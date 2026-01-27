@@ -1,6 +1,6 @@
 import logo2 from "../photos/logo2.png"
  import "../styles/welcome.css"
- 
+
 export default function Welcome(){
   return (
   <div className="home-container">
@@ -14,4 +14,5 @@ export default function Welcome(){
       <button id="loginBtn">Login</button>
     </div>
   </div>
+  
     );}
