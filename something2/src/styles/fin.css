@@ -1,0 +1,126 @@
+html,body{
+    height: 100vh;
+    margin: 0;
+    overflow: hidden;
+}
+*{
+    margin: 0;
+    padding: 0;
+}
+
+
+#body3{
+    margin: 0;
+    background: linear-gradient(to bottom right, #F492F0 ,#5E429C,#07000a);
+    padding: 40px 20px;
+       
+}
+
+
+h3{
+    color:rgb(57, 246, 148);
+}
+
+
+
+a{
+    text-decoration: none;
+    color: rgb(7, 6, 6);
+    font-weight: lighter;
+    padding: 15px;
+    font-size: 15px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    margin-left: 15px;
+    display: inline-block;
+
+    
+}
+a:hover{
+    text-decoration: underline whitesmoke;
+    color: black;
+    /* box-shadow: 0 0 12px #C8A2C8; */
+    transform: scale(1.15);
+    transition: ease-out 0.5s ;
+    
+
+}
+#links{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 20%;
+}
+
+
+
+
+h1,h3{
+    text-align: center;
+    text-emphasis:inherit;
+    font-weight: bolder;
+    font-size: 35px;
+    margin-top: 30px;
+
+}
+/* ////////////////////////// */
+/* ------------------------------------------------------------ */
+/* <!--for the flashing --> */
+body{
+    background-color: #111;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+body.loaded{
+    opacity: 1;
+}
+
+
+/* tag style for future idea */
+/* .tag{
+  font-size: 0.7rem;
+  font-weight: bold;
+  padding: 2px,4px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  color: white;
+}
+.tag.st{
+  background-color: #3b82f6;
+}
+.tag.pr{
+  background-color: #ef4444;
+} */
+
+/*==============underline animations ;)==========*/
+/*==============there are plenty of bugs related to that(the repetition of css) ....i(*we) have to fix this later==========*/
+#links a {
+   text-decoration: none;
+    color: rgb(7, 6, 6);
+    font-weight: lighter;
+    padding: 15px;
+    /* padding-bottom: 8px; */
+    font-size: 15px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    margin-left: 15px;
+    display: inline-block;
+     position: relative;
+}
+
+#links a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 3px;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(to right, #ff6b6b, #39f694, #12dc4e);
+    transition: width 0.4s ease;
+    border-radius: 2px;
+} 
+
+#links a:hover::after {
+    width: 100%;
+}

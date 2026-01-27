@@ -1,0 +1,72 @@
+
+#body6{
+   margin: 0;
+    background: linear-gradient(to bottom right,#9D7207 ,#07319D,#9D7207);
+    padding: 100px ;
+    overflow: hidden;
+}
+
+fieldset{
+    border: 2px solid rgba(240, 248, 255, 0.133);
+    padding: 15px;
+    border-radius: 9px;
+    text-align: center;
+    height: 65%;
+    width: 45%;
+    margin-bottom: 80px;
+    margin-left: 25%;
+    margin-right: 25%;
+    margin-top: 40px;
+    box-shadow: 6px 8px 10px rgba(0, 0, 0, 0.627);
+    background-color: rgba(240, 248, 255, 0.133);
+}
+h2
+{
+  font-size: 30px;
+  font-weight: bold;
+  margin-top: 1rem;
+  margin-left: 1rem;  
+    color: azure;
+}
+
+label{
+    font-weight: bold;
+  margin-top: 1rem;
+  margin-left: 1rem;   
+   color: azure;
+}
+input[type="password"]{
+    border-width: 2px;
+    width: 50%;
+    height: 25px;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+input[type="submit"],#btn4{
+   border-radius: 10px;
+   cursor: pointer;
+   width: 40%;
+   height: 30px;
+   margin-bottom: 15px;
+    border: 3px solid black;
+    margin-top: 30px;
+
+
+}
+
+input[type="submit"]:hover,#btn4:hover{
+  background: linear-gradient(to right, #0a4ddd, #e60808);
+}
+
+
+
+#ohhh{
+  font-size: 1.6rem;
+}
+
+
+/*me want larger checkbox*/
+input[type="checkbox"]{
+  transform: scale(1.7);
+  margin-right: 6px;
+}

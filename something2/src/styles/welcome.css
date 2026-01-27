@@ -1,0 +1,118 @@
+html, body {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;   /*u think we should change the font family?*/
+  background: linear-gradient(to bottom right, #f536c2, #3514ac, #000000);
+  
+}
+
+.home-container {
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 2em 3em;
+  border-radius: 20px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  animation: fadeIn 1.2s ease-in-out;
+  margin-top: 5%;
+  width: 65%;
+  margin-left: 15%;
+  margin-right: 25%;
+}
+
+.logo {
+  width: 150px;
+  height: auto;
+  border-radius: 30%;
+  border: 2px solid whitesmoke;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));
+}
+
+.welcome {
+  font-size: 3em;   /*notice how i'm trying em and rem instead of px? yeah i hate it....*/
+  margin-bottom: 0.6em;
+  margin-left: 0.4em;
+}
+
+.quote {
+  font-style: italic;
+  opacity: 0.9;
+  margin-bottom: 2em;
+}
+
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8em;
+}
+
+button {
+  padding: 0.7rem 1.5em;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: 600;
+  width: 50%;
+  margin-left: 25%;
+
+  
+}
+
+button:hover {
+  transform: scale(1.05);
+
+}
+
+#guestBtn {
+  /* background: #F492F0; */
+background: #f492f1aa;
+color: antiquewhite;
+}
+#guestBtn:hover{
+    background: linear-gradient(to right, #0a4ddd, #e60808);
+
+}
+
+#createBtn {
+  background: #8d5cffaf;
+  color: antiquewhite;
+}
+#createBtn:hover{
+    background: linear-gradient(to right, #0a4ddd, #e60808);
+
+}
+
+#loginBtn {
+  background: #2eccbaaf;
+  color: antiquewhite; /*i have grown to like this shade of white..and u should like it too */
+}
+#loginBtn:hover{
+    background: linear-gradient(to right, #0a4ddd, #e60808);
+
+}
+
+/* Fade-in animation cause we fancy,girl(i didnt lose it yet ,i promise :) ) */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* hand wave animations cause why not */
+.wave {
+  display: inline-block;
+  animation: wave-animation 1.5s infinite;
+  transform-origin: 70% 70%;
+}
+
+@keyframes wave-animation {
+  0% { transform: rotate(0deg); }
+  10% { transform: rotate(14deg); }
+  20% { transform: rotate(-8deg); }
+  30% { transform: rotate(14deg); }
+  40% { transform: rotate(-4deg); }
+  50% { transform: rotate(10deg); }
+  60% { transform: rotate(0deg); }
+  100% { transform: rotate(0deg); }
+}
