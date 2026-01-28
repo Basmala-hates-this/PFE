@@ -4,14 +4,31 @@
     padding: 0;
 }
 
-#body1{
+/* #body1{
    height: 100vh;
     margin: 0;
-    overflow: hidden;
+    
     background: url("../photos/hat1.jpg") no-repeat center center fixed;
     background-size: 100% 100%;
     overflow: auto;
     
+} */
+
+#body1 {
+  position: relative;
+  height: 100vh;
+  overflow:auto;
+}
+
+#body1::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: url("../photos/hat1.jpg") no-repeat center center ;
+  background-size: 100% 100%;
+  filter: blur(5px);
+  z-index: -1;
+  opacity: 1;
 }
 
 
@@ -34,7 +51,7 @@ fieldset{
     border-radius: 70px;
     padding: 2px;
     box-shadow: #080808 5px 5px 6px;
-    background-color: #a0dce46b;
+    /* background-color: #a0dce46b; */
 
 }
 #field2{
@@ -97,7 +114,7 @@ input[type="submit"]{
 }
 
 input[type="submit"]:hover{
-color: antiquewhite;
+
   background: linear-gradient(to right, #0a4ddd, #e60808);
   transform: scale(1.05);
 }
@@ -108,7 +125,7 @@ input,select{
     border-radius: 6px;
     border: 2px solid black;
    
-  background: white;
+  
 }
 
 /* this is to be activated later when we plug the toggle logic again */
@@ -223,17 +240,18 @@ a:hover{
 }
 
 
-.bg1{
+/* .bg1{
     position: fixed;
     top: 0;
     left: 0;
+    background: rgba(255, 255, 255, 0.1);
     height: 100%;
     width: 100%;
     z-index: -1;
-     -webkit-backdrop-filter: blur(5px); /*NOTE: Microsoft edge console stated that the backdrop-filter alone wont work on SAFARI,i hope this will fix the problem..  */
+     -webkit-backdrop-filter: blur(5px); /*NOTE: Microsoft edge console stated that the backdrop-filter alone wont work on SAFARI,i hope this will fix the problem..  
     backdrop-filter: blur(10px);
 
-}
+} */*/
 
 
 
