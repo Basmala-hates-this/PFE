@@ -44,7 +44,7 @@ fieldset{
     border: solid black;
     border-radius: 70px;
     padding: 2px;
-    box-shadow: #080808 5px 5px 6px;
+    box-shadow: #080808 5px 10px 10px;
     background-color: #54c3d16b;
 
 }
