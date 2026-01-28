@@ -1,5 +1,5 @@
 
-import Welcome from './pages/welcome.jsx';
+ import Welcome from './pages/welcome.jsx';
 import Info from './pages/Info.jsx';
 
 

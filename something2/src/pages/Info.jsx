@@ -58,7 +58,7 @@ export default function Info() {
                 <option value="USTO">University of Science and Technology of Oran - Mohamed Boudiaf</option>
                 <option value="UOr">University of Ouargla - Kasdi Merbah</option>
                 <option value="USa">​University of Saida - Dr. Moulay Tahar </option>
-                <option value="USBA">​Djillali Liabès University of Sidi Bel Abbès  </option>
+                <option value="USBA">​Djillali Liabès University of Sidi Bel Abbes  </option>
                 <option value="USk">University of Skikda - 20 August 1955 </option>
                 <option value="USA">​University of Souk Ahras - Mohamed Cherif Messaadia  </option>
                 <option value="US1">University of Setif 1 - Ferhat Abbas </option>
@@ -90,7 +90,7 @@ export default function Info() {
                 <label htmlFor="major" id="major">Your Main Major(s) :</label>
                 <br/>
                 <div id="s_select">
-                <select name="major" className="major" id="studentselect" defaultValue="" >
+                <select name="studentMajor" className="major" id="studentselect" defaultValue="" >
                     <option value="" disabled ></option>
                     <option value="CS"> Computer Science</option>
                     <option value="Math">Mathematics</option>
@@ -125,7 +125,7 @@ export default function Info() {
                 </div>
                 <br/>
                 <div id="p_select">
-                <select name="major" className="major" id="professorselect" multiple >
+                <select name="profMajor" className="major" id="professorselect" multiple >
                   
                     <option value="CS"> Computer Science</option>
                     <option value="Math">Mathematics</option>
