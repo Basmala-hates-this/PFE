@@ -13,22 +13,22 @@ export default function Info() {
              <fieldset id="field2">
   
               <legend>Personal Info</legend>
-              <label for="name" >Full Name:</label>
+              <label htmlFor="name" >Full Name:</label>
               <br/>
-              <input type="text" className="name" id="name" required minlength="5" name="fullName" placeholder="Ex:Hannibal Lecter" />
+              <input type="text" className="name" id="name" required minLength="5" name="fullName" placeholder="Ex:Hannibal Lecter" />
               <br/><br/>
-              <label for="birth" >Your Date Of Birth:</label>
+              <label htmlFor="birth" >Your Date Of Birth:</label>
               <br/>
               <input type="date" id="birth"  className="birth" name="dateOfBirth" required />
               <br/><br/>
-              <label for="email" id="PEmail">Your Professional Email:</label>
+              <label htmlFor="email" id="PEmail">Your Professional Email:</label>
               <br/>
              <input type="email" className="PEmail" id="email" name="email" required />
               <br/><br/>
-              <label for="university" >Your University :</label>
+              <label htmlFor="university" >Your University :</label>
               <br/>
-              <select name="university" id="univ" className="univ" required >
-                <option value="" disabled selected> </option>
+              <select name="university" id="univ" className="univ" required  defaultValue="">
+                <option value="" disabled > </option>
                 <option value="A1">University Of Algiers 1- Benyoucef Benkhedda</option>
                 <option value="A2">University Of Algiers 2- Abou El Kacem Saadallah</option>
                 <option value="A3">University Of Algiers 3- Dely Ibrahim</option>
@@ -73,7 +73,7 @@ export default function Info() {
               </select>
               <br/><br/>
 
-              <label for="other1" className="other" id="other2">What is your University: </label><br/>
+              <label htmlFor="other1" className="other" id="other2">What is your University: </label><br/>
               <input type="text" id="other1" className="other"/>
            
               <br/><br/>
@@ -84,14 +84,14 @@ export default function Info() {
                <legend>Practical Info</legend>
                 
                <label>Are You A:</label> 
-               <input type="radio" id="student" name="role" value="student" class="student" required /> <label for="student">Student</label>
-               <input type="radio" id="professor" name="role" value="professor" class="professor" required /> <label for="professor">Professor</label>
+               <input type="radio" id="student" name="role" value="student" className="student" required /> <label htmlFor="student">Student</label>
+               <input type="radio" id="professor" name="role" value="professor" className="professor" required /> <label htmlFor="professor">Professor</label>
                 <br/><br/>
-                <label for="major" id="major">Your Main Major(s) :</label>
+                <label htmlFor="major" id="major">Your Main Major(s) :</label>
                 <br/>
                 <div id="s_select">
-                <select name="major" class="major" id="studentselect" >
-                    <option value="" disabled selected ></option>
+                <select name="major" className="major" id="studentselect" defaultValue="" >
+                    <option value="" disabled ></option>
                     <option value="CS"> Computer Science</option>
                     <option value="Math">Mathematics</option>
                     <option value="phy">Physics</option>
