@@ -1,0 +1,77 @@
+import "../styles/3.css";
+import Cat from "../photos/Cat.jpg";
+export default function Dashboard() {
+    return (
+        <div id="body5">
+            
+<div className="dashboard">
+
+    {/* <!-- Sidebar --> */}
+    <aside className="sidebar">
+        <h2>DASHBOARD</h2>
+        <ul>
+            <li><a href="#" id="home-link">Home</a></li>
+            <li><a href="#" id="rooms-link">Rooms</a></li>
+            <li><a href="#">Profile</a></li>
+            <li><a href="login.html" id="logoutBtn">Logout</a></li>
+            <li><button id="lgm">Light Mode ☀️</button></li>
+        </ul>
+    </aside>
+
+    {/* <!-- Main content --> */}
+    <main className="main">
+        {/* <!-- Header --> */}
+        <header className="header">
+            <h1>Welcome <span id="usernameDisplay"></span></h1>
+            <img src={Cat} alt="pfp" className="pfp" />
+        </header>
+
+        {/* <!-- Room Selection --> */}
+        <section className="room-selection">
+        <h3 id="dashh3">Select rooms to view:</h3>
+        <select id="room-select" multiple size="5">
+        {/* <!-- react will populate options --> */}
+        </select>
+       </section>
+
+        {/* <!-- Feed --> */}
+        <section className="fyp-container">
+            <h2>Feed</h2>
+            <div className="fyp-feed" id="fyp-feed">
+                <p>Select rooms to see posts...</p>
+            </div>
+        </section>
+
+        {/* <!-- Side Action Bar --> */}
+        <div className="side-action-bar">
+            <div className="icon-bar">
+                <div className="icon-btn" id="postsBtn">📝</div>
+                <div className="icon-btn" id="messagesBtn">💬</div>
+                <div className="icon-btn" id="followersBtn">👥</div>
+            </div>
+
+            <div className="content-panel-container">
+                <form className="content" id="postsPage">
+                    📝 Write a Post
+                    <label htmlFor="post-discription">Write Your Content</label><br/><br/>
+                    <input type="text" id="post-title" placeholder="Title"/><br/>
+                    <textarea id="post-discription" placeholder="Describe your flow..."></textarea><br/>
+                    <button type="submit" id="sub">Submit</button>
+                    <button type="reset" id="can">Cancel</button>
+                </form>
+
+                <div className="content" id="messagesPage">💬 Messages
+                    <p>PRIVATE MESSAGES AND NOTIFICATIONS</p>
+                </div>
+
+                <div className="content" id="followersPage">👥 Followers
+                    <p>FOLLOWERS LIST</p>
+                </div>
+            </div>
+        </div>
+
+    </main>
+</div>
+        </div>
+    );
+}

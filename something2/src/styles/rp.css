@@ -3,10 +3,10 @@
    margin: 0;
     background: linear-gradient(to bottom right,#9D7207 ,#07319D,#9D7207);
     padding: 100px ;
-    overflow: hidden;
+  height: 100vh;
 }
 
-fieldset{
+#field6{
     border: 2px solid rgba(240, 248, 255, 0.133);
     padding: 15px;
     border-radius: 9px;
@@ -20,7 +20,7 @@ fieldset{
     box-shadow: 6px 8px 10px rgba(0, 0, 0, 0.627);
     background-color: rgba(240, 248, 255, 0.133);
 }
-h2
+#rpTitle
 {
   font-size: 30px;
   font-weight: bold;
@@ -29,7 +29,7 @@ h2
     color: azure;
 }
 
-label{
+#rpLabel{
     font-weight: bold;
   margin-top: 1rem;
   margin-left: 1rem;   
@@ -42,7 +42,7 @@ input[type="password"]{
     border-radius: 5px;
     margin-top: 15px;
 }
-input[type="submit"],#btn4{
+#btn6{
    border-radius: 10px;
    cursor: pointer;
    width: 40%;
@@ -54,7 +54,7 @@ input[type="submit"],#btn4{
 
 }
 
-input[type="submit"]:hover,#btn4:hover{
+#btn6:hover{
   background: linear-gradient(to right, #0a4ddd, #e60808);
 }
 

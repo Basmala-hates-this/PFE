@@ -5,17 +5,21 @@ import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
 import Fin from './pages/Fin.jsx';
 import RRP from './pages/RRP.jsx';
+import Reset from './pages/Reset.jsx';
+import Dashboard from './pages/Dashboard.jsx';
 
 
 function App() {
   
   return (
     // <Welcome />
-    <Info />
+    // <Info />
       // <Register />
     // <Login />
     // <Fin />
     // <RRP />
+    // <Reset />
+    <Dashboard />
   )
 }
 

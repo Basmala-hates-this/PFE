@@ -166,7 +166,7 @@ export default function Info() {
            <br/><br/>
            <input type="submit" value="Next" id="btn1" /> 
            <br/><br/>
-           <a href="login.html">
+           <a href="/login">
               Already Have An Account?
             </a>
         </fieldset>
