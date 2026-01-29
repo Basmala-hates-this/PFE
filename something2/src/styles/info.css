@@ -23,6 +23,7 @@ background:
   url("../photos/hat1.jpg") center / cover no-repeat;
  background-size: 100% 100%;
  
+ 
   z-index: -1;
 }
 
@@ -41,7 +42,7 @@ fieldset{
     margin-left: 10%;
     margin-top: 25px;
     margin-bottom: 15px;
-    border: solid black;
+    border: solid #131b4f68;
     border-radius: 70px;
     padding: 2px;
     box-shadow: #080808 5px 10px 10px;
@@ -54,6 +55,7 @@ fieldset{
     margin-right: 10%;
     border-radius: 90px;
     padding: 5px;
+    border: solid #131b4f68;
 }
 #field3{
     width: 80%;
@@ -61,6 +63,7 @@ fieldset{
     margin-right: 10%;
     border-radius: 90px;
     padding: 5px;
+    border: solid #131b4f68;
 
 }
 
