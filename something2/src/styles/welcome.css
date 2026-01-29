@@ -1,10 +1,13 @@
-.home-container {
+
+ 
+ #body0 {
   height: 100vh;
   margin: 0;
-  overflow: hidden;
-  font-family: 'Poppins', sans-serif;   /*u think we should change the font family?*/
+  font-family: Arial, Helvetica, sans-serif;   /*u think we should change the font family?*/
   background: linear-gradient(to bottom right, #f536c2, #3514ac, #000000);
+  overflow: hidden;
   
+
 }
 
 .home-container {
@@ -13,13 +16,12 @@
   background: rgba(0, 0, 0, 0.35);
   padding: 2em 3em;
   border-radius: 20px;
-  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+ box-shadow: #080808 5px 10px 10px;
   animation: fadeIn 1.2s ease-in-out;
   margin-top: 5%;
   width: 65%;
-  margin-left: 17%;
+  margin-left: 18%;
   margin-right: 25%;
-  
 }
 
 .logo {
@@ -48,7 +50,7 @@
   gap: 0.8em;
 }
 
-button {
+#guestBtn, #createBtn, #loginBtn {
   padding: 0.7rem 1.5em;
   border: none;
   border-radius: 10px;
@@ -61,7 +63,7 @@ button {
   
 }
 
-button:hover {
+#guestBtn:hover, #createBtn:hover, #loginBtn:hover {
   transform: scale(1.05);
 
 }

@@ -12,7 +12,7 @@ export default function Login(){
             <input type="text" required id="username" minLength="5" className="username" name="username" maxLength="20" placeholder=" EX: bruh~@$&-_" />
             <p id="feedback"></p>
             <br/><br/>
-            <label htmlFor="password" > Your Password:</label>
+            <label htmlFor="password" id="label"> Your Password:</label>
             <br/><br/>
             <input type="password" id="password"   minLength="8" maxLength="15" name="password" required /><br/>
             <label id="label"> <input type="checkbox" id="togglePassword" />

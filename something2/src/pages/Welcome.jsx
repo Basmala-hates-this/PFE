@@ -3,6 +3,7 @@ import logo2 from "../photos/logo2.png"
 
 export default function Welcome(){
   return (
+    <div id="body0">
   <div className="home-container">
     <img src={logo2} alt="Logo" className="logo"/>
 
@@ -14,5 +15,5 @@ export default function Welcome(){
       <button id="loginBtn">Login</button>
     </div>
   </div>
-  
+  </div>
     );}

@@ -8,11 +8,11 @@ export default function Info() {
         <fieldset id="field1">
            
              <legend id="legend1">Make Your Account</legend>
-             <h3>All Information Is Required</h3>
+             <h3 id="h3">All Information Is Required</h3>
 
              <fieldset id="field2">
   
-              <legend>Personal Info</legend>
+              <legend id="legend2">Personal Info</legend>
               <label htmlFor="name" >Full Name:</label>
               <br/>
               <input type="text" className="name" id="name" required minLength="5" name="fullName" placeholder="Ex:Hannibal Lecter" />
@@ -81,7 +81,7 @@ export default function Info() {
             </fieldset>
              <fieldset id="field3">
                 
-               <legend>Practical Info</legend>
+               <legend  id="legend2">Practical Info</legend>
                 
                <label>Are You A:</label> 
                <input type="radio" id="student" name="role" value="student" className="student" required /> <label htmlFor="student">Student</label>

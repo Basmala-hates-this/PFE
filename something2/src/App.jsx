@@ -4,16 +4,18 @@ import Info from './pages/Info.jsx';
 import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
 import Fin from './pages/Fin.jsx';
+import RRP from './pages/RRP.jsx';
 
 
 function App() {
   
   return (
     // <Welcome />
-    // <Info />
+    <Info />
       // <Register />
-    <Login />
+    // <Login />
     // <Fin />
+    // <RRP />
   )
 }
 

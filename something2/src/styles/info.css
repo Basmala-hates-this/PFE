@@ -1,11 +1,4 @@
 
-*{
-    margin: 0;
-    padding: 0;
-}
-
-
-
 #body1 {
   position: relative;
   height: 100vh;
@@ -68,15 +61,15 @@ fieldset{
 }
 
 
-h3{
+#h3{
     text-align: center;
     color:rgb(57, 246, 148);
-    font-size: 1.5rem;
+    font-size: 1.7rem;
     margin-left: 30px;
 }
- legend{
+ #legend2{
     text-emphasis:inherit ;
-    font-size: large;
+    font-size: 20px;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bold;
     font-style: initial;
@@ -239,30 +232,11 @@ a:hover{
 }
 
 
-/* .bg1{
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: rgba(255, 255, 255, 0.1);
-    height: 100%;
-    width: 100%;
-    z-index: -1;
-     -webkit-backdrop-filter: blur(5px); /*NOTE: Microsoft edge console stated that the backdrop-filter alone wont work on SAFARI,i hope this will fix the problem..  
-    backdrop-filter: blur(10px);
-
-} */*/
 
 
 
 
-h3{
-    text-align: center;
-    text-emphasis:inherit;
-    font-weight: bolder;
-    font-size: 35px;
-    margin-top: 30px;
 
-}
 
 
 /* ////////////////////////// */

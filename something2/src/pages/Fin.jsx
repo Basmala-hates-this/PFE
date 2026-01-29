@@ -24,7 +24,7 @@ export default function Fin() {
             {/* <!-- <a href="register.html" className="fixing">🧾back to regestration Page</a> --> */}
              
         <a href="login.jsx" className="fixing">🔑back To Login Page</a>
-        <button  className="fixing" onClick={handleConfetti}>🎉 Celebrate Again</button> 
+        <button  id="con" className="fixing" onClick={handleConfetti}>🎉 Celebrate Again</button> 
         {/* <a href="javascript:void(0)" onClick={handleConfetti}> 🎉 Celebrate Again </a> */}
         
     
