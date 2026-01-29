@@ -1,8 +1,4 @@
-html,body{
-    height: 100vh;
-    margin: 0;
-    overflow: hidden;
-}
+
 *{
     margin: 0;
     padding: 0;
@@ -10,7 +6,10 @@ html,body{
 
 
 #body3{
-    margin: 0;
+     height: 100vh;
+ 
+    overflow: hidden;
+   
     background: linear-gradient(to bottom right, #F492F0 ,#5E429C,#07000a);
     padding: 40px 20px;
        
@@ -21,9 +20,13 @@ h3{
     color:rgb(57, 246, 148);
 }
 
+button{
+    border: none;
+    background-color: transparent;
+    width: fit-content;
+}
 
-
-a{
+.fixing{
     text-decoration: none;
     color: rgb(7, 6, 6);
     font-weight: lighter;
@@ -35,8 +38,7 @@ a{
 
     
 }
-a:hover{
-    text-decoration: underline whitesmoke;
+.fixing:hover{
     color: black;
     /* box-shadow: 0 0 12px #C8A2C8; */
     transform: scale(1.15);
@@ -64,18 +66,6 @@ h1,h3{
 }
 /* ////////////////////////// */
 /* ------------------------------------------------------------ */
-/* <!--for the flashing --> */
-body{
-    background-color: #111;
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-body.loaded{
-    opacity: 1;
-}
 
 
 /* tag style for future idea */
@@ -96,7 +86,7 @@ body.loaded{
 
 /*==============underline animations ;)==========*/
 /*==============there are plenty of bugs related to that(the repetition of css) ....i(*we) have to fix this later==========*/
-#links a {
+.fixing {
    text-decoration: none;
     color: rgb(7, 6, 6);
     font-weight: lighter;
@@ -109,7 +99,7 @@ body.loaded{
      position: relative;
 }
 
-#links a::after {
+.fixing::after {
     content: '';
     position: absolute;
     width: 0;
@@ -121,6 +111,6 @@ body.loaded{
     border-radius: 2px;
 } 
 
-#links a:hover::after {
+.fixing:hover::after {
     width: 100%;
 }

@@ -3,6 +3,7 @@
 import Info from './pages/Info.jsx';
 import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
+import Fin from './pages/Fin.jsx';
 
 
 function App() {
@@ -10,8 +11,9 @@ function App() {
   return (
     // <Welcome />
     // <Info />
-    <Register />
-    // <Login />
+      // <Register />
+    <Login />
+    // <Fin />
   )
 }
 
