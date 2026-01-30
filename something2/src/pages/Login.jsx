@@ -7,7 +7,7 @@ export default function Login(){
         <fieldset id="field4">
             <legend >Log In To Your Account</legend>
             <div id="logcenter">
-            <label htmlFor="username" >Your Username: </label>
+            <label htmlFor="username" >Your Username or Registerd Email: </label>
             <br/><br/>
             <input type="text" required id="username" minLength="5" className="username" name="username" maxLength="20" placeholder=" EX: bruh~@$&-_" />
             <p id="feedback"></p>
