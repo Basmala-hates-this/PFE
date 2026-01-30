@@ -69,7 +69,7 @@
 }
 
 .sidebar li:hover {
-  background: rgba(75, 173, 238, 0.15);
+  background: rgba(75, 173, 238, 0.412);
   transform: translateX(8px);
 }
 
@@ -132,7 +132,7 @@
 
 .stat-card:hover {
     transform: translateY(-10px) scale(1.03);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 40px rgba(4, 219, 239, 0.599);
   border-color: rgba(52, 152, 219, 0.4);
   transition: transform 0.3s ease-out, box-shadow 0.3s ease-out;
 }
