@@ -9,6 +9,41 @@
   --bg-card: #1e1e2e;
   --text-main: #f5f5f5;
   --accent: #00bcd4;
+  --blue-dark: #1B2A41;
+  --blue-primary: #2C3E50;
+  --dark: #8fbedf;
+ --man: #45398D;
+--this: #1E4085;
+--shit:#08686D;
+
+
+  /*-==I NEED A NEW PALETTE FUCK===*/
+:root {
+  /* === Core Backgrounds === */
+  --bg-body: #021c58;        /* deep navy */
+  --bg-sidebar: #13347a;    /* sidebar dark */
+  --bg-main: #2f446e;       /* main content */
+  --bg-header: #002066;
+  --bg-card: #0033a2;
+  --bg-soft: rgba(255,255,255,0.04);
+
+  /* === Text === */
+  --text-main: #E5E7EB;
+  --text-muted: #9CA3AF;
+
+  /* === Accents === */
+  --accent: #38BDF8;        /* sky blue */
+  --accent-soft: #0EA5E9;
+  --accent-neon: #22D3EE;
+
+  /* === Status === */
+  --danger: #EF4444;
+  --success: #22C55E;
+  --warning: #FACC15;
+
+  /* === Effects === */
+  --border-soft: rgba(255,255,255,0.08);
+}
 }
 
 /* === Light Mode === */
@@ -29,7 +64,7 @@
 
 
 #body5 {
-   background-color: var(--bg-body);
+   background: linear-gradient(135deg, var(--dark), var(--blue-dark));
   color: var(--text-main);
   font-family: Arial, sans-serif;
   overflow-y: auto;   /* enable scrolling */
@@ -44,80 +79,31 @@
   padding: 10px;
 }
 
-/* === Sidebar === */
-.sidebar {
-  width: 18%;
-  background: var(--bg-sidebar);
-  color: var(--text-main);
-  padding: 20px;
-  border-radius: 15px;
-}
 
-.sidebar h2 {
-  margin-bottom: 20px;
-  color: #ffffff;
-}
 
-.sidebar ul {
-  list-style: none;
+.lgm{
+    background: none;
+    background-color: transparent;
+    border: none;
 }
-
-.sidebar ul li {
-  margin-bottom: 15px;
-}
-#lgm{
-width: 100%;
-background-color: var(--bg-sidebar);
-/* color: var(--text-main); */
-border: none;
-}
-#lgm:hover{
-  background-color: #48bccc;
-  color: #121212;
-  box-shadow: 7px 7px 15px rgba(181, 198, 231, 0.924);
-}
-.sidebar ul li a, .sidebar ul li button {
-  text-decoration: none;
-  color: #f5f5f5;
-  font-size: 18px;
-  font-weight: bold;
-  border: 2px solid transparent;
-  padding: 8px;
-  display: block;
-  text-align: center;
-  border-radius: 25px;
-  transition: all 0.3s ease;
-}
-
-.sidebar ul li a:hover  {
-  background-color: #48bccc;
-  color: #121212;
-  box-shadow: 7px 7px 15px rgba(181, 198, 231, 0.924);
-  text-decoration: none;
-}
-.sidebar ul li a:hover::after{
-  text-decoration: none;
-  background: none;
-  transition: none;
-}
-
 /* === Main Content === */
 .main {
 
   flex: 1;
-  background: var(--bg-main);
+  background: linear-gradient(180deg, var(--blue-dark), var(--blue-primary));
   border-radius: 15px;
   padding: 20px;
   overflow: auto;
-  margin-bottom: 30px;
+  margin-bottom: 10px;
 }
 
 /* === Header === */
 .header {
-  background: var(--bg-header);
+  background: var(--dark);
   color: #fff;
   padding: 15px;
   border-radius: 8px;
+  height: 100px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -131,15 +117,15 @@ border: none;
 }
 
 .header h1 {
-  color: #00bcd4;
+  color: var(--blue-dark);
 }
 
 /* === For You Page === */
 .fyp-container {
-  background: var(--bg-fyp);
+  background: var(--dark);
   padding: 15px;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 6px rgba(72, 76, 99, 0.5);
   height: calc(100% - 140px);
   display: flex;
   flex-direction: column;
@@ -148,22 +134,22 @@ border: none;
 
 .fyp-container h2 {
   margin-top: 0;
-  color: #00bcd4;
+  color: #070707;
 }
 
 .fyp-feed {
   margin-top: 7px;
   flex-grow: 1;
-  border: 1px solid #2d2f45;
+  border: 1px solid var(--accent);
   border-radius: 5px;
   padding: 10px;
   overflow-y: auto;
-  background-color: var(--bg-card);
+  background-color: var(--bg-body);
   color: var(--text-main);
 }
 
 /* === Side Action Bar === */
-.side-action-bar {
+/* .side-action-bar {
   background: var(--bg-body) ;
   padding: 20px;
   border-radius: 15px;
@@ -191,7 +177,7 @@ border: none;
   align-items: center;
   justify-content: center;
   /*cursor: pointer; */
-  transition: all 0.3s ease;
+  /*transition: all 0.3s ease;
   font-size: 24px;
   color: var(--accent);
   margin-left: 20%;
@@ -208,11 +194,11 @@ border: none;
   transform: scale(1.15);
   box-shadow: 0 5px 20px rgba(0,188,212,0.8);
 }
-
+*/
 
 
 /* === Content Panels (inside side-action-bar) === */
-.content-panel-container {
+/*.content-panel-container {
   width: 100%;
 }
 
@@ -236,7 +222,7 @@ border: none;
   font-size: 14px;
   color: #a1a1aa;
   margin-top: 10px;
-}
+} */
 
 /* === Animations === */
 @keyframes fadeIn {
@@ -249,7 +235,9 @@ border: none;
   border-radius: 50%;
   border: 2px solid whitesmoke;
 }
-input,textarea{
+
+/*fix this because it is causing problems*/
+/* input,textarea{
   display: flex;
    align-items: center;
   justify-content: center;
@@ -264,7 +252,7 @@ textarea{
 }
 input{
   height: 35px;
-}
+} */
 #sub,#can{
   gap:80px;
   width: 20%;
@@ -278,7 +266,7 @@ input{
 }
 
 
-body, .sidebar, .main, .header, .fyp-container, .fyp-feed {
+#body5, .sidebar, .main, .header, .fyp-container, .fyp-feed {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 

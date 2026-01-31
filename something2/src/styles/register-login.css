@@ -1,24 +1,17 @@
-#body2{
-    height: 100vh;
+#body2{ 
+  height: 100vh;
     margin: 0;
     overflow: hidden;
-}
-*{
-    margin: 0;
-    padding: 0;
-}
-
-
-
-#body2{ 
     background: 
-     linear-gradient(to bottom right,#d2428c86,
-  #da9ae3,
-  #00277cde),
-
+     linear-gradient(to bottom right,rgba(210, 66, 140, 0.725), 
+        rgba(227, 183, 232, 0.502), 
+        rgba(0, 39, 124, 0.838)),
  url("../photos/pinkbackground.jpg");
-    background-size: 100% 100%;
-    background-blend-mode: overlay;
+
+    background-repeat: no-repeat; 
+    background-size: cover;
+    background-blend-mode:soft-light;
+    
 
 
 }
@@ -29,7 +22,7 @@
     border: 3px solid #f536c264;
     padding: 15px;
     text-align: center;
-    background-color:#967ce767;
+    background-color:#3e08de3f;
     margin-top: 35px;
     height: 70%;
     width: 70%;
@@ -38,11 +31,12 @@
     margin-right: 15%;
     border-radius:100px;
     box-shadow: #080808 5px 10px 10px;
+    backdrop-filter: blur(2px);
 
 
 }
 
- legend{
+ #logReg{
     text-emphasis:inherit ;
     font-size: large;
     font-family: Arial, Helvetica, sans-serif;
@@ -62,22 +56,30 @@
     font-weight: bold;
     font-family: Arial, Helvetica, sans-serif;
     text-shadow: 0 0 5px rgba(14, 13, 13, 0.95);
-
-
+    margin-bottom: 10px;
 
  }
-input[type="text"]{
-    border-width: 2px;
+#username{
+    
     width: 30%;
-    height: 25px;
+    height: 30px;
+     border-radius: 6px;
+    border: 2px solid #1a1919;
+    padding: 5px;
+    margin-top: 10px;
 }
-input[type="password"]{
-    border-width: 2px;
+#password,#Cpassword{
+    
     width: 30%;
-    height: 25px;
+    height: 30px;
+     border-radius: 6px;
+    border: 2px solid #1a1919;
+     padding: 5px;
+     margin-top: 10px;
+     margin-bottom: 10px;
+     
 }
-
-input[type="submit"]{
+.btn2{
    border-radius: 6px;
    cursor: pointer;
    width: 200px;
@@ -85,23 +87,20 @@ input[type="submit"]{
    margin-bottom: 15px;
     border: 1px solid black;
     margin-top: 30px;
+     padding: 5px;
 
 
 }
 
-input[type="submit"]:hover{
+.btn2:hover{
   color: antiquewhite;
   background: linear-gradient(to right, #0a4ddd, #e60808);
   transform: scale(1.05);
 
 }
 
-input{
-    border-radius: 6px;
-    border: 1px solid #1a1919;
-}
 
-a{
+#rrpLink, #backLink{
     text-decoration: none;
     color: blanchedalmond;
     font-weight: lighter;
@@ -118,6 +117,8 @@ a{
 
 #logcenter{
     margin-top: 40px;
+     padding: 5px;
+     
     
 }
 #feedback{
@@ -196,24 +197,23 @@ a{
   background-color: #ef4444;
 } */
 /*UNDERLINE EFFECT!!*/
- a {
+ #rrpLink, #backLink{
    text-decoration: none;
-    color: rgb(7, 6, 6);
     font-weight: lighter;
     padding: 5px;
     /* padding-bottom: 8px; */
     font-size: 15px;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    /* font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif; */
     margin-left: 15px;
     display: inline-block;
      position: relative;
 }
-a:hover{
+#rrpLink:hover, #backLink:hover{
    transform: scale(1.15);
     transition: ease-out 0.5s ;
 }
 
- a::after {
+#rrpLink:hover::after, #backLink:hover::after {
     content: '';
     position: absolute;
     width: 0;
@@ -225,18 +225,19 @@ a:hover{
     border-radius: 2px;
 }
 
- a:hover::after {
+ #rrpLink:hover::after, #backLink:hover::after {
     width: 100%;
 }
 
 
 #ohhh{
   font-size: 1.6rem;
+   padding: 5px;
 }
 
 
 /*me want larger checkbox*/
-input[type="checkbox"]{
+#togglePassword{
   transform: scale(1.7);
   margin-right: 6px;
 }

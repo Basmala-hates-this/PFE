@@ -3,6 +3,7 @@
   position: relative;
   height: 100vh;
   overflow:auto;
+  font-size: large;
 }
 
 
@@ -21,31 +22,27 @@ background:
 }
 
 
-fieldset{
-    border: 2px solid black;
-    padding: 15px;
-    border-radius: 9px;
-    text-align: center;
-    margin-top: 35px;
-}
+
 #field1{
     width: 80%;
     height: auto;
     margin-right: 10%;
     margin-left: 10%;
     margin-top: 25px;
-    margin-bottom: 15px;
+    margin-bottom: 35px;
     border: solid #131b4f68;
     border-radius: 70px;
-    padding: 2px;
     box-shadow: #080808 5px 10px 10px;
     background-color: #54c3d16b;
+    padding: 15px;
+    text-align: center;
 
 }
 #field2{
     width: 80%;
     margin-left: 10%;
     margin-right: 10%;
+    margin-top: 25px;
     border-radius: 90px;
     padding: 5px;
     border: solid #131b4f68;
@@ -54,6 +51,7 @@ fieldset{
     width: 80%;
     margin-left: 10%;
     margin-right: 10%;
+    margin-top: 25px;
     border-radius: 90px;
     padding: 5px;
     border: solid #131b4f68;
@@ -75,16 +73,18 @@ fieldset{
     font-style: initial;
     margin-bottom: 20px;
     text-align: center;
+    color: rgb(255, 255, 255);
  }
  #legend1 {
   font-size: 40px;
   font-weight: bold;
   margin-top: 1rem;
   margin-left: 1rem;
+  color: #000000;
 }
 
 
-input[type="text"],input[type="email"],input[type="date"],select{
+.name,.birth,.PEmail,.univ{
     border-width: 2px;
     width: 30%;
     height: 25px;
@@ -93,7 +93,7 @@ input[type="text"],input[type="email"],input[type="date"],select{
 
 
 
-input[type="submit"]{
+#btn1{
    border-radius: 6px;
    cursor: pointer;
    width: 200px;
@@ -105,20 +105,21 @@ input[type="submit"]{
 
 }
 
-input[type="submit"]:hover{
+#btn1:hover{
 
   background: linear-gradient(to right, #0a4ddd, #e60808);
   transform: scale(1.05);
+  transition: ease-out 0.3s ;
 }
-input[type="radio"] {
+#student,#professor{
     margin-left: 15px; 
 }
-input,select{
+/* input,select{
     border-radius: 6px;
     border: 2px solid black;
    
   
-}
+} */
 
 /* this is to be activated later when we plug the toggle logic again */
 /* #major,#studentselect,#professorselect,#small{
@@ -133,10 +134,16 @@ input,select{
     box-shadow:2px 2px 6px rgb(105, 211, 7);
 }
 #professorselect {
-  width: 40%;
+  width: 30%;
   height: auto;
-  border: 2px solid #0b0b0b;
-  border-radius: 6px;
+    border: 2px solid black;
+    border-radius: 6px;
+}
+#studentselect,#univ{
+    height: 25px;
+    width: 30%;
+    border: 2px solid black; 
+    border-radius: 6px;
 }
 /* 
 this is for the multiple select look 
@@ -210,7 +217,7 @@ i stole thise from chatgpt:
 /*the irony is ,i think most of this style  isnt applying for some reason..:)*/
 
 
-a{
+#InfoLink{
     text-decoration: none;
     color: rgb(7, 6, 6);
     font-weight: lighter;
@@ -222,7 +229,7 @@ a{
     margin-bottom: 7px;
     
 }
-a:hover{
+#InfoLink:hover{
     
     color: rgb(57, 246, 148);
      transform: scale(1.15);
@@ -262,7 +269,7 @@ a:hover{
 
 /*===========sooooo,i added this underline effect in fin page that i really liked..u know i'll add it everywhere
 feel free to tweak the colors is u feel like it later=====*/ 
- a {
+ #InfoLink {
    text-decoration: none;
     color: rgb(7, 6, 6);
     font-weight: lighter;
@@ -275,7 +282,7 @@ feel free to tweak the colors is u feel like it later=====*/
      position: relative;
 }
 
- a::after {
+ #InfoLink::after {
     content: '';
     position: absolute;
     width: 0;
@@ -287,7 +294,7 @@ feel free to tweak the colors is u feel like it later=====*/
     border-radius: 2px;
 }
 
- a:hover::after {
+ #InfoLink:hover::after {
     width: 100%;
 }
 

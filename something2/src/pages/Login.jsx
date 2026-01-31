@@ -5,9 +5,9 @@ export default function Login(){
     <div id="body2">
       <form  method="post" id="loginForm"> {/*<!--action="dashboard2.1.html"rederect the user to the dashboard after confirming with the database?? --> */}
         <fieldset id="field4">
-            <legend >Log In To Your Account</legend>
+            <legend id="logReg">Log In To Your Account</legend>
             <div id="logcenter">
-            <label htmlFor="username" >Your Username or Registerd Email: </label>
+            <label htmlFor="username" id="label" >Your Username or Registered Email: </label>
             <br/><br/>
             <input type="text" required id="username" minLength="5" className="username" name="username" maxLength="20" placeholder=" EX: bruh~@$&-_" />
             <p id="feedback"></p>
@@ -20,10 +20,10 @@ export default function Login(){
             <br/><br/>
                 <input type="submit" value="login" className="btn2" /> 
                 <br/><br/>
-                <a href="request-reset-password.html">Forgot Your Password?</a>
+                <a href="request-reset-password.html" id="rrpLink">Forgot Your Password?</a>
                 <br/><br/>
                 
-                 <a href="welcome.html">Back to Home</a>
+                 <a href="welcome.html" id="backLink">Back to Home</a>
             </div>
 
 

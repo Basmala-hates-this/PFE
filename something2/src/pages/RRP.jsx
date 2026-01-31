@@ -14,9 +14,9 @@ export default function RRP() {
             <button type="submit" id="btn4">Send Reset Link</button>
             <br/><br/>
             <div id="forgotlinks">
-               <a href="login.html">Back To Login </a>
+               <a href="login.html" id="backLog">Back To Login </a>
                <br/><br/>
-                <a href="index.html">Create A New Account</a>
+                <a href="index.html" id="backHome">Back To Home</a>
            </div>
         </fieldset>
         

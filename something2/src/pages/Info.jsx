@@ -5,7 +5,7 @@ export default function Info() {
     return (
         <div id="body1">
              <form  method="post" id="indexForm">{/*<!--action="register.html"   i think this is useless since i added the js redirection--> */}
-        <fieldset id="field1">
+        <fieldset id="field1" className="fieldInfo" >
            
              <legend id="legend1">Make Your Account</legend>
              <h3 id="h3">All Information Is Required</h3>
@@ -21,7 +21,7 @@ export default function Info() {
               <br/>
               <input type="date" id="birth"  className="birth" name="dateOfBirth" required />
               <br/><br/>
-              <label htmlFor="email" id="PEmail">Your Professional Email:</label>
+              <label htmlFor="email" id="PEmail" >Your Professional Email:</label>
               <br/>
              <input type="email" className="PEmail" id="email" name="email" required />
               <br/><br/>
@@ -166,7 +166,7 @@ export default function Info() {
            <br/><br/>
            <input type="submit" value="Next" id="btn1" /> 
            <br/><br/>
-           <a href="/login">
+           <a href="/login" id="InfoLink">
               Already Have An Account?
             </a>
         </fieldset>

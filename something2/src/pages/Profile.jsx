@@ -1,5 +1,6 @@
 import gethub from "../photos/gethub.jpg";
 import "../styles/profile.css";
+import "../styles/sidebar.css";
 
 export default function Profile() { 
     return (

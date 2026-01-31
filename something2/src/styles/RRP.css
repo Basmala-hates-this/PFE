@@ -6,7 +6,7 @@
     margin: 0;
     height: 100vh;
    background: linear-gradient(to bottom right, #07319D ,#feb703,#081fee);
-   color: white;
+   color: rgb(0, 0, 0);
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
    
  
@@ -31,11 +31,11 @@
 
 .email{
     font-weight: bold;
-  color: black;
-  margin-bottom: 10px;
+  color: rgb(0, 0, 0);
+  margin-bottom: 20px;
 }
 
-a{
+#backLog, #backHome{
     text-decoration: none;
     color: rgb(7, 6, 6);
     font-weight: lighter;
@@ -46,9 +46,9 @@ a{
     color: white;
     
 }
-a:hover{
+#backLog:hover, #backHome:hover{
     
-    color: #1ae95f;
+  
     transform: scale(1.05);
     
 
@@ -67,6 +67,8 @@ a:hover{
     border: 2px solid black;
     height: 10%;
     color: white;
+    margin-top: 10px;
+    margin-bottom: 10px;
 
 }
 #btn4{
@@ -76,7 +78,9 @@ a:hover{
     height: 10%;
     margin-left: 3px;
     border: none;
-    background: rgb(127, 240, 189);
+    background: #3B82F6;
+    color: whitesmoke;
+    font-size: large;
 
 }
 #btn4:hover{
@@ -105,7 +109,7 @@ a:hover{
 } */
 
 
- a {
+ #backLog, #backHome {
    text-decoration: none;
     color: rgb(7, 6, 6);
     font-weight: lighter;
@@ -116,7 +120,7 @@ a:hover{
      position: relative;
 }
 
- a::after {
+ #backLog::after, #backHome::after {
     content: '';
     position: absolute;
     width: 0;
@@ -124,11 +128,13 @@ a:hover{
     bottom: 0;
     left: 0;
     background: linear-gradient(90deg, #ff6b6b, #39f694, #12dc4e);
+     transition: width 0.4s ease;
+
     
   
 }
 
- a:hover::after {
+ #backLog:hover::after, #backHome:hover::after {
     width: 100%;
 }
 

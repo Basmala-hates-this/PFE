@@ -5,7 +5,7 @@ export default function Register(){
     <div id="body2">
       <form  id="registerForm">
         <fieldset id="field4">
-            <legend >Create Your Account</legend>
+            <legend  id="logReg">Create Your Account</legend>
             <div id="logcenter">
                 <label htmlFor="username" id="label"> Choose Your Username: </label>
                 <br />
@@ -26,7 +26,7 @@ export default function Register(){
                 <br/><br/>
                 <input type="submit" value="finish" className="btn2" /> 
                 <br/><br/>
-                <a href="welcome.html">Back to Home</a>
+                <a href="welcome.html" id="backLink">Back to Home</a>
 
 
             </div>

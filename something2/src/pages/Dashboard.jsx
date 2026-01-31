@@ -1,4 +1,5 @@
-import "../styles/3.css";
+import "../styles/Dash.css";
+import "../styles/sidebar.css";
 import Cat from "../photos/Cat.jpg";
 export default function Dashboard() {
     return (
@@ -14,7 +15,7 @@ export default function Dashboard() {
             <li><a href="#" id="rooms-link">Rooms</a></li>
             <li><a href="#">Profile</a></li>
             <li><a href="login.html" id="logoutBtn">Logout</a></li>
-            <li><button id="lgm">Light Mode ☀️</button></li>
+            <li><button id="lgm" className="lgm" >Light Mode ☀️</button></li>
         </ul>
     </aside>
 
@@ -42,8 +43,8 @@ export default function Dashboard() {
             </div>
         </section>
 
-        {/* <!-- Side Action Bar --> */}
-        <div className="side-action-bar">
+        {/* <!-- Side Action Bar: this was old logic to be visited later..... --> */}
+        {/* <div className="side-action-bar">
             <div className="icon-bar">
                 <div className="icon-btn" id="postsBtn">📝</div>
                 <div className="icon-btn" id="messagesBtn">💬</div>
@@ -68,7 +69,7 @@ export default function Dashboard() {
                     <p>FOLLOWERS LIST</p>
                 </div>
             </div>
-        </div>
+        </div> */}
 
     </main>
 </div>

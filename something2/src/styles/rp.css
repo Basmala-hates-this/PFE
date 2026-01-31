@@ -4,6 +4,7 @@
     background: linear-gradient(to bottom right,#9D7207 ,#07319D,#9D7207);
     padding: 100px ;
   height: 100vh;
+  font-size: large;
 }
 
 #field6{
@@ -24,37 +25,41 @@
 {
   font-size: 30px;
   font-weight: bold;
-  margin-top: 1rem;
-  margin-left: 1rem;  
+  margin-top: 20px;
+  margin-left: 20px;  
+  margin-bottom: 30px;
     color: azure;
 }
 
-#rpLabel{
+.rpLabel{
     font-weight: bold;
-  margin-top: 1rem;
-  margin-left: 1rem;   
+  margin-top: 100px;
+  margin-left: 10px;   
    color: azure;
 }
-input[type="password"]{
+#RPpassword, #RPCpassword{
     border-width: 2px;
+    padding: 10px;
     width: 50%;
-    height: 25px;
+    height: 30px;
     border-radius: 5px;
     margin-top: 15px;
+    margin-bottom: 10px;
 }
-#btn6{
+.btn6{
    border-radius: 10px;
    cursor: pointer;
    width: 40%;
    height: 30px;
+    padding: 5px;
    margin-bottom: 15px;
-    border: 3px solid black;
+    border: 1px solid black;
     margin-top: 30px;
 
 
 }
 
-#btn6:hover{
+.btn6:hover{
   background: linear-gradient(to right, #0a4ddd, #e60808);
 }
 
@@ -66,7 +71,7 @@ input[type="password"]{
 
 
 /*me want larger checkbox*/
-input[type="checkbox"]{
+.rpCheck{
   transform: scale(1.7);
   margin-right: 6px;
 }

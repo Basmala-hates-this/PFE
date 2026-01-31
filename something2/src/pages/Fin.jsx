@@ -12,9 +12,9 @@ export default function Fin() {
   };
   return (
     <div className="fin-page" id="body3">
-     <h1>You Have Successfully Created An Account!!✔️</h1>
+     <h1 id="finH1">You Have Successfully Created An Account!!✔️</h1>
     <br/><br/>
-    <h3>Thank You For Your Registration!</h3>
+    <h3 id="finH3">Thank You For Your Registration!</h3>
     <br/><br/>
     <div id="links">
         <a href="dashboard2.1.jsx" className="fixing">🗂️Go To The Dashboard</a>

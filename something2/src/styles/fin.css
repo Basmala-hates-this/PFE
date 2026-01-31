@@ -1,24 +1,17 @@
 
-*{
-    margin: 0;
-    padding: 0;
-}
-
-
 #body3{
      height: 100vh;
  
     overflow: hidden;
    
-    background: linear-gradient(to bottom right, #F492F0 ,#5E429C,#07000a);
+    background: linear-gradient(to bottom right,#0E21A0,#0E21A0,#4D2FB2, #B153D7 ,#F375C2,#e68aa0,#cb9ba6b6);
     padding: 40px 20px;
+  
        
 }
 
 
-h3{
-    color:rgb(57, 246, 148);
-}
+
 
 #con{
     border: none;
@@ -28,18 +21,19 @@ h3{
 
 .fixing{
     text-decoration: none;
-    color: rgb(7, 6, 6);
+    color: white;
     font-weight: lighter;
     padding: 15px;
     font-size: 15px;
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
     margin-left: 15px;
     display: inline-block;
+    margin-top: 15px;
 
     
 }
 .fixing:hover{
-    color: black;
+    color:antiquewhite;
     /* box-shadow: 0 0 12px #C8A2C8; */
     transform: scale(1.15);
     transition: ease-out 0.5s ;
@@ -51,17 +45,20 @@ h3{
   flex-direction: column;
   gap: 10px;
   width: 20%;
+  margin-left: 100px;
+  margin-top: 50px;
 }
 
 
 
 
-h1,h3{
+#finH1,#finH3{
     text-align: center;
     text-emphasis:inherit;
     font-weight: bolder;
     font-size: 35px;
     margin-top: 30px;
+    color:antiquewhite;
 
 }
 /* ////////////////////////// */
@@ -88,7 +85,7 @@ h1,h3{
 /*==============there are plenty of bugs related to that(the repetition of css) ....i(*we) have to fix this later==========*/
 .fixing {
    text-decoration: none;
-    color: rgb(7, 6, 6);
+    color: white;
     font-weight: lighter;
     padding: 15px;
     /* padding-bottom: 8px; */
