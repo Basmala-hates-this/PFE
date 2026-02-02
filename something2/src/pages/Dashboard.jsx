@@ -1,7 +1,11 @@
 import "../styles/Dash.css";
 import "../styles/sidebar.css";
 import Cat from "../photos/Cat.jpg";
+ import { useNavigate } from "react-router-dom";
+
 export default function Dashboard() {
+      const navigate = useNavigate();
+
     return (
         <div id="body5">
             
@@ -11,10 +15,10 @@ export default function Dashboard() {
     <aside className="sidebar">
         <h2>DASHBOARD</h2>
         <ul>
-            <li><a href="#" id="home-link">Home</a></li>
+            <li><a href="#" id="home-link" onClick={() => navigate("/dashboard")}>Home</a></li>
             <li><a href="#" id="rooms-link">Rooms</a></li>
-            <li><a href="#">Profile</a></li>
-            <li><a href="login.html" id="logoutBtn">Logout</a></li>
+            <li><a href="#" onClick={() => navigate("/profile")}>Profile</a></li>
+            <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li>
             <li><button id="lgm" className="lgm" >Light Mode ☀️</button></li>
         </ul>
     </aside>

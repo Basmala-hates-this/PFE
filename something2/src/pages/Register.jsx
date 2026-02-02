@@ -1,39 +1,98 @@
 import "../styles/register-login.css"
+ import { useNavigate } from "react-router-dom";
+ import { useState } from "react";
+ import {validateUsername, checkPasswordStrength} from "../assets/components/Validations.js";
+ import { useEffect } from "react";
+
 
 export default function Register(){
+
+
+const handleSubmit = (e) => {
+  e.preventDefault();
+
+  if (!canSubmit) return;
+
+  // TEMP: final navigation (later we merge with Info)
+  navigate("/fin");
+};
+
+
+
+    const navigate = useNavigate();
+
+    
+  const [username, setUsername] = useState("");
+  const [usernameFeedback, setUsernameFeedback] = useState("");
+  const [usernameColor, setUsernameColor] = useState("");
+
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState("");
+  const [strengthColor, setStrengthColor] = useState("");
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [canSubmit, setCanSubmit] = useState(false);
+
+  const handleUsernameChange = (e) => {
+  const value = e.target.value;
+  setUsername(value);
+
+  const result = validateUsername(value);
+  setUsernameFeedback(result.message);
+  setUsernameColor(result.color);
+};
+
+const handlePasswordChange = (e) => {
+  const value = e.target.value;
+  setPassword(value);
+
+  const result = checkPasswordStrength(value);
+  setPasswordStrength(result.message);
+  setStrengthColor(result.color);
+};
+
+useEffect(() => {
+  const usernameValid = validateUsername(username).valid;
+  const passwordsMatch = password && password === confirmPassword;
+
+  setCanSubmit(usernameValid && passwordsMatch);
+}, [username, password, confirmPassword]);
+
   return (
     <div id="body2">
-      <form  id="registerForm">
-        <fieldset id="field4">
+      <form  id="registerForm" onClick={handleSubmit} >
+        <fieldset id="field4" >
             <legend  id="logReg">Create Your Account</legend>
             <div id="logcenter">
                 <label htmlFor="username" id="label"> Choose Your Username: </label>
                 <br />
-                <input type="text" required minlength="5" id="username" className="username" name="username" maxlength="20"/>
-                <p id="feedback"></p>
+                <input type="text" required minLength="5" id="username" className="username" name="username" maxLength="20" value={username} onChange={handleUsernameChange}/>
+                <p id="feedback"style={{ color: usernameColor }}>{usernameFeedback}</p>
 
                 <br/><br/>
                 <label htmlFor="password" id="label">Choose Your Password:</label>
                 <br/>
-                <input type="password" id="password"  minlength="8" maxlength="15" name="password" required/>
-                <p id="strength"></p>
+                <input type="password" id="password"  minLength="8" maxLength="15" name="password" required value={password} onChange={handlePasswordChange}/>
+                <p id="strength"style={{ color: strengthColor }}>{passwordStrength}</p>
                 <br/><br/>
                 <label htmlFor="Cpassword" id="label">Confirm Password:</label>
                 <br/>
-                <input type="password"  id="Cpassword"  minlength="8" maxlength="15" name="Cpassword" required/><br/>
-                 <label id="label"> <input type="checkbox" id="togglePassword"/>
-                <span id="ohhh"> 👀</span></label>
+                <input type={showPassword ? "text" : "password"}  id="Cpassword"  minLength="8" maxLength="15" name="Cpassword" required  value={confirmPassword}
+  onChange={(e) => setConfirmPassword(e.target.value)}/><br/>
+                 <label id="label"> <input type="checkbox" id="togglePassword" onChange={() => setShowPassword(!showPassword)}/>
+                <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
                 <br/><br/>
-                <input type="submit" value="finish" className="btn2" /> 
+                <input type="submit" value="finish" className="btn2" disabled={!canSubmit}  /> 
                 <br/><br/>
-                <a href="welcome.html" id="backLink">Back to Home</a>
+                <a href="#" id="backLink" onClick={() => navigate("/")}>Back to Home</a>
 
 
             </div>
         </fieldset>
 
     </form>
-    <div class="bg2"></div>
+    <div className="bg2"></div>
     </div>
   );
 }

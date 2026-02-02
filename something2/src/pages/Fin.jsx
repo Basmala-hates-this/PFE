@@ -1,7 +1,11 @@
 import "../styles/fin.css"
 // import "../scripts/confetti.js"
+ import { useNavigate } from "react-router-dom";
+
 import confetti from "canvas-confetti";
 export default function Fin() {
+    const navigate = useNavigate();
+
     
   const handleConfetti = () => {
     confetti({
@@ -17,13 +21,13 @@ export default function Fin() {
     <h3 id="finH3">Thank You For Your Registration!</h3>
     <br/><br/>
     <div id="links">
-        <a href="dashboard2.1.jsx" className="fixing">🗂️Go To The Dashboard</a>
+        <a href="#" className="fixing" onClick={() => navigate("/dashboard")}>🗂️Go To The Dashboard</a>
         
-        <a  href="info.jsx" className="fixing">🏠back to home Page</a>
+        <a  href="#" className="fixing" onClick={() => navigate("/")}>🏠back to home Page</a>
 
             {/* <!-- <a href="register.html" className="fixing">🧾back to regestration Page</a> --> */}
              
-        <a href="login.jsx" className="fixing">🔑back To Login Page</a>
+        <a href="#" className="fixing" onClick={() => navigate("/login")}>🔑back To Login Page</a>
         <button  id="con" className="fixing" onClick={handleConfetti}>🎉 Celebrate Again</button> 
         {/* <a href="javascript:void(0)" onClick={handleConfetti}> 🎉 Celebrate Again </a> */}
         

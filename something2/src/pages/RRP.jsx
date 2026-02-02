@@ -1,6 +1,9 @@
 import "../styles/RRP.css";
+ import { useNavigate } from "react-router-dom";
 
 export default function RRP() {
+    const navigate = useNavigate();
+
   return (
     <div className="RRP" id="body4">  
         <form action="resetPassword.html" method="post" id="reset-form">
@@ -14,9 +17,9 @@ export default function RRP() {
             <button type="submit" id="btn4">Send Reset Link</button>
             <br/><br/>
             <div id="forgotlinks">
-               <a href="login.html" id="backLog">Back To Login </a>
+               <a href="#" id="backLog" onClick={() => navigate("/login")}>Back To Login </a>
                <br/><br/>
-                <a href="index.html" id="backHome">Back To Home</a>
+                <a href="#" id="backHome" onClick={() => navigate("/")}>Back To Home</a>
            </div>
         </fieldset>
         

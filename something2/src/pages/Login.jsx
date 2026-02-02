@@ -1,6 +1,10 @@
 import "../styles/register-login.css"
+ import { useNavigate } from "react-router-dom";
+
 
 export default function Login(){
+    const navigate = useNavigate();
+
   return (
     <div id="body2">
       <form  method="post" id="loginForm"> {/*<!--action="dashboard2.1.html"rederect the user to the dashboard after confirming with the database?? --> */}
@@ -20,10 +24,10 @@ export default function Login(){
             <br/><br/>
                 <input type="submit" value="login" className="btn2" /> 
                 <br/><br/>
-                <a href="request-reset-password.html" id="rrpLink">Forgot Your Password?</a>
+                <a href="#" id="rrpLink" onClick={() => navigate("/rrp")}>Forgot Your Password?</a>
                 <br/><br/>
                 
-                 <a href="welcome.html" id="backLink">Back to Home</a>
+                 <a href="#" id="backLink" onClick={() => navigate("/")}>Back to Home</a>
             </div>
 
 

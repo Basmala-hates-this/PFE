@@ -1,5 +1,9 @@
 import "../styles/rp.css";
+ import { useNavigate } from "react-router-dom";
+
 export default function Reset() {
+      const navigate = useNavigate();
+
     return (
         <div id="body6">
               <form  action="login.html">
@@ -17,7 +21,7 @@ export default function Reset() {
                  <label id="label" className="rpLabel"> <input type="checkbox" className="rpCheck" id="togglePassword"/>
                 <span id="ohhh"> 👀</span></label>
                 <br/><br/>
-                <input type="submit" value="Change Password" className="btn6" /> 
+                <input type="submit" value="Change Password" className="btn6"  onClick={() => navigate("/login")}/> {/*<!-- after changing password redirect to login page --> */}
                 <br/><br/>
                 
 

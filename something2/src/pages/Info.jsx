@@ -1,10 +1,65 @@
  import "../styles/info.css"
+  import { useNavigate } from "react-router-dom";
+import {validateProfile } from "../assets/components/Validations.js";
+import { useState } from "react";
+import { useEffect } from "react";
+
+
+
+
 
 
 export default function Info() {
+  // handllers to be updated while user fills the form*/
+  const [fullName, setFullName] = useState("");
+const [birthDate, setBirthDate] = useState("");
+const [email, setEmail] = useState("");
+const [university, setUniversity] = useState({ code: "", name: "" });
+const [role, setRole] = useState("");
+const [majors, setMajors] = useState([]);
+ 
+const navigate = useNavigate();
+
+//reset the select when changing the role.....
+useEffect(() => {
+  setMajors([]);
+}, [role]);
+
+
+// form submit handler*/
+const handleSubmit = (e) => {
+  
+  e.preventDefault();
+
+  const profile = {
+    fullName,
+    birthDate,
+    email,
+    university,
+    role,
+    majors
+  };
+
+  const result = validateProfile(profile);
+
+  if (!result.valid) {
+    alert(result.error);
+    return;
+  }
+
+  // Save to localStorage.....i need to abandon the local storage at some point....that is SAD....
+  localStorage.setItem("user", JSON.stringify(profile));
+
+  // Navigate to next page
+  navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
+};
+
+
+      
+
     return (
         <div id="body1">
-             <form  method="post" id="indexForm">{/*<!--action="register.html"   i think this is useless since i added the js redirection--> */}
+             <form  onSubmit={handleSubmit} id="indexForm">{/*<!--action="register.html"   i think this is useless since i added the js redirection--> */}
         <fieldset id="field1" className="fieldInfo" >
            
              <legend id="legend1">Make Your Account</legend>
@@ -15,19 +70,24 @@ export default function Info() {
               <legend id="legend2">Personal Info</legend>
               <label htmlFor="name" >Full Name:</label>
               <br/>
-              <input type="text" className="name" id="name" required minLength="5" name="fullName" placeholder="Ex:Hannibal Lecter" />
+              <input type="text" className="name" id="name" required minLength="5" name="fullName" placeholder="Ex:Hannibal Lecter"  onChange={(e) => setFullName(e.target.value)}/>
               <br/><br/>
               <label htmlFor="birth" >Your Date Of Birth:</label>
               <br/>
-              <input type="date" id="birth"  className="birth" name="dateOfBirth" required />
+              <input type="date" id="birth"  className="birth" name="dateOfBirth" required onChange={(e) => setBirthDate(e.target.value)}/>
               <br/><br/>
               <label htmlFor="email" id="PEmail" >Your Professional Email:</label>
               <br/>
-             <input type="email" className="PEmail" id="email" name="email" required />
+             <input type="email" className="PEmail" id="email" name="email" required onChange={(e) => setEmail(e.target.value)}/>
               <br/><br/>
               <label htmlFor="university" >Your University :</label>
               <br/>
-              <select name="university" id="univ" className="univ" required  defaultValue="">
+              <select name="university" id="univ" className="univ" required  defaultValue="" value={university.code}
+  onChange={(e) =>
+    e.target.value === "other"
+      ? setUniversity({ code: null, name: "" })
+      : setUniversity({ code: e.target.value, name: "" })
+  }>
                 <option value="" disabled > </option>
                 <option value="A1">University Of Algiers 1- Benyoucef Benkhedda</option>
                 <option value="A2">University Of Algiers 2- Abou El Kacem Saadallah</option>
@@ -72,10 +132,17 @@ export default function Info() {
 
               </select>
               <br/><br/>
+             {university.code === null && (
+  <input
+    type="text"
+    className="other"
+    placeholder="Enter university name"
+    onChange={(e) =>
+      setUniversity({ code: null, name: e.target.value })
+    }
+  />
+)}
 
-              <label htmlFor="other1" className="other" id="other2">What is your University: </label><br/>
-              <input type="text" id="other1" className="other"/>
-           
               <br/><br/>
         
             </fieldset>
@@ -84,14 +151,22 @@ export default function Info() {
                <legend  id="legend2">Practical Info</legend>
                 
                <label>Are You A:</label> 
-               <input type="radio" id="student" name="role" value="student" className="student" required /> <label htmlFor="student">Student</label>
-               <input type="radio" id="professor" name="role" value="professor" className="professor" required /> <label htmlFor="professor">Professor</label>
+               <input type="radio" id="student" name="role" value="student" className="student" required  checked={role === "student"} onChange={(e) => setRole(e.target.value)}/> <label htmlFor="student">Student</label>
+               <input type="radio" id="professor" name="role" value="professor" className="professor" required  checked={role === "professor"} onChange={(e) => setRole(e.target.value)}/> <label htmlFor="professor">Professor</label>
                 <br/><br/>
-                <label htmlFor="major" id="major">Your Main Major(s) :</label>
+                <label htmlFor="major" id="major">Choose a Role to Select Your Main Major(s) :</label>
                 <br/>
-                <div id="s_select">
-                <select name="studentMajor" className="major" id="studentselect" defaultValue="" >
-                    <option value="" disabled ></option>
+                
+                {role === "student" && (
+  <div id="s_select">
+    <select
+    id="studentselect"
+      className="major"
+      defaultValue=""
+      onChange={(e) => setMajors([e.target.value])}
+      required
+    >
+     <option value="" disabled ></option>
                     <option value="CS"> Computer Science</option>
                     <option value="Math">Mathematics</option>
                     <option value="phy">Physics</option>
@@ -121,11 +196,16 @@ export default function Info() {
                     <option value="ICS">Information & Communucation Science</option>
                     <option value="SSP">Sport Science & Physical Education</option>
                     <option value="AD">Art & Design</option>
-                </select>
-                </div>
+    </select>
+  </div>
+)}
+
                 <br/>
+                {role === "professor" && (
                 <div id="p_select">
-                <select name="profMajor" className="major" id="professorselect" multiple >
+                <select name="profMajor" className="major" id="professorselect" multiple  onChange={(e) =>
+    setMajors([...e.target.selectedOptions].map(o => o.value))
+  } >
                   
                     <option value="CS"> Computer Science</option>
                     <option value="Math">Mathematics</option>
@@ -158,15 +238,19 @@ export default function Info() {
                     <option value="AD">Art & Design</option>
                 </select>
                 </div>
+                )}
+                {/* {role === "student" && <StudentMajorSelect />}
+                {role === "professor" && <ProfessorMajorSelect />}  these are to toggle later....i hate react */}
+
                 <br/>
                 {/* <!-- <small id="small">Hold on 'Ctrl' or 'Cmd' to have multiple choices</small> -->
                  */}
             </fieldset>
         
            <br/><br/>
-           <input type="submit" value="Next" id="btn1" /> 
+            <input type="submit" value="Next" id="btn1"/>  {/* onClick={() => navigate("/register")} */}
            <br/><br/>
-           <a href="/login" id="InfoLink">
+           <a href="#" id="InfoLink" onClick={() => navigate("/login")}>
               Already Have An Account?
             </a>
         </fieldset>

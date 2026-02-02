@@ -1,8 +1,12 @@
 import gethub from "../photos/gethub.jpg";
 import "../styles/profile.css";
 import "../styles/sidebar.css";
+ import { useNavigate } from "react-router-dom";
+
 
 export default function Profile() { 
+    const navigate = useNavigate();
+
     return (
 <div id="body7">
     <div className="container">
@@ -10,13 +14,13 @@ export default function Profile() {
   <aside className="sidebar">
     <h2 id="h2pro"> Profile</h2>
     <ul>
-      <li><span>👤 Profile </span></li>
+      <li onClick={() => navigate("/dashboard")}><span>👤 Dashboard </span></li>
       <li><span>🏠 Rooms </span></li>
       <li><span>🔒 Create Private Room </span></li>
       <li><span>📚 My Courses/resources </span></li>
       <li><span>👥 Connections </span></li>
       <li><span>⚙️ Edit </span></li>
-      <li><span>✌️ Logout </span></li>
+      <li onClick={() => navigate("/login")}><span>✌️ Logout </span></li>
       <li className="delete-item" ><span>🗑️ Delete Account </span> </li>
     </ul>
 
