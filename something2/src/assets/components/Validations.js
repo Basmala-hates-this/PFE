@@ -96,52 +96,6 @@ export function isValidMajors(majors, role) {
   return false;
 }
 
-// PROFILE VALIDATION (AGGREGATE)
-// Rule: all profile fields must be valid
-//
-
-export function validateProfile(profile) {
-  if (!profile) return { valid: false, error: "Missing profile" };
-
-  const {
-    fullName,
-    birthDate,
-    email,
-    university,
-    role,
-    majors
-  } = profile;
-
-  if (!isValidFullName(fullName)) {
-    return { valid: false, error: "Invalid full name" };
-  }
-
-  if (!isOldEnough(birthDate)) {
-    return { valid: false, error: "User must be at least 17" };
-  }
-
-  if (!isValidEmail(email)) {
-    return { valid: false, error: "Invalid email" };
-  }
-
-  if (!isValidUniversity(university)) {
-    return { valid: false, error: "Invalid university selection" };
-  }
-
-  if (!isValidRole(role)) {
-    return { valid: false, error: "Invalid role" };
-  }
-
-  if (!isValidMajors(majors, role)) {
-    return { valid: false, error: "Invalid majors selection" };
-  }
-
-  return { valid: true };
-}
-
-
-
-
 
 //username validation
 export const validateUsername = (value) => {
@@ -176,7 +130,7 @@ export const validateUsername = (value) => {
   if (!allowedPattern.test(value)) {
     return {
       valid: false,
-      message: "Only letters, numbers, and @$&-~ are allowed.",
+      message: "Only letters, numbers, and $&-~ are allowed.",
       color: "#fc0c0ce9"
     };
   }
@@ -228,3 +182,57 @@ export const checkPasswordStrength = (value) => {
 };
 
 // export { validateUsername, checkPasswordStrength };
+
+
+
+
+
+
+
+
+
+// PROFILE VALIDATION (AGGREGATE)
+// Rule: all profile fields must be valid
+//
+
+export function validateProfile(profile) {
+  if (!profile) return { valid: false, error: "Missing profile" };
+
+  const {
+    fullName,
+    birthDate,
+    email,
+    university,
+    role,
+    majors
+  } = profile;
+
+  if (!isValidFullName(fullName)) {
+    return { valid: false, error: "Invalid full name" };
+  }
+
+  if (!isOldEnough(birthDate)) {
+    return { valid: false, error: "User must be at least 17" };
+  }
+
+  if (!isValidEmail(email)) {
+    return { valid: false, error: "Invalid email" };
+  }
+
+  if (!isValidUniversity(university)) {
+    return { valid: false, error: "Invalid university selection" };
+  }
+
+  if (!isValidRole(role)) {
+    return { valid: false, error: "Invalid role" };
+  }
+
+  if (!isValidMajors(majors, role)) {
+    return { valid: false, error: "Invalid majors selection" };
+  }
+
+  return { valid: true };
+}
+
+
+

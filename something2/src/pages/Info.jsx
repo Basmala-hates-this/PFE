@@ -3,6 +3,8 @@
 import {validateProfile } from "../assets/components/Validations.js";
 import { useState } from "react";
 import { useEffect } from "react";
+import { useRegistration } from "../assets/components/Context.jsx";
+
 
 
 
@@ -10,6 +12,8 @@ import { useEffect } from "react";
 
 
 export default function Info() {
+  
+
   // handllers to be updated while user fills the form*/
   const [fullName, setFullName] = useState("");
 const [birthDate, setBirthDate] = useState("");
@@ -47,8 +51,16 @@ const handleSubmit = (e) => {
     return;
   }
 
+
+  //context is the kinda freindly replace of localstorage
+  //anything but an actual databse for now
+  const { setProfile } = useRegistration();
+
   // Save to localStorage.....i need to abandon the local storage at some point....that is SAD....
-  localStorage.setItem("user", JSON.stringify(profile));
+  // localStorage.setItem("user", JSON.stringify(profile));
+  //use context instead
+  setProfile(profile);
+
 
   // Navigate to next page
   navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
@@ -154,7 +166,7 @@ const handleSubmit = (e) => {
                <input type="radio" id="student" name="role" value="student" className="student" required  checked={role === "student"} onChange={(e) => setRole(e.target.value)}/> <label htmlFor="student">Student</label>
                <input type="radio" id="professor" name="role" value="professor" className="professor" required  checked={role === "professor"} onChange={(e) => setRole(e.target.value)}/> <label htmlFor="professor">Professor</label>
                 <br/><br/>
-                <label htmlFor="major" id="major">Choose a Role to Select Your Main Major(s) :</label>
+                <label htmlFor="major" id="major">Choose a Role to Select Your Main Major(s) </label>
                 <br/>
                 
                 {role === "student" && (

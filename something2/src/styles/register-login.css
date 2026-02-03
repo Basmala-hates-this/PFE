@@ -122,7 +122,7 @@
     
 }
 #feedback{
-    display: none;
+    /* display: none; */
     /* text-shadow: 0 0 5px rgba(6, 6, 6, 0.5);/*this makes the text more visible on this damn background*/  
     font-weight: bold;
     font-size: 17px;
@@ -132,7 +132,7 @@
     border-radius: 15px;
 }
 #strength{
-    display: none;
+    /* display: none; */
     margin-top: 5px;
     font-weight: bold;
     font-size: 17px;
