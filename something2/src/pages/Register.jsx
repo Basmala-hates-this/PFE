@@ -3,23 +3,40 @@ import "../styles/register-login.css"
  import { useState } from "react";
  import {validateUsername, checkPasswordStrength} from "../assets/components/Validations.js";
  import { useEffect } from "react";
+ import { useRegistration } from "../assets/components/Context.jsx";
+
 
 
 export default function Register(){
 
+    const navigate = useNavigate();
+
+  //theh call for infos from the info context to be updated in this ass of a form.....sorry sarah..i hate what i made...
+  const { profile, setCredentials } = useRegistration();
+
+
+//if someine ever was abale to skip info form....this will atke them back to it
+useEffect(() => {
+  if (!profile) {
+    navigate("/info");
+  }
+}, [profile, navigate]);
+
+
 
 const handleSubmit = (e) => {
   e.preventDefault();
-
   if (!canSubmit) return;
 
-  // TEMP: final navigation (later we merge with Info)
+  setCredentials({
+    username,
+    password
+  });
+
   navigate("/fin");
 };
 
 
-
-    const navigate = useNavigate();
 
     
   const [username, setUsername] = useState("");
@@ -72,6 +89,7 @@ useEffect(() => {
 
   setCanSubmit(usernameValid && passwordsMatch && strongEnough);
 }, [username, password, confirmPassword]);
+
 
   return (
     <div id="body2">

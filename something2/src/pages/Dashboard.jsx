@@ -2,9 +2,39 @@ import "../styles/Dash.css";
 import "../styles/sidebar.css";
 import Cat from "../photos/Cat.jpg";
  import { useNavigate } from "react-router-dom";
+ import { useEffect } from "react";
+
+import { useRegistration } from "../assets/components/Context.jsx";
+
+//sooooooooooo
+//i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
+//sooo why not work with both,context and localstorge?
+//i meant context to creat the datashape "agreed upon" and local storage to save ot as is....
+//deal?
+//i imported the same thing twice and it made errors....u gotta love react...
+
+
+
 
 export default function Dashboard() {
       const navigate = useNavigate();
+      const { profile, credentials } = useRegistration();
+
+  // If user skipped info/register, send them back
+  useEffect(() => {
+    if (!profile || !credentials) {
+      navigate("/info");
+    } else {
+      // Commit the decoy account to localStorage
+      const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
+      const newUser = { ...profile, ...credentials };
+      localStorage.setItem(
+        "users",
+        JSON.stringify([...existingUsers, newUser])
+      );
+    }
+  }, [profile, credentials]);
+
 
     return (
         <div id="body5">

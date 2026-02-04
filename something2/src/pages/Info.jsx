@@ -21,6 +21,10 @@ const [email, setEmail] = useState("");
 const [university, setUniversity] = useState({ code: "", name: "" });
 const [role, setRole] = useState("");
 const [majors, setMajors] = useState([]);
+
+  //context is the kinda freindly replace of localstorage
+  //anything but an actual databse for now
+  const { setProfile } = useRegistration();
  
 const navigate = useNavigate();
 
@@ -52,9 +56,7 @@ const handleSubmit = (e) => {
   }
 
 
-  //context is the kinda freindly replace of localstorage
-  //anything but an actual databse for now
-  const { setProfile } = useRegistration();
+
 
   // Save to localStorage.....i need to abandon the local storage at some point....that is SAD....
   // localStorage.setItem("user", JSON.stringify(profile));
@@ -90,7 +92,7 @@ const handleSubmit = (e) => {
               <br/><br/>
               <label htmlFor="email" id="PEmail" >Your Professional Email:</label>
               <br/>
-             <input type="email" className="PEmail" id="email" name="email" required onChange={(e) => setEmail(e.target.value)}/>
+             <input type="email" className="PEmail" id="email" name="email" placeholder="something@something.something" required onChange={(e) => setEmail(e.target.value)}/>
               <br/><br/>
               <label htmlFor="university" >Your University :</label>
               <br/>
