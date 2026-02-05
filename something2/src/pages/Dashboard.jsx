@@ -18,22 +18,14 @@ import { useRegistration } from "../assets/components/Context.jsx";
 
 export default function Dashboard() {
       const navigate = useNavigate();
-      const { profile, credentials } = useRegistration();
-
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   // If user skipped info/register, send them back
-  useEffect(() => {
-    if (!profile || !credentials) {
-      navigate("/info");
-    } else {
-      // Commit the decoy account to localStorage
-      const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
-      const newUser = { ...profile, ...credentials };
-      localStorage.setItem(
-        "users",
-        JSON.stringify([...existingUsers, newUser])
-      );
-    }
-  }, [profile, credentials]);
+ useEffect(() => {
+  if (!currentUser) {
+    navigate("/login");
+  }
+}, [currentUser]);
+
 
 
     return (

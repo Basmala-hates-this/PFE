@@ -64,14 +64,39 @@ export default function Fin() {
 
 
 //hol'up imma try something stupid
+//for some reason...when i navigate to dashboard...it saves to users in localstorage-->this later works normally in login
+//when i navigate to another link..it goes to user...and at login it does not pass
+//i'll change everything to users and see if it works....
 const handleDashboard = () => {
   localStorage.setItem(
-    "user",
+    "users",
     JSON.stringify({ profile, credentials })
   );
     navigate("/dashboard");
 
 };
+
+const handleLogin = () => {
+  localStorage.setItem(
+    "users",
+    JSON.stringify({ profile, credentials })
+  );
+    navigate("/login");
+
+};
+
+const handleWelcome = () => {
+  localStorage.setItem(
+    "users",
+    JSON.stringify({ profile, credentials })
+  );
+    navigate("/");
+
+};
+
+const users = JSON.parse(localStorage.getItem("users")) || [];
+localStorage.setItem("users", JSON.stringify([...users, newUser]));
+localStorage.setItem("currentUser", JSON.stringify(newUser));
 
   return (
     <div className="fin-page" id="body3">
@@ -82,11 +107,11 @@ const handleDashboard = () => {
     <div id="links">
         <a href="#" className="fixing" onClick={handleDashboard}>🗂️Go To The Dashboard</a>
         
-        <a  href="#" className="fixing" onClick={() => navigate("/")}>🏠back to home Page</a>
+        <a  href="#" className="fixing" onClick={handleWelcome}>🏠back to home Page</a>
 
             {/* <!-- <a href="register.html" className="fixing">🧾back to regestration Page</a> --> */}
              
-        <a href="#" className="fixing" onClick={() => navigate("/login")}>🔑back To Login Page</a>
+        <a href="#" className="fixing" onClick={handleLogin}>🔑back To Login Page</a>
         <button  id="con" className="fixing" onClick={handleConfetti}>🎉 Celebrate Again</button> 
         {/* <a href="javascript:void(0)" onClick={handleConfetti}> 🎉 Celebrate Again </a> */}
         

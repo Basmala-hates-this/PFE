@@ -84,7 +84,7 @@ background:
 }
 
 
-.name,.birth,.PEmail,.univ{
+.name,.birth,.PEmail,.univ,.other{
     border-width: 2px;
     width: 30%;
     height: 25px;

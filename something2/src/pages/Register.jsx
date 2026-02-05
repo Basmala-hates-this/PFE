@@ -5,7 +5,7 @@ import "../styles/register-login.css"
  import { useEffect } from "react";
  import { useRegistration } from "../assets/components/Context.jsx";
 
-
+//////THE DAMN USERNAME CANNOT BELONG TO ANOTHER USER...IF IT EXISTS ALREADY IT CANNOT BE CHOSEN....fuck...
 
 export default function Register(){
 
