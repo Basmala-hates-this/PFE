@@ -110,7 +110,7 @@ const handlePasswordChange = (e) => {
             <br/><br/>
 {/* hummm thsi displays the VERY creative error message.... */}
             {error && (
-  <p style={{ color: "#fc0c0c", marginTop: "10px" ,fontSize:"20px",backgroundColor:"#d0d1eeba", borderRadius: "12px", width:"40%", marginLeft:"30%"}}>
+  <p style={{ color: "#fc0c0c", marginTop: "10px" ,fontSize:"20px",backgroundColor:"#f7f4f4a7", borderRadius: "12px", width:"40%", marginLeft:"30%"}}>
     {error}
   </p>
 )} <br />
@@ -119,7 +119,7 @@ const handlePasswordChange = (e) => {
                 <a href="#" id="rrpLink" onClick={() => navigate("/rrp")}>Forgot Your Password?</a>
                 <br/><br/>
                 
-                 <a href="#" id="backLink" >Back to Home</a>
+                 <a href="#" id="backLink" onClick={() => navigate("/")} >Back to Home</a>
             </div>
 
 

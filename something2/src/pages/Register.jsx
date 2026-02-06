@@ -22,11 +22,25 @@ useEffect(() => {
   }
 }, [profile, navigate]);
 
-
+//upon me realizing the user name bug...apperantlly it was in my plans but i forgot...of course i did....we will atempt to fix it now....help
+const [error, setError] = useState("");
 
 const handleSubmit = (e) => {
   e.preventDefault();
   if (!canSubmit) return;
+
+
+  const users = JSON.parse(localStorage.getItem("users")) ||JSON.parse(localStorage.getItem("user")) || [];
+
+const usernameExists = users.some(
+  (u) => u.username === username
+);
+
+if (usernameExists) {
+  setError("Username already taken.Maybe be more creative?");
+  return;
+}
+
 
   setCredentials({
     username,
@@ -35,6 +49,7 @@ const handleSubmit = (e) => {
 
   navigate("/fin");
 };
+
 
 
 
@@ -132,6 +147,12 @@ useEffect(() => {
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
                 <br/><br/>
                 <input type="submit" value="finish" className="btn2" disabled={!canSubmit}  /> 
+                <br />
+                {error && (
+  <p style={{ color: "#fc0c0ce9", marginTop: "10px",fontSize:"20px",backgroundColor:"#f7f4f4a7", borderRadius: "12px", width:"70%", marginLeft:"15%", height:" 30px" }}>
+    {error}
+  </p>
+)}
                 <br/><br/>
                 <a href="#" id="backLink" onClick={() => navigate("/")}>Back to Home</a>
 

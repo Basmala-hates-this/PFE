@@ -21,6 +21,8 @@ import {
 export default function Fin() {
     const navigate = useNavigate();
     const { profile, credentials } = useRegistration();
+    const newUser = { ...profile, ...credentials };
+
 
     
   const handleConfetti = () => {
@@ -34,22 +36,19 @@ export default function Fin() {
 
   //AAAAAAAAAAAAAAAAAA
   //user efect will check the previosly mentiond...if one is false..rederect to he page needed...if not....well....CONTENT!!
-  useEffect(() => {
-  // guard: no skipping steps(YOU SHAALLLLL NOOOOOOT PAAAASSSSSSSS!!)
+ useEffect(() => {
+  //no skipping to fin somehow..... YOUUUUUUUUUUUU SHALL NOOOOOOOOOOT PAASSSSSSSSS
   if (!profile || !credentials) {
     navigate("/info");
     return;
   }
 
-  // final profile validation
   const profileCheck = validateProfile(profile);
   if (!profileCheck.valid) {
-    alert(profileCheck.error);
     navigate("/info");
     return;
   }
-
-  // final credential validation
+//if somehow passed with not so valid data.....am i paranoid ?
   if (
     !validateUsername(credentials.username).valid ||
     checkPasswordStrength(credentials.password).strength < 4
@@ -58,9 +57,28 @@ export default function Fin() {
     return;
   }
 
- 
+  const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
+
+  const usernameExists = existingUsers.some(
+    (u) =>
+      u.username === credentials.username
+  );
+//this one i belive is extra and is causing problems...i cause myself problems...
+//anyhow at register..even if the username is new..it gets flagged as already exists and redirect to register then fin again....weird...
+  // if (usernameExists) {
+  //   alert("Username already taken.");
+  //   navigate("/register");
+  //   return;
+  // }
+
+  const updatedUsers = [...existingUsers, newUser];
+
+  localStorage.setItem("users", JSON.stringify(updatedUsers));
+  localStorage.setItem("currentUser", JSON.stringify(newUser));
+
   handleConfetti();
 }, []);
+
 
 
 //hol'up imma try something stupid
@@ -68,35 +86,23 @@ export default function Fin() {
 //when i navigate to another link..it goes to user...and at login it does not pass
 //i'll change everything to users and see if it works....
 const handleDashboard = () => {
-  localStorage.setItem(
-    "users",
-    JSON.stringify({ profile, credentials })
-  );
+ 
     navigate("/dashboard");
 
 };
 
 const handleLogin = () => {
-  localStorage.setItem(
-    "users",
-    JSON.stringify({ profile, credentials })
-  );
+ 
     navigate("/login");
 
 };
 
 const handleWelcome = () => {
-  localStorage.setItem(
-    "users",
-    JSON.stringify({ profile, credentials })
-  );
+ 
     navigate("/");
 
 };
 
-const users = JSON.parse(localStorage.getItem("users")) || [];
-localStorage.setItem("users", JSON.stringify([...users, newUser]));
-localStorage.setItem("currentUser", JSON.stringify(newUser));
 
   return (
     <div className="fin-page" id="body3">
