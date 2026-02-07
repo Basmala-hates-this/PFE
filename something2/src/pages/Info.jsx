@@ -48,6 +48,7 @@ const emailExists = users.some(
 
 if (emailExists) {
   setError("Email Already Exists...Login-in Instead?");
+  alert("Email Already Exists...Login-in Instead?");
   return;
 }
 
@@ -106,12 +107,13 @@ if (emailExists) {
               <br/>
              <input type="email" className="PEmail" id="email" name="email" placeholder="something@something.something" required onChange={(e) => setEmail(e.target.value)}/>
              <br />
-             {/* in hopes this works to fix the email uniqueness...is that a word?...couldnt care less... */}
-             {error && (
+             {/* in hopes this works to fix the email uniqueness...is that a word?...couldnt care less...yeah it workes....for now */}
+             {/* {error && (
               <p style={{ color: "#fc0c0ce9", marginTop: "10px",fontSize:"20px",backgroundColor:"#f7f4f4a7", borderRadius: "12px", width:"70%", marginLeft:"15%", height:" 30px" }}>
     {error}
-  </p>
-             )}
+  </p> )}*/}
+  {/* that works....works completly fine but for the sake of my testing...i should nake it an alert..atleast for now */}
+             
               <br/><br/>
               <label htmlFor="university" >Your University :</label>
               <br/>
