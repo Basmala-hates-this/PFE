@@ -81,7 +81,7 @@ export default function Fin() {
 
 
 
-//hol'up imma try something stupid
+//hol'up imma try something stupid.....that thing was in fact....very stupid.....fixed
 //for some reason...when i navigate to dashboard...it saves to users in localstorage-->this later works normally in login
 //when i navigate to another link..it goes to user...and at login it does not pass
 //i'll change everything to users and see if it works....

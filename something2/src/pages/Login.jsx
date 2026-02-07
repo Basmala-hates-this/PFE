@@ -104,7 +104,7 @@ const handlePasswordChange = (e) => {
 <br/><br/> 
             <label htmlFor="password" id="label"> Your Password:</label>
             <br/><br/>
-            <input type={showPassword ? "text" : "password"} id="password"   minLength="8" maxLength="15" name="password" required value={password} onChange={handlePasswordChange}/><br/>
+            <input type={showPassword ? "text" : "password"} id="password" placeholder="Password1*"  minLength="8" maxLength="15" name="password" required value={password} onChange={handlePasswordChange}/><br/>
             <label id="label"> <input type="checkbox" id="togglePassword" onClick={() => setShowPassword(!showPassword)} />
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
             <br/><br/>

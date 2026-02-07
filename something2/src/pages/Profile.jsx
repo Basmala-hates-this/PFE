@@ -19,7 +19,7 @@ export default function Profile() {
       <li><span>🔒 Create Private Room </span></li>
       <li><span>📚 My Courses/resources </span></li>
       <li><span>👥 Connections </span></li>
-      <li><span>⚙️ Edit </span></li>
+      <li onClick={()=> navigate("/edit")}><span>⚙️ Edit </span></li>
       <li onClick={() => navigate("/login")}><span>✌️ Logout </span></li>
       <li className="delete-item" ><span>🗑️ Delete Account </span> </li>
     </ul>

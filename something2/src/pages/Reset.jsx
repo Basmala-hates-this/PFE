@@ -12,11 +12,11 @@ export default function Reset() {
             
                 <label htmlFor="password" className="rpLabel" >Choose Your New Password:</label>
                 <br/>
-                <input type="password" id="RPpassword" className="password" minLength="8" maxLength="15" name="password" required/>
+                <input type="password" id="RPpassword" className="password"  placeholder="Password1*" minLength="8" maxLength="15" name="password" required/>
                 <br/><br/>
                 <label htmlFor="Cpassword" className="rpLabel">Confirm Password:</label>
                 <br/>
-                <input type="password"  id="RPCpassword" className="Cpassword" minLength="8" maxLength="15" name="Cpassword" required/>
+                <input type="password"  id="RPCpassword" placeholder="Password1*" className="Cpassword" minLength="8" maxLength="15" name="Cpassword" required/>
                 <br/>
                  <label id="label" className="rpLabel"> <input type="checkbox" className="rpCheck" id="togglePassword"/>
                 <span id="ohhh"> 👀</span></label>

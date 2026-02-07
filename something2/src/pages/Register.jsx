@@ -114,7 +114,7 @@ useEffect(() => {
             <div id="logcenter">
                 <label htmlFor="username" id="label"> Choose Your Username: </label>
                 <br />
-                <input type="text" required minLength="5" id="username" className="username" name="username" maxLength="20" value={username} onChange={handleUsernameChange}/>
+                <input type="text" required minLength="5" id="username" className="username" name="username" maxLength="20" value={username} placeholder="bruh~$&-_" onChange={handleUsernameChange}/>
                <p
   id="feedback"
   style={{
@@ -128,7 +128,7 @@ useEffect(() => {
                 <br/><br/>
                 <label htmlFor="password" id="label">Choose Your Password:</label>
                 <br/>
-                <input  type={showPassword ? "text" : "password"} id="password"  minLength="8" maxLength="15" name="password" required value={password} onChange={handlePasswordChange}/>
+                <input  type={showPassword ? "text" : "password"} id="password"  minLength="8" maxLength="15" name="password" required value={password} placeholder="Password1*" onChange={handlePasswordChange}/>
                <p
   id="strength"
   style={{
@@ -141,7 +141,7 @@ useEffect(() => {
                 <br/><br/>
                 <label htmlFor="Cpassword" id="label">Confirm Password:</label>
                 <br/>
-                <input type={showPassword ? "text" : "password"}  id="Cpassword"  minLength="8" maxLength="15" name="Cpassword" required  value={confirmPassword}
+                <input type={showPassword ? "text" : "password"}  id="Cpassword"  minLength="8" maxLength="15" name="Cpassword" placeholder="Password1*" required  value={confirmPassword}
   onChange={(e) => setConfirmPassword(e.target.value)}/><br/>
                  <label id="label"> <input type="checkbox" id="togglePassword" onChange={() => setShowPassword(!showPassword)}/>
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>

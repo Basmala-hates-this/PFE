@@ -32,12 +32,24 @@ const navigate = useNavigate();
 useEffect(() => {
   setMajors([]);
 }, [role]);
+//..............email should also be unique........damn....how do i keep forgetting about this stuff?
 
+const [error, setError] = useState("");
 
 // form submit handler*/
 const handleSubmit = (e) => {
   
   e.preventDefault();
+  const users = JSON.parse(localStorage.getItem("users")) ||JSON.parse(localStorage.getItem("user")) || [];
+
+const emailExists = users.some(
+  (u) => u.email === email
+);
+
+if (emailExists) {
+  setError("Email Already Exists...Login-in Instead?");
+  return;
+}
 
   const profile = {
     fullName,
@@ -93,6 +105,13 @@ const handleSubmit = (e) => {
               <label htmlFor="email" id="PEmail" >Your Professional Email:</label>
               <br/>
              <input type="email" className="PEmail" id="email" name="email" placeholder="something@something.something" required onChange={(e) => setEmail(e.target.value)}/>
+             <br />
+             {/* in hopes this works to fix the email uniqueness...is that a word?...couldnt care less... */}
+             {error && (
+              <p style={{ color: "#fc0c0ce9", marginTop: "10px",fontSize:"20px",backgroundColor:"#f7f4f4a7", borderRadius: "12px", width:"70%", marginLeft:"15%", height:" 30px" }}>
+    {error}
+  </p>
+             )}
               <br/><br/>
               <label htmlFor="university" >Your University :</label>
               <br/>
@@ -132,7 +151,7 @@ const handleSubmit = (e) => {
                 <option value="USTO">University of Science and Technology of Oran - Mohamed Boudiaf</option>
                 <option value="UOr">University of Ouargla - Kasdi Merbah</option>
                 <option value="USa">​University of Saida - Dr. Moulay Tahar </option>
-                <option value="USBA">​Djillali Liabès University of Sidi Bel Abbes  </option>
+                <option value="USBA">​Djillali Liabes University of Sidi Bel Abbes  </option>
                 <option value="USk">University of Skikda - 20 August 1955 </option>
                 <option value="USA">​University of Souk Ahras - Mohamed Cherif Messaadia  </option>
                 <option value="US1">University of Setif 1 - Ferhat Abbas </option>

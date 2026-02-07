@@ -9,6 +9,7 @@ import RRP from "./pages/RRP.jsx";
 import Reset from "./pages/Reset.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
+import EditProfile from "./pages/EditProfile.jsx";
 import { RegistrationProvider } from "./assets/components/Context.jsx";
 
 function App() {
@@ -26,9 +27,12 @@ function App() {
         <Route path="/reset" element={<Reset />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
+         <Route path="/edit" element={<EditProfile />} />
+
       </Routes>
             </RegistrationProvider>
     </Router>
+   
     
   );
 }
