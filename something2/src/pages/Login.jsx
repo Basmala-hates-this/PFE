@@ -25,7 +25,7 @@ const [error, setError] = useState("");
 
   const navigate = useNavigate();
 
-//huumm...the browser is playing with me and adding data i didint input ....i want it crispy clean soooo.....
+//huumm...the browser is playing with me and adding data i didint input ....i want it crispy clean soooo.....didnt work....
 useEffect(() => {
   setUsername("");
   setPassword("");

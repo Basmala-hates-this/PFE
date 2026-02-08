@@ -27,7 +27,7 @@ export default function EditProfile(){
 
     <div className="form-group">
       <label htmlFor="username" className="EditLabel">New Username</label>
-     <input type="text" id="username"  className="edit-username" placeholder="Enter your new username" />
+     <input type="text" id="editUsername"  className="edit-username" placeholder="Enter your new username" />
       <label htmlFor="EditedEmail" className="EditLabel">New Email</label>
      <input type="text" id="EditedEmail"  className="edit-Email" placeholder="Enter your new email" />
  </div>
