@@ -30,6 +30,15 @@ useEffect(() => {
   setUsername("");
   setPassword("");
 }, []);
+////////////////
+
+   const handleUsernameChange = (e) => {
+  setUsername(e.target.value);
+};
+
+const handlePasswordChange = (e) => {
+  setPassword(e.target.value);
+};
 ///////////////////////////////
 const handleSubmit = (e) => {
   e.preventDefault();
@@ -70,13 +79,6 @@ localStorage.setItem("currentUser", JSON.stringify(user));
 
 
 
-   const handleUsernameChange = (e) => {
-  setUsername(e.target.value);
-};
-
-const handlePasswordChange = (e) => {
-  setPassword(e.target.value);
-};
 
 
 

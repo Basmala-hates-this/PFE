@@ -1,3 +1,9 @@
+//me need to cenect this page to the previous selected/found accout so we can update the said password....
+//otherwise...who on earth would this change the password to?
+//i feel like progress-webtu's  random password changes has something to do with this....eitherway...lets see how bad we can make this
+
+
+
 import "../styles/rp.css";
  import { useNavigate } from "react-router-dom";
  import { useState } from "react";
@@ -20,6 +26,18 @@ export default function Reset() {
 
   const [showPassword, setShowPassword] = useState(false);
   const [canSubmit, setCanSubmit] = useState(false);
+
+  //i'm too sick and tired this is going to be extra hell...either way...for selecting and changing the password of the correct account
+  //email found:
+  const resetEmail = localStorage.getItem("resetEmail");
+  //as much as i hate this security...i need it 
+  //but is login the correct page here?welp couldnt care less each page has links to navigate......
+  useEffect(() => {
+  if (!resetEmail) {
+    navigate("/login");
+  }
+}, []);
+
 
 const handlePasswordChange = (e) => {
   const value = e.target.value;
@@ -64,7 +82,26 @@ const handleSubmit = (e) => {
     return;
   }
 
-  setCredentials({ password });
+  ///ternary operators are my goated if/else statments....same as template literal for messages...
+  //we update THE SELECTED USER RATHER THAN ANYOTHER 
+    const users = JSON.parse(localStorage.getItem("users")) || JSON.parse(localStorage.getItem("user")) || [];
+
+  const updatedUsers = users.map(user =>
+    user.email === resetEmail
+      ? { ...user, password }
+      : user
+  );
+//...this should also update context so it is easy to backend it later-if that is a word- meh another shit for another day
+//reminder to my forgetful sole...and urs partner...if u ever ended up reading my comments...
+// If it must survive refresh -> storage
+// If many components need it -> context
+// If it’s temporary & sensitive -> storage, not context
+// If it’s UI convenience -> context
+//i still do sometimes question my sanety for keeping with this major
+  localStorage.setItem("users", JSON.stringify(updatedUsers));
+  localStorage.removeItem("resetEmail");
+
+  alert("Password successfully reset! try not to forget this one :)");
   navigate("/login");
 };
 

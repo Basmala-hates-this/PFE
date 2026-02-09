@@ -35,9 +35,14 @@ else if (!emailExists) {
 //2 parts of the party are  working...check if the email is valid then check if it exists...
 //the third one is not for the moment....why is giving an existing email flagg the second alert?
 //damn...my guess is i'm not checking the localstorage corectly.....
-else{
+//again it ws my logic which i had to invert the emailexist part....
+//eitherway....for real flow...we will keep the email we found....so we can use it to change the password of the said email's related account
+//pointless work.....NOT POINTLESS WHATSOEVER
+localStorage.setItem("resetEmail", email);
+
+
   navigate("/Reset");
-}
+
 
   
   }

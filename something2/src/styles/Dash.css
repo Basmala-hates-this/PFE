@@ -272,26 +272,32 @@ input{
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-
+/* bad naming for the elemnt btw */
 #room-select {
-    width: 20%;
+  
     height: 50px;
    
-    margin-right: 75%;
+    
     margin-bottom: 30px;
     padding: 2px;
     border-radius: 6px;
-    border: 2px solid rgb(140, 164, 198);
+    border: 2px solid #8ca4c6;
     background-color: var(--bg-card);
     color: var(--text-main);
+    display: inline;
     
 }
-
-
-#dashh3{
-  color: var(--text-main);
-  font-size: 15px;
-  text-align: left;
-  margin-bottom: 15px;
-  
+.postBtn:hover{
+  color: antiquewhite;
+  background-color:#0033a2;
+  box-shadow: 0 20px 40px var(--accent-neon);
 }
+
+
+/* #dashh3{
+  color: var(--text-main);
+  font-size: 17px;
+  text-align: left;
+  margin-bottom: 25px;
+  
+} */

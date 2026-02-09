@@ -1,10 +1,10 @@
 
 #body4{
-    height: 100vh;
-    margin: 0;
+   
     overflow: hidden;
     margin: 0;
     height: 100vh;
+    padding: 5px;
    background: linear-gradient(to bottom right, #07319D ,#feb703,#081fee);
    color: rgb(0, 0, 0);
     font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;

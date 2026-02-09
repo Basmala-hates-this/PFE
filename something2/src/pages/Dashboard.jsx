@@ -55,10 +55,13 @@ const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
         {/* <!-- Room Selection --> */}
         <section className="room-selection">
-        <h3 id="dashh3">Select rooms to view:</h3>
-        <select id="room-select" multiple size="5">
+        {/* <label id="dashh3">Select rooms to view:</label> */}
+        <select id="room-select" multiple size="5" style={{width:"30%"}}>
+            <option value="" disabled style={{color:"whitesmoke"}}>Select rooms to view:</option>
         {/* <!-- react will populate options --> */}
         </select>
+        <input type="text"  id="dashSearch" className="dashSearch" placeholder="🔍 searching for something?" style={{float:"right" , width:"30%", border:" 2px, solid, #8ca4c6",height:"30px", padding:"3px", borderRadius:"6px"}}/>
+        <button id="postBtn" className="postBtn" style={{float:"right" , width:"15%",height:"30px", marginRight:"5px", padding:"3px", borderRadius:"6px" }}>Write A Post📝</button>
        </section>
 
         {/* <!-- Feed --> */}

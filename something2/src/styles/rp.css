@@ -1,9 +1,9 @@
 
 #body6{
    margin: 0;
-    background: linear-gradient(to bottom right,#9D7207 ,#07319D,#9D7207);
+    background: linear-gradient(to bottom right,#d79b03da ,#07319D,#d19e1fea);
     padding: 100px ;
-  height: 100vh;
+  max-height: 100vh;
   font-size: large;
 }
 
