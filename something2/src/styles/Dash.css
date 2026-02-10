@@ -1,70 +1,11 @@
 
- :root {
-  /* === Dark Mode === */
-  --bg-body: #40566b;
-  --bg-sidebar: #1e1e2e;
-  --bg-main: #1a1b26;
-  --bg-header: #2d2f45;
-  --bg-fyp: #0f172a;
-  --bg-card: #1e1e2e;
-  --text-main: #f5f5f5;
-  --accent: #00bcd4;
-  --blue-dark: #1B2A41;
-  --blue-primary: #2C3E50;
-  --dark: #8fbedf;
- --man: #45398D;
---this: #1E4085;
---shit:#08686D;
 
 
-  /*-==I NEED A NEW PALETTE FUCK===*/
-:root {
-  /* === Core Backgrounds === */
-  --bg-body: #021c58;        /* deep navy */
-  --bg-sidebar: #13347a;    /* sidebar dark */
-  --bg-main: #2f446e;       /* main content */
-  --bg-header: #002066;
-  --bg-card: #0033a2;
-  --bg-soft: rgba(255,255,255,0.04);
-
-  /* === Text === */
-  --text-main: #E5E7EB;
-  --text-muted: #9CA3AF;
-
-  /* === Accents === */
-  --accent: #38BDF8;        /* sky blue */
-  --accent-soft: #0EA5E9;
-  --accent-neon: #22D3EE;
-
-  /* === Status === */
-  --danger: #EF4444;
-  --success: #22C55E;
-  --warning: #FACC15;
-
-  /* === Effects === */
-  --border-soft: rgba(255,255,255,0.08);
-}
-}
-
-/* === Light Mode === */
-.light-mode {
-  --bg-body: #b4bfdb;        
-  --bg-sidebar: #6a77a3;      
-  --bg-main: #5f76a3;        
-  --bg-header: #c7d2eb;       
-  --bg-fyp: #e3e8f9;          
-  --bg-card: #ffffff;         
-  --text-main: #20263a;       
-  --accent: #2b5dd1;          
-}
-
-
-
-
+/* ...............fuck it i'll make a css file for the pallette..... */
 
 
 #body5 {
-   background: linear-gradient(135deg, var(--dark), var(--blue-dark));
+   background: linear-gradient(180deg, var(--bg-main), var(--dark) ,var(--blue-dark));
   color: var(--text-main);
   font-family: Arial, sans-serif;
   overflow-y: auto;   /* enable scrolling */
@@ -85,23 +26,26 @@
     background: none;
     background-color: transparent;
     border: none;
+    cursor: pointer;
 }
 /* === Main Content === */
-.main {
+.dashMain {
 
   flex: 1;
-  background: linear-gradient(180deg, var(--blue-dark), var(--blue-primary));
+  background: linear-gradient(180deg,var(--bg-soft), var(--dark), var(--blue-dark));
   border-radius: 15px;
   padding: 20px;
   overflow: auto;
   margin-bottom: 10px;
   width: 70%;
-    box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+    box-shadow: 0 15px 35px #367e969b;
+    margin-right: 5px;
+    
 }
 
 /* === Header === */
 .header {
-  background: var(--dark);
+  background: var(--bg-header);
   color: #fff;
   padding: 15px;
   border-radius: 8px;
@@ -118,25 +62,25 @@
   color: var(--accent);
 }
 
-.header h1 {
-  color: var(--blue-dark);
+.header .welH1 {
+  color: var(--text-main);
 }
 
 /* === For You Page === */
 .fyp-container {
-  background: var(--dark);
+  background: var(--bg-soft);
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(72, 76, 99, 0.5);
   height: calc(100% - 140px);
   display: flex;
   flex-direction: column;
-  margin-bottom: 30px;
+  
 }
 
-.fyp-container h2 {
+.fyp-container .H2feed {
   margin-top: 0;
-  color: #070707;
+  color: var(--text-main);
 }
 
 .fyp-feed {
@@ -146,87 +90,12 @@
   border-radius: 5px;
   padding: 10px;
   overflow-y: auto;
-  background-color: var(--bg-body);
+  background-color: var(--bg-panel);
   color: var(--text-main);
 }
 
-/* === Side Action Bar === */
-/* .side-action-bar {
-  background: var(--bg-body) ;
-  padding: 20px;
-  border-radius: 15px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  
-}
 
-.icon-bar {
-  display: flex;
-  gap: 30px;
-  margin-bottom: 20px;
-  width: 80%;
-}
-
-.icon-btn {
-  width: 50px;
-  height: 50px;
-  background: #2d2f45;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /*cursor: pointer; */
-  /*transition: all 0.3s ease;
-  font-size: 24px;
-  color: var(--accent);
-  margin-left: 20%;
-}
-
-.icon-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 5px 15px rgb(3, 219, 247);
-}
-
-.icon-btn.active {
-  background: #00bcd4;
-  color: #121212;
-  transform: scale(1.15);
-  box-shadow: 0 5px 20px rgba(0,188,212,0.8);
-}
-*/
-
-
-/* === Content Panels (inside side-action-bar) === */
-/*.content-panel-container {
-  width: 100%;
-}
-
-.content {
-  background: #0f172a;
-  border-radius: 12px;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.4);
-  padding: 20px;
-  font-size: 16px;
-  color: #f5f5f5;
-  display: none;
-  margin-top: 15px;
-}
-
-.content.active {
-  display: block;
-  animation: fadeIn 0.3s ease;
-}
-
-.content p {
-  font-size: 14px;
-  color: #a1a1aa;
-  margin-top: 10px;
-} */
-
-/* === Animations === */
+/* === Animations .....what animations?! === */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -238,23 +107,6 @@
   border: 2px solid whitesmoke;
 }
 
-/*fix this because it is causing problems*/
-/* input,textarea{
-  display: flex;
-   align-items: center;
-  justify-content: center;
-  width: 60%;
-  margin-left: 15%;
-  margin-right: 15%;
-  border: 3.5px solid rgb(140, 164, 198);
-  border-radius: 4px;
-}
-textarea{
-  height: 80px;
-}
-input{
-  height: 35px;
-} */
 #sub,#can{
   gap:80px;
   width: 20%;
@@ -293,6 +145,10 @@ input{
   box-shadow: 0 20px 40px var(--accent-neon);
 }
 
+
+.roomSelect option{
+  color: var(--text-main);
+}
 
 /* #dashh3{
   color: var(--text-main);

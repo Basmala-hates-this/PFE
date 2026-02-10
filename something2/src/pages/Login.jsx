@@ -63,7 +63,7 @@ const handleSubmit = (e) => {
     return;
   }
 
-  alert("Registration Successful!!!!");
+  alert("Login Successful!!!!");
 
 
   //this sets the current user....i hate this...

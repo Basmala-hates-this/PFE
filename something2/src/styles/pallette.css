@@ -1,0 +1,62 @@
+/* fucking color pallette only file... */
+
+:root {
+  /* === Surfaces === */
+  --bg-body: #002c93;        
+  --bg-sidebar: #020617;    /* almost black */
+  --bg-main: #020617;
+  --bg-header: #0206176f;
+  --bg-panel: #3f4f936a;
+  --bg-card: #010f50ab;
+  --bg-soft: rgba(130, 126, 232, 0.392);
+  --blue-dark: #1B2A41;
+  --dark: #8fbedf;
+  --light: #ECF0F1;
+
+
+  /* === Text === */
+  --text-main: #e5e7eb;     /* near white */
+  --text-muted: #9ca3af;   /* secondary */
+  --text-soft: #6b7280;
+
+  /* === Accent (BFUA identity) === */
+  --accent: #38bdf8;        /* sky */
+  --accent-hover: #0ea5e9;
+  --accent-glow: #22d3ee;
+
+  /* === Borders & Effects === */
+  --border-soft: rgba(255,255,255,0.08);
+  --shadow-soft: 0 10px 30px rgba(0,0,0,0.4);
+
+  /* === Status === */
+  --success: #22c55e;
+  --warning: #facc15;
+  --danger: #ef4444;
+}
+
+
+.light-mode {
+  /* === Surfaces === */
+  --bg-body: #f1f5f9;
+  --bg-sidebar: #e2e8f0;
+  --bg-main: #a7cef6;
+  --bg-header: #aacbe3de;
+  --bg-panel: #ffffff;
+  --bg-card: #ffffff;
+  --bg-soft: #6bb5df79;
+  --blue-dark: #2e4463bf;
+
+  /* === Text === */
+  --text-main: #020617;
+  --text-muted: #475569;
+  --text-soft: #64748b;
+
+  /* === Accent === */
+  --accent: #0284c7;
+  --accent-hover: #0369a1;
+  --accent-glow: #38bdf8;
+
+  /* === Borders & Effects === */
+  --border-soft: rgba(9, 190, 184, 0.46);
+  --shadow-soft: 0 8px 20px rgba(12, 142, 248, 0.596);
+}

@@ -1,5 +1,5 @@
 
-:root {
+/* :root {
   --blue-dark: #1B2A41;
   --blue-primary: #2C3E50;
   --blue-secondary: #2471A3;
@@ -10,12 +10,12 @@
   --gold: #F1C40F;
   --dark: #8fbedf;
   --light: #ECF0F1;
-}
-
+} */
+/* ...............fuck it i'll make a css file for the pallette..... */
 #body7 {
   font-family: 'Inter', sans-serif;
   padding: 10px;
-  background: linear-gradient(135deg, var(--dark), var(--blue-dark));
+   background: linear-gradient(180deg, var(--bg-main), var(--dark) ,var(--blue-dark));
   padding: 30px;
   color: var(--light);
   min-height: 100vh;
