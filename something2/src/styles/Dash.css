@@ -23,6 +23,7 @@
 
 
 .lgm{
+  all: unset;
     background: none;
     background-color: transparent;
     border: none;

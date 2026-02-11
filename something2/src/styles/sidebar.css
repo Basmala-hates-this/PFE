@@ -47,6 +47,7 @@
   align-items: center;
 }
 .sidebar .lgm{
+  all: unset; 
     text-decoration: none;
   color: var(--text-main);
   width: 100%;
@@ -54,6 +55,7 @@
   justify-content: space-between;
   align-items: center;  
   font-size: 16px;
+  padding: 0;
 }
 .sidebar li:hover {
   background: var(--accent-hover);
