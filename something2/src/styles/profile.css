@@ -42,7 +42,7 @@
 
 /* ===== PROFILE CARD ===== */
 .profile-card {
-  background: linear-gradient(135deg, rgba(27,42,65,.9), rgba(44,62,80,.9));
+  background: var(--blue-dark);
   border-radius: 20px;
   padding: 30px;
   display: flex;
@@ -79,13 +79,14 @@
 }
 
 .stat-card {
-  background: linear-gradient(135deg, rgba(27,42,65,.9), rgba(44,62,80,.9));
+  background: var(--bg-body);
   border-radius: 18px;
   padding: 22px;
   text-align: center;
   box-shadow: 0 12px 30px rgba(0,0,0,.4);
   transition: transform 0.4s ease-in-out, box-shadow 0.4s ease-in-out;
   transform: translateY(0);
+  color: var(--text-main);
 }
 
 .stat-card:hover {
@@ -97,7 +98,7 @@
 
 .stat-card span {
   display: block;
-  color: #BDC3C7;
+  color: var(--text-soft);
   font-size: 14px;
 }
 
@@ -107,7 +108,7 @@
 
 /* ===== COURSES (LIKE CARDS) ===== */
 .courses {
-  background: linear-gradient(135deg, rgba(27,42,65,.9), rgba(44,62,80,.9));
+  background:var(--blue-dark);
   border-radius: 20px;
   padding: 25px;
   box-shadow: 0 12px 30px rgba(0,0,0,.4);

@@ -2,10 +2,32 @@ import gethub from "../photos/gethub.jpg";
 import "../styles/profile.css";
 import "../styles/sidebar.css";
  import { useNavigate } from "react-router-dom";
+ import { useEffect, useState } from "react";
+
 
 
 export default function Profile() { 
     const navigate = useNavigate();
+
+    const [user, setUser] = useState(null);
+
+useEffect(() => {
+  const storedUser = JSON.parse(localStorage.getItem("currentUser"));
+  setUser(storedUser);
+}, []);
+
+//listener to the blah blah b;ah blah....u get the damn idea
+useEffect(() => {
+  const syncUser = () => {
+    setUser(JSON.parse(localStorage.getItem("currentUser")));
+  };
+
+  window.addEventListener("storage", syncUser);
+
+  return () => window.removeEventListener("storage", syncUser);
+}, []);
+
+
 
     return (
 <div id="body7">
@@ -33,9 +55,12 @@ export default function Profile() {
     <div className="profile-card">
       <img src={gethub} alt="Profile Picture" className="profile-pic" />
       <div className="profile-info">
-        <h2>User @username</h2>
+        {/* yay dynamic updates in profile */}
+        <h2>@{user?.username}</h2>
+        <p>{user?.email}</p>
+
         <p> Computer Science Professor</p>
-        <p> professor@university.edu</p>
+        
           <p>tag: prof/stdn</p>{/*<!-- only one that showes later --> */}
          <p>rating: ⭐⭐⭐☆☆ <small>based on 120 user</small></p>  {/* <!-- this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
       </div>

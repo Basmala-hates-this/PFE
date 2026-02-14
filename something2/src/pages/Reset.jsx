@@ -14,7 +14,7 @@ import "../styles/rp.css";
 
 export default function Reset() {
       const navigate = useNavigate();
-       const { profile, setCredentials } = useRegistration();
+       
       
 //the irony of me using react was to not rewrite alot of things....but i really cant help but have costum functions for each elemnt
 //welp...having the standards ones away and just calling them when needed is also kinda nice....right?
@@ -29,11 +29,15 @@ export default function Reset() {
 
   //i'm too sick and tired this is going to be extra hell...either way...for selecting and changing the password of the correct account
   //email found:
-  const resetEmail = localStorage.getItem("resetEmail");
+const resetEmail = localStorage.getItem("resetEmail");
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));//eehhhh....recycling and using this same page in the damn password change for editProfile page...
+
+// determine who we are resetting
+const targetEmail = resetEmail || currentUser?.email;
   //as much as i hate this security...i need it 
   //but is login the correct page here?welp couldnt care less each page has links to navigate......
   useEffect(() => {
-  if (!resetEmail) {
+  if (!targetEmail) {
     navigate("/login");
   }
 }, []);
@@ -87,7 +91,7 @@ const handleSubmit = (e) => {
     const users = JSON.parse(localStorage.getItem("users")) || JSON.parse(localStorage.getItem("user")) || [];
 
   const updatedUsers = users.map(user =>
-    user.email === resetEmail
+    user.email === targetEmail
       ? { ...user, password }
       : user
   );
@@ -100,9 +104,15 @@ const handleSubmit = (e) => {
 //i still do sometimes question my sanety for keeping with this major
   localStorage.setItem("users", JSON.stringify(updatedUsers));
   localStorage.removeItem("resetEmail");
-
-  alert("Password successfully reset! try not to forget this one :)");
+//self explanatory...or should i explaun to ur dull forgetfull brain?we use the page for 2 diffrent sides of the system...if else to define each side of the damn thing
+//also i would like to apologize now for the awfull typos because that state of brain where i used to mix up lettsrs or write full words backwards is back...fun...
+  if (currentUser) {
+  alert("Password updated successfully!");
+  navigate("/profile");
+} else {
+  alert("Password successfully reset! Try not to forget this one :)");
   navigate("/login");
+}
 };
 
 

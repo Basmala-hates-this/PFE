@@ -2,10 +2,12 @@ import "../styles/Dash.css";
 import "../styles/sidebar.css";
 import Cat from "../photos/Cat.jpg";
  import { useNavigate } from "react-router-dom";
- import { useEffect } from "react";
+
 
 import { useRegistration } from "../assets/components/Context.jsx";
 import "../styles/pallette.css"
+import { useEffect, useState } from "react";
+
 
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
@@ -23,26 +25,19 @@ import "../styles/pallette.css"
 export default function Dashboard() {
       const navigate = useNavigate();
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const [user, setUser] = useState(null);
   // If user skipped info/register, send them back
 useEffect(() => {
-  const currentUser =
-    JSON.parse(localStorage.getItem("currentUser")) ||
-    localStorage.getItem("loggedInUser");
-//just checking if there is no login or registration then there will be no dashboard for who ever baypassed everything.....
-//i remember the hell this was with vanilla elements...damn the dom...and login mulfunctions...
-  if (!currentUser) {
+  const storedUser = JSON.parse(localStorage.getItem("currentUser"));
+
+  if (!storedUser) {
     navigate("/login");
     return;
   }
-//i missed(kinda ) uning dom elemnts ....we get the location to display the said user's username and display it...duh
-  const usernameSpan = document.getElementById("usernameDisplay");
-  if (usernameSpan) {
-    usernameSpan.textContent =
-      typeof currentUser === "string"
-        ? currentUser
-        : currentUser.username || currentUser.fullname || "User";
-  }
-}, []);
+
+  setUser(storedUser);
+}, [navigate]);
+
 
 useEffect(() => {
   const lgm = document.getElementById("lgm");
@@ -78,6 +73,21 @@ useEffect(() => {
 }, []);
 
 
+//listener to the update from editprofile page
+useEffect(() => {
+  const updateUser = () => {
+    const storedUser = JSON.parse(localStorage.getItem("currentUser"));
+    setUser(storedUser);
+  };
+
+  window.addEventListener("storage", updateUser);
+
+  return () => {
+    window.removeEventListener("storage", updateUser);
+  };
+}, []);
+
+
 
 
     return (
@@ -101,7 +111,12 @@ useEffect(() => {
     <main className="dashMain">
         {/* <!-- Header --> */}
         <header className="header">
-            <h1 className="welH1">Welcome <span id="usernameDisplay"></span></h1>
+            {/* <h1 className="welH1">Welcome <span id="usernameDisplay"></span></h1>...yeah it was a matter of time before i go back to react mind and remove dom shit */}
+            {/* might remove full name though.... */}
+            <h1 className="welH1">
+  Welcome <span className="usernameDisplay">@{user?.username || user?.fullname || "User"}</span>
+</h1>
+
             <img src={Cat} alt="pfp" className="pfp" />
         </header>
 

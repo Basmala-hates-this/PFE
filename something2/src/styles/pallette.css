@@ -17,7 +17,7 @@
   /* === Text === */
   --text-main: #e5e7eb;     /* near white */
   --text-muted: #9ca3af;   /* secondary */
-  --text-soft: #6b7280;
+  --text-soft: #b4bac6;
 
   /* === Accent (BFUA identity) === */
   --accent: #38bdf8;        /* sky */
@@ -44,7 +44,7 @@
   --bg-panel: #ffffff;
   --bg-card: #ffffff;
   --bg-soft: #6bb5df79;
-  --blue-dark: #2e4463bf;
+  --blue-dark: #4e698fbf;
 
   /* === Text === */
   --text-main: #020617;
@@ -52,7 +52,7 @@
   --text-soft: #64748b;
 
   /* === Accent === */
-  --accent: #0284c7;
+  --accent: #0315a0;
   --accent-hover: #0369a1;
   --accent-glow: #38bdf8;
 

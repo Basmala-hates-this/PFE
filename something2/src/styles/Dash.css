@@ -58,7 +58,7 @@
 } 
 
 
-#usernameDisplay {
+.usernameDisplay {
   font-weight: 700;
   color: var(--accent);
 }

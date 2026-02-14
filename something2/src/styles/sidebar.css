@@ -32,6 +32,7 @@
   background: var(--bg-soft);
   transition: 0.3s;
   margin-left: 0;
+  color: var(--text-main);
  
 }
 .sidebar li.active {
