@@ -23,6 +23,7 @@
   --accent: #38bdf8;        /* sky */
   --accent-hover: #0ea5e9;
   --accent-glow: #22d3ee;
+  --accent-neon:
 
   /* === Borders & Effects === */
   --border-soft: rgba(255,255,255,0.08);
@@ -54,7 +55,7 @@
   /* === Accent === */
   --accent: #0315a0;
   --accent-hover: #0369a1;
-  --accent-glow: #38bdf8;
+  --accent-glow: #b0dbed;
 
   /* === Borders & Effects === */
   --border-soft: rgba(9, 190, 184, 0.46);

@@ -11,6 +11,7 @@ export default function Profile() {
 
     const [user, setUser] = useState(null);
 
+
 useEffect(() => {
   const storedUser = JSON.parse(localStorage.getItem("currentUser"));
   setUser(storedUser);
@@ -27,6 +28,41 @@ useEffect(() => {
   return () => window.removeEventListener("storage", syncUser);
 }, []);
 
+//i was ignoring that big ass red delete  account button for a long while now....
+//help me this is hell
+//do it slowly
+const handleDeleteAccount = () => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete your account? Whyyyyyy...I dont care,bye."
+  );
+
+  if (!confirmDelete) return;
+
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+
+  if (!currentUser) {
+    navigate("/login");
+    return;
+  }
+
+  // remove user from users array
+  const updatedUsers = users.filter(
+    (u) => u.email !== currentUser.email
+  );
+
+  // save updated users
+  localStorage.setItem("users", JSON.stringify(updatedUsers));
+
+  // remove session
+  localStorage.removeItem("currentUser");
+
+  //  notify listeners that are useless but still exist because i'm too scared to delete them....damn it
+  window.dispatchEvent(new Event("storage"));
+
+  alert("Account deleted successfully.");
+  navigate("/login");
+};
 
 
     return (
@@ -42,8 +78,8 @@ useEffect(() => {
       <li><span>📚 My Courses/resources </span></li>
       <li><span>👥 Connections </span></li>
       <li onClick={()=> navigate("/edit")}><span>⚙️ Edit </span></li>
-      <li onClick={() => navigate("/login")}><span>✌️ Logout </span></li>
-      <li className="delete-item" ><span>🗑️ Delete Account </span> </li>
+      <li onClick={() => navigate("/login")}><span>✌️ Logout </span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
+      <li className="delete-item"  onClick={handleDeleteAccount}><span>🗑️ Delete Account </span> </li>
     </ul>
 
   </aside>
@@ -57,12 +93,12 @@ useEffect(() => {
       <div className="profile-info">
         {/* yay dynamic updates in profile */}
         <h2>@{user?.username}</h2>
-        <p>{user?.email}</p>
+        <p>Email: {user?.email}</p>
 
-        <p> Computer Science Professor</p>
+        <p>Major(s): {user?.majors?.join(", ")}</p>
         
-          <p>tag: prof/stdn</p>{/*<!-- only one that showes later --> */}
-         <p>rating: ⭐⭐⭐☆☆ <small>based on 120 user</small></p>  {/* <!-- this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
+          <p >tag: {user?.role}</p>{/*<!-- only one that showes later --> */}
+         <p>rating: 3.5 </p>  {/* <!-- ⭐⭐⭐☆☆this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
       </div>
     </div>
 {/* 
@@ -76,7 +112,8 @@ useEffect(() => {
       <div className="stat-card"><span>Rooms Joined 🏠</span><strong>24</strong></div>
     </div>
 
-    {/* <!-- COURSES --> */}
+    {/* <!-- COURSES this.....i still dont know how to use....bisicaly the distingtive factor of prof profile from student profile 
+    how or what to do with it....i still dont know....maybe a list of majors and each major some rooms?--> */}
     <div className="courses">
       <h3 style={{marginBottom:"15px",color:"#5DADE2"}}>My Majors</h3>
 

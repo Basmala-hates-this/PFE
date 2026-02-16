@@ -158,3 +158,15 @@
   margin-bottom: 25px;
   
 } */
+
+
+/* the tag style */
+.tag{
+font-size: 0.8rem;
+  font-weight: bold;
+  padding: 4px;
+  border-radius: 6px;
+  text-transform: uppercase;
+  color: var(--accent-glow);
+  background-color: rgba(118, 94, 237, 0.771);
+}

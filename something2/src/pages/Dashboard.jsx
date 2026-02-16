@@ -102,7 +102,8 @@ useEffect(() => {
             <li><a href="#" id="home-link" onClick={() => navigate("/dashboard")}>Home</a></li>
             <li><a href="#" id="rooms-link">Rooms</a></li>
             <li><a href="#" onClick={() => navigate("/profile")}>Profile</a></li>
-            <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li>
+            {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
+            right now, lets just keep it in the profile....should it have a confirmation? */}
             <li><button id="lgm" className="lgm"  >Light Mode ☀️</button></li>
         </ul>
     </aside>
@@ -114,7 +115,8 @@ useEffect(() => {
             {/* <h1 className="welH1">Welcome <span id="usernameDisplay"></span></h1>...yeah it was a matter of time before i go back to react mind and remove dom shit */}
             {/* might remove full name though.... */}
             <h1 className="welH1">
-  Welcome <span className="usernameDisplay">@{user?.username || user?.fullname || "User"}</span>
+  Welcome <span className="usernameDisplay">@{user?.username || user?.fullname || "User"} <small className="tag">{user?.role}
+</small></span>
 </h1>
 
             <img src={Cat} alt="pfp" className="pfp" />
