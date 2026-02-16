@@ -1,4 +1,4 @@
-import gethub from "../photos/gethub.jpg";
+import cat from "../photos/cat.jpg";
 import "../styles/profile.css";
 import "../styles/sidebar.css";
  import { useNavigate } from "react-router-dom";
@@ -32,11 +32,11 @@ useEffect(() => {
 //help me this is hell
 //do it slowly
 const handleDeleteAccount = () => {
-  const confirmDelete = window.confirm(
+  const confirmDelete = window.confirm(//i aint doing alert for this one...also can we remeber to close the terminal when we want t turn the pc off?this is causing problems..
     "Are you sure you want to delete your account? Whyyyyyy...I dont care,bye."
   );
 
-  if (!confirmDelete) return;
+  if (!confirmDelete) return;//shit is a yes/no question..the hell u dont understand?
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const users = JSON.parse(localStorage.getItem("users")) || [];
@@ -46,21 +46,46 @@ const handleDeleteAccount = () => {
     return;
   }
 
+
+  //eehhhh...do you think the suer(user)should confirm their identety before deleting the account?
+  //i mean we all have that one ANNOYING SIBLING THAT KEEPS MESSING AROUND
+  //what are we thinkig?github requires the name of the repo before deleting it...but that is just the repo...
+  //snapchat does that entire buggy email validation...
+  //i think as simple as entring just the username.....or as secure as the password....lets do password and comment it until we decide
+  //partner isnt responding to me....
+  //anyhow
+  const passwordCheck = prompt("Enter your password to confirm deletion:");
+
+if (passwordCheck !== currentUser.password) {
+  alert("Incorrect password.");
+  return;
+}
+//be mean and double check with the username?
+//yeah this definitely not evil or cruel...i'm just being secure.....which one should come first though?
+const usernameCheck = prompt("Enter your username to confirm deletion:");
+
+if (usernameCheck !== currentUser.password) {
+  alert("Incorrect password.");
+  return;
+}
+
+
+
+
   // remove user from users array
   const updatedUsers = users.filter(
     (u) => u.email !== currentUser.email
   );
 
-  // save updated users
   localStorage.setItem("users", JSON.stringify(updatedUsers));
 
   // remove session
-  localStorage.removeItem("currentUser");
+  localStorage.removeItem("currentUser");//i forgot what i was going to say tbh...
 
   //  notify listeners that are useless but still exist because i'm too scared to delete them....damn it
   window.dispatchEvent(new Event("storage"));
 
-  alert("Account deleted successfully.");
+  alert("Account deleted successfully.");//yaay what most people will do if they ever created their accouns...
   navigate("/login");
 };
 
@@ -89,7 +114,7 @@ const handleDeleteAccount = () => {
 
     {/* <!-- PROFILE --> */}
     <div className="profile-card">
-      <img src={gethub} alt="Profile Picture" className="profile-pic" />
+      <img src={cat} alt="Profile Picture" className="profile-pic" />
       <div className="profile-info">
         {/* yay dynamic updates in profile */}
         <h2>@{user?.username}</h2>
