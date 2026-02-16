@@ -65,7 +65,7 @@ if (passwordCheck !== currentUser.password) {
 const usernameCheck = prompt("Enter your username to confirm deletion:");
 
 if (usernameCheck !== currentUser.password) {
-  alert("Incorrect password.");
+  alert("Incorrect username.");
   return;
 }
 
