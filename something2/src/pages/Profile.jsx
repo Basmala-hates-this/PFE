@@ -88,6 +88,7 @@ if (usernameCheck !== currentUser.password) {
   alert("Account deleted successfully.");//yaay what most people will do if they ever created their accouns...
   navigate("/login");
 };
+//the irony is i'm making this all just around the local storage...this shit gonna hurt when backended
 
 
     return (
