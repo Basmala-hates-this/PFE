@@ -16,7 +16,8 @@ import { useEffect, useState } from "react";
 //deal?
 //i imported the same thing twice and it made errors....u gotta love react...
 //what are the chances that i can use don refrences in here?....
-//as much as i know this would be a very bad idea....i wanna test it out....sorry sarah..i'm experementing again...ignore that kind of comments..
+//as much as i know this would be a very bad idea....i wanna test it out....sorry sarah..i'm experementing again...
+// //ignore that kind of comments..
 
 
 

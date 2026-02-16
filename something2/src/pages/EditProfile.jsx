@@ -131,7 +131,7 @@ const handleSubmit = (e) => {
 
   //soooooooooo...since shit is stubern...u cant see the update until the page is refreshed....fix:
   window.dispatchEvent(new Event("storage"));
-//react will listen to this damn thing changing the localstorae and "live update" the data....might as well test that out.
+//react will listen to this damn thing changing the localstorage and "live update" the data....might as well test that out.
 //am i stupid....i really  might be....i'm using damn react...
 //navigating away will push to rerender and reread the data...thus i dont need the damn thing...but if u want to change the user name then change it back...
 //which maybe...people like me would do(change to something then back to the original imediatly)....this might be usefull....nah its not but i'm not removig it ..atleast for now

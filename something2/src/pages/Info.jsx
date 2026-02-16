@@ -298,8 +298,9 @@
 
 
 ///imma change plenty of shit this this logic
-//wishme luck...+i commented out the original beraly working one to have a standing point if i ever mess up
+//wish me luck...+i commented out the original beraly working one to have a standing point if i ever mess up
 //this reminds me of my swing working....not so fun
+///mmmm...dynamic major didnt give me much of a hell to hate it enough....i'll do the same to unis...i hate me sometimes
  import "../styles/info.css"
   import { useNavigate } from "react-router-dom";
 import {validateProfile } from "../assets/components/Validations.js";
@@ -331,7 +332,7 @@ const [role, setRole] = useState("");
 const navigate = useNavigate();
 //me finds that the current/old select isnt working fine for my perfectionest ass
 //me wants to change it
-//variables i wuld need
+//variables i would need
 const [availableMajors, setAvailableMajors] = useState([]);
 const [majors, setMajors] = useState([]);
 const [customMajor, setCustomMajor] = useState("");
@@ -385,6 +386,69 @@ useEffect(() => {
    localStorage.setItem("majors", JSON.stringify(mergedMajors));
 }, []);
 
+//hum...lets try the major select thingy to the uni select thingy
+const [isOtherUniversity, setIsOtherUniversity] = useState(false);
+const [availableUniversities, setAvailableUniversities] = useState([]);
+
+//the effect for universities/i feel like i wrote this wrong
+useEffect(() => {
+  const defaultUniversities = [
+  { code: "A1", name: "University Of Algiers 1- Benyoucef Benkhedda" },
+  { code: "A2", name: "University Of Algiers 2- Abou El Kacem Saadallah" },
+  { code: "A3", name: "University Of Algiers 3- Dely Ibrahim" },
+  { code: "USTHB", name: "University Of Science And Technology Houari Boumediene" },
+  { code: "ENP", name: "National Polytechnic School Of Algiers" },
+  { code: "ESNA", name: "National Higher School of Agronomy" },
+  { code: "NHV", name: "National Higher Veterinary School" },
+  { code: "BMU", name: "Badji Mokhtar University-Annaba" },
+  { code: "UB1", name: "University Of Batna 1" },
+  { code: "UB2", name: "University Of Batna 2" },
+  { code: "UBj", name: "University Of Bejaia" },
+  { code: "UBs", name: "University Of Biskra Mohamed Khider" },
+  { code: "UBl1", name: "University Of Blida 1-Saad Dahlab" },
+  { code: "Ubl2", name: "University Of Blida 2-Ali Lounici" },
+  { code: "UCh", name: "University Of Chlef-Hassiba Benbouali" },
+  { code: "UC1", name: "University Of Constantine 1-Mentouri Brothers" },
+  { code: "UC2", name: "University Of Constantine 2-Abdelhamid Mehri" },
+  { code: "UC3", name: "University Of Constantine 3-Salah Boubnider" },
+  { code: "UD", name: "University of Djelfa - Ziane Achour" },
+  { code: "UG", name: "University of Guelma - 8 May 1945" },
+  { code: "UJ", name: "University of Jijel" },
+  { code: "UL", name: "University of Laghouat - Amar Telidji" },
+  { code: "UM", name: "University of Mostaganem - Abdelhamid Ibn Badis" },
+  { code: "UMs", name: "University of M'Sila - Mohamed Boudiaf" },
+  { code: "UO1", name: "University of Oran 1 - Ahmed Ben Bella" },
+  { code: "UO2", name: "University of Oran 2 - Mohamed Ben Ahmed" },
+  { code: "USTO", name: "University of Science and Technology of Oran - Mohamed Boudiaf" },
+  { code: "UOr", name: "University of Ouargla - Kasdi Merbah" },
+  { code: "USa", name: "University of Saida - Dr. Moulay Tahar" },
+  { code: "USBA", name: "Djillali Liabes University of Sidi Bel Abbes" },
+  { code: "USk", name: "University of Skikda - 20 August 1955" },
+  { code: "USA", name: "University of Souk Ahras - Mohamed Cherif Messaadia" },
+  { code: "US1", name: "University of Setif 1 - Ferhat Abbas" },
+  { code: "US2", name: "University of Setif 2" },
+  { code: "UTi", name: "University of Tiaret - Ibn Khaldoun" },
+  { code: "UTl", name: "University of Tlemcen - Abou Bekr Belkaid" },
+  { code: "UTO", name: "University of Tizi Ouzou - Mouloud Mammeri" },
+  
+];
+
+  const storedUniversities = JSON.parse(localStorage.getItem("universities")) || [];
+
+  const mergedUniversities = [...defaultUniversities];
+
+  // add stored custom universities if they don't already exist
+  storedUniversities.forEach(u => {
+    if (!mergedUniversities.some(d => d.name === u.name)) {
+      mergedUniversities.push(u);
+    }
+  });
+
+  setAvailableUniversities(mergedUniversities);
+
+  // persist merged list
+  localStorage.setItem("universities", JSON.stringify(mergedUniversities));
+}, []);
 
 
 //reset the select when changing the role.....
@@ -396,7 +460,7 @@ useEffect(() => {
 
 const [error, setError] = useState("");
 
-// form submit handler*/
+// form submit handler */i friking need a way to find this segment faster bro...this code is bigger then my ego
 const handleSubmit = (e) => {
   
   e.preventDefault();
@@ -415,7 +479,7 @@ if (emailExists) {
 //back to update the submitter with new data...i have no idea how much things this is breaking...
 let finalMajors = majors;
 
-// if user typed a custom major(aka other)
+// if user typed a custom major(aka other)//we do the same process to unis tomorow
 if (customMajor.trim()) {
   finalMajors = [customMajor.trim()];
 }
@@ -438,6 +502,17 @@ if (role === "student" && finalMajors.length !== 1) {
 if (role === "professor" && finalMajors.length < 1) {
   alert("Professors must select at least one major.");
   return;
+}
+
+//how about doing the uni validation right before the oint i need it in?
+if (isOtherUniversity && university.name.trim()) {
+  const storedUniversities = JSON.parse(localStorage.getItem("universities")) || [];
+
+  if (!storedUniversities.some(u => u.name === university.name.trim())) {
+    const updatedUniversities = [...storedUniversities, { code: null, name: university.name.trim() }];
+    localStorage.setItem("universities", JSON.stringify(updatedUniversities));
+    setAvailableUniversities(updatedUniversities); // update select immediately
+  }
 }
 
 
@@ -507,60 +582,32 @@ if (role === "professor" && finalMajors.length < 1) {
               <label htmlFor="university" >Your University :</label>
               <br/>
               <select name="university" id="univ" className="univ" required  defaultValue="" value={university.code}
-  onChange={(e) =>
-    e.target.value === "other"
-      ? setUniversity({ code: null, name: "" })
-      : setUniversity({ code: e.target.value, name: "" })
-  }>
-                <option value="" disabled > </option>
-                <option value="A1">University Of Algiers 1- Benyoucef Benkhedda</option>
-                <option value="A2">University Of Algiers 2- Abou El Kacem Saadallah</option>
-                <option value="A3">University Of Algiers 3- Dely Ibrahim</option>
-                <option value="USTHB">University Of Science And Thechnology Houari Boumediene</option>
-                <option value="ENP">National polytechnic School Of Algiers </option>
-                <option value="ESNA">National Higher School of Agronomy </option>
-                <option value="NHV">National Higher Veterinary School</option>
-                <option value="BMU">Badji Mokhtar University-Annaba</option>
-                <option value="UB1">University Of Batna 1</option>
-                <option value="UB2">University Of Batna 2</option>
-                <option value="UBj">University Of Bejaia</option>
-                <option value="UBs">University Of Beskra Mohamed Khider Biskra</option>
-                <option value="UBl1">University Of Blida 1-Saad Dahlab</option>
-                <option value="Ubl2">University Of Blida 2-Ali Lounici</option>
-                <option value="UCh">University Of Chlef-Hassiba benbouali</option>
-                <option value="UC1">University Of Costantine 1-Mentouri Brothers</option>
-                <option value="UC2">University Of Costantine 2-Abdelhamid Mehri </option>
-                <option value="UC3">University Of Costantine 3-Salah boubnider</option>
-                <option value="UD">University of Djelfa - Ziane Achour </option>
-                <option value="UG">​University of Guelma - 8 May 1945</option>
-                <option value="UJ">University of Jijel </option>
-                <option value="UL">University of Laghouat - Amar Telidji</option>
-                <option value="UM">​University of Mostaganem - Abdelhamid Ibn Badis  </option>
-                <option value="UMs">University of M'Sila - Mohamed Boudiaf  </option>
-                <option value="UO1">University of Oran 1 - Ahmed Ben Bella </option>
-                <option value="UO2">​University of Oran 2 - Mohamed Ben Ahmed </option>
-                <option value="USTO">University of Science and Technology of Oran - Mohamed Boudiaf</option>
-                <option value="UOr">University of Ouargla - Kasdi Merbah</option>
-                <option value="USa">​University of Saida - Dr. Moulay Tahar </option>
-                <option value="USBA">​Djillali Liabes University of Sidi Bel Abbes  </option>
-                <option value="USk">University of Skikda - 20 August 1955 </option>
-                <option value="USA">​University of Souk Ahras - Mohamed Cherif Messaadia  </option>
-                <option value="US1">University of Setif 1 - Ferhat Abbas </option>
-                <option value="US2">University of Setif 2</option>
-                <option value="UTi">University of Tiaret - Ibn Khaldoun</option>
-                <option value="UTl">​University of Tlemcen - Abou Bekr Belkaid</option>
-                <option value="UTO">​University of Tizi Ouzou - Mouloud Mammeri</option>
-                <option value="other">Other</option>
-
-
-
+  onChange={(e) => {
+    if (e.target.value === "OTHER") {
+      setUniversity({ code: null, name: "" });
+      setIsOtherUniversity(true);
+    } else {
+      const selected = availableUniversities.find(u => u.code === e.target.value);
+      setUniversity(selected);
+      setIsOtherUniversity(false);
+    }
+  }}
+>
+  <option value="" disabled></option>
+  {availableUniversities.map(u => (
+    <option key={u.code || u.name} value={u.code || u.name}>
+      {u.name}
+    </option>
+  ))}
+  <option value="OTHER">Other</option>
               </select>
               <br/><br/>
-             {university.code === null && (
+            {isOtherUniversity && (
   <input
     type="text"
     className="other"
-    placeholder="Enter university name"
+    placeholder="Enter University Name"
+    value={university.name}
     onChange={(e) =>
       setUniversity({ code: null, name: e.target.value })
     }
@@ -580,7 +627,7 @@ if (role === "professor" && finalMajors.length < 1) {
                 <br/><br/>
                 <label htmlFor="major" id="major">Choose a Role to Select Your Main Major(s) </label>
                 <br/>
-                
+                {/* ONE RING TO RULE THEM ALL .....select i mean one select to rule them all*/}
                <select
                id="professorselect"
   className="major"
