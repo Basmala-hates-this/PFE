@@ -116,7 +116,7 @@ if (usernameCheck !== currentUser.password) {
 
     {/* <!-- PROFILE --> */}
     <div className="profile-card">
-      <img src={cat} alt="Profile Picture" className="profile-pic" />
+      <img src={user?.profilePic || cat} alt="Profile Picture" className="profile-pic" />
       <div className="profile-info">
         {/* yay dynamic updates in profile */}
         <h2>@{user?.username}</h2>

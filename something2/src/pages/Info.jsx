@@ -341,7 +341,16 @@ const [customMajor, setCustomMajor] = useState("");
 //and nafie saw them in a code and said this isnt our working....i knew i shouldnt bother with sad....
 const [isOtherMajor, setIsOtherMajor] = useState(false);
 
-
+//i keep getting lost in this code ........anyhow..unis -the custom ones-should have a unique name...i aint making it extravigant..i messed the word
+//the code would be JUST_THE_NAME_IN_UPPERCASE_WITHOUTS_SPACE just like that....wish me luck
+const generateUniversityCode = (name) => {//the names of the functions are just getting longer and longer because i decided the names will make sense from now on
+  //stupid decision if u ask me//but also a smart one....
+  return name
+    .trim()
+    .toUpperCase()
+    .replace(/[^A-Z0-9]+/g, "_")//uppercase+numbers...anything else is a _
+    .replace(/^_|_$/g, "");//because my ass is creative the first one adds a _ at the start and end....we clean that ....
+};
 
 //effect that gets stred data and allows update:
 useEffect(() => {
@@ -382,7 +391,7 @@ useEffect(() => {
 
   // Merge without duplicates
   const mergedMajors = [...new Set([...defaultMajors, ...stored])];
-  setAvailableMajors(stored);
+  setAvailableMajors(mergedMajors);
    localStorage.setItem("majors", JSON.stringify(mergedMajors));
 }, []);
 
@@ -393,9 +402,9 @@ const [availableUniversities, setAvailableUniversities] = useState([]);
 //the effect for universities/i feel like i wrote this wrong
 useEffect(() => {
   const defaultUniversities = [
-  { code: "A1", name: "University Of Algiers 1- Benyoucef Benkhedda" },
-  { code: "A2", name: "University Of Algiers 2- Abou El Kacem Saadallah" },
-  { code: "A3", name: "University Of Algiers 3- Dely Ibrahim" },
+  { code: "UA1", name: "University Of Algiers 1- Benyoucef Benkhedda" },
+  { code: "UA2", name: "University Of Algiers 2- Abou El Kacem Saadallah" },
+  { code: "UA3", name: "University Of Algiers 3- Dely Ibrahim" },
   { code: "USTHB", name: "University Of Science And Technology Houari Boumediene" },
   { code: "ENP", name: "National Polytechnic School Of Algiers" },
   { code: "ESNA", name: "National Higher School of Agronomy" },
@@ -437,7 +446,8 @@ useEffect(() => {
 
   const mergedUniversities = [...defaultUniversities];
 
-  // add stored custom universities if they don't already exist
+  // add stored custom universities if they don't already exist//the code is....NUUUUUULLLLL
+  //am i stupid this should not be null...this will cause little to tooo much problems....fuck..i need to find it
   storedUniversities.forEach(u => {
     if (!mergedUniversities.some(d => d.name === u.name)) {
       mergedUniversities.push(u);
@@ -505,15 +515,34 @@ if (role === "professor" && finalMajors.length < 1) {
 }
 
 //how about doing the uni validation right before the oint i need it in?
+//changing the original because i stupidly set the costom uni code to be null....
 if (isOtherUniversity && university.name.trim()) {
-  const storedUniversities = JSON.parse(localStorage.getItem("universities")) || [];
+  const storedUniversities =
+    JSON.parse(localStorage.getItem("universities")) || [];
 
-  if (!storedUniversities.some(u => u.name === university.name.trim())) {
-    const updatedUniversities = [...storedUniversities, { code: null, name: university.name.trim() }];
-    localStorage.setItem("universities", JSON.stringify(updatedUniversities));
-    setAvailableUniversities(updatedUniversities); // update select immediately
+  const uniName = university.name.trim();
+  const uniCode = generateUniversityCode(uniName);
+
+  const newUniversity = {
+    code: uniCode,
+    name: uniName
+  };
+
+  if (!storedUniversities.some(u => u.code === uniCode)) {
+    const updatedUniversities = [...storedUniversities, newUniversity];
+
+    localStorage.setItem(
+      "universities",
+      JSON.stringify(updatedUniversities)
+    );
+
+    setAvailableUniversities(prev => [...prev, newUniversity]);
   }
+
+  // IMPORTANT: update selected university to have real code
+  setUniversity(newUniversity);
 }
+
 
 
   const profile = {
@@ -595,7 +624,7 @@ if (isOtherUniversity && university.name.trim()) {
 >
   <option value="" disabled></option>
   {availableUniversities.map(u => (
-    <option key={u.code || u.name} value={u.code || u.name}>
+    <option key={u.code} value={u.code} >
       {u.name}
     </option>
   ))}

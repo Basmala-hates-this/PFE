@@ -88,6 +88,8 @@ useEffect(() => {
   };
 }, []);
 
+//////the pfp call if edited from edit page
+
 
 
 
@@ -120,7 +122,7 @@ useEffect(() => {
 </small></span>
 </h1>
 
-            <img src={Cat} alt="pfp" className="pfp" />
+            <img src={currentUser?.profilePic || Cat} alt="pfp" className="pfp" />
         </header>
 
         {/* <!-- Room Selection --> */}

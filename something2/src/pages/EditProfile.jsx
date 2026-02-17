@@ -17,7 +17,49 @@ export default function EditProfile(){
    const [editEmail, setEditEmail] = useState("");
    
 
-  
+  //huummm...dynamic pfp updates..but leave the cat as a fallback because i like it
+  const [profilePreview, setProfilePreview] = useState(cat); 
+const [selectedFile, setSelectedFile] = useState(null);
+
+
+useEffect(() => {
+  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  if (currentUser) {
+    setUsername(currentUser.username);
+    setEditEmail(currentUser.email);
+    if (currentUser.profilePic) {
+      setProfilePreview(currentUser.profilePic);
+    }
+  }
+}, []);
+
+
+//immidiate preview//however u write that word..the hell is wrong with my typing bruh
+const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  //ehhh...limits for localstorage//this might not be necessery when databased
+if (file.size > 2 * 1024 * 1024) {
+  alert("Image must be under 2MB");
+  return;
+}
+//also...not sure if this should come here or before...or after...i think here...
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setProfilePreview(reader.result); // base64 string
+    setSelectedFile(reader.result);
+  };
+
+  reader.readAsDataURL(file);
+};
+
+//le photot remove handler//i noticed the typo .....but i'm keeping it because i like how it looks tot
+const handleRemovePhoto = () => {
+  setProfilePreview(cat); 
+  setSelectedFile(null);
+};
+
 
 //...fill the form with current user's data?....this is making the feedback strip show up....maybe just remove it?...
 // useEffect(() => {
@@ -45,6 +87,8 @@ export default function EditProfile(){
   setUsernameColor(result.color);
 };
 
+
+
 const handleSubmit = (e) => {
   e.preventDefault();
 
@@ -53,7 +97,7 @@ const handleSubmit = (e) => {
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
   if (!currentUser) {//useless but go with me...better safe then app crash...
-    alert("No active user found.");//sidn in bro...
+    alert("No active user found.");//sign in bro...
     return;
   }
 
@@ -69,9 +113,14 @@ const handleSubmit = (e) => {
   const isChangingEmail =
     editEmail.trim() !== "" && editEmail !== currentUser.email;
 
+    const isChangingPfp =
+  selectedFile !== null ||
+  (profilePreview === cat && currentUser.profilePic);
+
+
   // If nothing changed
-  if (!isChangingUsername && !isChangingEmail) {
-    alert("Nothing to update.u discovering?");
+  if (!isChangingUsername && !isChangingEmail && !isChangingPfp) {
+    alert("Nothing to update....u discovering?");
     return;
   }
 
@@ -113,12 +162,18 @@ const handleSubmit = (e) => {
 
   
 
-  // Update current user
+  // Update current user+pfp updates baby...i need to call this in the dashboard and profile
  const updatedUser = {
-    ...currentUser,
-    username: isChangingUsername ? username : currentUser.username,
-    email: isChangingEmail ? editEmail : currentUser.email,
-  };
+  ...currentUser,
+  username: isChangingUsername ? username : currentUser.username,
+  email: isChangingEmail ? editEmail : currentUser.email,
+  profilePic: selectedFile !== null
+    ? selectedFile
+    : profilePreview === cat
+      ? null
+      : currentUser.profilePic
+};
+
 
   // Update users array
   const updatedUsers = users.map((u) =>
@@ -157,14 +212,14 @@ const handleSubmit = (e) => {
 
 
 <div className="preview-container" id="previewContainer">
-           <img src={cat} alt="Preview" className="preview-image" id="previewImage" />
-          <button type="button" className="remove-photo" > Remove </button>
+           <img src={profilePreview} alt="Preview" className="preview-image" id="previewImage" />
+          <button type="button" className="remove-photo" onClick={handleRemovePhoto}> Remove </button>
         </div>
 
     <div className="form-group">
       <label htmlFor="username" className="EditLabel">New Username</label>
      <input type="text" id="editUsername"  className="edit-username" placeholder="Enter your new username"  value={username}  onChange={handleUsernameChange}/>
-      <p
+     {usernameFeedback && <p
   id="feedback"
   style={{
     textAlign:"center",
@@ -173,7 +228,7 @@ const handleSubmit = (e) => {
   }}
 >
   {usernameFeedback}
-</p>
+</p>}
 {/* {error && (
               <p style={{ color: "#fc0c0ce9", marginTop: "10px",fontSize:"20px",backgroundColor:"#f7f4f4a7", borderRadius: "12px", width:"70%", marginLeft:"15%", height:" 30px" }}>
     {error}
@@ -186,7 +241,7 @@ const handleSubmit = (e) => {
  <label  htmlFor="profilePic" className="EditLabel">Profile Picture</label>
    
   
-     <input type="file" id="profilePic" className="editPfp" accept="image/*" />
+     <input type="file" id="profilePic" className="editPfp" accept="image/*"  onChange={handleFileChange} />
                 
          
     
