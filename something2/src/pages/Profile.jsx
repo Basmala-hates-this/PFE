@@ -65,7 +65,7 @@ if (passwordCheck !== currentUser.password) {
 //yeah this definitely not evil or cruel...i'm just being secure.....which one should come first though?
 const usernameCheck = prompt("Enter your username to confirm deletion:");
 
-if (usernameCheck !== currentUser.password) {
+if (usernameCheck !== currentUser.username) {
   alert("Incorrect username.");
   return;
 }
@@ -99,14 +99,14 @@ if (usernameCheck !== currentUser.password) {
   <aside className="sidebar">
     <h2 id="h2pro"> Profile</h2>
     <ul>
-      <li onClick={() => navigate("/dashboard")}><span>👤 Dashboard </span></li>
-      <li><span>🏠 Rooms </span></li>
-      <li><span>🔒 Create Private Room </span></li>
-      <li><span>📚 My Courses/resources </span></li>
-      <li><span>👥 Connections </span></li>
-      <li onClick={()=> navigate("/edit")}><span>⚙️ Edit </span></li>
-      <li onClick={() => navigate("/login")}><span>✌️ Logout </span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
-      <li className="delete-item"  onClick={handleDeleteAccount}><span>🗑️ Delete Account </span> </li>
+      <li onClick={() => navigate("/dashboard")}><span> Dashboard </span></li>
+      <li><span>Rooms </span></li>
+      <li><span>Create Private Room </span></li>
+      <li><span>My Courses/resources </span></li>
+      <li><span> Connections </span></li>
+      <li onClick={()=> navigate("/edit")}><span> Edit </span></li>
+      <li onClick={() => navigate("/login")}><span> Logout </span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
+      <li className="delete-item"  onClick={handleDeleteAccount}><span> Delete Account </span> </li>
     </ul>
 
   </aside>
