@@ -513,35 +513,29 @@ if (role === "professor" && finalMajors.length < 1) {
   alert("Professors must select at least one major.");
   return;
 }
+let finalUniversity = university;
 
 //how about doing the uni validation right before the oint i need it in?
 //changing the original because i stupidly set the costom uni code to be null....
 if (isOtherUniversity && university.name.trim()) {
-  const storedUniversities =
-    JSON.parse(localStorage.getItem("universities")) || [];
-
   const uniName = university.name.trim();
   const uniCode = generateUniversityCode(uniName);
 
-  const newUniversity = {
+  finalUniversity = {
     code: uniCode,
-    name: uniName
+    name: uniName,
   };
 
+  const storedUniversities =
+    JSON.parse(localStorage.getItem("universities")) || [];
+
   if (!storedUniversities.some(u => u.code === uniCode)) {
-    const updatedUniversities = [...storedUniversities, newUniversity];
-
-    localStorage.setItem(
-      "universities",
-      JSON.stringify(updatedUniversities)
-    );
-
-    setAvailableUniversities(prev => [...prev, newUniversity]);
+    const updatedUniversities = [...storedUniversities, finalUniversity];
+    localStorage.setItem("universities", JSON.stringify(updatedUniversities));
+    setAvailableUniversities(prev => [...prev, finalUniversity]);
   }
-
-  // IMPORTANT: update selected university to have real code
-  setUniversity(newUniversity);
 }
+//u know...for times like when i decide to make the variable names make sense.....i'm gratful for vs code to suggest the names i need instead of typing the enrite shit...fuck
 
 
 
@@ -549,7 +543,7 @@ if (isOtherUniversity && university.name.trim()) {
     fullName,
     birthDate,
     email,
-    university,
+    university :finalUniversity,
     role,
     majors:finalMajors
   };
@@ -638,7 +632,9 @@ if (isOtherUniversity && university.name.trim()) {
     placeholder="Enter University Name"
     value={university.name}
     onChange={(e) =>
+      // /////////////////////////////////////////////////////
       setUniversity({ code: null, name: e.target.value })
+      ////////////////////////////////////////////////
     }
   />
 )}

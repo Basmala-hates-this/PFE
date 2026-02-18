@@ -33,7 +33,7 @@ useEffect(() => {
 //do it slowly
 const handleDeleteAccount = () => {
   const confirmDelete = window.confirm(//i aint doing alert for this one...also can we remeber to close the terminal when we want t turn the pc off?this is causing problems..
-    "Are you sure you want to delete your account? Whyyyyyy...I dont care,bye."
+    "Are you sure you want to delete your account? Whyyyyyy...I dont care,pass the checks first though."
   );
 
   if (!confirmDelete) return;//shit is a yes/no question..the hell u dont understand?
@@ -86,7 +86,7 @@ if (usernameCheck !== currentUser.username) {
   //  notify listeners that are useless but still exist because i'm too scared to delete them....damn it
   window.dispatchEvent(new Event("storage"));
 
-  alert("Account deleted successfully.");//yaay what most people will do if they ever created their accouns...
+  alert("Account deleted successfully....Bye");//yaay what most people will do if they ever created their accouns...
   navigate("/login");
 };
 //the irony is i'm making this all just around the local storage...this shit gonna hurt when backended
