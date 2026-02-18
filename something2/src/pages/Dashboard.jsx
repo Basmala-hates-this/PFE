@@ -20,13 +20,27 @@ import { useEffect, useState } from "react";
 // //ignore that kind of comments..
 
 
+//hheheheheheheh....since i hate my self now i can justify the pain i'm about to do....
+//i'll make mokeup posts....just simple numbered blocks that appear when clicking the button to write a post ...
+//this should be easy enough...but if not...then i already hate myself...maybe a nigative and a nigative will make it positive?hehehehehehe
+
+
 
 
 
 export default function Dashboard() {
       const navigate = useNavigate();
+
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [user, setUser] = useState(null);
+
+  //let this be the point i start the mock posts
+  const [mockPosts, setMockPosts] = useState([]);
+
+
+
+
+  //
   // If user skipped info/register, send them back
 useEffect(() => {
   const storedUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -88,6 +102,20 @@ useEffect(() => {
   };
 }, []);
 
+//ze function to(can i call it function? or component? this entire page is a compenent though...anyhow finish the comment)create mock
+const handleMockPost = () => {
+  setMockPosts(prev => [//objet dde post....why did i turn french? brothaa eughhhh
+    {
+      id: prev.length + 1,
+      author: user?.username || user?.fullname || "User",
+      content: `Post #${prev.length + 1}`,
+      time: new Date().toLocaleTimeString()
+    },
+    ...prev
+  ]);
+};
+
+
 //////the pfp call if edited from edit page
 
 
@@ -133,14 +161,26 @@ useEffect(() => {
         {/* <!-- react will populate options --> */}
         </select>
         <input type="text"  id="dashSearch" className="dashSearch" placeholder="🔍 searching for something?" style={{float:"right" , width:"30%", border:" 2px, solid, #8ca4c6",height:"30px", padding:"3px", borderRadius:"6px"}}/>
-        <button id="postBtn" className="postBtn" style={{float:"right" , width:"15%",height:"30px", marginRight:"5px", padding:"3px", borderRadius:"6px" }}>Write A Post📝</button>
+        {/* i kinda lost the button heeeh.... */}
+        <button id="postBtn" className="postBtn" style={{float:"right" , width:"15%",height:"30px", marginRight:"5px", padding:"3px", borderRadius:"6px" }}  onClick={handleMockPost}>Write A Post📝</button>
        </section>
 
         {/* <!-- Feed --> */}
         <section className="fyp-container">
             <h2 className="H2feed">Feed</h2>
             <div className="fyp-feed" id="fyp-feed">
-                <p>Select rooms to see posts...</p>
+                <p>ehh...the mock are just for funsies....this will not be at all the way this will be..i hope</p><br /><br />
+                {mockPosts.length === 0 ? (
+    <p>No posts yet. Try writing one ✨(i lost it)</p>
+  ) : (
+    mockPosts.map(post => (
+      <div key={post.id} className="mock-post" style={{border:" 2px,solid black",marginBottom:"5px", padding:"14px",borderRadius:"6px"}}>
+        <strong>@{post.author}</strong>
+        <p>{post.content}</p>
+        <small>{post.time}</small>
+      </div>
+    ))
+  )}
             </div>
         </section>
 
