@@ -36,6 +36,8 @@ const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
   //let this be the point i start the mock posts
   const [mockPosts, setMockPosts] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+const [postContent, setPostContent] = useState("");
 
 
 
@@ -114,6 +116,25 @@ const handleMockPost = () => {
     ...prev
   ]);
 };
+//the one before just creats a should have been good enough block...
+//THIS WILL EMITATE WHAT THE VISION MIGHT LOOK LIKE...
+const handleSubmitPost = () => {
+  if (!postContent.trim()) return;
+
+  setMockPosts(prev => [
+    {
+      id: prev.length + 1,
+      author: user?.username || "User",
+      content: postContent,
+      time: new Date().toLocaleTimeString()
+    },
+    ...prev
+  ]);
+
+  setPostContent("");
+  setIsModalOpen(false);
+};
+
 
 
 //////the pfp call if edited from edit page
@@ -135,7 +156,7 @@ const handleMockPost = () => {
             <li><a href="#" onClick={() => navigate("/profile")}>Profile</a></li>
             {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
             right now, lets just keep it in the profile....should it have a confirmation? */}
-            <li><button id="lgm" className="lgm"  >Light Mode ☀️</button></li>
+            <li><button id="lgm" className="lgm"  >☀️Light Mode </button></li>
         </ul>
     </aside>
 
@@ -162,7 +183,7 @@ const handleMockPost = () => {
         </select>
         <input type="text"  id="dashSearch" className="dashSearch" placeholder="🔍 searching for something?" style={{float:"right" , width:"30%", border:" 2px, solid, #8ca4c6",height:"30px", padding:"3px", borderRadius:"6px"}}/>
         {/* i kinda lost the button heeeh.... */}
-        <button id="postBtn" className="postBtn" style={{float:"right" , width:"15%",height:"30px", marginRight:"5px", padding:"3px", borderRadius:"6px" }}  onClick={handleMockPost}>Write A Post📝</button>
+        <button id="postBtn" className="postBtn" style={{float:"right" , width:"15%",height:"30px", marginRight:"5px", padding:"3px", borderRadius:"6px" }}  onClick={() => setIsModalOpen(true)}>Write A Post📝</button>
        </section>
 
         {/* <!-- Feed --> */}
@@ -213,6 +234,26 @@ const handleMockPost = () => {
         </div> */}
 
     </main>
+    {/* right down here we fuck around and find out */}
+    {isModalOpen && (
+  <div className="modal-overlay">
+    <div className="modal">
+      <h3>Write a Post</h3><br />
+      {/* <input type="text" name="title" id="title"  placeholder="What's on your mind?" style={{width:"400px"}}/><br /><br /> */}
+
+      <textarea style={{width:"400px",minHeight:"100px", padding:"10px"}}
+        value={postContent}
+        onChange={(e) => setPostContent(e.target.value)}
+        placeholder="Describe your flow..."
+      /> <br /><br />
+
+      <div className="modal-actions">
+        <button onClick={() => setIsModalOpen(false)} style={{width:" 70px"}}>Cancel</button>
+        <button onClick={handleSubmitPost} style={{width:" 70px", marginLeft:"50px"}}>Post</button>
+      </div>
+    </div>
+  </div>
+)}
 </div>
         </div>
     );

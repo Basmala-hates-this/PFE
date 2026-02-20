@@ -1,4 +1,5 @@
-
+/* the amount of extra css is killing me....but i will absolutly not touch anything till the end of things...
+adding things on another hand....hate me if u want...i'm learning to develepe a webapp */
 #body1 {
   position: relative;
   height: 100vh;
@@ -84,7 +85,7 @@ background:
 }
 
 
-.name,.birth,.PEmail,.univ,.other{
+.name,.birth,.PEmail,.other{
     border-width: 2px;
     width: 30%;
     height: 25px;
@@ -137,19 +138,23 @@ background:
     border-radius: 6px;
     box-shadow:2px 2px 6px rgb(105, 211, 7);
 }
-#professorselect {
+.major {
   width: 30%;
   height: auto;
-    border: 2px solid black;
+    /* border: 2px solid black;
     border-radius: 6px;
-    padding: 3px;
+    padding: 3px; */
+    margin-left: 35%;
+    margin-top: 1%;
+    
 }
-#studentselect,#univ{
-    height: 25px;
+#univ{
+    height: auto;
     width: 30%;
-    border: 2px solid black; 
+    /* border: 2px solid black; 
     border-radius: 6px;
-    padding: 3px;
+    padding: 3px; */
+    margin-left: 35%;
 }
 /* 
 this is for the multiple select look 
@@ -257,21 +262,6 @@ i stole thise from chatgpt:
 
 
 
-/* tag style for future idea */
-/* .tag{
-  font-size: 0.7rem;
-  font-weight: bold;
-  padding: 2px,4px;
-  border-radius: 4px;
-  text-transform: uppercase;
-  color: white;
-}
-.tag.st{
-  background-color: #3b82f6;
-}
-.tag.pr{
-  background-color: #ef4444;
-} */
 
 /*===========sooooo,i added this underline effect in fin page that i really liked..u know i'll add it everywhere
 feel free to tweak the colors is u feel like it later=====*/ 
@@ -305,10 +295,9 @@ feel free to tweak the colors is u feel like it later=====*/
 }
 
 
-#other1,#other2{
-  display: none;
+.other{
+  margin-bottom: 2%;
 }
-
 /* i keep ading things that break and i keep fixing and breaking */
 /*welp, this project is called BFUA for a reason :) */
 /*i added wrapers to fix the role bug...fucked the sizing tho...so i'll add a wraper style in hope it will fix it*/

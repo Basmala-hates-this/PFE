@@ -171,3 +171,26 @@ font-size: 0.8rem;
   color: var(--accent-glow);
   background-color: rgba(118, 94, 237, 0.771);
 }
+
+
+/* back to adding extras....this should be fun..right?heh */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  margin-left: 25%;
+  margin-top: 15%;
+  background: rgba(30, 57, 165, 0.854);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px,solid, whitesmoke;
+  width: 50%;
+  height: 40%;
+}
+
+.modal {
+  background: var(--card-bg);
+  padding: 20px;
+  width: 400px;
+  border-radius: 10px;
+}

@@ -299,7 +299,7 @@
 
 ///imma change plenty of shit this this logic
 //wish me luck...+i commented out the original beraly working one to have a standing point if i ever mess up
-//this reminds me of my swing working....not so fun
+//this reminds me of my swing working....not so fun(ps:the code is humongus because ...i sill dont know why)
 ///mmmm...dynamic major didnt give me much of a hell to hate it enough....i'll do the same to unis...i hate me sometimes
  import "../styles/info.css"
   import { useNavigate } from "react-router-dom";
@@ -307,6 +307,10 @@ import {validateProfile } from "../assets/components/Validations.js";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useRegistration } from "../assets/components/Context.jsx";
+//remember my crashout because of choices.js and how much i hated that thing?-freindly comments because it's ramadan..-
+//i'm doing it again..but in react...introducing "isMulti" and hoping for the best..it needs an import
+import Select from "react-select";
+//i have to npm download it...npm install react-select...///can i install a brain first?
 
 
 
@@ -351,6 +355,16 @@ const generateUniversityCode = (name) => {//the names of the functions are just 
     .replace(/[^A-Z0-9]+/g, "_")//uppercase+numbers...anything else is a _
     .replace(/^_|_$/g, "");//because my ass is creative the first one adds a _ at the start and end....we clean that ....
 };
+//this seems to be around the correct place to add the vars for the react-select for the majors....right?
+const majorOptions = availableMajors.map(m => ({
+  value: m,
+  label: m
+}));
+
+const selectedMajorOptions = majors.map(m => ({
+  value: m,
+  label: m
+}));
 
 //effect that gets stred data and allows update:
 useEffect(() => {
@@ -398,6 +412,18 @@ useEffect(() => {
 //hum...lets try the major select thingy to the uni select thingy
 const [isOtherUniversity, setIsOtherUniversity] = useState(false);
 const [availableUniversities, setAvailableUniversities] = useState([]);
+//fancy wancy react select for unis...
+const universityOptions = availableUniversities.map(u => ({
+  value: u.code,
+  label: u.name
+}));
+
+const selectedUniversityOption = university.code
+  ? {
+      value: university.code,
+      label: university.name
+    }
+  : null;
 
 //the effect for universities/i feel like i wrote this wrong
 useEffect(() => {
@@ -568,7 +594,77 @@ if (isOtherUniversity && university.name.trim()) {
   navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
 };
 
+//people who created something that works so nicley couldnt be botherd to style it nicely huh?...
+//anyhow the chuncky look of react select gives me Choices.js trauma....
+// i need to fix that
+const customSelect = {
+  control: (provided, state) => ({
+    ...provided,
+    backgroundColor: "white",
+   
+    border: "2px solid black", 
+    borderRadius: "12px",
+    padding: "7px",
+    transition: "all 0.2s ease",
+      
+    height: "15px",
+    fontSize: "16px"
+    
+  }),
 
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#98b2f1",
+    borderRadius: "12px",
+    overflow: "hidden",
+    fontSize: "16px"
+  }),
+
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? "#6685e9"
+      : state.isFocused
+      ? "#5c7eb5"
+      : "#9eafd8",
+    color: "#000000",
+    cursor: "pointer",
+    padding: "10px"
+  
+  }),
+
+  multiValue: (provided) => ({
+    ...provided,
+    backgroundColor: "#c7b9df",
+    borderRadius: "8px"
+  }),
+
+  multiValueLabel: (provided) => ({
+    ...provided,
+    color: "#ffffff"
+  }),
+
+  multiValueRemove: (provided) => ({
+    ...provided,
+    color: "#ffffff",
+    
+  }),
+
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#000000"
+  }),
+
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#1e1e1f"
+  }),
+
+  input: (provided) => ({
+    ...provided,
+    color: "#232326"
+  })
+};
       
 
     return (
@@ -604,7 +700,7 @@ if (isOtherUniversity && university.name.trim()) {
               <br/><br/>
               <label htmlFor="university" >Your University :</label>
               <br/>
-              <select name="university" id="univ" className="univ" required  defaultValue="" value={university.code}
+              {/* <select name="university" id="univ" className="univ" required   value={university.code}
   onChange={(e) => {
     if (e.target.value === "OTHER") {
       setUniversity({ code: null, name: "" });
@@ -623,7 +719,27 @@ if (isOtherUniversity && university.name.trim()) {
     </option>
   ))}
   <option value="OTHER">Other</option>
-              </select>
+              </select> */}
+              <Select styles={customSelect}
+  className="univ" id="univ" 
+  options={[...universityOptions, { value: "OTHER", label: "Other" }]}
+  value={selectedUniversityOption}
+  onChange={(selected) => {
+    if (!selected) return;
+
+    if (selected.value === "OTHER") {
+      setUniversity({ code: null, name: "" });
+      setIsOtherUniversity(true);
+    } else {
+      const chosen = availableUniversities.find(
+        u => u.code === selected.value
+      );
+      setUniversity(chosen);
+      setIsOtherUniversity(false);
+    }
+  }}
+  placeholder="Select University..."
+/>
               <br/><br/>
             {isOtherUniversity && (
   <input
@@ -653,11 +769,15 @@ if (isOtherUniversity && university.name.trim()) {
                 <label htmlFor="major" id="major">Choose a Role to Select Your Main Major(s) </label>
                 <br/>
                 {/* ONE RING TO RULE THEM ALL .....select i mean one select to rule them all*/}
-               <select
+                {/* so spending along time on perfecting the one select thing just to decide to do something similar to choice.js is biond self hate at this point
+                anyow...if i liked how react-select works..then the unis will get it tooooo...the autocomplete is back...i'll rutn it off for a while
+                 */}
+               {/* <select
                id="professorselect"
   className="major"
   multiple={role === "professor"}
   value={majors}
+  isMulti
   onChange={(e) => {
     const values = [...e.target.selectedOptions].map(o => o.value);
 
@@ -676,7 +796,37 @@ if (isOtherUniversity && university.name.trim()) {
     <option key={m} value={m}>{m}</option>
   ))}
   <option value="OTHER">Other</option>
-</select><br /><br />
+</select> */}
+{role && (
+  <>
+  {/* i dont want to add more to info.css and tbh..i font know how to target that correctly+inline style will just give me hell so i created a style object here.. */}
+    <Select styles={customSelect}
+      className="major"
+      options={[...majorOptions, { value: "OTHER", label: "Other" }]}
+      value={selectedMajorOptions}
+      isMulti={role === "professor"}
+      onChange={(selected) => {
+        const values = selected
+          ? (Array.isArray(selected)
+              ? selected.map(s => s.value)
+              : [selected.value])
+          : [];
+
+        if (values.includes("OTHER")) {
+          setIsOtherMajor(true);
+          setMajors(["OTHER"]);
+        } else {
+          setIsOtherMajor(false);
+          setMajors(values);
+          setCustomMajor("");
+        }
+      }}
+      placeholder="Select Major(s)..."   id="professorselect"
+ 
+    />
+  </>
+)}
+<br /><br />
 {isOtherMajor && (
   <input
     type="text"
