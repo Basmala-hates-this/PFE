@@ -758,7 +758,7 @@ const customSelect = {
   <input
     type="text"
     className="other"
-    placeholder="Enter University Name"
+    placeholder="the full correct name please"
     value={university.name}
     onChange={(e) =>
       // /////////////////////////////////////////////////////
