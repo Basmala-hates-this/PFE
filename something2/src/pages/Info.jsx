@@ -491,6 +491,7 @@ useEffect(() => {
 useEffect(() => {
   setMajors([]);
   setCustomMajor("");
+  setIsOtherMajor(false); //hided the damn other input...i will not elaborate...but i hate my testing and what it reveals
 }, [role]);
 //..............email should also be unique........damn....how do i keep forgetting about this stuff?
 
@@ -513,11 +514,11 @@ if (emailExists) {
 }
 
 //back to update the submitter with new data...i have no idea how much things this is breaking...
-let finalMajors = majors;
+let finalMajors = [...majors];;
 
 // if user typed a custom major(aka other)//we do the same process to unis tomorow
 if (customMajor.trim()) {
-  finalMajors = [customMajor.trim()];
+    finalMajors.push(customMajor.trim());
 }
 
 if (customMajor.trim()) {
@@ -607,14 +608,22 @@ const customSelect = {
     padding: "7px",
     transition: "all 0.2s ease",
       
-    height: "15px",
-    fontSize: "16px"
+   minHeight: "10px",
+    fontSize: "16px",
+    display: "flex",
+    alignItems: "center", 
     
+  }),valueContainer: (provided) => ({
+    ...provided,
+    paddingTop: "2px",     
+   
+    display: "flex",
+    alignItems: "center"
   }),
 
   menu: (provided) => ({
     ...provided,
-    backgroundColor: "#98b2f1",
+    backgroundColor: "#ecf1fa",
     borderRadius: "12px",
     overflow: "hidden",
     fontSize: "16px"
@@ -623,20 +632,23 @@ const customSelect = {
   option: (provided, state) => ({
     ...provided,
     backgroundColor: state.isSelected
-      ? "#6685e9"
+      ? "#b3bfe5"
       : state.isFocused
-      ? "#5c7eb5"
-      : "#9eafd8",
+      ? "#6791d5"
+      : "#ced7ea",
     color: "#000000",
     cursor: "pointer",
-    padding: "10px"
+    padding: "10px",
+    
   
   }),
 
   multiValue: (provided) => ({
     ...provided,
-    backgroundColor: "#c7b9df",
-    borderRadius: "8px"
+    backgroundColor: "#6476af",
+    borderRadius: "8px",
+     marginTop: "2px",       
+    marginBottom: "2px"
   }),
 
   multiValueLabel: (provided) => ({
@@ -652,7 +664,8 @@ const customSelect = {
 
   singleValue: (provided) => ({
     ...provided,
-    color: "#000000"
+    color: "#000000",
+    marginTop: "2px",
   }),
 
   placeholder: (provided) => ({
@@ -814,7 +827,7 @@ const customSelect = {
 
         if (values.includes("OTHER")) {
           setIsOtherMajor(true);
-          setMajors(["OTHER"]);
+          setMajors(values.filter(v => v !== "OTHER"));
         } else {
           setIsOtherMajor(false);
           setMajors(values);
