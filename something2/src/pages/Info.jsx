@@ -312,7 +312,8 @@ import { useRegistration } from "../assets/components/Context.jsx";
 import Select from "react-select";
 //i have to npm download it...npm install react-select...///can i install a brain first?
 
-
+////////////////////
+//pd: CLEAN THE DAMN COMMENTED PARTS U DONT NEED THEM ANYMORE.....i'll do later....
 
 
 

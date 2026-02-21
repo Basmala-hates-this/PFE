@@ -104,6 +104,12 @@ useEffect(() => {
   };
 }, []);
 
+//ehem...not so pround of that....eehhh...svaed global mock posts to local storage?->yeah,no..this gets them
+useEffect(() => {
+  const storedPosts = JSON.parse(localStorage.getItem("globalPosts")) || [];
+  setMockPosts(storedPosts);
+}, []);
+
 //ze function to(can i call it function? or component? this entire page is a compenent though...anyhow finish the comment)create mock
 const handleMockPost = () => {
   setMockPosts(prev => [//objet dde post....why did i turn french? brothaa eughhhh
@@ -115,21 +121,26 @@ const handleMockPost = () => {
     },
     ...prev
   ]);
-};
+};//i think the one above is extra....that is just to spam button the feed...
+//this one creates a semi blivable post and WE SAVE TO LOCALSTORAGE
 //the one before just creats a should have been good enough block...
 //THIS WILL EMITATE WHAT THE VISION MIGHT LOOK LIKE...
 const handleSubmitPost = () => {
   if (!postContent.trim()) return;
 
-  setMockPosts(prev => [
-    {
-      id: prev.length + 1,
-      author: user?.username || "User",
-      content: postContent,
-      time: new Date().toLocaleTimeString()
-    },
-    ...prev
-  ]);
+  const storedPosts = JSON.parse(localStorage.getItem("globalPosts")) || [];
+
+  const newPost = {
+    id: Date.now(),
+    author: user?.username || "User",
+    content: postContent,
+    time: new Date().toLocaleTimeString()
+  };
+
+  const updatedPosts = [newPost, ...storedPosts];
+
+  localStorage.setItem("globalPosts", JSON.stringify(updatedPosts));
+  setMockPosts(updatedPosts);
 
   setPostContent("");
   setIsModalOpen(false);
