@@ -686,7 +686,7 @@ const customSelect = {
              <form  onSubmit={handleSubmit} id="indexForm">{/*<!--action="register.html"   i think this is useless since i added the js redirection--> */}
         <fieldset id="field1" className="fieldInfo" >
            
-             <legend id="legend1">Make Your Account</legend>
+             <legend id="legend1">Create Your Account</legend>
              <h3 id="h3">All Information Is Required</h3>
 
              <fieldset id="field2">
@@ -694,7 +694,7 @@ const customSelect = {
               <legend id="legend2">Personal Info</legend>
               <label htmlFor="name" >Full Name:</label>
               <br/>
-              <input type="text" className="name" id="name" required minLength="5" name="fullName" placeholder="Ex:Hannibal Lecter"  onChange={(e) => setFullName(e.target.value)}/>
+              <input type="text" className="name" id="name" required  name="fullName" placeholder="Ex:Hannibal Lecter"  onChange={(e) => setFullName(e.target.value)}/>
               <br/><br/>
               <label htmlFor="birth" >Your Date Of Birth:</label>
               <br/>

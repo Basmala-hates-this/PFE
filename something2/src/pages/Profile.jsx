@@ -10,6 +10,7 @@ export default function Profile() {
     const navigate = useNavigate();
 
     const [user, setUser] = useState(null);
+    const isProfessor=user?.role === "professor";
 
 
 useEffect(() => {
@@ -141,25 +142,38 @@ if (usernameCheck !== currentUser.username) {
 
     {/* <!-- COURSES this.....i still dont know how to use....bisicaly the distingtive factor of prof profile from student profile 
     how or what to do with it....i still dont know....maybe a list of majors and each major some rooms?--> */}
-    <div className="courses">
-      <h3 style={{marginBottom:"15px",color:"#5DADE2"}}>My Majors</h3>
+    {/* { isProfessor && (<div className="courses">
+      <h3 style={{marginBottom:"15px",color:"#5DADE2"}}>Specialty  Majors</h3>
 
       <div className="course">
         <span style={{color:"#85C1E9"}}>Web Development</span>
-        <strong>HTML, CSS & JavaScript</strong>
+       
       </div>
 
       <div className="course">
         <span style={{color:"#85C1E9"}}>Software Engineering</span>
-        <strong>UML & Design Patterns</strong>
+        
       </div>
 
       <div className="course">
         <span style={{color:"#85C1E9"}}>Databases</span>
-        <strong>SQL & NoSQL</strong>
+       
       </div>
     </div>
+)} */}
+{/* soooo...dynamic display of majors? */}
+{isProfessor && user?.majors?.length > 0 && (
+  <div className="courses">
+    <h3 style={{ marginBottom: "15px", color: "#5DADE2" }}>Specialty Majors</h3>
 
+    {user.majors.map((major, index) => (
+      <div className="course" key={index}>
+        <span style={{ color: "#85C1E9" }}>{major}</span>
+        {/* the listing of rooms maybe? */}
+      </div>
+    ))}
+  </div>
+)}
   </section>
  
 </div>

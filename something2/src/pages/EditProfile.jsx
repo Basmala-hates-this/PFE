@@ -195,6 +195,17 @@ const handleSubmit = (e) => {
   alert("Profile updated successfully!");
   navigate("/profile");
 };
+const PasswordResetLink = () => {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+  const usernameCheck = prompt("Enter your username to confirm deletion:");
+
+if (usernameCheck !== currentUser.username) {
+  alert("Incorrect username.");
+  return;
+}
+  navigate("/reset");
+};
 
 
 
@@ -246,7 +257,7 @@ const handleSubmit = (e) => {
          
     
     <div className="password-link">
-      <a href="#"  className="editPassword" onClick={() => navigate("/reset")}>Change Password </a>
+      <a href="#"  className="editPassword" onClick={PasswordResetLink}>Change Password </a>
     </div>
            <div className="action-buttons">
              <button type="button"  className="main-btn cancel-btn" onClick={() => navigate("/profile")}>Cancel</button>

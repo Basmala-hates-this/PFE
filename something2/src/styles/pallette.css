@@ -1,9 +1,10 @@
-/* fucking color pallette only file... */
+/* fucking color pallette only file... 
+didnt use most of them...+the namings are bad...idc*/
 
 :root {
   /* === Surfaces === */
   --bg-body: #002c93;        
-  --bg-sidebar: #020617;    /* almost black */
+  --bg-sidebar: #020617;    
   --bg-main: #020617;
   --bg-header: #0206176f;
   --bg-panel: #3f4f936a;
@@ -15,12 +16,12 @@
 
 
   /* === Text === */
-  --text-main: #e5e7eb;     /* near white */
-  --text-muted: #9ca3af;   /* secondary */
+  --text-main: #e5e7eb;     
+  --text-muted: #9ca3af;  
   --text-soft: #b4bac6;
 
-  /* === Accent (BFUA identity) === */
-  --accent: #38bdf8;        /* sky */
+  /* === Accent  === */
+  --accent: #38bdf8;        
   --accent-hover: #0ea5e9;
   --accent-glow: #22d3ee;
   --accent-neon:

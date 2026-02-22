@@ -57,6 +57,7 @@ useEffect(() => {
 
 
 useEffect(() => {
+  //maybe if this caused problems...change with useRef of react...only if necessary...which for now..it isnt..
   const lgm = document.getElementById("lgm");
   const body = document.body;
 
@@ -72,16 +73,16 @@ useEffect(() => {
 
   if (savedTheme === "light") {
     body.classList.add("light-mode");
-    lgm.textContent = "Dark Mode 🌙";
+    lgm.textContent = "🌙Dark Mode ";
   } else {
-    lgm.textContent = "Light Mode ☀️";
+    lgm.textContent = "☀️Light Mode ";
   }
 
   const toggleTheme = () => {
     body.classList.toggle("light-mode");
     const mode = body.classList.contains("light-mode") ? "light" : "dark";
     localStorage.setItem("theme", mode);
-    lgm.textContent = mode === "light" ? "Dark Mode 🌙" : "Light Mode ☀️";
+    lgm.textContent = mode === "light" ? "🌙Dark Mode " : "☀️Light Mode ";
   };
 
   lgm.addEventListener("click", toggleTheme);
@@ -131,7 +132,7 @@ const handleSubmitPost = () => {
   const storedPosts = JSON.parse(localStorage.getItem("globalPosts")) || [];
 
   const newPost = {
-    id: Date.now(),
+    id: Date.now(),//ehhh...didnt think this one thrugh with the seconds did i?...it works what more could i possibly want?..i'll fix that one backend
     author: user?.username || "User",
     content: postContent,
     time: new Date().toLocaleTimeString()
@@ -148,7 +149,7 @@ const handleSubmitPost = () => {
 
 
 
-//////the pfp call if edited from edit page
+
 
 
 

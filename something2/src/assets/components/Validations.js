@@ -7,14 +7,17 @@
 
 // NAME VALIDATION
 
-// Rule: at least two words (one space), trimmed
 export function isValidFullName(name) {
   if (!name) return false;
 
-  const trimmed = name.trim();
+  // trim and split by one or more spaces
+  const parts = name.trim().split(/\s+/);
 
-  // at least one space between words
-  return trimmed.includes(" ") && trimmed.length >= 5;
+  // requirement 1: At least two words (meaning at least one space existed)
+  if (parts.length < 2) return false;
+
+  // requirement 2: Every part must have at least 2 letters
+  return parts.every(part => part.length >= 2);
 }
 
 // AGE VALIDATION
