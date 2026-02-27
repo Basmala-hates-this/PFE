@@ -204,7 +204,7 @@ useEffect(() => {
 const [error, setError] = useState("");
 
 // form submit handler */i friking need a way to find this segment faster bro...this code is bigger then my ego
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   
   e.preventDefault();
   const users = JSON.parse(localStorage.getItem("users")) ||JSON.parse(localStorage.getItem("user")) || [];
@@ -298,7 +298,23 @@ if (isOtherUniversity && university.name.trim()) {
   // localStorage.setItem("user", JSON.stringify(profile));
   //use context instead
   setProfile(profile);
+try {
+  const response = await fetch("http://localhost:5000/register", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(profile)
+  });
 
+  const data = await response.json();
+  console.log(data);
+
+  navigate("/register");
+
+} catch (err) {
+  console.error("Error sending profile:", err);
+}
 
   // Navigate to next page
   navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
