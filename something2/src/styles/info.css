@@ -94,7 +94,15 @@ background:
     padding: 3px;
 }
 
-
+.IsProf{
+   border-width: 2px;
+    width: 30%;
+    height: 35px;
+    border-radius: 6px;
+    border: 2px solid black;
+    padding: 7px;
+    background-color: aliceblue;
+}
 
 
 #btn1{

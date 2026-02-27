@@ -88,7 +88,7 @@ const handleSubmit = (e) => {
 
   ///ternary operators are my goated if/else statments....same as template literal for messages...
   //we update THE SELECTED USER RATHER THAN ANYOTHER 
-    const users = JSON.parse(localStorage.getItem("users")) || JSON.parse(localStorage.getItem("user")) || [];
+    const users = JSON.parse(localStorage.getItem("users")) || [];
 
   const updatedUsers = users.map(user =>
     user.email === targetEmail
@@ -106,12 +106,15 @@ const handleSubmit = (e) => {
   localStorage.removeItem("resetEmail");
 //self explanatory...or should i explaun to ur dull forgetfull brain?we use the page for 2 diffrent sides of the system...if else to define each side of the damn thing
 //also i would like to apologize now for the awfull typos because that state of brain where i used to mix up lettsrs or write full words backwards is back...fun...
-  if (currentUser) {
-  alert("Password updated successfully!");
-  navigate("/profile");
+  if (resetEmail) {
+    alert("Password successfully reset! Try not to forget this one :)");
+  
+  localStorage.removeItem("resetEmail");
+   navigate("/login");
 } else {
-  alert("Password successfully reset! Try not to forget this one :)");
-  navigate("/login");
+  alert("Password updated successfully!");
+ 
+  navigate("/edit");
 }
 };
 
@@ -144,7 +147,7 @@ const handleSubmit = (e) => {
                  <label id="label" className="rpLabel"> <input type="checkbox" onChange={() => setShowPassword(!showPassword)} className="rpCheck" id="togglePassword"/>
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
                 <br/><br/>
-                <input type="submit" value="Change Password" className="btn6"  /> {/*<!-- after changing password redirect to login page --> */}
+                <input type="submit" value="Change Password" className="btn6" disabled={!canSubmit} /> {/*<!-- after changing password redirect to login page --> */}
                 <br/><br/>
                 
 

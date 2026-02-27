@@ -207,7 +207,8 @@ export function validateProfile(profile) {
     email,
     university,
     role,
-    majors
+    majors,
+    profProof
   } = profile;
 
   if (!isValidFullName(fullName)) {
@@ -233,6 +234,22 @@ export function validateProfile(profile) {
   if (!isValidMajors(majors, role)) {
     return { valid: false, error: "Invalid majors selection" };
   }
+  //the extra proof of prof with extra steps of course.....
+  if (role === "professor") {
+  if (!profProof) {
+    return { valid: false, error: "Proof documentation is required" };
+  }
+
+  const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+
+  if (!allowedTypes.includes(profProof.type)) {
+    return { valid: false, error: "Only PDF or image files allowed" };
+  }
+
+  if (profProof.size > 5 * 1024 * 1024) {
+    return { valid: false, error: "File must be under 5MB" };
+  }
+}
 
   return { valid: true };
 }
