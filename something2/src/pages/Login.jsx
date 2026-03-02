@@ -44,7 +44,7 @@ const handleSubmit = (e) => {
   e.preventDefault();
   setError("");
 //again...localstorage to the testing rescue...we get theusers existing...i for somereason found users and user....but it just reads users....to  be fixed later
-  const users = JSON.parse(localStorage.getItem("users")) || JSON.parse(localStorage.getItem("user")) || [];
+  const users = JSON.parse(localStorage.getItem("users")) || [];
 
   //our little tini tiny checker 
   let user = null;

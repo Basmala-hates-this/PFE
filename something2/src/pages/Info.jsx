@@ -309,15 +309,14 @@ try {
 
   const data = await response.json();
   console.log(data);
-
-  navigate("/register");
+ // Navigate to next page
+  navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
 
 } catch (err) {
   console.error("Error sending profile:", err);
 }
 
-  // Navigate to next page
-  navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
+ 
 };
 
 //people who created something that works so nicley couldnt be botherd to style it nicely huh?...

@@ -1,18 +1,35 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 
 const app = express();
+const PORT = 5000;
 
-app.use(cors());
-app.use(express.json());
+// Middleware
+app.use(cors()); // allows frontend to talk to backend
+app.use(express.json()); // parses incoming JSON automatically
 
-app.post("/register", (req, res) => {
-  console.log("Received from frontend:");
-  console.log(req.body);
-
-  res.json({ message: "Profile received successfully" });
+// Test route
+app.get("/", (req, res) => {
+  res.send("ITS ALIVE...ITS ALIIIIVE!");
 });
 
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
+// Example register route
+let users = [];
+
+app.post("/register", (req, res) => {
+  const profile = {
+    ...req.body,
+    isVerified: false,
+    admin: false
+  };
+
+  users.push(profile);
+
+  console.log("New user registered:", profile);
+  res.json({ message: "User registered successfully", user: profile });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
