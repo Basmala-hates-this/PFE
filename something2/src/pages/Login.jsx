@@ -4,6 +4,7 @@ import "../styles/register-login.css"
 //  import {validateUsername} from "../assets/components/Validations.js";
  import { useEffect } from "react";
  import { isValidEmail } from "../assets/components/Validations.js";
+ import { Eye, EyeOff } from 'lucide-react';
 
 
 
@@ -109,6 +110,7 @@ localStorage.setItem("currentUser", JSON.stringify(user));
             <input type={showPassword ? "text" : "password"} id="password" placeholder="Password1*"  minLength="8" maxLength="15" name="password" required value={password} onChange={handlePasswordChange}/><br/>
             <label id="label"> <input type="checkbox" id="togglePassword" onClick={() => setShowPassword(!showPassword)} />
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
+                {/* <span id="ohhh"> {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}</span></label> */}
             <br/><br/>
 {/* hummm thsi displays the VERY creative error message.... */}
             {error && (
