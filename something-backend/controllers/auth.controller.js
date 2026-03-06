@@ -69,7 +69,7 @@ const user = isEmail ? userRepo.findByEmail(identifier) : userRepo.findByUsernam
   res.json({ 
   token,
   user: userWithoutPassword 
-});
+});//so token as id and user for frontend to display user info without password
 };
 
 module.exports = {
