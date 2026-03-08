@@ -5,6 +5,7 @@ import "../styles/register-login.css"
  import { useEffect } from "react";
  import { isValidEmail } from "../assets/components/Validations.js";
  import { Eye, EyeOff } from 'lucide-react';
+ import axios from "axios";
 
 
 
@@ -41,39 +42,55 @@ const handlePasswordChange = (e) => {
   setPassword(e.target.value);
 };
 ///////////////////////////////
-const handleSubmit = (e) => {
+const handleSubmit =async (e) => {
   e.preventDefault();
   setError("");
 //again...localstorage to the testing rescue...we get theusers existing...i for somereason found users and user....but it just reads users....to  be fixed later
-  const users = JSON.parse(localStorage.getItem("users")) || [];
+  //const users = JSON.parse(localStorage.getItem("users")) || [];
 
   //our little tini tiny checker 
-  let user = null;
+ // let user = null;
 // we look for the username OR email ...if they exist.then check the password related to that accoount
-  if (isValidEmail(username)) {
-    // email login
-    user = users.find((u) => u.email === username);
-  } else {
-    // username login
-    user = users.find((u) => u.username === username);
-  }
+  // if (isValidEmail(username)) {
+  //   // email login
+  //   user = users.find((u) => u.email === username);
+  // } else {
+  //   // username login
+  //   user = users.find((u) => u.username === username);
+  // }
   // if user not found or password incorrect
 
-  if (!user || user.password !== password) {
-    setError("Credentials are incorrect.");
-    return;
-  }
+  // if (!user || user.password !== password) {
+  //   setError("Credentials are incorrect.");
+  //   return;
+  // }
 
+  try {
+  const response = await axios.post("http://localhost:5000/api/auth/login", {
+   identifier: username,
+  password
+  });
+
+  const data = response.data;
+  console.log(data);
+   // store token
+  localStorage.setItem("token", data.token);
+  // store user
+  localStorage.setItem("currentUser", JSON.stringify(data.user));
   alert("Login Successful!!!!");
-
-
-  //this sets the current user....i hate this...
-localStorage.setItem("currentUser", JSON.stringify(user));
-
-
-
+  
   //le legin est successful...i'll add a star emoji to this comment later...
   navigate("/dashboard");
+
+ 
+
+} catch (err) {
+  console.error("Error sending profile:", err);
+}
+ 
+
+
+
 };
 
 

@@ -298,25 +298,25 @@ if (isOtherUniversity && university.name.trim()) {
   // localStorage.setItem("user", JSON.stringify(profile));
   //use context instead
   setProfile(profile);
-try {
-  const response = await fetch("http://localhost:5000/register", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(profile)
-  });
+// try {
+//   const response = await fetch("http://localhost:5000/register", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json"
+//     },
+//     body: JSON.stringify(profile)
+//   });
 
-  const data = await response.json();
-  console.log(data);
- // Navigate to next page
-  navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
+//   const data = await response.json();
+//   console.log(data);
+//  // Navigate to next page
+  
 
-} catch (err) {
-  console.error("Error sending profile:", err);
-}
+// } catch (err) {
+//   console.error("Error sending profile:", err);
+// }
 
- 
+ navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
 };
 
 //people who created something that works so nicley couldnt be botherd to style it nicely huh?...

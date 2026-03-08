@@ -1,5 +1,6 @@
 import "../styles/fin.css"
 // import "../scripts/confetti.js"
+import axios from "axios";
  import { useNavigate } from "react-router-dom";
 
 import confetti from "canvas-confetti";
@@ -37,7 +38,7 @@ export default function Fin() {
   //AAAAAAAAAAAAAAAAAA
   //user efect will check the previosly mentiond...if one is false..rederect to he page needed...if not....well....CONTENT!!
  useEffect(() => {
-  //no skipping to fin somehow..... YOUUUUUUUUUUUU SHALL NOOOOOOOOOOT PAASSSSSSSSS
+  //no skipping to fin somehow..... YOUUUUUUUUUUUU SHALL NOOOOOOOOOOT PAASSSSSSSSS...said dembeldore quitly....this should cuase ragbait to whoever read it:)
   if (!profile || !credentials) {
     navigate("/info");
     return;
@@ -57,12 +58,7 @@ export default function Fin() {
     return;
   }
 
-  const existingUsers = JSON.parse(localStorage.getItem("users")) || [];
 
-  const usernameExists = existingUsers.some(
-    (u) =>
-      u.username === credentials.username
-  );
 //this one i belive is extra and is causing problems...i cause myself problems...
 //anyhow at register..even if the username is new..it gets flagged as already exists and redirect to register then fin again....weird...
   // if (usernameExists) {
@@ -71,12 +67,30 @@ export default function Fin() {
   //   return;
   // }
 
-  const updatedUsers = [...existingUsers, newUser];
-
-  localStorage.setItem("users", JSON.stringify(updatedUsers));
-  localStorage.setItem("currentUser", JSON.stringify(newUser));
-
+  
+   const registerUser = async () => {
+    try {
+     const response = await axios.post("http://localhost:5000/api/auth/register", newUser);
+    const data =response.data;
+     
+  localStorage.setItem("token", data.token);
+ 
+  localStorage.setItem("currentUser", JSON.stringify(data.user));
+  
   handleConfetti();
+   
+  }
+
+
+ catch (err) {
+  console.error("Error sending profile:", err);
+  navigate("/register");//should we send to home instead or what?
+}
+ 
+  };
+  registerUser();
+
+ 
 }, []);
 
 
