@@ -13,7 +13,7 @@ const writePosts = (postsList) => {
   fs.writeFileSync(filePath, JSON.stringify(postsList));
 };
 
-const createPost = (userData) => {
+const createPost = (postData) => {
    const posts = readPosts();
   const newPost = {
     id: Date.now().toString(),
@@ -43,8 +43,39 @@ const getPostsAll = () => {
   return readPosts();
 };
 
+
+const votePost = (postId, userId, voteType) => {
+  const posts = readPosts();
+  const post = posts.find((p) => p.id === postId);
+  
+  if (!post) return null;
+  
+  if (post.authorId === userId) {
+    return { error: "Cannot vote on your own post" };
+  }
+
+  // 3 caases: no existing vote, same vote (remove), different vote (switch)
+  const existingVote = post.votes.voters.find((v) => v.userId === userId);
+  if (!existingVote) {
+  post.votes.voters.push({ userId, type: voteType });
+  post.votes[voteType]++;
+}
+else if (existingVote.type === voteType) {
+  post.votes.voters = post.votes.voters.filter((v) => v.userId !== userId);
+  post.votes[voteType]--;
+}
+else {
+  post.votes[existingVote.type]--;
+  existingVote.type = voteType;
+  post.votes[voteType]++;
+}
+  writePosts(posts);
+  return post;
+};
+
 module.exports = {
   createPost,
   getPostById,
-  getPostsAll
+  getPostsAll,
+  votePost,
 };

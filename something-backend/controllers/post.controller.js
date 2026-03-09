@@ -30,8 +30,25 @@ const getPostsAll = (req, res) => {
   res.json(posts);
 };
 
+const votePost = (req, res) => {
+  const { id } = req.params;
+  const { voteType } = req.body;
+    const userId = req.user.id;
+
+  const post = postRepo.votePost(id, userId, voteType);
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+  if (post.error) {//case of trying to vote on own post
+    return res.status(403).json({ message: post.error });
+  }
+  res.json(post);
+};
+
+
 module.exports = {
   createPost,
   getPostById,
-  getPostsAll
+  getPostsAll,
+  votePost,
 };
