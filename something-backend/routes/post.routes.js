@@ -7,6 +7,8 @@ router.post("/", protect, postController.createPost);
 router.get("/", protect, postController.getPostsAll);
 router.get("/:id", protect, postController.getPostById);
 router.patch("/:id/vote", protect, postController.votePost);
+router.patch("/:id", protect, postController.updatePost);
+router.delete("/:id", protect, postController.deletePost);
 
 
 module.exports = router;

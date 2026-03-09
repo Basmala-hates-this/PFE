@@ -45,10 +45,38 @@ const votePost = (req, res) => {
   res.json(post);
 };
 
+const updatePost = (req, res) => {
+  const { id } = req.params;
+  const { title, content } = req.body;
+  const userId = req.user.id;
+    const updatedPost = postRepo.updatePost(id, userId, { title, content });
+    if (!updatedPost) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+    if (updatedPost.error) {
+    return res.status(403).json({ message: updatedPost.error });
+  }
+  res.json(updatedPost);
+};
+
+const deletePost = (req, res) => {
+  const { id } = req.params;
+  const userId = req.user.id;
+  const deletedPost = postRepo.deletePost(id, userId);
+  if (!deletedPost) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+  if (deletedPost.error) {
+    return res.status(403).json({ message: deletedPost.error });
+  }
+  res.json({ message: "Post deleted successfully" });
+};
 
 module.exports = {
   createPost,
   getPostById,
   getPostsAll,
   votePost,
+  updatePost,
+  deletePost,
 };

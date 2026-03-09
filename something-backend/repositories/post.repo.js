@@ -12,7 +12,8 @@ const readPosts = () => {
 const writePosts = (postsList) => {
   fs.writeFileSync(filePath, JSON.stringify(postsList));
 };
-
+//ps: i'm not writing much comments only because i'm new to backend and i want it to stay clean so i can find my way easily...
+//the more i get used to it the more comments will return
 const createPost = (postData) => {
    const posts = readPosts();
   const newPost = {
@@ -73,9 +74,90 @@ else {
   return post;
 };
 
+const updatePost = (postId, userId, updatedData) => {
+  const posts = readPosts();
+  const postIndex = posts.findIndex((p) => p.id === postId);
+  if (postIndex === -1) return null;
+
+  if (posts[postIndex].authorId !== userId) {
+    return { error: "Not authorized to edit this post" };
+  }
+
+  const updatedPost = {
+    ...posts[postIndex],
+    title: updatedData.title,
+    content: updatedData.content,
+    updatedAt: new Date().toISOString(),
+    isUpdated: true
+  };
+  posts[postIndex] = updatedPost;
+  writePosts(posts);
+  return updatedPost;
+};
+
+const deletePost = (postId,userId) => {
+  const posts = readPosts();
+  const postIndex = posts.findIndex((p) => p.id === postId);
+  
+  if (postIndex === -1) return false;//null....false....all the same...if post not found ..exit
+
+  if (posts[postIndex].authorId !== userId) {
+    return { error: "Nop...u  are not deleting this one " };
+  }
+    posts.splice(postIndex, 1);
+    writePosts(posts);
+    return true;
+};
+
+const addComment = (postId, commentData) => {
+  const posts = readPosts();
+  const post = posts.find((p) => p.id === postId);
+  
+  if (!post) return null;
+
+ const newComment = {
+  id: Date.now().toString(),
+  postId,
+  authorId: commentData.authorId,
+  authorUsername: commentData.authorUsername,
+  content: commentData.content,
+  createdAt: new Date().toISOString(),
+  isUpdated: false,
+  parentCommentId: commentData.parentCommentId || null,
+  votes: { useful: 0, useless: 0, specialized: 0, voters: [] }
+};
+
+  post.comments.push(newComment);
+  writePosts(posts);
+  return newComment;
+};
+
+
+const deleteComment = (commentId, postId, userId) => {
+  const posts = readPosts();
+
+  const postIndex = posts.findIndex((p) => p.id === postId);
+   if (postIndex === -1) return false;//null....false....all the same...if post not found ..exit
+  const commentIndex = posts[postIndex].comments.findIndex((c) => c.id === commentId);
+  
+ 
+  if (commentIndex === -1) return false;
+
+  if (posts[postIndex].comments[commentIndex].authorId !== userId) {
+    return { error: "Nop...u  are not deleting this one " };
+  }
+    posts[postIndex].comments.splice(commentIndex, 1);
+    writePosts(posts);
+    return true;
+};
+
+
+
 module.exports = {
   createPost,
   getPostById,
   getPostsAll,
   votePost,
+  updatePost,
+  deletePost
 };
