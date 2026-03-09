@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard.jsx";
 import Profile from "./pages/Profile.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
 import { RegistrationProvider } from "./assets/components/Context.jsx";
+import ProtectedRoute from "./assets/components/ProtectedRoute.jsx";
 
 function App() {
   return (
@@ -25,9 +26,9 @@ function App() {
         <Route path="/fin" element={<Fin />} />
         <Route path="/rrp" element={<RRP />} />
         <Route path="/reset" element={<Reset />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/profile" element={<Profile />} />
-         <Route path="/edit" element={<EditProfile />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
 
       </Routes>
             </RegistrationProvider>
