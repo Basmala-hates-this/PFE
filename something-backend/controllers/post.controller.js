@@ -72,6 +72,55 @@ const deletePost = (req, res) => {
   res.json({ message: "Post deleted successfully" });
 };
 
+const addComment = (req, res) => {
+  const { postId } = req.params;
+  const { content, parentCommentId } = req.body;
+  const authorId = req.user.id;
+  const authorUsername = req.user.username;
+
+  const comment = postRepo.addComment(postId, {
+    authorId,
+    authorUsername,
+    content,
+    parentCommentId
+  });
+
+  if (!comment) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+
+  res.status(201).json(comment);
+};
+
+const deleteComment = (req, res) => {
+  const { postId, commentId } = req.params;
+  const userId = req.user.id;
+
+  const deletedComment = postRepo.deleteComment(commentId, postId, userId);
+  if (!deletedComment) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+  if (deletedComment.error) {
+    return res.status(403).json({ message: deletedComment.error });
+  }
+  res.json({ message: "Comment deleted successfully" });
+};
+
+const voteComment = (req, res) => {
+  const { postId, commentId } = req.params;
+  const { voteType } = req.body;
+  const userId = req.user.id;
+
+  const post = postRepo.voteComment(postId, userId, voteType, commentId);
+  if (!post) {
+    return res.status(404).json({ message: "Post not found" });
+  }
+  if (post.error) {
+    return res.status(403).json({ message: post.error });
+  }
+  res.json(post);
+};
+
 module.exports = {
   createPost,
   getPostById,
@@ -79,4 +128,7 @@ module.exports = {
   votePost,
   updatePost,
   deletePost,
+  addComment,
+  deleteComment,
+  voteComment,
 };

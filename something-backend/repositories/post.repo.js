@@ -150,14 +150,48 @@ const deleteComment = (commentId, postId, userId) => {
     writePosts(posts);
     return true;
 };
+const voteComment=(postId,userId,voteType,commentId)=>{
+   const posts = readPosts();
 
+ 
+ const post = posts.find((p) => p.id === postId);
+if (!post) return null;
+
+const comment = post.comments.find((c) => c.id === commentId);
+if (!comment) return null;
+
+if (comment.authorId === userId) {
+  return { error: "cant vote on own comment" };
+}
+
+
+  const existingVote = comment.votes.voters.find((v) => v.userId === userId);
+  if (!existingVote) {
+  comment.votes.voters.push({ userId, type: voteType });
+  comment.votes[voteType]++;
+}
+else if (existingVote.type === voteType) {
+  comment.votes.voters = comment.votes.voters.filter((v) => v.userId !== userId);
+  comment.votes[voteType]--;
+}
+else {
+  comment.votes[existingVote.type]--;
+  existingVote.type = voteType;
+  comment.votes[voteType]++;
+}
+  writePosts(posts);
+  return post;
+}
 
 
 module.exports = {
   createPost,
-  getPostById,
   getPostsAll,
-  votePost,
+  getPostById,
   updatePost,
-  deletePost
+  deletePost,
+  votePost,
+  addComment,
+  deleteComment,
+  voteComment,
 };
