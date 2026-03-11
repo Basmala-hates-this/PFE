@@ -42,9 +42,21 @@ const findById = (id) => {
   return users.find((u) => u.id === id);
 };
 
+const updateUser = (id, updatedData) => {
+  const users = readUsers();
+  const userIndex = users.findIndex((u) => u.id === id);
+  if (userIndex === -1) return null;
+  const updatedUser = { ...users[userIndex], ...updatedData };
+  users[userIndex] = updatedUser;
+  writeUsers(users);
+  return updatedUser;
+};
+
+
 module.exports = {
   createUser,
   findByEmail,
   findByUsername,
   findById,
+  updateUser,
 };

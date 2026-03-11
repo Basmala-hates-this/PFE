@@ -4,6 +4,7 @@ import {validateProfile } from "../assets/components/Validations.js";
 import { useState } from "react";
 import { useEffect } from "react";
 import { useRegistration } from "../assets/components/Context.jsx";
+import axios from "axios";
 //remember my crashout because of choices.js and how much i hated that thing?-freindly comments because it's ramadan..-
 //i'm doing it again..but in react...introducing "isMulti" and hoping for the best..it needs an import
 import Select from "react-select";
@@ -203,21 +204,30 @@ useEffect(() => {
 
 const [error, setError] = useState("");
 
+//the backend ceck of email existence
+const handleEmailBlur = async () => {
+  if (!email) return;
+  try {
+    const response = await axios.get(
+      `http://localhost:5000/api/auth/check-email?email=${email}`
+    );
+    if (response.data.exists) {
+      setError("Email already exists...Login instead?");
+    } else {
+      setError("");
+    }
+  } catch (err) {
+    console.error("Email check failed", err);
+  }
+};
+
 // form submit handler */i friking need a way to find this segment faster bro...this code is bigger then my ego
 const handleSubmit = async (e) => {
   
   e.preventDefault();
-  const users = JSON.parse(localStorage.getItem("users")) ||JSON.parse(localStorage.getItem("user")) || [];
+ if (error) return;
 
-const emailExists = users.some(
-  (u) => u.email === email
-);
 
-if (emailExists) {
-  setError("Email Already Exists...Login-in Instead?");
-  alert("Email Already Exists...Login-in Instead?");
-  return;
-}
 
 //back to update the submitter with new data...i have no idea how much things this is breaking...
 let finalMajors = [...majors];;
@@ -298,23 +308,7 @@ if (isOtherUniversity && university.name.trim()) {
   // localStorage.setItem("user", JSON.stringify(profile));
   //use context instead
   setProfile(profile);
-// try {
-//   const response = await fetch("http://localhost:5000/register", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json"
-//     },
-//     body: JSON.stringify(profile)
-//   });
 
-//   const data = await response.json();
-//   console.log(data);
-//  // Navigate to next page
-  
-
-// } catch (err) {
-//   console.error("Error sending profile:", err);
-// }
 
  navigate("/register");//i think i did this twice?.....i'll fix it later....fixed
 };
@@ -425,13 +419,14 @@ const customSelect = {
               <br/><br/>
               <label htmlFor="email" id="PEmail" >Your Professional Email:</label>
               <br/>
-             <input type="email" className="PEmail" id="email" name="email" placeholder="something@something.something" required onChange={(e) => setEmail(e.target.value)}/>
+             <input type="email" className="PEmail" id="email" name="email" placeholder="something@something.something" required onChange={(e) => setEmail(e.target.value)}
+             onBlur={handleEmailBlur}/>
              <br />
              {/* in hopes this works to fix the email uniqueness...is that a word?...couldnt care less...yeah it workes....for now */}
-             {/* {error && (
+             {error && (
               <p style={{ color: "#fc0c0ce9", marginTop: "10px",fontSize:"20px",backgroundColor:"#f7f4f4a7", borderRadius: "12px", width:"70%", marginLeft:"15%", height:" 30px" }}>
     {error}
-  </p> )}*/}
+  </p> )}
   {/* that works....works completly fine but for the sake of my testing...i should nake it an alert..atleast for now */}
              
               <br/><br/>

@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userRepo = require("../repositories/user.repo");
+const roomRepo = require("../repositories/room.repo");
 
 const register = async (req, res) => {
   const { 
@@ -12,6 +13,9 @@ const register = async (req, res) => {
   majors,
   username,
   password } = req.body;
+
+
+
 
   const existing = userRepo.findByEmail(email);
   if (existing) {
@@ -35,10 +39,56 @@ const register = async (req, res) => {
     password: hashed,
     
   });
-  const { password: _, ...userWithoutPassword } = user;
+    // find or create public room
+let publicRoom = roomRepo.getRoomsByType("public", null)[0];
+if (!publicRoom) {
+  publicRoom = roomRepo.createRoom({
+    name: "Public Space",
+    type: "public",
+  });
+}
+roomRepo.addMember(publicRoom.id, user.id);
+
+//uni room
+let universityRoom = roomRepo.getRoomsByType("university", user.university.code)[0];
+if (!universityRoom) {
+  universityRoom = roomRepo.createRoom({
+    name: user.university.name,
+    type: "university",
+    university: user.university.code
+  });
+}
+roomRepo.addMember(universityRoom.id, user.id);
+//eeAAAAHHHHHHHHHHHHHHGGGG............
+//major room(s)
+const roomIds = [publicRoom.id, universityRoom.id];
+
+// loop through majors(damn profs....)
+for (const major of user.majors) {
+  
+  let majorRoom = roomRepo.getRoomsByType("major", major)[0];
+  if (!majorRoom) {
+    majorRoom = roomRepo.createRoom({
+      name: major,
+      type: "major",
+      major: major,
+    });
+  }
+  roomRepo.addMember(majorRoom.id, user.id);
+  roomIds.push(majorRoom.id);
+
+}
+
+
+const updatedUser = userRepo.updateUser(user.id, { rooms: roomIds });
+
+
+  const { password: _, ...userWithoutPassword } = updatedUser;
 
   res.status(201).json({ message: "User created", user: userWithoutPassword });
+  
 };
+
 
 const login = async (req, res) => {
   const { identifier, password } = req.body;
@@ -69,10 +119,26 @@ const user = isEmail ? userRepo.findByEmail(identifier) : userRepo.findByUsernam
   res.json({ 
   token,
   user: userWithoutPassword 
-});//so token as id and user for frontend to display user info without password
+});//so token as id and user for frontend to display user info without password,only generated in login process
 };
+const checkEmail = (req, res) => {
+ 
+  const { email } = req.query;
+  const user = userRepo.findByEmail(email);
+  res.json({ exists: !!user });//new trick  unlocked,!! to transfer object to boolean
+
+};
+const checkUsername = (req, res) => {
+  
+  const { username } = req.query;
+  const user = userRepo.findByUsername(username);
+  res.json({ exists: !!user });
+};
+
 
 module.exports = {
   register,
   login,
+  checkEmail,
+  checkUsername,
 };
