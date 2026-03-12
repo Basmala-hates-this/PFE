@@ -112,7 +112,7 @@ const user = isEmail ? userRepo.findByEmail(identifier) : userRepo.findByUsernam
     authorityLevel: user.authorityLevel,
     verificationStatus: user.verificationStatus },
     process.env.JWT_SECRET,
-    { expiresIn: "1h" }
+    { expiresIn: "24h" }
   );
   const { password: _, ...userWithoutPassword } = user;
 

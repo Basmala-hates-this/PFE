@@ -40,7 +40,11 @@ const getPostById = (id) => {
   const posts = readPosts();
   return posts.find((p) => p.id === id);
 };
-const getPostsAll = () => {
+const getPostsAll = (roomId) => {
+    const posts = readPosts();
+  if (roomId) {
+    return posts.filter((p) => p.roomId === roomId);
+  }
   return readPosts();
 };
 

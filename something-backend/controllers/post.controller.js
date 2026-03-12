@@ -26,7 +26,8 @@ const getPostById = (req, res) => {
 };
 
 const getPostsAll = (req, res) => {
-  const posts = postRepo.getPostsAll();
+  const { roomId } = req.query;
+  const posts = postRepo.getPostsAll(roomId);
   res.json(posts);
 };
 

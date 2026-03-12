@@ -2,6 +2,7 @@ import "../styles/Dash.css";
 import "../styles/sidebar.css";
 import Cat from "../photos/Cat.jpg";
  import { useNavigate } from "react-router-dom";
+ import axios from "axios";
 
 
 import { useRegistration } from "../assets/components/Context.jsx";
@@ -34,11 +35,13 @@ export default function Dashboard() {
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [user, setUser] = useState(null);
 
-  //let this be the point i start the mock posts
-  const [mockPosts, setMockPosts] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-const [postContent, setPostContent] = useState("");
 
+
+//backen posts
+const [posts, setPosts] = useState([]);
+const [isModalOpen, setIsModalOpen] = useState(false);
+const [postContent, setPostContent] = useState("");
+const [loading, setLoading] = useState(false);
 
 
 
@@ -107,8 +110,21 @@ useEffect(() => {
 
 //ehem...not so pround of that....eehhh...svaed global mock posts to local storage?->yeah,no..this gets them
 useEffect(() => {
-  const storedPosts = JSON.parse(localStorage.getItem("globalPosts")) || [];
-  setMockPosts(storedPosts);
+  const fetchPosts = async () => {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/posts", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setPosts(response.data);
+    } catch (err) {
+      console.error("Failed to fetch posts:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchPosts();
 }, []);
 
 //ze function to(can i call it function? or component? this entire page is a compenent though...anyhow finish the comment)create mock
@@ -126,25 +142,25 @@ const handleMockPost = () => {
 //this one creates a semi blivable post and WE SAVE TO LOCALSTORAGE
 //the one before just creats a should have been good enough block...
 //THIS WILL EMITATE WHAT THE VISION MIGHT LOOK LIKE...
-const handleSubmitPost = () => {
+const handleSubmitPost = async () => {
   if (!postContent.trim()) return;
-
-  const storedPosts = JSON.parse(localStorage.getItem("globalPosts")) || [];
-
-  const newPost = {
-    id: Date.now(),//ehhh...didnt think this one thrugh with the seconds did i?...it works what more could i possibly want?..i'll fix that one backend
-    author: user?.username || "User",
-    content: postContent,
-    time: new Date().toLocaleTimeString()
-  };
-
-  const updatedPosts = [newPost, ...storedPosts];
-
-  localStorage.setItem("globalPosts", JSON.stringify(updatedPosts));
-  setMockPosts(updatedPosts);
-
-  setPostContent("");
-  setIsModalOpen(false);
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.post(
+      "http://localhost:5000/api/posts",
+      {
+        content: postContent,
+        title: "Post",
+        roomId: "public"
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setPosts(prev => [response.data, ...prev]);
+    setPostContent("");
+    setIsModalOpen(false);
+  } catch (err) {
+    console.error("Failed to create post:", err);
+  }
 };
 
 
@@ -203,17 +219,24 @@ const handleSubmitPost = () => {
             <h2 className="H2feed">Feed</h2>
             <div className="fyp-feed" id="fyp-feed">
                 <p>ehh...the mock are just for funsies....this will not be at all the way this will be..i hope</p><br /><br />
-                {mockPosts.length === 0 ? (
-    <p>No posts yet. Try writing one ✨(i lost it)</p>
-  ) : (
-    mockPosts.map(post => (
-      <div key={post.id} className="mock-post" style={{border:" 2px,solid black",marginBottom:"5px", padding:"14px",borderRadius:"6px"}}>
-        <strong>@{post.author}</strong>
-        <p>{post.content}</p>
-        <small>{post.time}</small>
+                {loading ? (
+  <p>Loading posts...</p>
+) : posts.length === 0 ? (
+  <p>No posts yet. Try writing one ✨</p>
+) : (
+  posts.map(post => (
+    <div key={post.id} className="mock-post" style={{marginBottom:"5px", padding:"14px", borderRadius:"6px"}}>
+      <strong>@{post.authorUsername}</strong>
+      <small style={{marginLeft: "8px", opacity: 0.6}}>{post.roomId}</small>
+      <p>{post.content}</p>
+      <small>{new Date(post.createdAt).toLocaleString()}</small>
+      <div style={{marginTop: "8px"}}>
+        <button>👍 Useful {post.votes.useful}</button>
+        <button style={{marginLeft: "8px"}}>👎 Useless {post.votes.useless}</button>
       </div>
-    ))
-  )}
+    </div>
+  ))
+)}
             </div>
         </section>
 
