@@ -3,6 +3,8 @@ import "../styles/sidebar.css";
 import Cat from "../photos/Cat.jpg";
  import { useNavigate } from "react-router-dom";
  import axios from "axios";
+import Select from "react-select";
+import { customSelect } from "../assets/components/selectStyles";
 
 
 import { useRegistration } from "../assets/components/Context.jsx";
@@ -43,6 +45,13 @@ const [isModalOpen, setIsModalOpen] = useState(false);
 const [postContent, setPostContent] = useState("");
 const [loading, setLoading] = useState(false);
 
+const [userRooms, setUserRooms] = useState([]);
+const [selectedRooms, setSelectedRooms] = useState([]);
+//scroling to the top of the code just to add a usestate u didnt even know you needed is absurd and biond me at this point
+
+const [postTitle, setPostTitle] = useState("");
+const [selectedPostRoom, setSelectedPostRoom] = useState(null);
+const [selectedPost, setSelectedPost] = useState(null);
 
 
   //
@@ -114,7 +123,14 @@ useEffect(() => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/posts", {
+      
+      // build the url based on selected rooms
+      let url = "http://localhost:5000/api/posts";
+      if (selectedRooms.length === 1) {
+        url += `?roomId=${selectedRooms[0].value}`;
+      }
+      
+      const response = await axios.get(url, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setPosts(response.data);
@@ -125,7 +141,7 @@ useEffect(() => {
     }
   };
   fetchPosts();
-}, []);
+}, [selectedRooms]); // reruns when selectedRooms changes
 
 //ze function to(can i call it function? or component? this entire page is a compenent though...anyhow finish the comment)create mock
 const handleMockPost = () => {
@@ -143,30 +159,153 @@ const handleMockPost = () => {
 //the one before just creats a should have been good enough block...
 //THIS WILL EMITATE WHAT THE VISION MIGHT LOOK LIKE...
 const handleSubmitPost = async () => {
-  if (!postContent.trim()) return;
+  if (!postContent.trim() || !selectedPostRoom) return;
   try {
     const token = localStorage.getItem("token");
     const response = await axios.post(
       "http://localhost:5000/api/posts",
       {
         content: postContent,
-        title: "Post",
-        roomId: "public"
+        title: postTitle || "Post",
+        roomId: selectedPostRoom.value
       },
       { headers: { Authorization: `Bearer ${token}` } }
     );
     setPosts(prev => [response.data, ...prev]);
     setPostContent("");
+    setPostTitle("");
+    setSelectedPostRoom(null);
     setIsModalOpen(false);
   } catch (err) {
     console.error("Failed to create post:", err);
   }
 };
 
+//fetching ze rooms for room filtaa
+useEffect(() => {
+  const fetchRooms = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUserRooms(response.data);
+    } catch (err) {
+      console.error("Failed to fetch rooms:", err);
+    }
+  };
+  fetchRooms();
+}, []);
+
+//the ammount of bugs is bugging me.....
+//me stupid used the wrong api...
+//u know how i like to be extra so instead of simple select or react select i want a fancy select for room filtration?
+//....about that...
+const groupedRoomOptions = [
+  {
+    label: "Public",
+    options: userRooms
+      .filter(r => r.type === "public")
+      .map(r => ({ value: r.id, label: r.name }))
+  },
+  {
+    label: "University",
+    options: userRooms
+      .filter(r => r.type === "university")
+      .map(r => ({ value: r.id, label: r.name }))
+  },
+  {
+    label: "Majors",
+    options: userRooms
+      .filter(r => r.type === "major")
+      .map(r => ({ value: r.id, label: r.name }))
+  },
+  {
+    label: "Private Rooms",
+    options: userRooms
+      .filter(r => r.type === "private")
+      .map(r => ({ value: r.id, label: r.name }))
+  }
+].filter(group => group.options.length > 0); // remove empty groups
 
 
+//ladies and gentemen.....the votes
+const handleVote = async (postId, voteType) => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.patch(
+      `http://localhost:5000/api/posts/${postId}/vote`,
+      { voteType },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    // update the post in the feed without refetching everything
+    setPosts(prev => prev.map(post => 
+      post.id === postId ? response.data : post
+    ));
+  } catch (err) {
+    console.error("Failed to vote:", err);
+  }
+};
 
+//room name instead of id(me was stupid again)
+const getRoomName = (roomId) => {
+  const room = userRooms.find(r => r.id === roomId);
+  return room ? room.name : roomId;
+};
 
+//ze comments my good living organisme
+//screw it...this is the last i'll do today
+//even if it didnt work
+const handleAddComment = async (postId) => {
+  const input = document.getElementById("commentInput");
+  const content = input?.value.trim();
+  if (!content) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post(
+      `http://localhost:5000/api/posts/${postId}/comments`,
+      { content },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // refetch the post to get updated comments
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // update the post in the feed
+    setPosts(prev => prev.map(p => p.id === postId ? response.data : p));
+    // update selected post
+    setSelectedPost(response.data);
+    input.value = "";
+  } catch (err) {
+    console.error("Failed to add comment:", err);
+  }
+};
+//i friking got lost in my own code....
+const handleCommentVote = async (postId, commentId, voteType) => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.patch(
+      `http://localhost:5000/api/posts/${postId}/comments/${commentId}/vote`,
+      { voteType },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // refetch the post to get updated comment votes
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    setPosts(prev => prev.map(p => p.id === postId ? response.data : p));
+    setSelectedPost(response.data);
+  } catch (err) {
+    console.error("Failed to vote on comment:", err);
+  }
+};
 
 
 
@@ -202,17 +341,53 @@ const handleSubmitPost = async () => {
             <img src={currentUser?.profilePic || Cat} alt="pfp" className="pfp" />
         </header>
 
-        {/* <!-- Room Selection --> */}
-        <section className="room-selection">
-        {/* <label id="dashh3">Select rooms to view:</label> */}
-        <select id="room-select" className="roomSelect" multiple size="5" style={{width:"30%"}}>
-            <option value="" disabled >Select rooms to view:</option>
-        {/* <!-- react will populate options --> */}
-        </select>
-        <input type="text"  id="dashSearch" className="dashSearch" placeholder="🔍 searching for something?" style={{float:"right" , width:"30%", border:" 2px, solid, #8ca4c6",height:"30px", padding:"3px", borderRadius:"6px"}}/>
-        {/* i kinda lost the button heeeh.... */}
-        <button id="postBtn" className="postBtn" style={{float:"right" , width:"15%",height:"30px", marginRight:"5px", padding:"3px", borderRadius:"6px" }}  onClick={() => setIsModalOpen(true)}>Write A Post📝</button>
-       </section>
+        {/* why is simple css so damn hell?....was using css framwork going to make this worst or better?..guess we never gonna know */}
+<section className="room-selection" style={{
+  display: "flex",
+  alignItems: "center",
+  gap: "10px",
+  marginBottom: "15px"
+}}>
+  <div style={{ flex: 1 }}>
+    <Select
+      isMulti
+      options={groupedRoomOptions}
+      value={selectedRooms}
+      onChange={(selected) => setSelectedRooms(selected || [])}
+      placeholder="Select rooms to view..."
+      styles={customSelect}
+    />
+  </div>
+
+  <input 
+    type="text" 
+    id="dashSearch" 
+    className="dashSearch" 
+    placeholder="🔍 searching for something?" 
+    style={{
+      width: "25%",
+      border: "2px solid #8ca4c6",
+      height: "38px",
+      padding: "3px 8px",
+      borderRadius: "6px"
+    }}
+  />
+
+  <button 
+    id="postBtn" 
+    className="postBtn" 
+    style={{
+      width: "15%",
+      height: "38px",
+      padding: "3px",
+      borderRadius: "6px",
+      whiteSpace: "nowrap"
+    }} 
+    onClick={() => setIsModalOpen(true)}
+  >
+    Write A Post📝
+  </button>
+</section>
 
         {/* <!-- Feed --> */}
         <section className="fyp-container">
@@ -225,14 +400,31 @@ const handleSubmitPost = async () => {
   <p>No posts yet. Try writing one ✨</p>
 ) : (
   posts.map(post => (
-    <div key={post.id} className="mock-post" style={{marginBottom:"5px", padding:"14px", borderRadius:"6px"}}>
-      <strong>@{post.authorUsername}</strong>
-      <small style={{marginLeft: "8px", opacity: 0.6}}>{post.roomId}</small>
+    <div key={post.id} className="mock-post" style={{border:"1px solid #ccc",borderRadius:"30%",marginBottom:"5px", padding:"14px", borderRadius:"6px"}}>
+      <div style={{  display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
+  <img 
+    src={currentUser?.profilePic || Cat} 
+    alt="pfp" 
+    style={{width:"32px", height:"32px", borderRadius:"50%", objectFit:"cover"}}
+  />
+  <strong>@{post.authorUsername}</strong>
+  <small style={{
+    background:"#6476af", 
+    color:"white", 
+    padding:"2px 8px", 
+    borderRadius:"10px",
+    fontSize:"11px"
+  }}>{post.authorRole || "user"}</small>
+  <small style={{opacity:0.6}}>{getRoomName(post.roomId)}</small>
+</div>
       <p>{post.content}</p>
       <small>{new Date(post.createdAt).toLocaleString()}</small>
       <div style={{marginTop: "8px"}}>
-        <button>👍 Useful {post.votes.useful}</button>
-        <button style={{marginLeft: "8px"}}>👎 Useless {post.votes.useless}</button>
+        <button onClick={() => handleVote(post.id, "useful")}>{post.votes.useful}👍 Useful </button>
+        <button onClick={() => handleVote(post.id, "useless")} style={{marginLeft: "8px"}}>{post.votes.useless}👎 Useless </button>
+        <button onClick={() => setSelectedPost(post)}  style={{marginLeft: "8px"}}>
+         Comments {post.comments.length}
+        </button>
       </div>
     </div>
   ))
@@ -240,56 +432,136 @@ const handleSubmitPost = async () => {
             </div>
         </section>
 
-        {/* <!-- Side Action Bar: this was old logic to be visited later..... --> */}
-        {/* <div className="side-action-bar">
-            <div className="icon-bar">
-                <div className="icon-btn" id="postsBtn">📝</div>
-                <div className="icon-btn" id="messagesBtn">💬</div>
-                <div className="icon-btn" id="followersBtn">👥</div>
-            </div>
-
-            <div className="content-panel-container">
-                <form className="content" id="postsPage">
-                    📝 Write a Post
-                    <label htmlFor="post-discription">Write Your Content</label><br/><br/>
-                    <input type="text" id="post-title" placeholder="Title"/><br/>
-                    <textarea id="post-discription" placeholder="Describe your flow..."></textarea><br/>
-                    <button type="submit" id="sub">Submit</button>
-                    <button type="reset" id="can">Cancel</button>
-                </form>
-
-                <div className="content" id="messagesPage">💬 Messages
-                    <p>PRIVATE MESSAGES AND NOTIFICATIONS</p>
-                </div>
-
-                <div className="content" id="followersPage">👥 Followers
-                    <p>FOLLOWERS LIST</p>
-                </div>
-            </div>
-        </div> */}
-
     </main>
     {/* right down here we fuck around and find out */}
-    {isModalOpen && (
-  <div className="modal-overlay">
-    <div className="modal">
-      <h3>Write a Post</h3><br />
-      {/* <input type="text" name="title" id="title"  placeholder="What's on your mind?" style={{width:"400px"}}/><br /><br /> */}
+ {isModalOpen && (
+  <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>Write a Post</h3>
+        <button onClick={() => setIsModalOpen(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
 
-      <textarea style={{width:"400px",minHeight:"100px", padding:"10px"}}
+      <input 
+        type="text"
+        placeholder="Title (optional)"
+        value={postTitle}
+        onChange={(e) => setPostTitle(e.target.value)}
+        style={{width:"100%", marginBottom:"10px", padding:"8px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box"}}
+      />
+
+      <Select
+        options={groupedRoomOptions}
+        value={selectedPostRoom}
+        onChange={(selected) => setSelectedPostRoom(selected)}
+        placeholder="Select a room to post in..."
+        styles={customSelect}
+      />
+      <br/>
+
+      <textarea
         value={postContent}
         onChange={(e) => setPostContent(e.target.value)}
         placeholder="Describe your flow..."
-      /> <br /><br />
+        style={{width:"100%", minHeight:"120px", padding:"10px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box", resize:"vertical"}}
+      />
+      <br/><br/>
 
-      <div className="modal-actions">
-        <button onClick={() => setIsModalOpen(false)} style={{width:" 70px"}}>Cancel</button>
-        <button onClick={handleSubmitPost} style={{width:" 70px", marginLeft:"50px"}}>Post</button>
+      <div className="modal-actions" style={{display:"flex", justifyContent:"flex-end", gap:"10px"}}>
+        <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+        <button onClick={handleSubmitPost} disabled={!postContent.trim() || !selectedPostRoom}>Post</button>
       </div>
+
     </div>
   </div>
 )}
+{selectedPost && (
+  <div className="modal-overlay" onClick={() => setSelectedPost(null)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()} style={{width:"600px", maxHeight:"80vh", display:"flex", flexDirection:"column"}}>
+      
+      {/* header */}
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>Comments</h3>
+        <button onClick={() => setSelectedPost(null)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer", color:"white"}}>✕</button>
+      </div>
+
+      {/* original post */}
+      <div style={{padding:"12px", background:"rgba(255,255,255,0.05)", borderRadius:"8px", marginBottom:"15px"}}>
+        <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
+          <img src={currentUser?.profilePic || Cat} alt="pfp" style={{width:"28px", height:"28px", borderRadius:"50%"}}/>
+          <strong>@{selectedPost.authorUsername}</strong>
+          <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{selectedPost.authorRole || "user"}</small>
+        </div>
+        <p style={{margin:0}}>{selectedPost.content}</p>
+      </div>
+
+      {/* comments list */}
+      <div style={{flex:1, overflowY:"auto", marginBottom:"15px"}}>
+        {selectedPost.comments.length === 0 ? (
+          <p style={{opacity:0.5, textAlign:"center"}}>No comments yet. Be the first!</p>
+        ) : (
+          selectedPost.comments.map(comment => (
+            <div key={comment.id} style={{padding:"10px", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
+              
+              {/* comment header */}
+              <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"4px"}}>
+                <img src={Cat} alt="pfp" style={{width:"24px", height:"24px", borderRadius:"50%"}}/>
+                <strong style={{fontSize:"13px"}}>@{comment.authorUsername}</strong>
+                <small style={{opacity:0.5, fontSize:"11px"}}>{new Date(comment.createdAt).toLocaleString()}</small>
+              </div>
+
+              {/* comment content */}
+              <p style={{margin:"0 0 6px 32px", fontSize:"14px"}}>{comment.content}</p>
+
+              {/* comment votes */}
+              <div style={{margin:"4px 0 0 32px", display:"flex", gap:"8px", flexWrap:"wrap"}}>
+                <button 
+                  onClick={() => handleCommentVote(selectedPost.id, comment.id, "useful")}
+                  style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
+                  👍 Useful {comment.votes.useful}
+                </button>
+                <button 
+                  onClick={() => handleCommentVote(selectedPost.id, comment.id, "useless")}
+                  style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
+                  👎 Useless {comment.votes.useless}
+                </button>
+                {/* specialized vote — only for OP or high rated users */}
+                {(currentUser?.id === selectedPost.authorId || currentUser?.rating >= 4) && (
+                  <button 
+                    onClick={() => handleCommentVote(selectedPost.id, comment.id, "specialized")}
+                    style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", background:"#f0c040", border:"none"}}>
+                    ⭐ Specialized {comment.votes.specialized}
+                  </button>
+                )}
+              </div>
+
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* add comment input */}
+      <div style={{display:"flex", gap:"8px"}}>
+        <input
+          type="text"
+          placeholder="Write a comment..."
+          id="commentInput"
+          style={{flex:1, padding:"8px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white"}}
+        />
+        <button
+          onClick={() => handleAddComment(selectedPost.id)}
+          style={{padding:"8px 16px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}
+        >
+          Send
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
+
 </div>
         </div>
-    );
-}
+    );  }
+      

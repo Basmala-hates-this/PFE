@@ -53,10 +53,17 @@ const addMember = (roomId, userId) => {
     return room;
 };
 
+const getRoomsByIds = (ids) => {
+  const rooms = readRooms();
+  return rooms.filter((r) => ids.includes(r.id));
+};
+
 module.exports = {
     createRoom,
     getRoomById,
     getRoomsByType,
     addMember,
+    getRoomsByIds,
+    
 }
 

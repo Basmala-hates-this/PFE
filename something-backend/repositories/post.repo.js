@@ -20,6 +20,7 @@ const createPost = (postData) => {
     id: Date.now().toString(),
     authorId: postData.authorId,
     authorUsername: postData.authorUsername,
+    authorRole: postData.authorRole,
     roomId: postData.roomId,
     title: postData.title,
     content: postData.content,
@@ -58,9 +59,13 @@ const votePost = (postId, userId, voteType) => {
   if (post.authorId === userId) {
     return { error: "Cannot vote on your own post" };
   }
+  //since i add and delete....this is a procution of me testing accounts that didnt have the vote array yet...because i'm too damn stupidly lazy i didnt want to delete all of them just to rectreate them again
+  if (!post.votes.voters) post.votes.voters = [];
 
   // 3 caases: no existing vote, same vote (remove), different vote (switch)
   const existingVote = post.votes.voters.find((v) => v.userId === userId);
+  // add this line before the existingVote check
+   
   if (!existingVote) {
   post.votes.voters.push({ userId, type: voteType });
   post.votes[voteType]++;

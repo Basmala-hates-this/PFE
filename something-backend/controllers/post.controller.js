@@ -4,13 +4,15 @@ const createPost = (req, res) => {
   const { title, content, roomId } = req.body;
   const authorId = req.user.id;
   const authorUsername = req.user.username;
+   const authorRole = req.user.role;
 
   const newPost = postRepo.createPost({
     title,
     content,
     roomId,
     authorId,
-    authorUsername
+    authorUsername,
+    authorRole,
   });
 
   res.status(201).json(newPost);
