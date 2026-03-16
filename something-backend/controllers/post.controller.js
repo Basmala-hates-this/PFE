@@ -124,6 +124,42 @@ const voteComment = (req, res) => {
   res.json(post);
 };
 
+
+const getPostsByUser = (req, res) => {
+  const userId = req.params.userId;
+  const posts = postRepo.getPostsByUser(userId);
+  res.json(posts);
+};
+
+const getCommentsByUser = (req, res) => {
+  const userId = req.params.userId;
+  const comments = postRepo.getCommentsByUser(userId);
+  res.json(comments);
+};
+
+const getMyStats = (req, res) => {
+  const userId = req.user.id;
+  
+  const posts = postRepo.getPostsByUser(userId);
+  const comments = postRepo.getCommentsByUser(userId);
+
+  // calculate vote totals from posts
+  const usefulVotes = posts.reduce((total, post) => total + post.votes.useful, 0);
+  const uselessVotes = posts.reduce((total, post) => total + post.votes.useless, 0);
+
+  // calculate vote totals from comments
+  const commentUseful = comments.reduce((total, c) => total + c.votes.useful, 0);
+  const commentSpecialized = comments.reduce((total, c) => total + c.votes.specialized, 0);
+
+  res.json({
+    postsCount: posts.length,
+    commentsCount: comments.length,
+    usefulReceived: usefulVotes + commentUseful,
+    uselessReceived: uselessVotes,
+    specializedReceived: commentSpecialized,
+  });
+};
+
 module.exports = {
   createPost,
   getPostById,
@@ -134,4 +170,7 @@ module.exports = {
   addComment,
   deleteComment,
   voteComment,
+  getPostsByUser,
+  getCommentsByUser,
+  getMyStats,
 };

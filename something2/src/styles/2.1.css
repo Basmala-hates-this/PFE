@@ -312,6 +312,7 @@ body, .sidebar, .main, .header, .fyp-container, .fyp-feed {
   align-items: center;
   z-index: 1000;
   backdrop-filter: blur(4px);
+  overflow: auto;
 }
 
 .modal {
@@ -323,6 +324,7 @@ body, .sidebar, .main, .header, .fyp-container, .fyp-feed {
   border: 1px solid rgba(255,255,255,0.1);
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   color: white;
+  overflow: auto;
 }
 
 .modal h3 {

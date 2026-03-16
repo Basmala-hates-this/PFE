@@ -3,6 +3,7 @@ import "../styles/profile.css";
 import "../styles/sidebar.css";
  import { useNavigate } from "react-router-dom";
  import { useEffect, useState } from "react";
+ import axios from "axios";
 
 
 
@@ -10,6 +11,10 @@ export default function Profile() {
     const navigate = useNavigate();
 
     const [user, setUser] = useState(null);
+
+    const [stats, setStats] = useState(null);
+
+
     const isProfessor=user?.role === "professor";
 
 
@@ -92,6 +97,31 @@ if (usernameCheck !== currentUser.username) {
 };
 //the irony is i'm making this all just around the local storage...this shit gonna hurt when backended
 
+const handleLogout = () => {
+  localStorage.removeItem("token");
+  localStorage.removeItem("currentUser");
+  navigate("/login");
+};
+
+
+//bout time we git rid of those hard coded stats...right?
+useEffect(() => {
+  const fetchStats = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/users/me/stats", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setStats(response.data);
+    } catch (err) {
+      console.error("Failed to fetch stats:", err);
+    }
+  };
+  fetchStats();
+}, []);
+
+
+
 
     return (
 <div id="body7">
@@ -106,7 +136,7 @@ if (usernameCheck !== currentUser.username) {
       <li><span>My Courses/resources </span></li>
       <li><span> Connections </span></li>
       <li onClick={()=> navigate("/edit")}><span> Edit </span></li>
-      <li onClick={() => navigate("/login")}><span> Logout </span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
+      <li onClick={handleLogout}><span> Logout </span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
       <li className="delete-item"  onClick={handleDeleteAccount}><span> Delete Account </span> </li>
     </ul>
 
@@ -126,18 +156,18 @@ if (usernameCheck !== currentUser.username) {
         <p>Major(s): {user?.majors?.join(", ")}</p>
         
           <p >tag: {user?.role}</p>{/*<!-- only one that showes later --> */}
-         <p>rating: 3.5 </p>  {/* <!-- ⭐⭐⭐☆☆this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
+         <p>rating: N/A </p>  {/* <!-- ⭐⭐⭐☆☆this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
       </div>
     </div>
 {/* 
     <!-- STATS --> */}
     <div className="stats">
-      <div className="stat-card"><span> Posts 📝</span><strong>180</strong></div>
-      <div className="stat-card"><span>Comments 🗨️</span><strong>60</strong></div>
-      <div className="stat-card"><span>Usefull Count👍</span><strong>24</strong></div>
-      <div className="stat-card"><span> Useless Count ❌</span><strong>18</strong></div>
-      <div className="stat-card"><span> Specialized✨</span><strong>6</strong></div>
-      <div className="stat-card"><span>Rooms Joined 🏠</span><strong>24</strong></div>
+      <div className="stat-card"><span> Posts 📝</span><strong>{stats?.postsCount || 0}</strong></div>
+      <div className="stat-card"><span>Comments 🗨️</span><strong>{stats?.commentsCount || 0}</strong></div>
+      <div className="stat-card"><span>Usefull Count👍</span><strong>{stats?.usefulReceived || 0}</strong></div>
+      <div className="stat-card"><span> Useless Count ❌</span><strong>{stats?.uselessReceived || 0}</strong></div>
+      <div className="stat-card"><span> Specialized✨</span><strong>{stats?.specializedReceived || 0}</strong></div>
+      <div className="stat-card"><span>Rooms Joined 🏠</span><strong>{user?.rooms?.length || 0}</strong></div>
     </div>
 
     {/* <!-- COURSES this.....i still dont know how to use....bisicaly the distingtive factor of prof profile from student profile 

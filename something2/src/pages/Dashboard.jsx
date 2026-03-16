@@ -526,12 +526,12 @@ const handleCommentVote = async (postId, commentId, voteType) => {
                   style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
                   👎 Useless {comment.votes.useless}
                 </button>
-                {/* specialized vote — only for OP or high rated users */}
+                {/* specialized vote — only for OP or high rated users ....shit still ...i forgot the rating bit till now...weill be done soon*/}
                 {(currentUser?.id === selectedPost.authorId || currentUser?.rating >= 4) && (
                   <button 
                     onClick={() => handleCommentVote(selectedPost.id, comment.id, "specialized")}
                     style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", background:"#f0c040", border:"none"}}>
-                    ⭐ Specialized {comment.votes.specialized}
+                    ✨ Specialized {comment.votes.specialized}
                   </button>
                 )}
               </div>

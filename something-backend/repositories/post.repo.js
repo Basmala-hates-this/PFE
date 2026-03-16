@@ -192,6 +192,23 @@ else {
   return post;
 }
 
+//something about vs code is pissing me off.....why is vs code buggy now?
+const getPostsByUser = (userId) => {
+  const posts = readPosts();
+  return posts.filter((p) => p.authorId === userId);
+};
+
+const getCommentsByUser = (userId) => {
+  const posts = readPosts();
+  const comments = [];
+  posts.forEach(post => {
+    post.comments.forEach(comment => {
+      if (comment.authorId === userId) comments.push(comment);
+    });
+  });
+  return comments;
+};
+
 
 module.exports = {
   createPost,
@@ -203,4 +220,6 @@ module.exports = {
   addComment,
   deleteComment,
   voteComment,
+  getPostsByUser,
+  getCommentsByUser,
 };
