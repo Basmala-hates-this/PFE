@@ -24,6 +24,7 @@ const [email, setEmail] = useState("");
   }
 
   try {
+    console.log(email)
     await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
     // always show success message — don't reveal if email exists.......damn
     alert("If that email exists, a reset link has been sent. Check your inbox!");
@@ -44,10 +45,10 @@ const [email, setEmail] = useState("");
             <br/>
             <input type="email" id="reset-email" name="reset-email" placeholder="something@something.something" required  value={email} onChange={(e) => setEmail(e.target.value)} />
             <br />
-             {/* {error && (
+             {error && (
               <p style={{ color: "#fc0c0ce9", marginTop: "10px",fontSize:"20px",backgroundColor:"#f7f4f4a7", borderRadius: "12px", width:"70%", marginLeft:"15%", height:" 30px" }}>
     {error}
-  </p> )}*/}
+  </p> )}
             <br/><br/>
             <button type="submit" id="btn4">Send Reset Link</button>
             <br/><br/>

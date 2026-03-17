@@ -22,16 +22,19 @@ export default function EditProfile(){
   const [profilePreview, setProfilePreview] = useState(cat); 
 const [selectedFile, setSelectedFile] = useState(null);
 
-
 useEffect(() => {
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  if (currentUser) {
-    setUsername(currentUser.username);
-    setEditEmail(currentUser.email);
-    if (currentUser.profilePic) {
-      setProfilePreview(currentUser.profilePic);
+  const token = localStorage.getItem("token");
+  axios.get("http://localhost:5000/api/users/me", {
+    headers: { Authorization: `Bearer ${token}` }
+  }).then((res) => {
+    setUsername(res.data.username);
+    setEditEmail(res.data.email);
+    if (res.data.profilePic) {
+      setProfilePreview(res.data.profilePic);
     }
-  }
+  }).catch((err) => {
+    console.error("Failed to fetch user:", err);
+  });
 }, []);
 
 
@@ -136,8 +139,7 @@ const handleSubmit = async (e) => {
       }
     );
 
-    const updatedUser = { ...currentUser, ...response.data };
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    localStorage.setItem("currentUser", JSON.stringify(response.data));
     window.dispatchEvent(new Event("storage"));
 
     alert("Profile updated successfully!");

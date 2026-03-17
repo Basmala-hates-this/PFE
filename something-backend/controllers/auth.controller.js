@@ -172,6 +172,9 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+//the reset password flow would be 2 cases
+//case one is for account recovery ...email link and all
+//case two is for normal password reset for all in all user desire
 
 const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
@@ -200,6 +203,25 @@ const resetPassword = async (req, res) => {
 };
 
 
+const resetPasswordAuth = async (req, res) => {
+  const { newPassword } = req.body;
+  
+  if (!newPassword) {
+    return res.status(400).json({ message: "New password is required" });
+  }
+
+  const user = userRepo.findByEmail(req.user.email);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  userRepo.updateUser(user.id, { password: hashed });
+
+  res.json({ message: "Password updated successfully" });
+};
+
+
 
 module.exports = {
   register,
@@ -208,4 +230,5 @@ module.exports = {
   checkUsername,
   forgotPassword,
   resetPassword,
+  resetPasswordAuth,
 };

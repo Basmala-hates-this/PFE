@@ -81,11 +81,23 @@ const updateMe = async (req, res) => {
 };
 
 
+
+//le me ....memememememememememememememeemmemememememememememe
+const getMe = (req, res) => {
+  const userId = req.user.id;
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  
+  const { password: _, ...userWithoutPassword } = user;
+  res.json(userWithoutPassword);
+};
+
 module.exports = {
   getMyStats,
   getPostsByUser,
   getCommentsByUser,
   updateMe,
+  getMe,
 
   
 };

@@ -15,6 +15,7 @@ router.get("/me/stats", protect, userController.getMyStats);
 
 
 router.patch("/me", protect, upload.single("profilePic"), userController.updateMe);
+router.get("/me", protect, userController.getMe);
 
 
 

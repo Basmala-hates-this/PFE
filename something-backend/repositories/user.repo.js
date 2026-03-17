@@ -32,6 +32,8 @@ const findByEmail = (email) => {
   const users = readUsers();
   return users.find((u) => u.email === email);
 };
+
+
 const findByUsername = (username) => {
   const users = readUsers();
   return users.find((u) => u.username === username);

@@ -5,15 +5,20 @@
 
 
 import "../styles/rp.css";
- import { useNavigate } from "react-router-dom";
- import { useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom"; import { useState } from "react";
 
   import { checkPasswordStrength} from "../assets/components/Validations.js";
  import { useEffect } from "react";
  import { useRegistration } from "../assets/components/Context.jsx";
 
+ import axios from "axios";
+
+
 export default function Reset() {
       const navigate = useNavigate();
+
+      const [searchParams] = useSearchParams();
+      const token = searchParams.get("token");
        
       
 //the irony of me using react was to not rewrite alot of things....but i really cant help but have costum functions for each elemnt
@@ -37,7 +42,8 @@ const targetEmail = resetEmail || currentUser?.email;
   //as much as i hate this security...i need it 
   //but is login the correct page here?welp couldnt care less each page has links to navigate......
   useEffect(() => {
-  if (!targetEmail) {
+  const authToken = localStorage.getItem("token");
+  if (!token && !authToken) {
     navigate("/login");
   }
 }, []);
@@ -70,7 +76,7 @@ useEffect(() => {
 }, [ password, confirmPassword]);
 
 //wait...does register have the same set of error handlers?...meh i'll check later
-const handleSubmit = (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
   const passwordsMatch = password === confirmPassword;
@@ -88,13 +94,7 @@ const handleSubmit = (e) => {
 
   ///ternary operators are my goated if/else statments....same as template literal for messages...
   //we update THE SELECTED USER RATHER THAN ANYOTHER 
-    const users = JSON.parse(localStorage.getItem("users")) || [];
-
-  const updatedUsers = users.map(user =>
-    user.email === targetEmail
-      ? { ...user, password }
-      : user
-  );
+   
 //...this should also update context so it is easy to backend it later-if that is a word- meh another shit for another day
 //reminder to my forgetful sole...and urs partner...if u ever ended up reading my comments...
 // If it must survive refresh -> storage
@@ -102,19 +102,37 @@ const handleSubmit = (e) => {
 // If it’s temporary & sensitive -> storage, not context
 // If it’s UI convenience -> context
 //i still do sometimes question my sanety for keeping with this major
-  localStorage.setItem("users", JSON.stringify(updatedUsers));
-  localStorage.removeItem("resetEmail");
+ 
 //self explanatory...or should i explaun to ur dull forgetfull brain?we use the page for 2 diffrent sides of the system...if else to define each side of the damn thing
 //also i would like to apologize now for the awfull typos because that state of brain where i used to mix up lettsrs or write full words backwards is back...fun...
-  if (resetEmail) {
-    alert("Password successfully reset! Try not to forget this one :)");
-  
-  localStorage.removeItem("resetEmail");
-   navigate("/login");
+if (token) {
+    // case 1: email recovery
+    try {
+        await axios.post("http://localhost:5000/api/auth/reset-password", {
+            token,
+            newPassword: password,
+        });
+        alert("Password reset successfully! Try not to forget this one :)");
+        navigate("/login");
+    } catch (err) {
+        const msg = err.response?.data?.message || "Something went wrong.";
+        alert(msg);
+    }
 } else {
-  alert("Password updated successfully!");
- 
-  navigate("/edit");
+    // case 2: logged in user changing password
+    try {
+        const authToken = localStorage.getItem("token");
+        await axios.post(
+            "http://localhost:5000/api/auth/reset-password-auth",
+            { newPassword: password },
+            { headers: { Authorization: `Bearer ${authToken}` } }
+        );
+        alert("Password updated successfully!");
+        navigate("/profile");
+    } catch (err) {
+        const msg = err.response?.data?.message || "Something went wrong.";
+        alert(msg);
+    }
 }
 };
 
