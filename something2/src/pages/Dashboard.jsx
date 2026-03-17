@@ -338,7 +338,7 @@ const handleCommentVote = async (postId, commentId, voteType) => {
 </small></span>
 </h1>
 
-            <img src={currentUser?.profilePic || Cat} alt="pfp" className="pfp" />
+            <img src={user?.profilePic || Cat} alt="pfp" className="pfp" />
         </header>
 
         {/* why is simple css so damn hell?....was using css framwork going to make this worst or better?..guess we never gonna know */}
@@ -403,7 +403,7 @@ const handleCommentVote = async (postId, commentId, voteType) => {
     <div key={post.id} className="mock-post" style={{border:"1px solid #ccc",borderRadius:"30%",marginBottom:"5px", padding:"14px", borderRadius:"6px"}}>
       <div style={{  display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
   <img 
-    src={currentUser?.profilePic || Cat} 
+    src={user?.profilePic || Cat} 
     alt="pfp" 
     style={{width:"32px", height:"32px", borderRadius:"50%", objectFit:"cover"}}
   />
@@ -489,7 +489,7 @@ const handleCommentVote = async (postId, commentId, voteType) => {
       {/* original post */}
       <div style={{padding:"12px", background:"rgba(255,255,255,0.05)", borderRadius:"8px", marginBottom:"15px"}}>
         <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
-          <img src={currentUser?.profilePic || Cat} alt="pfp" style={{width:"28px", height:"28px", borderRadius:"50%"}}/>
+          <img src={user?.profilePic || Cat} alt="pfp" style={{width:"28px", height:"28px", borderRadius:"50%"}}/>
           <strong>@{selectedPost.authorUsername}</strong>
           <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{selectedPost.authorRole || "user"}</small>
         </div>

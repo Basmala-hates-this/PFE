@@ -3,6 +3,8 @@ import "../styles/RRP.css";
  import { useState } from "react";
 import { useEffect } from "react";
 import { isValidEmail } from "../assets/components/Validations";
+import axios from "axios";
+
 
 export default function RRP() {
     const navigate = useNavigate();
@@ -13,39 +15,24 @@ const [email, setEmail] = useState("");
     const [error, setError] = useState("");
     
     // form submit handler*/
-    const handleSubmit = (e) => {
-      
-      e.preventDefault();
-      const users = JSON.parse(localStorage.getItem("users"))  || [];
-    
-    const emailExists = users.some(
-      (u) => u.email === email
-    );
-
-    if(!isValidEmail(email)){
-  alert("Email Not Valid");
-  return;
-}
+   const handleSubmit = async (e) => {
+  e.preventDefault();
   
-else if (!emailExists) {
-  setError("Email Does Not Exist... You Have the Right Email?");
-  alert("Email Does Not Exist...Do You Have the Right Email?");
-  return;
-}
-//2 parts of the party are  working...check if the email is valid then check if it exists...
-//the third one is not for the moment....why is giving an existing email flagg the second alert?
-//damn...my guess is i'm not checking the localstorage corectly.....
-//again it ws my logic which i had to invert the emailexist part....
-//eitherway....for real flow...we will keep the email we found....so we can use it to change the password of the said email's related account
-//pointless work.....NOT POINTLESS WHATSOEVER
-localStorage.setItem("resetEmail", email);
-
-
-  navigate("/Reset");
-
-
-  
+  if (!isValidEmail(email)) {
+    setError("Email Not Valid");
+    return;
   }
+
+  try {
+    await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+    // always show success message — don't reveal if email exists.......damn
+    alert("If that email exists, a reset link has been sent. Check your inbox!");
+    navigate("/login");
+  } catch (err) {
+    console.error("Failed to send reset email:", err);
+    setError("Something went wrong. Try again.");
+  }
+};
 
   return (
     <div className="RRP" id="body4">  

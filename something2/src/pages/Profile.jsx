@@ -61,12 +61,12 @@ const handleDeleteAccount = () => {
   // .lets do password and comment it until we decide
   //partner isnt responding to me....
   //anyhow
-  const passwordCheck = prompt("Enter your password to confirm deletion:");
+//   const passwordCheck = prompt("Enter your password to confirm deletion:");
 
-if (passwordCheck !== currentUser.password) {
-  alert("Incorrect password.");
-  return;
-}
+// if (passwordCheck !== currentUser.password) {
+//   alert("Incorrect password.");
+//   return;
+// }
 //be mean and double check with the username?
 //yeah this definitely not evil or cruel...i'm just being secure.....which one should come first though?
 const usernameCheck = prompt("Enter your username to confirm deletion:");

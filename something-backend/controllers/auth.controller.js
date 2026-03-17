@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userRepo = require("../repositories/user.repo");
 const roomRepo = require("../repositories/room.repo");
+const sendResetEmail = require("../config/email");
 
 const register = async (req, res) => {
   const { 
@@ -136,9 +137,75 @@ const checkUsername = (req, res) => {
 };
 
 
+
+
+
+
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  // check if email exists
+  const user = userRepo.findByEmail(email);
+  if (!user) {
+    // don't reveal if email exists or not — security best practice
+    return res.json({ message: "If that email exists, a reset link has been sent." });
+  }
+
+  // generate reset token — expires in 15 minutes
+  const resetToken = jwt.sign(
+    { email: user.email, id: user.id },
+    process.env.JWT_SECRET,
+    { expiresIn: "15m" }
+  );
+
+  // build reset link
+  const resetLink = `http://localhost:5173/reset?token=${resetToken}`;
+
+  // send email
+  try {
+    await sendResetEmail(user.email, resetLink);
+    res.json({ message: "If that email exists, a reset link has been sent." });
+  } catch (err) {
+    console.error("Email sending failed:", err);
+    res.status(500).json({ message: "Failed to send reset email." });
+  }
+};
+
+
+const resetPassword = async (req, res) => {
+  const { token, newPassword } = req.body;
+
+  if (!token || !newPassword) {
+    return res.status(400).json({ message: "Token and new password are required" });
+  }
+
+  // verify the token
+  let decoded;
+  try {
+    decoded = jwt.verify(token, process.env.JWT_SECRET);
+  } catch (err) {
+    return res.status(400).json({ message: "Invalid or expired reset token" });
+  }
+
+  const user = userRepo.findByEmail(decoded.email);
+  if (!user) {
+    return res.status(404).json({ message: "User not found" });
+  }
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  userRepo.updateUser(user.id, { password: hashed });
+
+  res.json({ message: "Password updated successfully" });
+};
+
+
+
 module.exports = {
   register,
   login,
   checkEmail,
   checkUsername,
+  forgotPassword,
+  resetPassword,
 };

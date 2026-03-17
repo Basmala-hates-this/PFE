@@ -14,4 +14,10 @@ router.get("/me", protect, (req, res) => {
 router.get("/check-email", authController.checkEmail);
 router.get("/check-username", authController.checkUsername);
 
+
+
+
+router.post("/forgot-password", authController.forgotPassword);
+router.post("/reset-password", authController.resetPassword);
+
 module.exports = router;
