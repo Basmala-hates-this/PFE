@@ -1,6 +1,9 @@
 const fs = require("fs");//to connect to the json file(aka false database)
 const path = require("path");
 const filePath = path.join(__dirname, "../data/posts.json");//__dirname means "the folder this file is currently in"
+const userRepo = require("./user.repo");
+
+
 
 // Read posts from the JSON file
 const readPosts = () => {
@@ -79,6 +82,16 @@ else {
   existingVote.type = voteType;
   post.votes[voteType]++;
 }
+if (!existingVote) {
+  userRepo.updateRating(post.authorId, voteType, "add");
+} else if (existingVote.type === voteType) {
+  userRepo.updateRating(post.authorId, voteType, "remove");
+} else {
+  userRepo.updateRating(post.authorId, existingVote.type, "remove");
+  userRepo.updateRating(post.authorId, voteType, "add");
+}
+
+
   writePosts(posts);
   return post;
 };
@@ -188,6 +201,15 @@ else {
   existingVote.type = voteType;
   comment.votes[voteType]++;
 }
+if (!existingVote) {
+  userRepo.updateRating(comment.authorId, voteType, "add");
+} else if (existingVote.type === voteType) {
+  userRepo.updateRating(comment.authorId, voteType, "remove");
+} else {
+  userRepo.updateRating(comment.authorId, existingVote.type, "remove");
+  userRepo.updateRating(comment.authorId, voteType, "add");
+}
+
   writePosts(posts);
   return post;
 }
@@ -210,6 +232,25 @@ const getCommentsByUser = (userId) => {
 };
 
 
+const updateComment = (postId, commentId, userId, content) => {
+  const posts = readPosts();
+  const post = posts.find((p) => p.id === postId);
+  if (!post) return null;
+
+  const comment = post.comments.find((c) => c.id === commentId);
+  if (!comment) return null;
+
+  if (comment.authorId !== userId) {
+    return { error: "Not authorized to edit this comment" };
+  }
+
+  comment.content = content;
+  comment.isUpdated = true;
+
+  writePosts(posts);
+  return comment;
+};
+
 module.exports = {
   createPost,
   getPostsAll,
@@ -222,4 +263,5 @@ module.exports = {
   voteComment,
   getPostsByUser,
   getCommentsByUser,
+  updateComment,
 };

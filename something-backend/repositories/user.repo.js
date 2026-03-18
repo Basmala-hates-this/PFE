@@ -18,6 +18,7 @@ const createUser = (userData) => {
   const newUser = {
     id: Date.now().toString(),
     ...userData,
+     rating: 1,//starting oint because why the hell would u start with 0 reddit?that is annoying as hell
     verificationStatus: userData.role === 'professor' ? 'pending' : 'none',
     authorityLevel: 'user',
     permissions: []   
@@ -55,10 +56,30 @@ const updateUser = (id, updatedData) => {
 };
 
 
+const updateRating = (userId, voteType, action) => {
+  const user = findById(userId);
+  if (!user) return;
+
+  const currentRating = user.rating ?? 1;
+  
+  let change = 0;
+  if (voteType === "useful") change = 0.02;
+  else if (voteType === "useless") change = -0.02;
+  else if (voteType === "specialized") change = 0.10;
+
+  // if removing a vote, reverse the change
+  if (action === "remove") change = -change;
+
+  const newRating = Math.min(5, Math.max(0, currentRating + change));
+  updateUser(userId, { rating: parseFloat(newRating.toFixed(2)) });
+};
+
+
 module.exports = {
   createUser,
   findByEmail,
   findByUsername,
   findById,
   updateUser,
+  updateRating,
 };

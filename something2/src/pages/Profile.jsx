@@ -19,8 +19,14 @@ export default function Profile() {
 
 
 useEffect(() => {
-  const storedUser = JSON.parse(localStorage.getItem("currentUser"));
-  setUser(storedUser);
+  const token = localStorage.getItem("token");
+  axios.get("http://localhost:5000/api/users/me", {
+    headers: { Authorization: `Bearer ${token}` }
+  }).then((res) => {
+    setUser(res.data);
+  }).catch((err) => {
+    console.error("Failed to fetch user:", err);
+  });
 }, []);
 
 //listener to the blah blah b;ah blah....u get the damn idea
@@ -156,7 +162,7 @@ useEffect(() => {
         <p>Major(s): {user?.majors?.join(", ")}</p>
         
           <p >tag: {user?.role}</p>{/*<!-- only one that showes later --> */}
-         <p>rating: N/A </p>  {/* <!-- ⭐⭐⭐☆☆this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
+         <p>rating: {user?.rating ?? 1} / 5 </p>  {/* <!-- ⭐⭐⭐☆☆this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
       </div>
     </div>
 {/* 

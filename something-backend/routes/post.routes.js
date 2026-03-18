@@ -12,6 +12,7 @@ router.delete("/:id", protect, postController.deletePost);
 router.post("/:postId/comments", protect, postController.addComment);
 router.delete("/:postId/comments/:commentId", protect, postController.deleteComment);
 router.patch("/:postId/comments/:commentId/vote", protect, postController.voteComment);
+router.patch("/:postId/comments/:commentId", protect, postController.updateComment);
 
 
 module.exports = router;

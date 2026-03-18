@@ -137,27 +137,43 @@ const getCommentsByUser = (req, res) => {
   res.json(comments);
 };
 
-const getMyStats = (req, res) => {
-  const userId = req.user.id;
+// const getMyStats = (req, res) => {
+//   const userId = req.user.id;
   
-  const posts = postRepo.getPostsByUser(userId);
-  const comments = postRepo.getCommentsByUser(userId);
+//   const posts = postRepo.getPostsByUser(userId);
+//   const comments = postRepo.getCommentsByUser(userId);
 
-  // calculate vote totals from posts
-  const usefulVotes = posts.reduce((total, post) => total + post.votes.useful, 0);
-  const uselessVotes = posts.reduce((total, post) => total + post.votes.useless, 0);
+//   // calculate vote totals from posts
+//   const usefulVotes = posts.reduce((total, post) => total + post.votes.useful, 0);
+//   const uselessVotes = posts.reduce((total, post) => total + post.votes.useless, 0);
 
-  // calculate vote totals from comments
-  const commentUseful = comments.reduce((total, c) => total + c.votes.useful, 0);
-  const commentSpecialized = comments.reduce((total, c) => total + c.votes.specialized, 0);
+//   // calculate vote totals from comments
+//   const commentUseful = comments.reduce((total, c) => total + c.votes.useful, 0);
+//   const commentSpecialized = comments.reduce((total, c) => total + c.votes.specialized, 0);
 
-  res.json({
-    postsCount: posts.length,
-    commentsCount: comments.length,
-    usefulReceived: usefulVotes + commentUseful,
-    uselessReceived: uselessVotes,
-    specializedReceived: commentSpecialized,
-  });
+//   res.json({
+//     postsCount: posts.length,
+//     commentsCount: comments.length,
+//     usefulReceived: usefulVotes + commentUseful,
+//     uselessReceived: uselessVotes,
+//     specializedReceived: commentSpecialized,
+//   });
+// };
+
+const updateComment = (req, res) => {
+  const { postId, commentId } = req.params;
+  const { content } = req.body;
+  const userId = req.user.id;
+
+  const updatedComment = postRepo.updateComment(postId, commentId, userId, content);
+  
+  if (!updatedComment) {
+    return res.status(404).json({ message: "Comment not found" });
+  }
+  if (updatedComment.error) {
+    return res.status(403).json({ message: updatedComment.error });
+  }
+  res.json(updatedComment);
 };
 
 module.exports = {
@@ -172,5 +188,6 @@ module.exports = {
   voteComment,
   getPostsByUser,
   getCommentsByUser,
-  getMyStats,
+  // getMyStats,
+  updateComment,
 };

@@ -53,6 +53,13 @@ const [postTitle, setPostTitle] = useState("");
 const [selectedPostRoom, setSelectedPostRoom] = useState(null);
 const [selectedPost, setSelectedPost] = useState(null);
 
+const [editingPost, setEditingPost] = useState(null);
+const [editPostContent, setEditPostContent] = useState("");
+const [editPostTitle, setEditPostTitle] = useState("");
+
+const [editingComment, setEditingComment] = useState(null);
+const [editCommentContent, setEditCommentContent] = useState("");
+
 
   //
   // If user skipped info/register, send them back
@@ -308,7 +315,87 @@ const handleCommentVote = async (postId, commentId, voteType) => {
 };
 
 
+const handleDeletePost = async (postId) => {
+  const confirm = window.confirm("Are you sure you want to delete this post?");
+  if (!confirm) return;
 
+  try {
+    const token = localStorage.getItem("token");
+    await axios.delete(`http://localhost:5000/api/posts/${postId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setPosts(prev => prev.filter(p => p.id !== postId));
+  } catch (err) {
+    console.error("Failed to delete post:", err);
+  }
+};
+
+const handleEditPost = async (postId) => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.patch(
+      `http://localhost:5000/api/posts/${postId}`,
+      { title: editPostTitle, content: editPostContent },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setPosts(prev => prev.map(p => 
+      p.id === postId 
+        ? { ...p, title: editPostTitle, content: editPostContent, isUpdated: true }
+        : p
+    ));
+    setEditingPost(null);
+  } catch (err) {
+    console.error("Failed to edit post:", err);
+  }
+};
+
+
+const handleDeleteComment = async (postId, commentId) => {
+  const confirm = window.confirm("Delete this comment?");
+  if (!confirm) return;
+
+  try {
+    const token = localStorage.getItem("token");
+    await axios.delete(
+      `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setPosts(prev => prev.map(p => p.id === postId ? response.data : p));
+    setSelectedPost(response.data);
+  } catch (err) {
+    console.error("Failed to delete comment:", err);
+  }
+};
+
+
+
+const handleEditComment = async (postId, commentId) => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.patch(
+      `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+      { content: editCommentContent },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setPosts(prev => prev.map(p => p.id === postId ? response.data : p));
+    setSelectedPost(response.data);
+    setEditingComment(null);
+  } catch (err) {
+    console.error("Failed to edit comment:", err);
+  }
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (
         <div id="body5">
             
@@ -425,6 +512,27 @@ const handleCommentVote = async (postId, commentId, voteType) => {
         <button onClick={() => setSelectedPost(post)}  style={{marginLeft: "8px"}}>
          Comments {post.comments.length}
         </button>
+
+        {currentUser?.id === post.authorId && (
+  <button 
+    onClick={() => handleDeletePost(post.id)} 
+    style={{marginLeft: "8px", color:"red", cursor:"pointer"}}>
+    🗑️ Delete
+  </button>
+  
+)}
+  {currentUser?.id === post.authorId && (
+  <button 
+    onClick={() => {
+      setEditingPost(post);
+      setEditPostTitle(post.title);
+      setEditPostContent(post.content);
+    }}  
+    style={{marginLeft: "8px", color:"green", cursor:"pointer"}}>
+    Edit
+  </button>
+  
+)}
       </div>
     </div>
   ))
@@ -457,6 +565,7 @@ const handleCommentVote = async (postId, commentId, voteType) => {
         onChange={(selected) => setSelectedPostRoom(selected)}
         placeholder="Select a room to post in..."
         styles={customSelect}
+        isMulti
       />
       <br/>
 
@@ -533,7 +642,26 @@ const handleCommentVote = async (postId, commentId, voteType) => {
                     style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", background:"#f0c040", border:"none"}}>
                     ✨ Specialized {comment.votes.specialized}
                   </button>
+
+                  
                 )}
+                {currentUser?.id === comment.authorId && (
+                   <button
+                      onClick={() => handleDeleteComment(selectedPost.id, comment.id)}
+                        style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", color:"red"}}>
+                          🗑️ Delete
+                     </button>
+                 )}
+                  {currentUser?.id === comment.authorId && (
+                      <button
+                         onClick={() => {
+                             setEditingComment(comment);
+                             setEditCommentContent(comment.content);
+                          }}
+                        style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", color:"green"}}>
+                          Edit
+                      </button>
+                   )}
               </div>
 
             </div>
@@ -560,6 +688,65 @@ const handleCommentVote = async (postId, commentId, voteType) => {
     </div>
   </div>
 )}
+
+{editingPost && (
+  <div className="modal-overlay" onClick={() => setEditingPost(null)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>Edit Post</h3>
+        <button onClick={() => setEditingPost(null)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
+
+      <input
+        type="text"
+        value={editPostTitle}
+        onChange={(e) => setEditPostTitle(e.target.value)}
+        placeholder="Title"
+        style={{width:"100%", marginBottom:"10px", padding:"8px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box"}}
+      />
+
+      <textarea
+        value={editPostContent}
+        onChange={(e) => setEditPostContent(e.target.value)}
+        placeholder="Content"
+        style={{width:"100%", minHeight:"120px", padding:"10px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box", resize:"vertical"}}
+      />
+
+      <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
+        <button onClick={() => setEditingPost(null)}>Cancel</button>
+        <button onClick={() => handleEditPost(editingPost.id)}>Save</button>
+      </div>
+
+    </div>
+  </div>
+)}
+
+
+{editingComment && (
+  <div className="modal-overlay" onClick={() => setEditingComment(null)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>Edit Comment</h3>
+        <button onClick={() => setEditingComment(null)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
+
+      <textarea
+        value={editCommentContent}
+        onChange={(e) => setEditCommentContent(e.target.value)}
+        style={{width:"100%", minHeight:"100px", padding:"10px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box", resize:"vertical"}}
+      />
+
+      <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
+        <button onClick={() => setEditingComment(null)}>Cancel</button>
+        <button onClick={() => handleEditComment(selectedPost.id, editingComment.id)}>Save</button>
+      </div>
+
+    </div>
+  </div>
+)}
+{/* i seriosly need better modals.....but UI for last apperantly */}
 
 </div>
         </div>
