@@ -92,12 +92,26 @@ const getMe = (req, res) => {
   res.json(userWithoutPassword);
 };
 
+
+
+const deleteMe = async (req, res) => {
+  const userId = req.user.id;
+  const user = userRepo.findById(userId);
+  
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  userRepo.deleteUser(userId);
+  res.json({ message: "Account deleted successfully" });
+};
+
+
 module.exports = {
   getMyStats,
   getPostsByUser,
   getCommentsByUser,
   updateMe,
   getMe,
+  deleteMe,
 
   
 };

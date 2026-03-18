@@ -75,6 +75,12 @@ const updateRating = (userId, voteType, action) => {
 };
 
 
+const deleteUser = (id) => {
+  const users = readUsers();
+  const updatedUsers = users.filter((u) => u.id !== id);
+  writeUsers(updatedUsers);
+};
+
 module.exports = {
   createUser,
   findByEmail,
@@ -82,4 +88,5 @@ module.exports = {
   findById,
   updateUser,
   updateRating,
+  deleteUser,
 };

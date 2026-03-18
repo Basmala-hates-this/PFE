@@ -43,65 +43,35 @@ useEffect(() => {
 //i was ignoring that big ass red delete  account button for a long while now....
 //help me this is hell
 //do it slowly
-const handleDeleteAccount = () => {
-  const confirmDelete = window.confirm(//i aint doing alert for this one...also can we remeber to close the terminal when we want t turn the pc off?this is causing problems..
-    "Are you sure you want to delete your account? Whyyyyyy...I dont care,pass the checks first though."
+const handleDeleteAccount = async () => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete your account? Whyyyyyy...I dont care, pass the check first though."
   );
+  if (!confirmDelete) return;//shit is a yes or no question....what dont ur ass understand
 
-  if (!confirmDelete) return;//shit is a yes/no question..the hell u dont understand?
-
-  const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  const users = JSON.parse(localStorage.getItem("users")) || [];
-
-  if (!currentUser) {
-    navigate("/login");
+//soooo...i wanted 2 steps of confirmation...but thought better of it...
+  const usernameCheck = prompt("Enter your username to confirm deletion:");
+  if (usernameCheck !== user?.username) {
+    alert("Incorrect username.");
     return;
   }
 
-
-  //eehhhh...do you think the suer(user)should confirm their identety before deleting the account?
-  //i mean we all have that one ANNOYING SIBLING THAT KEEPS MESSING AROUND
-  //what are we thinkig?github requires the name of the repo before deleting it...but that is just the repo...
-  //snapchat does that entire buggy email validation...
-  //i think as simple as entring just the username.....or as secure as the password...
-  // .lets do password and comment it until we decide
-  //partner isnt responding to me....
-  //anyhow
-//   const passwordCheck = prompt("Enter your password to confirm deletion:");
-
-// if (passwordCheck !== currentUser.password) {
-//   alert("Incorrect password.");
-//   return;
-// }
-//be mean and double check with the username?
-//yeah this definitely not evil or cruel...i'm just being secure.....which one should come first though?
-const usernameCheck = prompt("Enter your username to confirm deletion:");
-
-if (usernameCheck !== currentUser.username) {
-  alert("Incorrect username.");
-  return;
-}
-
-
-
-
-  // remove user from users array
-  const updatedUsers = users.filter(
-    (u) => u.email !== currentUser.email
-  );
-
-  localStorage.setItem("users", JSON.stringify(updatedUsers));
-
-  // remove session
-  localStorage.removeItem("currentUser");//i forgot what i was going to say tbh...
-
-  //  notify listeners that are useless but still exist because i'm too scared to delete them....damn it
-  window.dispatchEvent(new Event("storage"));
-
-  alert("Account deleted successfully....Bye");//yaay what most people will do if they ever created their accouns...
-  navigate("/login");
+  try {
+    const token = localStorage.getItem("token");
+    await axios.delete("http://localhost:5000/api/users/me", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    localStorage.removeItem("token");
+    localStorage.removeItem("currentUser");
+    alert("Account deleted successfully.... Bye");//yeeeey what most will do if they actually created their accounts...kill me
+    navigate("/login");
+  } catch (err) {
+    console.error("Failed to delete account:", err);
+    alert("Something went wrong.");
+  }
 };
 //the irony is i'm making this all just around the local storage...this shit gonna hurt when backended
+//suck it up backend....that is honestly killing me ngl
 
 const handleLogout = () => {
   localStorage.removeItem("token");
