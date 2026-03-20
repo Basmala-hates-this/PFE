@@ -61,7 +61,8 @@ const [editingComment, setEditingComment] = useState(null);
 const [editCommentContent, setEditCommentContent] = useState("");
 
 //this to be set to backend maybe later....but guests are not saved in database....gray hole to be patched by local storage for now
-const isGuest = localStorage.getItem("isGuest") === "true";
+const guestToken = localStorage.getItem("guestToken");
+const isGuest = !!guestToken;
 
 
   //
@@ -70,7 +71,7 @@ const isGuest = localStorage.getItem("isGuest") === "true";
 
 useEffect(() => {
   const storedUser = JSON.parse(localStorage.getItem("currentUser"));
-  const guest = localStorage.getItem("isGuest") === "true";
+  const guest = !!localStorage.getItem("guestToken");
 
   if (!storedUser && !guest) {
     navigate("/login");
@@ -191,12 +192,13 @@ useEffect(() => {
 //merge fetch rooms and posts so rooms runs before posts and i can avoid those stupid bugs and errors
 useEffect(() => {
   const fetchRoomsAndPosts = async () => {
+    console.log("fetchRoomsAndPosts called");
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
       let allowedRooms = [];
 
-      if (localStorage.getItem("isGuest") === "true") {
+      if (isGuest) {
         const response = await axios.get("http://localhost:5000/api/rooms/public-rooms");
         const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
         const selectedCodes = guestUniversities.map(u => u.value);
@@ -212,16 +214,16 @@ useEffect(() => {
 
       setUserRooms(allowedRooms);
 
-      // now fetch posts with rooms already known
       let url = "http://localhost:5000/api/posts";
       if (selectedRooms.length === 1) {
         url += `?roomId=${selectedRooms[0].value}`;
       }
       const postsResponse = await axios.get(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
+        headers: token ? { Authorization: `Bearer ${token}` } : 
+                 guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
       });
 
-      if (localStorage.getItem("isGuest") === "true") {
+      if (isGuest) {
         const allowedRoomIds = allowedRooms.map(r => r.id);
         setPosts(postsResponse.data.filter(p => allowedRoomIds.includes(p.roomId)));
       } else {
@@ -506,14 +508,14 @@ const handleEditComment = async (postId, commentId) => {
              {isGuest && (
                  <>
                     <li><a href="#" onClick={() => {
-                        localStorage.removeItem("isGuest");
-                         localStorage.removeItem("guestUniversities");
+                        localStorage.removeItem("guestToken");
+                        localStorage.removeItem("guestUniversities");
                          navigate("/");
                      }}>Leave Guest Mode</a></li>
                    <li><a href="#" onClick={() => {
-                      localStorage.removeItem("isGuest");
+                      localStorage.removeItem("guestToken");
                       localStorage.removeItem("guestUniversities");
-                       navigate("/info");
+                      navigate("/info");      
                         }}>Create Account</a></li>
                  </>
                 )}

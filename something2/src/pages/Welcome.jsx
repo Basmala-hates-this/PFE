@@ -4,6 +4,7 @@ import logo2 from "../photos/logo2.png"
  import { useState } from "react";
 import Select from "react-select";
 import { customSelect } from "../assets/components/selectStyles";
+import axios from "axios";
 
 
 export default function Welcome(){
@@ -90,12 +91,21 @@ export default function Welcome(){
       <br/>
       <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
         <button onClick={() => setShowGuestModal(false)}>Cancel</button>
-        <button onClick={() => {
-          localStorage.setItem("isGuest", "true");
-          localStorage.setItem("guestUniversities", JSON.stringify(selectedUniversities));
-          setShowGuestModal(false);
-          navigate("/dashboard");
-        }}>Browse as Guest</button>
+        {/* is it stupid to write the entire function derectly into the element?not illegall....just stupid... */}
+        <button onClick={async () => {
+  try {
+    const response = await axios.post("http://localhost:5000/api/auth/guest", {
+      selectedUniversities
+    });
+    localStorage.setItem("guestToken", response.data.guestToken);
+    localStorage.setItem("guestUniversities", JSON.stringify(selectedUniversities));
+    localStorage.removeItem("isGuest");
+    setShowGuestModal(false);
+    navigate("/dashboard");
+  } catch (err) {
+    console.error("Failed to create guest session:", err);
+  }
+}}>Browse as Guest</button>
       </div>
 
     </div>

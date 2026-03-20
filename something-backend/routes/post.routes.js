@@ -2,17 +2,18 @@ const express = require("express");
 const router = express.Router();
 const postController = require("../controllers/post.controller");
 const protect = require("../middleware/authMiddleware");
+const { guestBlock } = require("../middleware/authMiddleware");
 
-router.post("/", protect, postController.createPost);
+router.post("/", protect,guestBlock, postController.createPost);
 router.get("/",  postController.getPostsAll);
-router.get("/:id", protect, postController.getPostById);
-router.patch("/:id/vote", protect, postController.votePost);
-router.patch("/:id", protect, postController.updatePost);
-router.delete("/:id", protect, postController.deletePost);
-router.post("/:postId/comments", protect, postController.addComment);
-router.delete("/:postId/comments/:commentId", protect, postController.deleteComment);
-router.patch("/:postId/comments/:commentId/vote", protect, postController.voteComment);
-router.patch("/:postId/comments/:commentId", protect, postController.updateComment);
+router.get("/:id", protect,postController.getPostById);
+router.patch("/:id/vote", protect,guestBlock, postController.votePost);
+router.patch("/:id", protect,guestBlock, postController.updatePost);
+router.delete("/:id", protect,guestBlock, postController.deletePost);
+router.post("/:postId/comments", protect,guestBlock, postController.addComment);
+router.delete("/:postId/comments/:commentId", protect,guestBlock, postController.deleteComment);
+router.patch("/:postId/comments/:commentId/vote", protect,guestBlock, postController.voteComment);
+router.patch("/:postId/comments/:commentId", protect,guestBlock, postController.updateComment);
 
 
 module.exports = router;

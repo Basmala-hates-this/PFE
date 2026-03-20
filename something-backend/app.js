@@ -14,7 +14,7 @@ const rateLimit = require("express-rate-limit");
 
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // max 20 requests per 15 minutes,this is a reasonable amount of guest loging per person...right?
+  max: 200, // max 20 requests per 15 minutes,this is a reasonable amount of guest loging per person...right?200 for testing only for nw
   message: { message: "Too many requests, slow down a little..." }
 });
 
