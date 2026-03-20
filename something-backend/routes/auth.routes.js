@@ -22,4 +22,7 @@ router.post("/reset-password", authController.resetPassword);
 
 router.post("/reset-password-auth", protect, authController.resetPasswordAuth);
 
+
+router.post("/guest", authController.guestLogin);
+
 module.exports = router;

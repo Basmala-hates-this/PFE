@@ -8,6 +8,18 @@ const roomRoutes = require("./routes/room.routes");
 const userRoutes = require("./routes/user.routes");
 const path = require("path");
 const app = express();
+const rateLimit = require("express-rate-limit");
+
+
+
+const publicLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // max 20 requests per 15 minutes,this is a reasonable amount of guest loging per person...right?
+  message: { message: "Too many requests, slow down a little..." }
+});
+
+app.use("/api/posts", publicLimiter);
+app.use("/api/rooms/public-rooms", publicLimiter);
 
 app.use(cors());//thiss so the damn browser dont block the 2 diffrent ports call(aka frontend aand backend)
 app.use(express.json());

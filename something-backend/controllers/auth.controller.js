@@ -222,6 +222,21 @@ const resetPasswordAuth = async (req, res) => {
 };
 
 
+const guestLogin = (req, res) => {
+  const { selectedUniversities } = req.body;
+  
+  const guestToken = jwt.sign(
+    { 
+      role: "guest",
+      selectedUniversities: selectedUniversities || []
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "2h" }
+  );
+
+  res.json({ guestToken });
+};
+
 
 module.exports = {
   register,
@@ -231,4 +246,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   resetPasswordAuth,
+  guestLogin,
 };
