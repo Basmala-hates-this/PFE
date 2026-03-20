@@ -541,6 +541,9 @@ const customSelect = {
            <br/><br/>
             <input type="submit" value="Next" id="btn1"/>  {/* onClick={() => navigate("/register")} */}
            <br/><br/>
+            <a href="#" id="InfoLink" onClick={() => navigate("/")} style={{marginRight:"30px"}}>
+              Back to Home?
+            </a>
            <a href="#" id="InfoLink" onClick={() => navigate("/login")}>
               Already Have An Account?
             </a>

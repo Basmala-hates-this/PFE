@@ -58,12 +58,18 @@ const getRoomsByIds = (ids) => {
   return rooms.filter((r) => ids.includes(r.id));
 };
 
+
+const getAllRooms = () => {
+  return readRooms();
+};
+
 module.exports = {
     createRoom,
     getRoomById,
     getRoomsByType,
     addMember,
     getRoomsByIds,
+    getAllRooms,
     
 }
 

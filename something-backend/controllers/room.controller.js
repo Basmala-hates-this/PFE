@@ -14,6 +14,13 @@ const getMyRooms = (req, res) => {
   res.json(userRooms);
 };
 
+const getPublicRooms = (req, res) => {
+  const rooms = roomRepo.getAllRooms();
+  const publicRooms = rooms.filter(r => r.type === "public" || r.type === "university");
+  res.json(publicRooms);
+};
+
 module.exports = {
-  getMyRooms,      
+  getMyRooms, 
+  getPublicRooms,     
 };

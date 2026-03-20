@@ -6,5 +6,6 @@ const protect = require("../middleware/authMiddleware");
 
 
 router.get("/my-rooms", protect, roomController.getMyRooms);
+router.get("/public-rooms", roomController.getPublicRooms);
 
 module.exports = router;

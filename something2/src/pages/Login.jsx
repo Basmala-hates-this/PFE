@@ -77,6 +77,9 @@ const handleSubmit =async (e) => {
   localStorage.setItem("token", data.token);
   // store user
   localStorage.setItem("currentUser", JSON.stringify(data.user));
+  //remove any guests from earlier testing....humor me...
+  localStorage.removeItem("isGuest");
+  localStorage.removeItem("guestUniversities");
   alert("Login Successful!!!!");
   
   //le legin est successful...i'll add a star emoji to this comment later...

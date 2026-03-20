@@ -60,19 +60,26 @@ const [editPostTitle, setEditPostTitle] = useState("");
 const [editingComment, setEditingComment] = useState(null);
 const [editCommentContent, setEditCommentContent] = useState("");
 
+//this to be set to backend maybe later....but guests are not saved in database....gray hole to be patched by local storage for now
+const isGuest = localStorage.getItem("isGuest") === "true";
+
 
   //
   // If user skipped info/register, send them back
+// +for guests
+
 useEffect(() => {
   const storedUser = JSON.parse(localStorage.getItem("currentUser"));
+  const guest = localStorage.getItem("isGuest") === "true";
 
-  if (!storedUser) {
+  if (!storedUser && !guest) {
     navigate("/login");
     return;
   }
 
-  setUser(storedUser);
+  if (storedUser) setUser(storedUser);
 }, [navigate]);
+
 
 
 useEffect(() => {
@@ -125,30 +132,110 @@ useEffect(() => {
 }, []);
 
 //ehem...not so pround of that....eehhh...svaed global mock posts to local storage?->yeah,no..this gets them
+// useEffect(() => {
+//   const fetchRooms = async () => {
+//     console.log("isGuest:", localStorage.getItem("isGuest"));
+//     try {
+//       const token = localStorage.getItem("token");
+      
+//       if (localStorage.getItem("isGuest") === "true") {
+//         // fetch public + university rooms only
+//         const response = await axios.get("http://localhost:5000/api/rooms/public-rooms");
+//         const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
+//         const selectedCodes = guestUniversities.map(u => u.value);
+        
+//         // keep public room + only the universities the guest selected
+//         const filtered = response.data.filter(r => 
+//           r.type === "public" || selectedCodes.includes(r.university)
+//         );
+//         setUserRooms(filtered);
+//       } else {
+//         const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
+//           headers: { Authorization: `Bearer ${token}` }
+//         });
+//         setUserRooms(response.data);
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch rooms:", err);
+//     }
+//   };
+//   fetchRooms();
+// }, []); // reruns when selectedRooms changes
+
+//i just want to know what happens to perfectly working functions when i decide to have a day off....where the hell did fetchposts go?
+// useEffect(() => {
+//   const fetchPosts = async () => {
+//     setLoading(true);
+//     try {
+//       const token = localStorage.getItem("token");
+//       let url = "http://localhost:5000/api/posts";
+//       if (selectedRooms.length === 1) {
+//         url += `?roomId=${selectedRooms[0].value}`;
+//       }
+//       console.log("fetching posts from:", url);
+//       const response = await axios.get(url, {
+//         headers: token ? { Authorization: `Bearer ${token}` } : {}
+//       });
+//       console.log("posts received:", response.data);
+//       setPosts(response.data);
+//     } catch (err) {
+//       console.error("Failed to fetch posts:", err);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+//   fetchPosts();
+// }, [selectedRooms]);
+//hope this one stays this time....
+
+//merge fetch rooms and posts so rooms runs before posts and i can avoid those stupid bugs and errors
 useEffect(() => {
-  const fetchPosts = async () => {
+  const fetchRoomsAndPosts = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
-      
-      // build the url based on selected rooms
+      let allowedRooms = [];
+
+      if (localStorage.getItem("isGuest") === "true") {
+        const response = await axios.get("http://localhost:5000/api/rooms/public-rooms");
+        const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
+        const selectedCodes = guestUniversities.map(u => u.value);
+        allowedRooms = response.data.filter(r =>
+          r.type === "public" || selectedCodes.includes(r.university)
+        );
+      } else {
+        const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        allowedRooms = response.data;
+      }
+
+      setUserRooms(allowedRooms);
+
+      // now fetch posts with rooms already known
       let url = "http://localhost:5000/api/posts";
       if (selectedRooms.length === 1) {
         url += `?roomId=${selectedRooms[0].value}`;
       }
-      
-      const response = await axios.get(url, {
-        headers: { Authorization: `Bearer ${token}` }
+      const postsResponse = await axios.get(url, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
       });
-      setPosts(response.data);
+
+      if (localStorage.getItem("isGuest") === "true") {
+        const allowedRoomIds = allowedRooms.map(r => r.id);
+        setPosts(postsResponse.data.filter(p => allowedRoomIds.includes(p.roomId)));
+      } else {
+        setPosts(postsResponse.data);
+      }
+
     } catch (err) {
-      console.error("Failed to fetch posts:", err);
+      console.error("Failed to fetch:", err);
     } finally {
       setLoading(false);
     }
   };
-  fetchPosts();
-}, [selectedRooms]); // reruns when selectedRooms changes
+  fetchRoomsAndPosts();
+}, [selectedRooms]);
 
 //ze function to(can i call it function? or component? this entire page is a compenent though...anyhow finish the comment)create mock
 const handleMockPost = () => {
@@ -189,20 +276,24 @@ const handleSubmitPost = async () => {
 };
 
 //fetching ze rooms for room filtaa
-useEffect(() => {
-  const fetchRooms = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setUserRooms(response.data);
-    } catch (err) {
-      console.error("Failed to fetch rooms:", err);
-    }
-  };
-  fetchRooms();
-}, []);
+// useEffect(() => {
+//   const fetchRooms = async () => {
+//     try {
+//       const token = localStorage.getItem("token");
+//       const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
+//         headers: { Authorization: `Bearer ${token}` }
+//       });
+//       setUserRooms(response.data);
+//     } catch (err) {
+//       console.error("Failed to fetch rooms:", err);
+//     }
+//   };
+//   fetchRooms();
+// }, []);
+
+
+///////
+
 
 //the ammount of bugs is bugging me.....
 //me stupid used the wrong api...
@@ -406,8 +497,26 @@ const handleEditComment = async (postId, commentId) => {
         <h2>DASHBOARD</h2>
         <ul>
             <li><a href="#" id="home-link" onClick={() => navigate("/dashboard")}>Home</a></li>
-            <li><a href="#" id="rooms-link">Rooms</a></li>
-            <li><a href="#" onClick={() => navigate("/profile")}>Profile</a></li>
+            {!isGuest && (
+               <>
+                  <li><a href="#" id="rooms-link">Rooms</a></li>
+                  <li><a href="#" onClick={() => navigate("/profile")}>Profile</a></li>
+                </>
+             )}
+             {isGuest && (
+                 <>
+                    <li><a href="#" onClick={() => {
+                        localStorage.removeItem("isGuest");
+                         localStorage.removeItem("guestUniversities");
+                         navigate("/");
+                     }}>Leave Guest Mode</a></li>
+                   <li><a href="#" onClick={() => {
+                      localStorage.removeItem("isGuest");
+                      localStorage.removeItem("guestUniversities");
+                       navigate("/info");
+                        }}>Create Account</a></li>
+                 </>
+                )}
             {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
             right now, lets just keep it in the profile....should it have a confirmation? */}
             <li><button id="lgm" className="lgm"  >☀️Light Mode </button></li>
@@ -420,10 +529,19 @@ const handleEditComment = async (postId, commentId) => {
         <header className="header">
             {/* <h1 className="welH1">Welcome <span id="usernameDisplay"></span></h1>...yeah it was a matter of time before i go back to react mind and remove dom shit */}
             {/* might remove full name though.... */}
-            <h1 className="welH1">
+            {/* <h1 className="welH1">
   Welcome <span className="usernameDisplay">@{user?.username || user?.fullname || "User"} <small className="tag">{user?.role}
 </small></span>
-</h1>
+</h1> */}
+         <h1 className="welH1">
+           Welcome <span className="usernameDisplay">
+           @{isGuest ? "Guest" : (user?.username || "User")} 
+           <small className="tag" style={{marginLeft:"5px"}}>{isGuest ? "guest" : user?.role}</small>
+           </span>
+          </h1>
+
+
+
 
             <img src={user?.profilePic || Cat} alt="pfp" className="pfp" />
         </header>
@@ -470,7 +588,7 @@ const handleEditComment = async (postId, commentId) => {
       borderRadius: "6px",
       whiteSpace: "nowrap"
     }} 
-    onClick={() => setIsModalOpen(true)}
+    onClick={() => isGuest ? alert("Login to post? ") : setIsModalOpen(true)}
   >
     Write A Post📝
   </button>
@@ -507,8 +625,8 @@ const handleEditComment = async (postId, commentId) => {
       <p>{post.content}</p>
       <small>{new Date(post.createdAt).toLocaleString()}</small>
       <div style={{marginTop: "8px"}}>
-        <button onClick={() => handleVote(post.id, "useful")}>{post.votes.useful}👍 Useful </button>
-        <button onClick={() => handleVote(post.id, "useless")} style={{marginLeft: "8px"}}>{post.votes.useless}👎 Useless </button>
+        <button onClick={() => isGuest ? alert("Create an account to vote! 👋") :handleVote(post.id, "useful")}>{post.votes.useful}👍 Useful </button>
+        <button onClick={() =>isGuest ? alert("Create an account to vote! 👋") : handleVote(post.id, "useless")} style={{marginLeft: "8px"}}>{post.votes.useless}👎 Useless </button>
         <button onClick={() => setSelectedPost(post)}  style={{marginLeft: "8px"}}>
          Comments {post.comments.length}
         </button>
@@ -626,19 +744,19 @@ const handleEditComment = async (postId, commentId) => {
               {/* comment votes */}
               <div style={{margin:"4px 0 0 32px", display:"flex", gap:"8px", flexWrap:"wrap"}}>
                 <button 
-                  onClick={() => handleCommentVote(selectedPost.id, comment.id, "useful")}
+                  onClick={() => isGuest ? alert("Create an account to vote! 👋") : handleCommentVote(selectedPost.id, comment.id, "useful")}
                   style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
                   👍 Useful {comment.votes.useful}
                 </button>
                 <button 
-                  onClick={() => handleCommentVote(selectedPost.id, comment.id, "useless")}
+                  onClick={() =>isGuest ? alert("Create an account to vote! 👋") : handleCommentVote(selectedPost.id, comment.id, "useless")}
                   style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
                   👎 Useless {comment.votes.useless}
                 </button>
                 {/* specialized vote — only for OP or high rated users ....shit still ...i forgot the rating bit till now...weill be done soon*/}
                 {(currentUser?.id === selectedPost.authorId || currentUser?.rating >= 4) && (
                   <button 
-                    onClick={() => handleCommentVote(selectedPost.id, comment.id, "specialized")}
+                    onClick={() =>isGuest ? alert("Create an account to vote!even though this one is useless since only users with strick rules can get this vote... 👋") : handleCommentVote(selectedPost.id, comment.id, "specialized")}
                     style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", background:"#f0c040", border:"none"}}>
                     ✨ Specialized {comment.votes.specialized}
                   </button>
@@ -678,7 +796,7 @@ const handleEditComment = async (postId, commentId) => {
           style={{flex:1, padding:"8px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white"}}
         />
         <button
-          onClick={() => handleAddComment(selectedPost.id)}
+          onClick={() =>isGuest ? alert("Create an account to contribute....") : handleAddComment(selectedPost.id)}
           style={{padding:"8px 16px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}
         >
           Send

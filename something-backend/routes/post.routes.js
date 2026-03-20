@@ -4,7 +4,7 @@ const postController = require("../controllers/post.controller");
 const protect = require("../middleware/authMiddleware");
 
 router.post("/", protect, postController.createPost);
-router.get("/", protect, postController.getPostsAll);
+router.get("/",  postController.getPostsAll);
 router.get("/:id", protect, postController.getPostById);
 router.patch("/:id/vote", protect, postController.votePost);
 router.patch("/:id", protect, postController.updatePost);
