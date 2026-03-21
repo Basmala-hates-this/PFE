@@ -105,6 +105,20 @@ const deleteMe = async (req, res) => {
 };
 
 
+//search starter pack...but for users instead...
+const searchUsers = (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.json([]);
+  
+  const users = userRepo.readUsers();
+  const results = users
+    .filter(u => u.username?.toLowerCase().includes(q.toLowerCase()))
+    .map(({ password, ...u }) => u)
+    .slice(0, 2);
+  
+  res.json(results);
+};
+
 module.exports = {
   getMyStats,
   getPostsByUser,
@@ -112,6 +126,7 @@ module.exports = {
   updateMe,
   getMe,
   deleteMe,
+  searchUsers,
 
   
 };

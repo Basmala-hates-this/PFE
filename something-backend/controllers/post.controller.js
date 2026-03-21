@@ -176,6 +176,20 @@ const updateComment = (req, res) => {
   res.json(updatedComment);
 };
 
+//search starter pack
+const searchPosts = (req, res) => {
+  const { q } = req.query;
+  if (!q) return res.json([]);
+  
+  const posts = postRepo.getPostsAll();
+  const results = posts.filter(p => 
+    p.title?.toLowerCase().includes(q.toLowerCase()) ||
+    p.content?.toLowerCase().includes(q.toLowerCase())
+  ).slice(0, 2); // limit to 5 results
+  
+  res.json(results);
+};
+
 module.exports = {
   createPost,
   getPostById,
@@ -190,4 +204,5 @@ module.exports = {
   getCommentsByUser,
   // getMyStats,
   updateComment,
+  searchPosts,
 };

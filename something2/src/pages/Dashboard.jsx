@@ -60,6 +60,11 @@ const [editPostTitle, setEditPostTitle] = useState("");
 const [editingComment, setEditingComment] = useState(null);
 const [editCommentContent, setEditCommentContent] = useState("");
 
+//search thinggis
+const [searchQuery, setSearchQuery] = useState("");
+const [searchResults, setSearchResults] = useState({ posts: [], users: [] });
+const [showSearchDropdown, setShowSearchDropdown] = useState(false);
+
 //this to be set to backend maybe later....but guests are not saved in database....gray hole to be patched by local storage for now
 const guestToken = localStorage.getItem("guestToken");
 const isGuest = !!guestToken;
@@ -492,6 +497,32 @@ const handleEditComment = async (postId, commentId) => {
   }
 };
 
+
+const handleSearch = async (query) => {
+  setSearchQuery(query);
+  if (!query.trim()) {
+    setSearchResults({ posts: [], users: [] });
+    setShowSearchDropdown(false);
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+    const [postsRes, usersRes] = await Promise.all([
+      axios.get(`http://localhost:5000/api/posts/search?q=${query}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {}
+      }),
+      axios.get(`http://localhost:5000/api/users/search?q=${query}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+    ]);
+    setSearchResults({ posts: postsRes.data, users: usersRes.data });
+    setShowSearchDropdown(true);
+  } catch (err) {
+    console.error("Search failed:", err);
+  }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -571,20 +602,87 @@ const handleEditComment = async (postId, commentId) => {
       styles={customSelect}
     />
   </div>
-
+{/* this is gonna hurt.... */}
+  <div style={{position:"relative", width:"25%"}}>
   <input 
     type="text" 
     id="dashSearch" 
     className="dashSearch" 
     placeholder="🔍 searching for something?" 
+    value={searchQuery}
+    onChange={(e) => handleSearch(e.target.value)}
+    onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
     style={{
-      width: "25%",
+      width: "100%",
       border: "2px solid #8ca4c6",
       height: "38px",
       padding: "3px 8px",
-      borderRadius: "6px"
+      borderRadius: "6px",
+      boxSizing: "border-box"
     }}
   />
+
+  {showSearchDropdown && (
+  <div style={{position:"absolute", top:"42px", left:0, right:0, background:"#2d3350", borderRadius:"8px", boxShadow:"0 4px 20px rgba(0,0,0,0.3)", zIndex:100}}>
+    
+    <div style={{display:"flex"}}>
+      {/* posts side */}
+      <div style={{flex:1, borderRight:"1px solid rgba(255,255,255,0.1)", maxHeight:"250px", overflowY:"auto"}}>
+        <p style={{padding:"8px 12px", margin:0, color:"rgba(255,255,255,0.5)", fontSize:"11px", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>POSTS</p>
+        {searchResults.posts.length === 0 ? (
+          <p style={{padding:"12px", opacity:0.4, fontSize:"12px", textAlign:"center"}}>No posts found</p>
+        ) : (
+          searchResults.posts.slice(0,2).map(post => (
+            <div key={post.id}
+              onClick={() => { setSelectedPost(post); setShowSearchDropdown(false); setSearchQuery(""); }}
+              style={{padding:"10px 12px", cursor:"pointer", borderBottom:"1px solid rgba(255,255,255,0.05)"}}
+              onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
+              onMouseLeave={e => e.currentTarget.style.background="transparent"}
+            >
+              <strong style={{fontSize:"12px", color:"white"}}>@{post.authorUsername}</strong>
+              <p style={{margin:"2px 0 0", fontSize:"11px", color:"rgba(255,255,255,0.6)"}}>{post.content?.slice(0, 50)}...</p>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* users side */}
+      <div style={{flex:1, maxHeight:"250px", overflowY:"auto"}}>
+        <p style={{padding:"8px 12px", margin:0, color:"rgba(255,255,255,0.5)", fontSize:"11px", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>USERS</p>
+        {searchResults.users.length === 0 ? (
+          <p style={{padding:"12px", opacity:0.4, fontSize:"12px", textAlign:"center"}}>No users found</p>
+        ) : (
+          searchResults.users.slice(0,2).map(u => (
+            <div key={u.id}
+              onClick={() => { setShowSearchDropdown(false); setSearchQuery(""); navigate(`/search?q=${u.username}`); }}
+              style={{padding:"10px 12px", cursor:"pointer", borderBottom:"1px solid rgba(255,255,255,0.05)", display:"flex", alignItems:"center", gap:"8px"}}
+              onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
+              onMouseLeave={e => e.currentTarget.style.background="transparent"}
+            >
+              <img src={u.profilePic || Cat} alt="pfp" style={{width:"28px", height:"28px", borderRadius:"50%", objectFit:"cover"}}/>
+              <div>
+                <strong style={{fontSize:"12px", color:"white"}}>@{u.username}</strong>
+                <small style={{display:"block", color:"rgba(255,255,255,0.5)", fontSize:"11px"}}>{u.role}</small>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    </div>
+
+    {/* see all results */}
+    <div
+      onClick={() => { setShowSearchDropdown(false); navigate(`/search?q=${searchQuery}`); }}
+      style={{padding:"10px", textAlign:"center", borderTop:"1px solid rgba(255,255,255,0.1)", cursor:"pointer", color:"#8ca4c6", fontSize:"12px"}}
+      onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.05)"}
+      onMouseLeave={e => e.currentTarget.style.background="transparent"}
+    >
+      See all results for "{searchQuery}" →
+    </div>
+
+  </div>
+)}
+</div>
 
   <button 
     id="postBtn" 

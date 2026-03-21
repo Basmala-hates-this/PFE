@@ -18,6 +18,8 @@ router.patch("/me", protect, upload.single("profilePic"), userController.updateM
 router.get("/me", protect, userController.getMe);
 router.delete("/me", protect, userController.deleteMe);
 
+router.get("/search", protect, userController.searchUsers);
+
 
 
 module.exports = router;
