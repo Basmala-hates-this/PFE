@@ -9,6 +9,7 @@ const userRoutes = require("./routes/user.routes");
 const path = require("path");
 const app = express();
 const rateLimit = require("express-rate-limit");
+const messageRoutes = require("./routes/message.routes");
 
 
 
@@ -36,5 +37,8 @@ app.use("/api/users", userRoutes);
 
 // app.use("/uploads", express.static("uploads"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+//private rooms
+app.use("/api/rooms", messageRoutes);
 
 module.exports = app;

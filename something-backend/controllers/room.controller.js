@@ -20,7 +20,100 @@ const getPublicRooms = (req, res) => {
   res.json(publicRooms);
 };
 
+
+
+///private room managment shit
+const createPrivateRoom = (req, res) => {
+  const { name, passKey } = req.body;
+  const userId = req.user.id;
+  const username = req.user.username;
+
+  const finalPassKey = passKey || roomRepo.generatePassKey();
+
+  const room = roomRepo.createRoom({
+    name,
+    type: "private",
+    isPrivate: true,
+    passKey: finalPassKey,
+    createdBy: userId,
+  });
+
+  // add creator as first member and admin
+  roomRepo.addMember(room.id, userId);
+  roomRepo.addRoomAdmin(room.id, userId);
+
+  // add room to user's rooms
+  const userRepo = require("../repositories/user.repo");
+  const user = userRepo.findById(userId);
+  userRepo.updateUser(userId, { rooms: [...(user.rooms || []), room.id] });
+
+  res.status(201).json(room);
+};
+
+const joinPrivateRoom = (req, res) => {
+  const { passKey } = req.body;
+  const userId = req.user.id;
+
+  const result = roomRepo.joinRoomByPassKey(passKey, userId);
+
+  if (result.error) {
+    return res.status(400).json({ message: result.error });
+  }
+
+  // add room to user's rooms
+  const userRepo = require("../repositories/user.repo");
+  const user = userRepo.findById(userId);
+  userRepo.updateUser(userId, { rooms: [...(user.rooms || []), result.room.id] });
+
+  res.json({ message: `Welcome to ${result.room.name}!`, room: result.room });
+};
+
+const deletePrivateRoom = (req, res) => {
+  const { roomId } = req.params;
+  const userId = req.user.id;
+
+  const result = roomRepo.deleteRoom(roomId, userId);
+  if (!result) return res.status(404).json({ message: "Room not found" });
+  if (result.error) return res.status(403).json({ message: result.error });
+
+  res.json({ message: "Room deleted" });
+};
+
+const renamePrivateRoom = (req, res) => {
+  const { roomId } = req.params;
+  const { name } = req.body;
+  const userId = req.user.id;
+
+  const result = roomRepo.renameRoom(roomId, userId, name);
+  if (!result) return res.status(404).json({ message: "Room not found" });
+  if (result.error) return res.status(403).json({ message: result.error });
+
+  res.json(result);
+};
+
+const upgradeToAdmin = (req, res) => {
+  const { roomId, memberId } = req.params;
+  const userId = req.user.id;
+
+  const result = roomRepo.addRoomAdmin(roomId, memberId, userId);
+  if (!result) return res.status(404).json({ message: "Room not found" });
+  if (result.error) return res.status(403).json({ message: result.error });
+
+  res.json({ message: "Member upgraded to admin" });
+};
+
+
+
+
+
+
 module.exports = {
   getMyRooms, 
-  getPublicRooms,     
+  getPublicRooms,
+  createPrivateRoom,
+  joinPrivateRoom,
+  deletePrivateRoom,
+  renamePrivateRoom,
+  upgradeToAdmin,
+
 };

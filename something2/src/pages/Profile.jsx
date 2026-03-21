@@ -109,6 +109,7 @@ useEffect(() => {
       <li onClick={() => navigate("/dashboard")}><span> Dashboard </span></li>
       <li><span>Rooms </span></li>
       <li><span>Create Private Room </span></li>
+      <li><span>Join Private Room </span></li>
       <li><span>My Courses/resources </span></li>
       <li><span> Connections </span></li>
       <li onClick={()=> navigate("/edit")}><span> Edit </span></li>

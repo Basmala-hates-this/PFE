@@ -63,6 +63,32 @@ const getAllRooms = () => {
   return readRooms();
 };
 
+
+
+//private room necisseties//i'm pretty sure i butchred that word...
+const generatePassKey = () => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  let result = "";
+  for (let i = 0; i < 8; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+};
+
+
+const joinRoomByPassKey = (passKey, userId) => {
+  const rooms = readRooms();
+  const room = rooms.find((r) => r.passKey === passKey);
+  
+  if (!room) return { error: "Invalid passkey" };
+  if (room.members.includes(userId)) return { error: "Already joined" };
+  if (room.members.length >= 200) return { error: "Room full" };
+  
+  room.members.push(userId);
+  writeRooms(rooms);
+  return { success: true, room };
+};
+
 module.exports = {
     createRoom,
     getRoomById,
@@ -70,6 +96,8 @@ module.exports = {
     addMember,
     getRoomsByIds,
     getAllRooms,
+    generatePassKey,
+    joinRoomByPassKey,
     
 }
 
