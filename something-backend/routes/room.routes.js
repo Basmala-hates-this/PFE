@@ -16,5 +16,8 @@ router.post("/private/join", protect, guestBlock, roomController.joinPrivateRoom
 router.delete("/private/:roomId", protect, guestBlock, roomController.deletePrivateRoom);
 router.patch("/private/:roomId/rename", protect, guestBlock, roomController.renamePrivateRoom);
 router.patch("/private/:roomId/admin/:memberId", protect, guestBlock, roomController.upgradeToAdmin);
+router.get("/:roomId", protect, roomController.getRoomById);
+
+router.get("/:roomId/members", protect, roomController.getRoomMembers);
 
 module.exports = router;

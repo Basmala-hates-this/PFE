@@ -104,6 +104,40 @@ const upgradeToAdmin = (req, res) => {
 
 
 
+const getRoomById = (req, res) => {
+  const { roomId } = req.params;
+  const userId = req.user.id;
+  
+  const room = roomRepo.getRoomById(roomId);
+  if (!room) return res.status(404).json({ message: "Room not found" });
+  if (!room.members.includes(userId)) {
+    return res.status(403).json({ message: "You are not a member of this room" });
+  }
+  
+  res.json(room);
+};
+
+
+
+//names better then ids.....
+const getRoomMembers = (req, res) => {
+  const { roomId } = req.params;
+  const userId = req.user.id;
+
+  const room = roomRepo.getRoomById(roomId);
+  if (!room) return res.status(404).json({ message: "Room not found" });
+  if (!room.members.includes(userId)) {
+    return res.status(403).json({ message: "Not a member" });
+  }
+
+  const userRepo = require("../repositories/user.repo");
+  const members = room.members.map(memberId => {
+    const user = userRepo.findById(memberId);
+    return { id: memberId, username: user?.username || "Unknown" };
+  });
+
+  res.json(members);
+};
 
 
 
@@ -115,5 +149,7 @@ module.exports = {
   deletePrivateRoom,
   renamePrivateRoom,
   upgradeToAdmin,
+  getRoomById,
+  getRoomMembers,
 
 };

@@ -33,6 +33,10 @@ export default function Profile() {
     const [joinPassKey, setJoinPassKey] = useState("");
     const [joinFeedback, setJoinFeedback] = useState("");
 
+    //private room ui shit
+    const [userRooms, setUserRooms] = useState([]);
+    const [showMyRooms, setShowMyRooms] = useState(false);
+
 
 useEffect(() => {
   const token = localStorage.getItem("token");
@@ -112,6 +116,26 @@ useEffect(() => {
   fetchStats();
 }, []);
 
+
+useEffect(() => {
+  const fetchRooms = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setUserRooms(response.data);
+    } catch (err) {
+      console.error("Failed to fetch rooms:", err);
+    }
+  };
+  fetchRooms();
+}, []);
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////// 
+
 //into the habit of declaring states..then effects..the functions to need....started it lately without realizing....i fear of having to debug the old ones that doeas not have this devision
 const handleCreateRoom = async () => {
   try {
@@ -162,7 +186,7 @@ const handleJoinRoom = async () => {
     <h2 id="h2pro"> Profile</h2>
     <ul>
       <li onClick={() => navigate("/dashboard")}><span> Dashboard </span></li>
-      <li><span>My Rooms </span></li>
+      <li onClick={() => setShowMyRooms(true)} ><span>My Rooms </span></li>
       <li onClick={() => setShowCreateRoom(true)}><span>Create Private Room </span></li>
       <li onClick={() => setShowJoinRoom(true)}><span>Join Private Room </span></li>
       <li><span>My Courses/resources </span></li>
@@ -333,6 +357,46 @@ const handleJoinRoom = async () => {
   </div>
 )}
 
+
+
+
+{/* other shit */}
+{showMyRooms && (
+  <div className="modal-overlay" onClick={() => setShowMyRooms(false)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>My Rooms</h3>
+        <button onClick={() => setShowMyRooms(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
+
+      {userRooms.length === 0 ? (
+        <p style={{opacity:0.5, textAlign:"center"}}>No rooms yet.</p>
+      ) : (
+        userRooms.map(room => (
+          <div key={room.id} style={{padding:"10px", borderBottom:"1px solid rgba(255,255,255,0.1)", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
+            <div>
+              <strong>{room.name}</strong>
+              <small style={{marginLeft:"8px", background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{room.type}</small>
+            </div>
+            {room.type === "private" && (
+              <button
+                onClick={() => {
+                  setShowMyRooms(false);
+                  navigate(`/rooms/${room.id}`);
+                }}
+                style={{padding:"6px 12px", borderRadius:"6px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}
+              >
+                Open Chat
+              </button>
+            )}
+          </div>
+        ))
+      )}
+
+    </div>
+  </div>
+)}
 
 </div>
     );
