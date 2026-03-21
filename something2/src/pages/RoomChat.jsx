@@ -58,7 +58,7 @@ useEffect(() => {
   };
 
   fetchMessages();
-  const interval = setInterval(fetchMessages, 500);
+  const interval = setInterval(fetchMessages, 1500);//i dont know why...2 requests per second might get a little too much for the server to handel?
   return () => clearInterval(interval);
 }, [roomId]);
 
@@ -137,6 +137,20 @@ const handleEditMessage = async (messageId) => {
 };
 
 
+const handleLeaveRoom = async () => {
+  const confirm = window.confirm("Are you sure you want to leave this room?");
+  if (!confirm) return;
+
+  try {
+    await axios.delete(`http://localhost:5000/api/rooms/${roomId}/leave`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    navigate("/profile");
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
+
 /////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////
@@ -154,6 +168,11 @@ const handleEditMessage = async (messageId) => {
         <h2 style={{margin:0, color:"white"}}>#{room?.name}</h2>
         <small style={{color:"rgba(255,255,255,0.5)"}}>{room?.members?.length} members</small>
       </div>
+      <button
+    onClick={handleLeaveRoom}
+    style={{padding:"6px 12px", borderRadius:"6px", cursor:"pointer",marginLeft:"55%", color:"red"}}>
+    🚪 Leave Room
+  </button>
       {isAdmin && (
         <div style={{marginLeft:"auto", display:"flex", gap:"10px"}}>
              <button 
@@ -308,8 +327,12 @@ const handleEditMessage = async (messageId) => {
               {},
               { headers: { Authorization: `Bearer ${token}` } }
             ).then((res) => {
-              setRoom(res.data);
-              alert(`@${member.username} is now an admin!`);
+                 setRoom(res.data);
+                             // refetch members to reflect new admin status
+                     axios.get(`http://localhost:5000/api/rooms/${roomId}/members`, {
+                      headers: { Authorization: `Bearer ${token}` }
+                         }).then(r => setMemberDetails(r.data));
+                     alert(`@${member.username} is now an admin!`);
             }).catch(err => alert(err.response?.data?.message || "Something went wrong."));
           }
         }}

@@ -19,5 +19,6 @@ router.patch("/private/:roomId/admin/:memberId", protect, guestBlock, roomContro
 router.get("/:roomId", protect, roomController.getRoomById);
 
 router.get("/:roomId/members", protect, roomController.getRoomMembers);
+router.delete("/:roomId/leave", protect, guestBlock, roomController.leaveRoom);
 
 module.exports = router;

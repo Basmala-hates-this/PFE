@@ -227,8 +227,14 @@ useEffect(() => {
         const allowedRoomIds = allowedRooms.map(r => r.id);
         setPosts(postsResponse.data.filter(p => allowedRoomIds.includes(p.roomId)));
       } else {
-        setPosts(postsResponse.data);
-      }
+       
+           const publicPosts = postsResponse.data.filter(p => {
+                 const room = allowedRooms.find(r => r.id === p.roomId);
+               return room ? room.type !== "private" : false;
+           });
+         setPosts(publicPosts);
+}
+      
 
     } catch (err) {
       console.error("Failed to fetch:", err);
@@ -320,12 +326,12 @@ const groupedRoomOptions = [
       .filter(r => r.type === "major")
       .map(r => ({ value: r.id, label: r.name }))
   },
-  {
-    label: "Private Rooms",
-    options: userRooms
-      .filter(r => r.type === "private")
-      .map(r => ({ value: r.id, label: r.name }))
-  }
+  // {
+  //   label: "Private Rooms",
+  //   options: userRooms
+  //     .filter(r => r.type === "private")
+  //     .map(r => ({ value: r.id, label: r.name }))
+  // }
 ].filter(group => group.options.length > 0); // remove empty groups
 
 

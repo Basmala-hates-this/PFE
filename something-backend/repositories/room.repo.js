@@ -137,6 +137,28 @@ const renameRoom = (roomId, userId, newName) => {
   return room;
 };
 
+//i forgot leave room......
+const leaveRoom = (roomId, userId) => {
+  const rooms = readRooms();
+  const room = rooms.find((r) => r.id === roomId);
+  if (!room) return null;
+  if (!room.members.includes(userId)) return { error: "Not a member" };
+
+  // if creator wants to leave, check if there is another admin
+  if (room.createdBy === userId) {
+    const otherAdmins = room.admins?.filter(id => id !== userId) || [];
+    if (otherAdmins.length === 0) {
+      return { error: "You must promote another member to admin or delete the room before leaving" };
+    }
+  }
+
+  room.members = room.members.filter(id => id !== userId);
+  if (room.admins) room.admins = room.admins.filter(id => id !== userId);
+  writeRooms(rooms);
+  return { success: true };
+};
+
+
 module.exports = {
     createRoom,
     getRoomById,
@@ -148,7 +170,8 @@ module.exports = {
     joinRoomByPassKey,
     addRoomAdmin,
     deleteRoom,
-    renameRoom
+    renameRoom,
+    leaveRoom
     
 }
 

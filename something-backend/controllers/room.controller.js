@@ -140,6 +140,23 @@ const getRoomMembers = (req, res) => {
 };
 
 
+const leaveRoom = (req, res) => {
+  const { roomId } = req.params;
+  const userId = req.user.id;
+
+  const result = roomRepo.leaveRoom(roomId, userId);
+  if (!result) return res.status(404).json({ message: "Room not found" });
+  if (result.error) return res.status(403).json({ message: result.error });
+
+  // remove room from user's rooms list
+  const userRepo = require("../repositories/user.repo");
+  const user = userRepo.findById(userId);
+  userRepo.updateUser(userId, { rooms: user.rooms.filter(id => id !== roomId) });
+
+  res.json({ message: "You have left the room" });
+};
+
+
 
 module.exports = {
   getMyRooms, 
@@ -151,5 +168,6 @@ module.exports = {
   upgradeToAdmin,
   getRoomById,
   getRoomMembers,
+  leaveRoom,
 
 };
