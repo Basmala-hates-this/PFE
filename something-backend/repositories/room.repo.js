@@ -89,6 +89,54 @@ const joinRoomByPassKey = (passKey, userId) => {
   return { success: true, room };
 };
 
+
+
+
+const addRoomAdmin = (roomId, memberId, requesterId) => {
+  const rooms = readRooms();
+  const room = rooms.find((r) => r.id === roomId);
+  if (!room) return null;
+
+  // if requesterId provided, check if they are admin
+  if (requesterId && !room.admins?.includes(requesterId)) {
+    return { error: "Not authorized" };
+  }
+
+  if (!room.admins) room.admins = [];
+  if (!room.admins.includes(memberId)) {
+    room.admins.push(memberId);
+  }
+
+  writeRooms(rooms);
+  return room;
+};
+
+const deleteRoom = (roomId, userId) => {
+  const rooms = readRooms();
+  const room = rooms.find((r) => r.id === roomId);
+  if (!room) return null;
+  if (room.createdBy !== userId && !room.admins?.includes(userId)) {
+    return { error: "Not authorized" };
+  }
+
+  const updatedRooms = rooms.filter((r) => r.id !== roomId);
+  writeRooms(updatedRooms);
+  return true;
+};
+
+const renameRoom = (roomId, userId, newName) => {
+  const rooms = readRooms();
+  const room = rooms.find((r) => r.id === roomId);
+  if (!room) return null;
+  if (room.createdBy !== userId && !room.admins?.includes(userId)) {
+    return { error: "Not authorized" };
+  }
+
+  room.name = newName;
+  writeRooms(rooms);
+  return room;
+};
+
 module.exports = {
     createRoom,
     getRoomById,
@@ -98,6 +146,9 @@ module.exports = {
     getAllRooms,
     generatePassKey,
     joinRoomByPassKey,
+    addRoomAdmin,
+    deleteRoom,
+    renameRoom
     
 }
 

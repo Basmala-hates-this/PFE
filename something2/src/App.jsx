@@ -12,6 +12,7 @@ import Profile from "./pages/Profile.jsx";
 import EditProfile from "./pages/EditProfile.jsx";
 import { RegistrationProvider } from "./assets/components/Context.jsx";
 import ProtectedRoute from "./assets/components/ProtectedRoute.jsx";
+import RoomChat from "./pages/RoomChat.jsx";
 
 function App() {
   return (
@@ -29,6 +30,7 @@ function App() {
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
         <Route path="/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/rooms/:roomId" element={<ProtectedRoute><RoomChat /></ProtectedRoute>} />
 
       </Routes>
             </RegistrationProvider>

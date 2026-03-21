@@ -15,7 +15,23 @@ export default function Profile() {
     const [stats, setStats] = useState(null);
 
 
+
     const isProfessor=user?.role === "professor";
+
+    //remember when i said info was the biggist page to be?...
+    //well, i lied...that would be the dashboard and this damn profile pagge......
+    //moving on i wanted private rooms...i'll get me private rooms
+    const [showCreateRoom, setShowCreateRoom] = useState(false);
+    const [roomName, setRoomName] = useState("");
+    const [roomPassKey, setRoomPassKey] = useState("");
+    const [useGeneratedKey, setUseGeneratedKey] = useState(true);
+    const [roomFeedback, setRoomFeedback] = useState("");
+
+    //the damn modal is killing me...
+    //join room related shit
+    const [showJoinRoom, setShowJoinRoom] = useState(false);
+    const [joinPassKey, setJoinPassKey] = useState("");
+    const [joinFeedback, setJoinFeedback] = useState("");
 
 
 useEffect(() => {
@@ -96,9 +112,48 @@ useEffect(() => {
   fetchStats();
 }, []);
 
+//into the habit of declaring states..then effects..the functions to need....started it lately without realizing....i fear of having to debug the old ones that doeas not have this devision
+const handleCreateRoom = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.post(
+      "http://localhost:5000/api/rooms/private",
+      {
+        name: roomName,
+        passKey: useGeneratedKey ? null : roomPassKey,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
+    const createdRoom = response.data;
+    setRoomFeedback(`Room created! Your passkey is: ${createdRoom.passKey} — share this with people you want to invite.`);
+    setRoomName("");
+    setRoomPassKey("");
+    setUseGeneratedKey(true);
 
+  } catch (err) {
+    setRoomFeedback(err.response?.data?.message || "Something went wrong.");
+  }
+};
 
+//join shit
+const handleJoinRoom = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const response = await axios.post(
+      "http://localhost:5000/api/rooms/private/join",
+      { passKey: joinPassKey },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setJoinFeedback(response.data.message);
+    setJoinPassKey("");
+  } catch (err) {
+    setJoinFeedback(err.response?.data?.message || "Something went wrong.");
+  }
+};
+/////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
     return (
 <div id="body7">
     <div className="container">
@@ -107,9 +162,9 @@ useEffect(() => {
     <h2 id="h2pro"> Profile</h2>
     <ul>
       <li onClick={() => navigate("/dashboard")}><span> Dashboard </span></li>
-      <li><span>Rooms </span></li>
-      <li><span>Create Private Room </span></li>
-      <li><span>Join Private Room </span></li>
+      <li><span>My Rooms </span></li>
+      <li onClick={() => setShowCreateRoom(true)}><span>Create Private Room </span></li>
+      <li onClick={() => setShowJoinRoom(true)}><span>Join Private Room </span></li>
       <li><span>My Courses/resources </span></li>
       <li><span> Connections </span></li>
       <li onClick={()=> navigate("/edit")}><span> Edit </span></li>
@@ -184,6 +239,101 @@ useEffect(() => {
   </section>
  
 </div>
+
+{/* create private room modal...i ned to login to test this...damn */}
+{showCreateRoom && (
+  <div className="modal-overlay" onClick={() => setShowCreateRoom(false)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>Create Private Room</h3>
+        <button onClick={() => setShowCreateRoom(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
+
+      <label>Room Name</label>
+      <input
+        type="text"
+        value={roomName}
+        onChange={(e) => setRoomName(e.target.value)}
+        placeholder="Enter room name..."
+        style={{width:"100%", marginBottom:"10px", padding:"8px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box"}}
+      />
+
+      <label>
+        <input
+          type="checkbox"
+          checked={useGeneratedKey}
+          onChange={() => {
+            setUseGeneratedKey(!useGeneratedKey);
+            setRoomPassKey("");
+          }}
+        /> Generate passkey automatically
+      </label>
+      <br/><br/>
+
+      {!useGeneratedKey && (
+        <input
+          type="text"
+          value={roomPassKey}
+          onChange={(e) => setRoomPassKey(e.target.value)}
+          placeholder="Enter your own passkey..."
+          maxLength={8}
+          style={{width:"100%", marginBottom:"10px", padding:"8px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box"}}
+        />
+      )}
+
+      {roomFeedback && (
+        <p style={{color: roomFeedback.includes("!") ? "lightgreen" : "#fc0c0ce9", marginBottom:"10px"}}>
+          {roomFeedback}
+        </p>
+      )}
+
+      <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
+        <button onClick={() => setShowCreateRoom(false)}>Cancel</button>
+        <button onClick={handleCreateRoom} disabled={!roomName.trim()}>Create</button>
+      </div>
+
+    </div>
+  </div>
+)}
+
+
+{/* join shit */}
+{showJoinRoom && (
+  <div className="modal-overlay" onClick={() => setShowJoinRoom(false)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>Join Private Room</h3>
+        <button onClick={() => setShowJoinRoom(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
+
+      <label>Enter Passkey</label>
+      <input
+        type="text"
+        value={joinPassKey}
+        onChange={(e) => setJoinPassKey(e.target.value)}
+        placeholder="Enter 8 character passkey..."
+        maxLength={8}
+        style={{width:"100%", marginBottom:"10px", padding:"8px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box"}}
+      />
+
+      {joinFeedback && (
+        <p style={{color: joinFeedback.includes("Welcome") ? "lightgreen" : "#fc0c0ce9", marginBottom:"10px"}}>
+          {joinFeedback}
+        </p>
+      )}
+
+      <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
+        <button onClick={() => setShowJoinRoom(false)}>Cancel</button>
+        <button onClick={handleJoinRoom} disabled={joinPassKey.length !== 8}>Join</button>
+      </div>
+
+    </div>
+  </div>
+)}
+
+
 </div>
     );
 }
