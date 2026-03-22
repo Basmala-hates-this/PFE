@@ -520,15 +520,28 @@ const handleSearch = async (query) => {
 
   try {
     const token = localStorage.getItem("token");
-    const [postsRes, usersRes] = await Promise.all([
+    const authHeader = token ? { Authorization: `Bearer ${token}` } :
+                       guestToken ? { Authorization: `Bearer ${guestToken}` } : {};
+
+    const requests = [
       axios.get(`http://localhost:5000/api/posts/search?q=${query}`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {}
-      }),
-      axios.get(`http://localhost:5000/api/users/search?q=${query}`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: authHeader
       })
-    ]);
-    setSearchResults({ posts: postsRes.data, users: usersRes.data });
+    ];
+
+    if (!isGuest) {
+      requests.push(
+        axios.get(`http://localhost:5000/api/users/search?q=${query}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      );
+    }
+
+    const results = await Promise.all(requests);
+    setSearchResults({ 
+      posts: results[0].data, 
+      users: isGuest ? [] : results[1].data 
+    });
     setShowSearchDropdown(true);
   } catch (err) {
     console.error("Search failed:", err);
@@ -659,6 +672,7 @@ const handleSearch = async (query) => {
       </div>
 
       {/* users side */}
+      {!isGuest && (
       <div style={{flex:1, maxHeight:"250px", overflowY:"auto"}}>
         <p style={{padding:"8px 12px", margin:0, color:"rgba(255,255,255,0.5)", fontSize:"11px", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>USERS</p>
         {searchResults.users.length === 0 ? (
@@ -682,6 +696,7 @@ const handleSearch = async (query) => {
           ))
         )}
       </div>
+      )}
     </div>
 
     {/* see all results */}

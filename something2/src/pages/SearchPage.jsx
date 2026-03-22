@@ -18,34 +18,72 @@ export default function SearchPage() {
   const [selectedPost, setSelectedPost] = useState(null);
 
 
+  const guestToken = localStorage.getItem("guestToken");
+const isGuest = !!guestToken;
+const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
+
+
+
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
-    if (!query) return;
-    const fetchResults = async () => {
-      setLoading(true);
-      try {
-        const [postsRes, usersRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/posts/search?q=${query}`, {
-            headers: token ? { Authorization: `Bearer ${token}` } : {}
-          }),
+  if (!query) return;
+  const fetchResults = async () => {
+    setLoading(true);
+    try {
+      const authHeader = token ? { Authorization: `Bearer ${token}` } : 
+                         guestToken ? { Authorization: `Bearer ${guestToken}` } : {};
+
+      const requests = [
+        axios.get(`http://localhost:5000/api/posts/search?q=${query}`, {
+          headers: authHeader
+        })
+      ];
+
+      if (!isGuest) {
+        requests.push(
           axios.get(`http://localhost:5000/api/users/search?q=${query}`, {
             headers: { Authorization: `Bearer ${token}` }
           })
-        ]);
-        setPosts(postsRes.data);
-        setUsers(usersRes.data);
-      } catch (err) {
-        console.error("Search failed:", err);
-      } finally {
-        setLoading(false);
+        );
       }
-    };
-    fetchResults();
-  }, [query]);
 
+      const results = await Promise.all(requests);
+      let filteredPosts = results[0].data;
+
+      if (isGuest) {
+        const roomsRes = await axios.get("http://localhost:5000/api/rooms/public-rooms");
+        const selectedCodes = guestUniversities.map(u => u.value);
+        const allowedRooms = roomsRes.data.filter(r =>
+          r.type === "public" || selectedCodes.includes(r.university)
+        );
+        const allowedRoomIds = allowedRooms.map(r => r.id);
+        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
+      } else {
+        // filter by user's own rooms
+        const roomsRes = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        const allowedRoomIds = roomsRes.data
+          .filter(r => r.type !== "private")
+          .map(r => r.id);
+        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
+      }
+
+      setPosts(filteredPosts);
+      setUsers(isGuest ? [] : results[1].data);
+
+    } catch (err) {
+      console.error("Search failed:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchResults();
+}, [query]);
 
 
   
@@ -70,12 +108,14 @@ export default function SearchPage() {
         >
           Posts ({posts.length})
         </button>
+         {!isGuest && (
         <button
           onClick={() => setActiveTab("users")}
           style={{background:"none", border:"none", color: activeTab === "users" ? "white" : "rgba(255,255,255,0.4)", fontSize:"14px", cursor:"pointer", paddingBottom:"8px", borderBottom: activeTab === "users" ? "2px solid #6476af" : "none"}}
         >
           Users ({users.length})
         </button>
+         )}
       </div>
 
       {loading ? (
@@ -109,6 +149,7 @@ export default function SearchPage() {
           )}
 
           {/* users tab */}
+
           {activeTab === "users" && (
             <div>
               {users.length === 0 ? (
@@ -139,7 +180,7 @@ export default function SearchPage() {
   <PostModal
     postId={selectedPost.id}
     onClose={() => setSelectedPost(null)}
-    isGuest={false}
+    isGuest={isGuest}
   />
 )}
 

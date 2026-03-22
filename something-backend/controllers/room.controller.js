@@ -14,7 +14,8 @@ const getMyRooms = (req, res) => {
   }
 
   const userRooms = roomRepo.getRoomsByIds(user.rooms);
-   console.log("userRooms found:", userRooms.length);
+  //  console.log("userRooms found:", userRooms.length);
+  //who knew that console.log would freez the terminal and stop the app
   
   res.json(userRooms);
 };

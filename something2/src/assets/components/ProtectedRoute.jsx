@@ -10,7 +10,7 @@ export default function ProtectedRoute({ children }) {
   }
 
   // guests can only access dashboard
-  if (guestToken && !token && location.pathname !== "/dashboard") {
+  if (guestToken && !token && location.pathname !== "/dashboard" && location.pathname !== "/search") {
     return <Navigate to="/dashboard" />;
   }
 

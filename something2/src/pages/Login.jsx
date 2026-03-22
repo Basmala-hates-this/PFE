@@ -88,7 +88,8 @@ const handleSubmit =async (e) => {
  
 
 } catch (err) {
-  console.error("Error sending profile:", err);
+   const msg = err.response?.data?.message || "Invalid credentials";
+  setError(msg);
 }
  
 
