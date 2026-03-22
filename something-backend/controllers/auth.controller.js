@@ -86,8 +86,14 @@ const updatedUser = userRepo.updateUser(user.id, { rooms: roomIds });
 
   const { password: _, ...userWithoutPassword } = updatedUser;
 
-  res.status(201).json({ message: "User created", user: userWithoutPassword });
-  
+
+  const token = jwt.sign(
+  { id: user.id, role: user.role, email: user.email, username: user.username, authorityLevel: user.authorityLevel, verificationStatus: user.verificationStatus },
+  process.env.JWT_SECRET,
+  { expiresIn: "24h" }
+);
+
+res.status(201).json({ message: "User created", user: userWithoutPassword, token });  
 };
 
 

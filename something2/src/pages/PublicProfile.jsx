@@ -57,6 +57,9 @@ export default function PublicProfile() {
           <p style={{margin:"8px 0 4px", opacity:0.7}}>Major(s): {user?.majors?.join(", ")}</p>
           <p style={{margin:0, opacity:0.7}}>Rating: {user?.rating ?? 1} / 5</p>
         </div>
+         <button style={{padding:"8px 20px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer", fontSize:"14px",marginLeft:"50%"}}>
+         Follow
+        </button>
       </div>
 
       {/* stats */}

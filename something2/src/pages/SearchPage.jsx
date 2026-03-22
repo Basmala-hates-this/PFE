@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
+import PostModal from "../assets/components/PostModal.jsx";
 
 export default function SearchPage() {
   const navigate = useNavigate();
@@ -13,6 +14,13 @@ export default function SearchPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
+
+  const [selectedPost, setSelectedPost] = useState(null);
+
+
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
   useEffect(() => {
     if (!query) return;
@@ -37,6 +45,13 @@ export default function SearchPage() {
     };
     fetchResults();
   }, [query]);
+
+
+
+  
+//////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
 
   return (
     <div style={{minHeight:"100vh", background:"#1a1f35", color:"white", padding:"20px"}}>
@@ -74,7 +89,12 @@ export default function SearchPage() {
                 <p style={{opacity:0.5}}>No posts found for "{query}"</p>
               ) : (
                 posts.map(post => (
-                  <div key={post.id} style={{padding:"15px", background:"#252b45", borderRadius:"8px", marginBottom:"10px"}}>
+                 <div key={post.id} 
+                       onClick={() => setSelectedPost(post)}
+                       style={{padding:"15px", background:"#252b45", borderRadius:"8px", marginBottom:"10px", cursor:"pointer"}}
+                       onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
+                       onMouseLeave={e => e.currentTarget.style.background="#252b45"}
+                    >
                     <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"8px"}}>
                       <strong>@{post.authorUsername}</strong>
                       <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
@@ -113,6 +133,15 @@ export default function SearchPage() {
           )}
         </>
       )}
+
+
+      {selectedPost && (
+  <PostModal
+    postId={selectedPost.id}
+    onClose={() => setSelectedPost(null)}
+    isGuest={false}
+  />
+)}
 
     </div>
   );

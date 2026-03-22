@@ -6,11 +6,16 @@ const getMyRooms = (req, res) => {
   const userId = req.user.id;
   const user = userRepo.findById(userId);
   
+  console.log("userId:", userId);
+  console.log("user.rooms:", user?.rooms);
+  
   if (!user) {
     return res.status(404).json({ message: "User not found" });
   }
 
   const userRooms = roomRepo.getRoomsByIds(user.rooms);
+   console.log("userRooms found:", userRooms.length);
+  
   res.json(userRooms);
 };
 
