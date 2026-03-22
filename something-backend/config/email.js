@@ -23,4 +23,21 @@ const sendResetEmail = async (toEmail, resetLink) => {
   });
 };
 
-module.exports = sendResetEmail;
+
+
+const sendFollowEmail = async (toEmail, followerUsername) => {
+  await transporter.sendMail({
+    from: `"StudyBuddy Platform" <${process.env.EMAIL_USER}>`,
+    to: toEmail,
+    subject: "You have a new follower!",
+    html: `
+      <h2>New Follower 🎉</h2>
+      <p><strong>@${followerUsername}</strong> started following you on StudyBuddy!</p>
+      <p>Log in to check out their profile and follow them back.</p>
+    `
+  });
+};
+
+module.exports = {sendResetEmail,
+  sendFollowEmail,
+}
