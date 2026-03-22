@@ -95,7 +95,12 @@ export default function SearchPage() {
                 <p style={{opacity:0.5}}>No users found for "{query}"</p>
               ) : (
                 users.map(user => (
-                  <div key={user.id} style={{padding:"15px", background:"#252b45", borderRadius:"8px", marginBottom:"10px", display:"flex", alignItems:"center", gap:"12px"}}>
+                  <div key={user.id} 
+                    onClick={() => navigate(`/users/${user.id}`)}
+                     style={{padding:"15px", background:"#252b45", borderRadius:"8px", marginBottom:"10px", display:"flex", alignItems:"center", gap:"12px", cursor:"pointer"}}
+                     onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
+                     onMouseLeave={e => e.currentTarget.style.background="#252b45"}
+                   >
                     <img src={user.profilePic || Cat} alt="pfp" style={{width:"45px", height:"45px", borderRadius:"50%", objectFit:"cover"}}/>
                     <div>
                       <strong>@{user.username}</strong>

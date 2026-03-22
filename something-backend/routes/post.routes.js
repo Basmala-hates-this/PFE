@@ -7,6 +7,10 @@ const { guestBlock } = require("../middleware/authMiddleware");
 router.post("/", protect,guestBlock, postController.createPost);
 router.get("/",  postController.getPostsAll);
 router.get("/search", postController.searchPosts);//something to keep in mind,all routes should come befre IDs because things will break and u wont knw why.....
+
+router.get("/user/:userId", protect, postController.getPostsByUser);
+
+
 router.get("/:id", protect,postController.getPostById);
 router.patch("/:id/vote", protect,guestBlock, postController.votePost);
 router.patch("/:id", protect,guestBlock, postController.updatePost);
@@ -15,6 +19,9 @@ router.post("/:postId/comments", protect,guestBlock, postController.addComment);
 router.delete("/:postId/comments/:commentId", protect,guestBlock, postController.deleteComment);
 router.patch("/:postId/comments/:commentId/vote", protect,guestBlock, postController.voteComment);
 router.patch("/:postId/comments/:commentId", protect,guestBlock, postController.updateComment);
+
+
+
 
 
 

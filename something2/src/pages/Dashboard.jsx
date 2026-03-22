@@ -654,7 +654,9 @@ const handleSearch = async (query) => {
         ) : (
           searchResults.users.slice(0,2).map(u => (
             <div key={u.id}
-              onClick={() => { setShowSearchDropdown(false); setSearchQuery(""); navigate(`/search?q=${u.username}`); }}
+              onClick={() => { setShowSearchDropdown(false); 
+              setSearchQuery(""); 
+              navigate(`/users/${u.id}`); }}
               style={{padding:"10px 12px", cursor:"pointer", borderBottom:"1px solid rgba(255,255,255,0.05)", display:"flex", alignItems:"center", gap:"8px"}}
               onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
               onMouseLeave={e => e.currentTarget.style.background="transparent"}

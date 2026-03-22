@@ -61,19 +61,44 @@ export default function PublicProfile() {
 
       {/* stats */}
       <div style={{display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:"10px", marginBottom:"20px"}}>
-        <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
-          <strong style={{fontSize:"22px"}}>{stats?.postsCount || 0}</strong>
-          <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Posts 📝</p>
-        </div>
-        <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
-          <strong style={{fontSize:"22px"}}>{stats?.commentsCount || 0}</strong>
-          <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Comments 🗨️</p>
-        </div>
-        <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
-          <strong style={{fontSize:"22px"}}>{stats?.usefulReceived || 0}</strong>
-          <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Useful Votes 👍</p>
-        </div>
+  <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
+    <strong style={{fontSize:"22px"}}>{stats?.postsCount || 0}</strong>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Posts 📝</p>
+  </div>
+  <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
+    <strong style={{fontSize:"22px"}}>{stats?.commentsCount || 0}</strong>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Comments 🗨️</p>
+  </div>
+  <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
+    <strong style={{fontSize:"22px"}}>{stats?.usefulReceived || 0}</strong>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Useful Votes 👍</p>
+  </div>
+  <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
+    <strong style={{fontSize:"22px"}}>{stats?.uselessReceived || 0}</strong>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Useless Count ❌</p>
+  </div>
+  <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
+    <strong style={{fontSize:"22px"}}>{stats?.specializedReceived || 0}</strong>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Specialized ✨</p>
+  </div>
+  <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
+    <strong style={{fontSize:"22px"}}>{user?.rooms?.length || 0}</strong>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Rooms Joined 🏠</p>
+  </div>
+</div>
+
+
+{/* the major thinggis for profs....the ammount of shit i'm doing is insane.. */}
+{user?.role === "professor" && user?.majors?.length > 0 && (
+  <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", marginBottom:"20px"}}>
+    <h3 style={{margin:"0 0 15px", color:"#5DADE2"}}>Specialty Majors</h3>
+    {user.majors.map((major, index) => (
+      <div key={index} style={{padding:"8px 0", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
+        <span style={{color:"#85C1E9"}}>{major}</span>
       </div>
+    ))}
+  </div>
+)}
 
       {/* recent posts */}
       <h3 style={{marginBottom:"15px"}}>Recent Posts</h3>

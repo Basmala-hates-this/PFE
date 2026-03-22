@@ -119,6 +119,37 @@ const searchUsers = (req, res) => {
   res.json(results);
 };
 
+
+const getUserById = (req, res) => {
+  const { userId } = req.params;
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  
+  const { password: _, ...userWithoutPassword } = user;
+  res.json(userWithoutPassword);
+};
+
+
+const getStatsByUserId = (req, res) => {
+  const { userId } = req.params;
+  
+  const posts = postRepo.getPostsByUser(userId);
+  const comments = postRepo.getCommentsByUser(userId);
+
+  const usefulVotes = posts.reduce((total, post) => total + post.votes.useful, 0);
+  const uselessVotes = posts.reduce((total, post) => total + post.votes.useless, 0);
+  const commentUseful = comments.reduce((total, c) => total + c.votes.useful, 0);
+  const commentSpecialized = comments.reduce((total, c) => total + c.votes.specialized, 0);
+
+  res.json({
+    postsCount: posts.length,
+    commentsCount: comments.length,
+    usefulReceived: usefulVotes + commentUseful,
+    uselessReceived: uselessVotes,
+    specializedReceived: commentSpecialized,
+  });
+};
+
 module.exports = {
   getMyStats,
   getPostsByUser,
@@ -127,6 +158,8 @@ module.exports = {
   getMe,
   deleteMe,
   searchUsers,
+  getUserById,
+  getStatsByUserId
 
   
 };

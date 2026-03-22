@@ -21,5 +21,9 @@ router.delete("/me", protect, userController.deleteMe);
 router.get("/search", protect, userController.searchUsers);
 
 
+router.get("/:userId", protect, userController.getUserById);
+router.get("/:userId/stats", protect, userController.getStatsByUserId);
+
+
 
 module.exports = router;
