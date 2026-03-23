@@ -36,6 +36,9 @@ export default function Profile() {
     //private room ui shit
     const [userRooms, setUserRooms] = useState([]);
     const [showMyRooms, setShowMyRooms] = useState(false);
+    const [following, setFollowing] = useState([]);
+    const [invitedUsers, setInvitedUsers] = useState([]);
+    const [roomLoading, setRoomLoading] = useState(false);
 
 
 useEffect(() => {
@@ -132,12 +135,33 @@ useEffect(() => {
   fetchRooms();
 }, []);
 
+
+
+useEffect(() => {
+  if (!showCreateRoom) return;
+  const fetchFollowing = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`http://localhost:5000/api/users/${user?.id}/following`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setFollowing(res.data);
+    } catch (err) {
+      console.error("Failed to fetch following:", err);
+    }
+  };
+  fetchFollowing();
+}, [showCreateRoom]);
+
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////// 
 
 //into the habit of declaring states..then effects..the functions to need....started it lately without realizing....i fear of having to debug the old ones that doeas not have this devision
 const handleCreateRoom = async () => {
+  setRoomLoading(true);
   try {
     const token = localStorage.getItem("token");
     const response = await axios.post(
@@ -145,6 +169,8 @@ const handleCreateRoom = async () => {
       {
         name: roomName,
         passKey: useGeneratedKey ? null : roomPassKey,
+        invitedUsers: invitedUsers,
+
       },
       { headers: { Authorization: `Bearer ${token}` } }
     );
@@ -154,10 +180,13 @@ const handleCreateRoom = async () => {
     setRoomName("");
     setRoomPassKey("");
     setUseGeneratedKey(true);
+    setInvitedUsers([]);
 
   } catch (err) {
     setRoomFeedback(err.response?.data?.message || "Something went wrong.");
-  }
+  } finally {
+    setRoomLoading(false);
+  } 
 };
 
 //join shit
@@ -306,15 +335,43 @@ const handleJoinRoom = async () => {
         />
       )}
 
+      {following.length > 0 && (
+
+              <div style={{marginBottom:"15px"}}>
+               <label>Invite from your following:</label>
+                 <div style={{maxHeight:"150px", overflowY:"auto", marginTop:"8px", display:"flex", flexDirection:"column", gap:"8px"}}>
+                {following.map(u => (
+                 <label key={u.id} style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer"}}>
+                   <input
+                      type="checkbox"
+                     checked={invitedUsers.includes(u.id)}
+                     onChange={() => {
+                     setInvitedUsers(prev =>
+                      prev.includes(u.id)
+                        ? prev.filter(id => id !== u.id)
+                     : [...prev, u.id]
+                   );
+                  }}
+                 />
+                 @{u.username} — {u.role}
+             </label>
+            ))}
+           </div>
+         </div>
+        )}
+
       {roomFeedback && (
         <p style={{color: roomFeedback.includes("!") ? "lightgreen" : "#fc0c0ce9", marginBottom:"10px"}}>
+          
           {roomFeedback}
         </p>
       )}
 
       <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
         <button onClick={() => setShowCreateRoom(false)}>Cancel</button>
-        <button onClick={handleCreateRoom} disabled={!roomName.trim()}>Create</button>
+        <button onClick={handleCreateRoom} disabled={!roomName.trim() || roomLoading}>
+        {roomLoading ? "Creating..." : "Create"}
+        </button>
       </div>
 
     </div>

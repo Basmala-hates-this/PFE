@@ -326,15 +326,16 @@ const handleLeaveRoom = async () => {
               `http://localhost:5000/api/rooms/private/${roomId}/admin/${member.id}`,
               {},
               { headers: { Authorization: `Bearer ${token}` } }
-            ).then((res) => {
-                 setRoom(res.data);
-                             // refetch members to reflect new admin status
+            ).then(() => {
+                  axios.get(`http://localhost:5000/api/rooms/${roomId}`, {
+                  headers: { Authorization: `Bearer ${token}` }
+               }).then(r => setRoom(r.data));
                      axios.get(`http://localhost:5000/api/rooms/${roomId}/members`, {
                       headers: { Authorization: `Bearer ${token}` }
-                         }).then(r => setMemberDetails(r.data));
-                     alert(`@${member.username} is now an admin!`);
-            }).catch(err => alert(err.response?.data?.message || "Something went wrong."));
-          }
+                     }).then(r => setMemberDetails(r.data));
+                   alert(`@${member.username} is now an admin!`);
+                }).catch(err => alert(err.response?.data?.message || "Something went wrong."));
+               }
         }}
         style={{padding:"4px 10px", borderRadius:"6px", background:"gold", border:"none", color:"black", cursor:"pointer", fontSize:"12px"}}
       >

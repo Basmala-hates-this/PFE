@@ -29,9 +29,8 @@ const getPublicRooms = (req, res) => {
 
 
 ///private room managment shit
-const createPrivateRoom = (req, res) => {
-  const { name, passKey } = req.body;
-  const userId = req.user.id;
+const createPrivateRoom = async (req, res) => {
+  const { name, passKey, invitedUsers = [] } = req.body;  const userId = req.user.id;
   const username = req.user.username;
 
   const finalPassKey = passKey || roomRepo.generatePassKey();
@@ -52,6 +51,23 @@ const createPrivateRoom = (req, res) => {
   const userRepo = require("../repositories/user.repo");
   const user = userRepo.findById(userId);
   userRepo.updateUser(userId, { rooms: [...(user.rooms || []), room.id] });
+
+
+  const { sendRoomInviteEmail } = require("../config/email");
+
+for (const invitedId of invitedUsers) {
+  const invitedUser = userRepo.findById(invitedId);
+  if (!invitedUser) continue;
+
+  roomRepo.addMember(room.id, invitedId);
+  userRepo.updateUser(invitedId, { rooms: [...(invitedUser.rooms || []), room.id] });
+
+  try {
+    await sendRoomInviteEmail(invitedUser.email, invitedUser.username, room.name, username);
+  } catch (err) {
+    console.error("Failed to send invite email:", err);
+  }
+}
 
   res.status(201).json(room);
 };

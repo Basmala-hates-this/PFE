@@ -38,6 +38,22 @@ const sendFollowEmail = async (toEmail, followerUsername) => {
   });
 };
 
+
+const sendRoomInviteEmail = async (toEmail, username, roomName, inviterUsername) => {
+  await transporter.sendMail({
+    from: `"StudyBuddy Platform" <${process.env.EMAIL_USER}>`,
+    to: toEmail,
+    subject: "You've been invited to a private room!",
+    html: `
+      <h2>Private Room Invite 🏠</h2>
+      <p>Hey <strong>@${username}</strong>!</p>
+      <p><strong>@${inviterUsername}</strong> has added you to their private room: <strong>${roomName}</strong>.</p>
+      <p>Log in to StudyBuddy to access it from your profile.</p>
+    `
+  });
+};
+
 module.exports = {sendResetEmail,
   sendFollowEmail,
+  sendRoomInviteEmail,
 }
