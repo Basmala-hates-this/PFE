@@ -180,6 +180,132 @@ const leaveRoom = (req, res) => {
 
 
 
+const getSubjectRoomsForUser = (req, res) => {
+  const userId = req.user.id;
+  const userRepo = require("../repositories/user.repo");
+  const subjectsMap = require("../data/subjectsMap.json");
+
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const userMajors = user.majors || [];
+  const rooms = roomRepo.getAllRooms();
+
+  const subjectRooms = rooms.filter(r =>
+    r.type === "subject" && userMajors.includes(r.major)
+  );
+
+  const result = userMajors.map(major => {
+    const existingRooms = subjectRooms.filter(r => r.major === major);
+    const existingSubjects = existingRooms.map(r => r.name);
+    const allSubjects = subjectsMap[major] || [];
+    const availableSubjects = allSubjects.filter(s => !existingSubjects.includes(s));
+
+    return {
+      major,
+      rooms: existingRooms,
+      available: availableSubjects
+    };
+  });
+
+  res.json(result);
+};
+
+
+const joinSubjectRoom = async (req, res) => {
+  const userId = req.user.id;
+  const { roomId } = req.params;
+  const userRepo = require("../repositories/user.repo");
+  const { sendRoomInviteEmail } = require("../config/email");
+
+  const room = roomRepo.getRoomById(roomId);
+  if (!room) return res.status(404).json({ message: "Room not found" });
+  if (room.type !== "subject") return res.status(400).json({ message: "Not a subject room" });
+
+  const user = userRepo.findById(userId);
+  if (!user.majors?.includes(room.major)) {
+    return res.status(403).json({ message: "You are not enrolled in this major" });
+  }
+
+  if (room.members?.includes(userId)) {
+    return res.status(400).json({ message: "Already joined" });
+  }
+
+  roomRepo.addMember(roomId, userId);
+  userRepo.updateUser(userId, { rooms: [...(user.rooms || []), roomId] });
+
+  try {
+    await sendRoomInviteEmail(user.email, user.username, room.name, "the platform");
+  } catch (err) {
+    console.error("Failed to send join email:", err);
+  }
+
+  res.json({ message: "Joined successfully" });
+};
+
+
+const leaveSubjectRoom = (req, res) => {
+  const userId = req.user.id;
+  const { roomId } = req.params;
+  const userRepo = require("../repositories/user.repo");
+
+  const room = roomRepo.getRoomById(roomId);
+  if (!room) return res.status(404).json({ message: "Room not found" });
+
+  const result = roomRepo.leaveRoom(roomId, userId);
+  if (result?.error) return res.status(400).json({ message: result.error });
+
+  const user = userRepo.findById(userId);
+  userRepo.updateUser(userId, { rooms: (user.rooms || []).filter(id => id !== roomId) });
+
+  res.json({ message: "Left room successfully" });
+};
+
+
+
+
+const createSubjectRoom = async (req, res) => {
+  const userId = req.user.id;
+  const { major, subject } = req.body;
+  const userRepo = require("../repositories/user.repo");
+  const subjectsMap = require("../data/subjectsMap.json");
+
+  const user = userRepo.findById(userId);
+  if (!user.majors?.includes(major)) {
+    return res.status(403).json({ message: "You are not enrolled in this major" });
+  }
+
+  const validSubjects = subjectsMap[major] || [];
+  if (!validSubjects.includes(subject)) {
+    return res.status(400).json({ message: "Invalid subject for this major" });
+  }
+
+  // check if room already exists
+  const existing = roomRepo.getAllRooms().find(r =>
+    r.type === "subject" && r.major === major && r.name === subject
+  );
+  if (existing) {
+    // just join it instead
+    roomRepo.addMember(existing.id, userId);
+    userRepo.updateUser(userId, { rooms: [...(user.rooms || []), existing.id] });
+    return res.json({ message: "Joined existing room", room: existing });
+  }
+
+  const room = roomRepo.createRoom({
+    name: subject,
+    type: "subject",
+    major: major,
+    createdBy: "system",
+  });
+
+  roomRepo.addMember(room.id, userId);
+  userRepo.updateUser(userId, { rooms: [...(user.rooms || []), room.id] });
+
+  res.status(201).json({ message: "Room created and joined", room });
+};
+
+
+
 module.exports = {
   getMyRooms, 
   getPublicRooms,
@@ -191,5 +317,9 @@ module.exports = {
   getRoomById,
   getRoomMembers,
   leaveRoom,
+  getSubjectRoomsForUser,
+  joinSubjectRoom,
+  leaveSubjectRoom,
+  createSubjectRoom,
 
 };

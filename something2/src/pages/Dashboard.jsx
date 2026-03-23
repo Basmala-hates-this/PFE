@@ -72,6 +72,11 @@ const [showSearchDropdown, setShowSearchDropdown] = useState(false);
 const guestToken = localStorage.getItem("guestToken");
 const isGuest = !!guestToken;
 
+//subject rooms...i coudnt run fast enough
+const [showBrowseRooms, setShowBrowseRooms] = useState(false);
+const [subjectRoomsData, setSubjectRoomsData] = useState([]);
+const [subjectRoomsLoading, setSubjectRoomsLoading] = useState(false);
+
 
   //
   // If user skipped info/register, send them back
@@ -343,6 +348,20 @@ const groupedRoomOptions = [
       .filter(r => r.type === "major")
       .map(r => ({ value: r.id, label: r.name }))
   },
+   ...userRooms
+    .filter(r => r.type === "subject")
+    .reduce((groups, room) => {
+      const existing = groups.find(g => g.label === `${room.major} — Subjects`);
+      if (existing) {
+        existing.options.push({ value: room.id, label: room.name });
+      } else {
+        groups.push({
+          label: `${room.major} — Subjects`,
+          options: [{ value: room.id, label: room.name }]
+        });
+      }
+      return groups;
+    }, [])
   // {
   //   label: "Private Rooms",
   //   options: userRooms
@@ -548,6 +567,70 @@ const handleSearch = async (query) => {
   }
 };
 
+
+
+
+const fetchSubjectRooms = async () => {
+  setSubjectRoomsLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get("http://localhost:5000/api/rooms/subject-rooms", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setSubjectRoomsData(res.data);
+  } catch (err) {
+    console.error("Failed to fetch subject rooms:", err);
+  } finally {
+    setSubjectRoomsLoading(false);
+  }
+};
+
+
+const handleJoinSubjectRoom = async (roomId) => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post(`http://localhost:5000/api/rooms/subject-rooms/${roomId}/join`, {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    // refetch both subject rooms and dashboard rooms
+    fetchSubjectRooms();
+    fetchRoomsAndPosts();
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
+
+const handleLeaveSubjectRoom = async (roomId) => {
+  const confirm = window.confirm("Are you sure you want to leave this room?");
+  if (!confirm) return;
+  try {
+    const token = localStorage.getItem("token");
+    await axios.delete(`http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    fetchSubjectRooms();
+    fetchRoomsAndPosts();
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
+
+const handleCreateAndJoinSubjectRoom = async (major, subject) => {
+  const confirm = window.confirm(`Join "${subject}" under ${major}?`);
+  if (!confirm) return;
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post("http://localhost:5000/api/rooms/subject-rooms/create", 
+      { major, subject },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    fetchSubjectRooms();
+    fetchRoomsAndPosts();
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -563,7 +646,11 @@ const handleSearch = async (query) => {
             <li><a href="#" id="home-link" onClick={() => navigate("/dashboard")}>Home</a></li>
             {!isGuest && (
                <>
-                  <li><a href="#" id="rooms-link">Rooms</a></li>
+                  <li><a href="#" id="rooms-link" onClick={(e) => {
+                      e.preventDefault();
+                       setShowBrowseRooms(true);
+                       fetchSubjectRooms();
+                        }}>Browse Rooms</a></li>
                   <li><a href="#" onClick={() => navigate("/profile")}>Profile</a></li>
                 </>
              )}
@@ -883,6 +970,61 @@ const handleSearch = async (query) => {
 )}
 
 {/* i seriosly need better modals.....but UI for last apperantly */}
+
+
+{showBrowseRooms && (
+  <div className="modal-overlay" onClick={() => setShowBrowseRooms(false)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()} style={{maxHeight:"100vh", overflowY:"auto"}}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>Browse Rooms</h3>
+        <button onClick={() => setShowBrowseRooms(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
+
+      {subjectRoomsLoading ? (
+        <p style={{opacity:0.5, textAlign:"center"}}>Loading...</p>
+      ) : subjectRoomsData.length === 0 ? (
+        <p style={{opacity:0.5, textAlign:"center"}}>No rooms available.</p>
+      ) : (
+        subjectRoomsData.map(({ major, rooms, available }) => (
+          <div key={major} style={{marginBottom:"20px"}}>
+            <h4 style={{margin:"0 0 10px", color:"#6476af", borderBottom:"1px solid rgba(255,255,255,0.1)", paddingBottom:"6px"}}>
+              {major}
+            </h4>
+
+            {/* joined rooms */}
+            {rooms.map(room => (
+              <div key={room.id} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 10px", marginBottom:"6px", background:"rgba(100,118,175,0.2)", borderRadius:"8px"}}>
+                <span>✓ {room.name}</span>
+                <button
+                  onClick={() => handleLeaveSubjectRoom(room.id)}
+                  style={{fontSize:"11px", padding:"3px 10px", borderRadius:"6px", background:"transparent", border:"1px solid #fc0c0c", color:"#fc0c0c", cursor:"pointer"}}
+                >
+                  Leave
+                </button>
+              </div>
+            ))}
+
+            {/* available subjects not yet created */}
+            {available.map(subject => (
+              <div key={subject} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 10px", marginBottom:"6px", background:"rgba(255,255,255,0.05)", borderRadius:"8px"}}>
+                <span style={{opacity:0.7}}>{subject}</span>
+                <button
+                  onClick={() => handleCreateAndJoinSubjectRoom(major, subject)}
+                  style={{fontSize:"11px", padding:"3px 10px", borderRadius:"6px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}
+                >
+                  Join
+                </button>
+              </div>
+            ))}
+
+          </div>
+        ))
+      )}
+
+    </div>
+  </div>
+)}
 
 </div>
         </div>
