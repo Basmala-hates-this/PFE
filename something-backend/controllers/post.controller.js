@@ -185,7 +185,7 @@ const searchPosts = (req, res) => {
   const results = posts.filter(p => 
     p.title?.toLowerCase().includes(q.toLowerCase()) ||
     p.content?.toLowerCase().includes(q.toLowerCase())
-  ).slice(0, 2); // limit to 5 results
+  ); // limit to 5 results
   
   res.json(results);
 };
