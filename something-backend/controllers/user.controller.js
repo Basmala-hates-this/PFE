@@ -113,8 +113,9 @@ const searchUsers = (req, res) => {
   const users = userRepo.readUsers();
   const results = users
     .filter(u => u.username?.toLowerCase().includes(q.toLowerCase()))
-    .map(({ password, ...u }) => u)
-    .slice(0, 2);
+    .filter(u => u.id !== req.user.id)
+    .map(({ password, ...u }) => u);
+    //maybe add slice and limit the ammount in frint end...or keep backend clean and mess with frontend only
   
   res.json(results);
 };

@@ -23,51 +23,62 @@ const [followLoading, setFollowLoading] = useState(false);
 ////////////////////////////////////////////////////////////////
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const [userRes, statsRes, postsRes] = await Promise.all([
-          axios.get(`http://localhost:5000/api/users/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axios.get(`http://localhost:5000/api/users/${userId}/stats`, {
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axios.get(`http://localhost:5000/api/posts/user/${userId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-        ]);
-        setUser(userRes.data);
-        setStats(statsRes.data);
-        setPosts(postsRes.data);
-      } catch (err) {
-        console.error("Failed to fetch profile:", err);
-        navigate("/dashboard");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProfile();
-  }, [userId]);
+  const fetchProfile = async () => {
+    try {
+      const [userRes, statsRes, postsRes, followersRes] = await Promise.all([
+        axios.get(`http://localhost:5000/api/users/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`http://localhost:5000/api/users/${userId}/stats`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`http://localhost:5000/api/posts/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }),
+        axios.get(`http://localhost:5000/api/users/${userId}/followers`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+      ]);
+
+      setUser(userRes.data);
+      setStats(statsRes.data);
+      setPosts(postsRes.data);
+
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      const alreadyFollowing = followersRes.data.some(f => f.id === currentUser?.id);
+      setIsFollowing(alreadyFollowing);
+
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+      navigate("/dashboard");
+    } finally {
+      setLoading(false);
+    }
+  };
+  fetchProfile();
+}, [userId]);
 
   
 
-useEffect(() => {
-  if (!userId) return;
-  const checkFollowing = async () => {
-    try {
-      const response = await axios.get(
-        `http://localhost:5000/api/users/${userId}/followers`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-      const alreadyFollowing = response.data.some(f => f.id === currentUser?.id);
-      setIsFollowing(alreadyFollowing);
-    } catch (err) {
-      console.error("Failed to check following status:", err);
-    }
-  };
-  checkFollowing();
-}, [userId]);
+// useEffect(() => {
+//   if (!userId) return;
+//   const checkFollowing = async () => {
+//     try {
+//       const response = await axios.get(
+//         `http://localhost:5000/api/users/${userId}/followers`,
+//         { headers: { Authorization: `Bearer ${token}` } }
+//       );
+//       const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+//       const alreadyFollowing = response.data.some(f => f.id === currentUser?.id);
+//       console.log("checkFollowing result:", alreadyFollowing, "currentUser id:", currentUser?.id);
+
+//       setIsFollowing(alreadyFollowing);
+//     } catch (err) {
+//       console.error("Failed to check following status:", err);
+//     }
+//   };
+//   checkFollowing();
+// }, [userId]);
 
 
   /////////////////////////////////////////////////////////////////////
@@ -76,6 +87,9 @@ useEffect(() => {
 
 
 const handleFollow = async () => {
+    console.log("handleFollow called, isFollowing:", isFollowing);
+
+   if (followLoading) return;
   setFollowLoading(true);
   try {
     const token = localStorage.getItem("token");
@@ -92,10 +106,10 @@ const handleFollow = async () => {
     }
 
     // refetch user to get updated followers//nodemon cuased timing isseu with reading and updating....
-    const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setUser(userRes.data);
+    // const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`, {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // });
+    // setUser(userRes.data);
 
   } catch (err) {
      const msg = err.response?.data?.message || "Something went wrong";

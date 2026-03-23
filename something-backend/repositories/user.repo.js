@@ -95,6 +95,11 @@ const followUser = (followerId, targetId) => {
   
   if (!follower.following) follower.following = [];
   if (!target.followers) target.followers = [];
+
+
+  console.log("follower.following:", follower.following);
+console.log("targetId:", targetId);
+console.log("includes?", follower.following.includes(targetId));
   
   if (follower.following.includes(targetId)) return { error: "Already following" };
   

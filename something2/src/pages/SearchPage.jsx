@@ -74,7 +74,8 @@ const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) 
       }
 
       setPosts(filteredPosts);
-      setUsers(isGuest ? [] : results[1].data);
+      const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
+      setUsers(isGuest ? [] : results[1].data).filter(u => u.id !== currentUser.id);
 
     } catch (err) {
       console.error("Search failed:", err);
