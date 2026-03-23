@@ -11,18 +11,23 @@ const upload = require("../middleware/upload");
 
 
 router.get("/me/stats", protect, userController.getMyStats);
-
-
-
 router.patch("/me", protect, upload.single("profilePic"), userController.updateMe);
 router.get("/me", protect, userController.getMe);
 router.delete("/me", protect, userController.deleteMe);
-
 router.get("/search", protect, userController.searchUsers);
 
+// follow routes BEFORE /:userId
+router.post("/:userId/follow", protect, userController.followUser);
+router.delete("/:userId/unfollow", protect, userController.unfollowUser);
+router.get("/:userId/followers", protect, userController.getFollowers);
+router.get("/:userId/following", protect, userController.getFollowing);
 
+// these must be last
 router.get("/:userId", protect, userController.getUserById);
 router.get("/:userId/stats", protect, userController.getStatsByUserId);
+
+
+
 
 
 

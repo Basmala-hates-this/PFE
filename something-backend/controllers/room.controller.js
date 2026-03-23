@@ -6,8 +6,8 @@ const getMyRooms = (req, res) => {
   const userId = req.user.id;
   const user = userRepo.findById(userId);
   
-  console.log("userId:", userId);
-  console.log("user.rooms:", user?.rooms);
+  // console.log("userId:", userId);
+  // console.log("user.rooms:", user?.rooms);fricking logs freezing the fricking server....
   
   if (!user) {
     return res.status(404).json({ message: "User not found" });

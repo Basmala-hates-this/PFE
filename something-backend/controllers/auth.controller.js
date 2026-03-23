@@ -2,7 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const userRepo = require("../repositories/user.repo");
 const roomRepo = require("../repositories/room.repo");
-const sendResetEmail = require("../config/email");
+const { sendResetEmail } = require("../config/email");
 
 const register = async (req, res) => {
   const { 

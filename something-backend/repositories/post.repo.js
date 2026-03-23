@@ -34,7 +34,7 @@ const createPost = (postData) => {
     comments: []
      
   };
-console.log("saving post with roomId:", newPost.roomId);
+// console.log("saving post with roomId:", newPost.roomId);
    posts.push(newPost);
   writePosts(posts);
   return newPost;

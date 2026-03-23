@@ -81,6 +81,49 @@ const deleteUser = (id) => {
   writeUsers(updatedUsers);
 };
 
+
+
+//follow/following shit.....................................i hate my life
+const followUser = (followerId, targetId) => {
+  const users = readUsers();
+  
+  const follower = users.find(u => u.id === followerId);
+  const target = users.find(u => u.id === targetId);
+  
+  if (!follower || !target) return { error: "User not found" };
+  if (followerId === targetId) return { error: "Cannot follow yourself" };
+  
+  if (!follower.following) follower.following = [];
+  if (!target.followers) target.followers = [];
+  
+  if (follower.following.includes(targetId)) return { error: "Already following" };
+  
+  follower.following.push(targetId);
+  target.followers.push(followerId);
+  
+  writeUsers(users);
+  return { success: true };
+};
+
+const unfollowUser = (followerId, targetId) => {
+  const users = readUsers();
+  
+  const follower = users.find(u => u.id === followerId);
+  const target = users.find(u => u.id === targetId);
+  
+  if (!follower || !target) return { error: "User not found" };
+  
+  follower.following = follower.following?.filter(id => id !== targetId) || [];
+  target.followers = target.followers?.filter(id => id !== followerId) || [];
+  
+  writeUsers(users);
+  return { success: true };
+};
+
+
+
+
+
 module.exports = {
   createUser,
   findByEmail,
@@ -90,4 +133,6 @@ module.exports = {
   updateRating,
   deleteUser,
   readUsers,
+  followUser,
+  unfollowUser,
 };

@@ -123,6 +123,7 @@ const searchUsers = (req, res) => {
 const getUserById = (req, res) => {
   const { userId } = req.params;
   const user = userRepo.findById(userId);
+//console.log("getUserById followers:", user?.followers);
   if (!user) return res.status(404).json({ message: "User not found" });
   
   const { password: _, ...userWithoutPassword } = user;
@@ -150,6 +151,70 @@ const getStatsByUserId = (req, res) => {
   });
 };
 
+
+
+
+const followUser = async (req, res) => {
+  const followerId = req.user.id;
+  const { userId: targetId } = req.params;
+
+  const result = userRepo.followUser(followerId, targetId);
+  //console.log("follow result:", result);
+  if (result.error) return res.status(400).json({ message: result.error });
+
+  // send email notification to the followed user
+  try {
+    const target = userRepo.findById(targetId);
+    const follower = userRepo.findById(followerId);
+    const { sendFollowEmail } = require("../config/email");
+    await sendFollowEmail(target.email, follower.username);
+  } catch (err) {
+    console.error("Failed to send follow email:", err);
+  }
+
+  res.json({ message: "Followed successfully" });
+};
+
+const unfollowUser = (req, res) => {
+  const followerId = req.user.id;
+  const { userId: targetId } = req.params;
+
+  const result = userRepo.unfollowUser(followerId, targetId);
+  if (result.error) return res.status(400).json({ message: result.error });
+
+  res.json({ message: "Unfollowed successfully" });
+};
+
+const getFollowers = (req, res) => {
+  const { userId } = req.params;
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const followers = (user.followers || []).map(id => {
+    const u = userRepo.findById(id);
+    if (!u) return null;
+    const { password: _, ...rest } = u;
+    return rest;
+  }).filter(Boolean);
+
+  res.json(followers);
+};
+
+const getFollowing = (req, res) => {
+  const { userId } = req.params;
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const following = (user.following || []).map(id => {
+    const u = userRepo.findById(id);
+    if (!u) return null;
+    const { password: _, ...rest } = u;
+    return rest;
+  }).filter(Boolean);
+
+  res.json(following);
+};
+
 module.exports = {
   getMyStats,
   getPostsByUser,
@@ -159,7 +224,12 @@ module.exports = {
   deleteMe,
   searchUsers,
   getUserById,
-  getStatsByUserId
+  getStatsByUserId,
+  getFollowers,
+  getFollowing,
+  followUser,
+  unfollowUser,
+
 
   
 };

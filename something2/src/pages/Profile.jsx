@@ -190,7 +190,7 @@ const handleJoinRoom = async () => {
       <li onClick={() => setShowCreateRoom(true)}><span>Create Private Room </span></li>
       <li onClick={() => setShowJoinRoom(true)}><span>Join Private Room </span></li>
       <li><span>My Courses/resources </span></li>
-      <li><span> Connections </span></li>
+      <li onClick={() => navigate(`/connections/${user?.id}`)}><span> Connections </span></li>
       <li onClick={()=> navigate("/edit")}><span> Edit </span></li>
       <li onClick={handleLogout}><span> Logout </span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
       <li className="delete-item"  onClick={handleDeleteAccount}><span> Delete Account </span> </li>

@@ -13,6 +13,15 @@ export default function PublicProfile() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+
+  const [isFollowing, setIsFollowing] = useState(false);
+const [followLoading, setFollowLoading] = useState(false);
+
+////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -40,7 +49,68 @@ export default function PublicProfile() {
     fetchProfile();
   }, [userId]);
 
-  if (loading) return <div style={{color:"white", padding:"20px"}}>Loading...</div>;
+  
+
+useEffect(() => {
+  if (!userId) return;
+  const checkFollowing = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:5000/api/users/${userId}/followers`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+      const alreadyFollowing = response.data.some(f => f.id === currentUser?.id);
+      setIsFollowing(alreadyFollowing);
+    } catch (err) {
+      console.error("Failed to check following status:", err);
+    }
+  };
+  checkFollowing();
+}, [userId]);
+
+
+  /////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////
+
+
+const handleFollow = async () => {
+  setFollowLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    if (isFollowing) {
+      await axios.delete(`http://localhost:5000/api/users/${userId}/unfollow`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setIsFollowing(false);
+    } else {
+      await axios.post(`http://localhost:5000/api/users/${userId}/follow`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setIsFollowing(true);
+    }
+
+    // refetch user to get updated followers//nodemon cuased timing isseu with reading and updating....
+    const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setUser(userRes.data);
+
+  } catch (err) {
+     const msg = err.response?.data?.message || "Something went wrong";
+    console.error("Failed to follow/unfollow:", err);
+     alert(msg);
+  } finally {
+    setFollowLoading(false);
+  }
+};
+
+
+
+/////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
 
   return (
     <div style={{minHeight:"100vh", background:"#1a1f35", color:"white", padding:"20px"}}>
@@ -57,9 +127,27 @@ export default function PublicProfile() {
           <p style={{margin:"8px 0 4px", opacity:0.7}}>Major(s): {user?.majors?.join(", ")}</p>
           <p style={{margin:0, opacity:0.7}}>Rating: {user?.rating ?? 1} / 5</p>
         </div>
-         <button style={{padding:"8px 20px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer", fontSize:"14px",marginLeft:"50%"}}>
-         Follow
-        </button>
+        <button 
+              onClick={handleFollow}
+              disabled={followLoading}
+             style={{
+                 padding:"8px 20px", 
+                 borderRadius:"8px", 
+                 background: isFollowing ? "transparent" : "#6476af", 
+                  border: isFollowing ? "1px solid #6476af" : "none", 
+                  color:"white", 
+                  cursor:"pointer", 
+                  fontSize:"14px"
+               }}
+               >
+              {followLoading ? "..." : isFollowing ? "Following ✓" : "Follow"}
+            </button>
+            <button
+              onClick={() => navigate(`/connections/${userId}`)}
+              style={{padding:"8px 20px", borderRadius:"8px", background:"transparent", border:"1px solid #6476af", color:"white", cursor:"pointer", fontSize:"14px"}}
+            >
+                View Connections
+            </button>
       </div>
 
       {/* stats */}

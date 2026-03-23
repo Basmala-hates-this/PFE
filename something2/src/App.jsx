@@ -16,6 +16,8 @@ import RoomChat from "./pages/RoomChat.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
 import PublicProfile from "./pages/PublicProfile.jsx";
 
+import ConnectionsPage from "./pages/ConnectionsPage.jsx";
+
 function App() {
   return (
     <Router>
@@ -35,6 +37,7 @@ function App() {
         <Route path="/rooms/:roomId" element={<ProtectedRoute><RoomChat /></ProtectedRoute>} />
         <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
         <Route path="/users/:userId" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
+        <Route path="/connections/:userId" element={<ProtectedRoute><ConnectionsPage /></ProtectedRoute>} />
 
       </Routes>
             </RegistrationProvider>
