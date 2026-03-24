@@ -196,10 +196,11 @@ const getSubjectRoomsForUser = (req, res) => {
   );
 
   const result = userMajors.map(major => {
-    const existingRooms = subjectRooms.filter(r => r.major === major);
-    const existingSubjects = existingRooms.map(r => r.name);
+     const existingRooms = subjectRooms.filter(r => r.major === major && r.members?.includes(userId));
+    const existingSubjects = subjectRooms.filter(r => r.major === major).map(r => r.name);
     const allSubjects = subjectsMap[major] || [];
     const availableSubjects = allSubjects.filter(s => !existingSubjects.includes(s));
+   
 
     return {
       major,

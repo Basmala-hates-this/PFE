@@ -203,8 +203,8 @@ useEffect(() => {
 //hope this one stays this time....
 
 //merge fetch rooms and posts so rooms runs before posts and i can avoid those stupid bugs and errors
-useEffect(() => {
-  const fetchRoomsAndPosts = async () => {
+
+ const fetchRoomsAndPosts = async () => {
     console.log("fetchRoomsAndPosts called");
     setLoading(true);
     try {
@@ -262,6 +262,10 @@ useEffect(() => {
       setLoading(false);
     }
   };
+
+
+useEffect(() => {
+ 
   fetchRoomsAndPosts();
 }, [selectedRooms]);
 
@@ -593,29 +597,16 @@ const handleJoinSubjectRoom = async (roomId) => {
       headers: { Authorization: `Bearer ${token}` }
     });
     // refetch both subject rooms and dashboard rooms
-    fetchSubjectRooms();
-    fetchRoomsAndPosts();
+   await fetchSubjectRooms();
+   await fetchRoomsAndPosts();
   } catch (err) {
     alert(err.response?.data?.message || "Something went wrong.");
   }
 };
 
-const handleLeaveSubjectRoom = async (roomId) => {
-  const confirm = window.confirm("Are you sure you want to leave this room?");
-  if (!confirm) return;
-  try {
-    const token = localStorage.getItem("token");
-    await axios.delete(`http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    fetchSubjectRooms();
-    fetchRoomsAndPosts();
-  } catch (err) {
-    alert(err.response?.data?.message || "Something went wrong.");
-  }
-};
 
 const handleCreateAndJoinSubjectRoom = async (major, subject) => {
+   console.log("handleCreateAndJoinSubjectRoom called", major, subject);
   const confirm = window.confirm(`Join "${subject}" under ${major}?`);
   if (!confirm) return;
   try {
@@ -624,12 +615,32 @@ const handleCreateAndJoinSubjectRoom = async (major, subject) => {
       { major, subject },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    fetchSubjectRooms();
-    fetchRoomsAndPosts();
+  await  fetchSubjectRooms();
+   await fetchRoomsAndPosts();
   } catch (err) {
     alert(err.response?.data?.message || "Something went wrong.");
   }
 };
+
+
+const handleLeaveSubjectRoom = async (roomId) => {
+   console.log("handleJoinSubjectRoom called", roomId);
+  const confirm = window.confirm("Are you sure you want to leave this room?");
+  if (!confirm) return;
+  try {
+    const token = localStorage.getItem("token");
+    await axios.delete(`http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+   await fetchSubjectRooms();
+   await fetchRoomsAndPosts();
+  } catch (err) {
+    console.log("full error:", err);
+  console.log("response:", err.response);
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

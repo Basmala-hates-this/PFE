@@ -178,19 +178,22 @@ font-size: 0.8rem;
   position: fixed;
   inset: 0;
   margin-left: 25%;
-  margin-top: 15%;
-  background: rgba(30, 57, 165, 0.854);
+  margin-top: 35px;
+  margin-bottom: 10%;
+  background: rgba(15, 28, 84, 0.854);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px,solid, whitesmoke;
   width: 50%;
-  height: 40%;
+  height: 90%;
+  color: white;
 }
 
 .modal {
   background: var(--card-bg);
   padding: 20px;
   width: 400px;
+  height: auto;
   border-radius: 10px;
 }
