@@ -26,12 +26,12 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB limit
+  limits: { fileSize: 10 * 1024 * 1024 }, // 2MB limit
   fileFilter: (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|gif|webp/;
+    const  allowed = /jpeg|jpg|png|gif|webp|pdf/;
     const isValid = allowed.test(path.extname(file.originalname).toLowerCase());
     if (isValid) cb(null, true);
-    else cb(new Error("Images only!"));
+    else cb(new Error("Images and PDF only!"));
   }
 });
 

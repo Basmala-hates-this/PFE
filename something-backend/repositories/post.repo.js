@@ -31,7 +31,11 @@ const createPost = (postData) => {
     updatedAt: new Date().toISOString(),
     isUpdated: false,
     votes: { useful: 0, useless: 0 },
-    comments: []
+    comments: [],
+    image: postData.image || null,
+    pdf: postData.pdf || null,
+    resourceLink: postData.resourceLink || null,
+    resourceLabel: postData.resourceLabel || null,
      
   };
 // console.log("saving post with roomId:", newPost.roomId);
