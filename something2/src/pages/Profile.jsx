@@ -4,6 +4,7 @@ import "../styles/sidebar.css";
  import { useNavigate } from "react-router-dom";
  import { useEffect, useState } from "react";
  import axios from "axios";
+ import PostModal from "../assets/components/PostModal.jsx";
 
 
 
@@ -39,6 +40,13 @@ export default function Profile() {
     const [following, setFollowing] = useState([]);
     const [invitedUsers, setInvitedUsers] = useState([]);
     const [roomLoading, setRoomLoading] = useState(false);
+
+
+    //resources things and shit...i am fasting btw...
+    const [showSavedPosts, setShowSavedPosts] = useState(false);
+    const [savedPosts, setSavedPosts] = useState([]);
+    const [savedPostsLoading, setSavedPostsLoading] = useState(false);
+    const [selectedPost, setSelectedPost] = useState(null);
 
 
 useEffect(() => {
@@ -204,6 +212,23 @@ const handleJoinRoom = async () => {
     setJoinFeedback(err.response?.data?.message || "Something went wrong.");
   }
 };
+
+
+
+const fetchSavedPosts = async () => {
+  setSavedPostsLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get("http://localhost:5000/api/posts/saved", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setSavedPosts(res.data);
+  } catch (err) {
+    console.error("Failed to fetch saved posts:", err);
+  } finally {
+    setSavedPostsLoading(false);
+  }
+};
 /////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -218,7 +243,7 @@ const handleJoinRoom = async () => {
       <li onClick={() => setShowMyRooms(true)} ><span>My Rooms </span></li>
       <li onClick={() => setShowCreateRoom(true)}><span>Create Private Room </span></li>
       <li onClick={() => setShowJoinRoom(true)}><span>Join Private Room </span></li>
-      <li><span>My Courses/resources </span></li>
+      <li onClick={() => { setShowSavedPosts(true); fetchSavedPosts(); }}><span>My Saved Posts</span></li>
       <li onClick={() => navigate(`/connections/${user?.id}`)}><span> Connections </span></li>
       <li onClick={()=> navigate("/edit")}><span> Edit </span></li>
       <li onClick={handleLogout}><span> Logout </span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
@@ -453,6 +478,54 @@ const handleJoinRoom = async () => {
 
     </div>
   </div>
+)}
+
+
+
+{showSavedPosts && (
+  <div className="modal-overlay" onClick={() => setShowSavedPosts(false)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()} style={{maxHeight:"80vh", overflowY:"auto"}}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>🔖 Saved Posts</h3>
+        <button onClick={() => setShowSavedPosts(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
+
+      {savedPostsLoading ? (
+        <p style={{opacity:0.5, textAlign:"center"}}>Loading...</p>
+      ) : savedPosts.length === 0 ? (
+        <p style={{opacity:0.5, textAlign:"center"}}>No saved posts yet.</p>
+      ) : (
+        savedPosts.map(post => (
+          <div
+            key={post.id}
+            onClick={() => { setShowSavedPosts(false); setSelectedPost(post); }}
+            style={{padding:"12px", background:"rgba(255,255,255,0.05)", borderRadius:"8px", marginBottom:"10px", cursor:"pointer"}}
+            onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
+            onMouseLeave={e => e.currentTarget.style.background="rgba(255,255,255,0.05)"}
+          >
+            <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
+              <strong style={{fontSize:"14px"}}>@{post.authorUsername}</strong>
+              <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
+            </div>
+            {post.title && <h4 style={{margin:"0 0 4px", fontSize:"14px"}}>{post.title}</h4>}
+            <p style={{margin:"0 0 6px", opacity:0.7, fontSize:"13px"}}>{post.content?.slice(0, 100)}...</p>
+            <small style={{opacity:0.4, fontSize:"11px"}}>{new Date(post.createdAt).toLocaleString()}</small>
+          </div>
+        ))
+      )}
+
+    </div>
+  </div>
+)}
+
+
+{selectedPost && (
+  <PostModal
+    postId={selectedPost.id}
+    onClose={() => setSelectedPost(null)}
+    isGuest={false}
+  />
 )}
 
 </div>

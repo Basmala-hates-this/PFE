@@ -946,7 +946,7 @@ const handleSavePost = async (postId) => {
            {!isGuest && (
               <button
               onClick={() => handleSavePost(post.id)}
-              style={{marginLeft:"8px", cursor:"pointer", color: savedPostIds.includes(post.id) ? "gold" : "inherit"}}
+              style={{marginLeft:"8px", cursor:"pointer", color: savedPostIds.includes(post.id) ? "green" : "inherit"}}
                >
                 {savedPostIds.includes(post.id) ? "🔖 Saved" : "🔖 Save"}
                 </button>
