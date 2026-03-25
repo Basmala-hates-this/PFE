@@ -1,10 +1,18 @@
 const postRepo = require("../repositories/post.repo");
 
 const createPost = (req, res) => {
-  const { title, content, roomId } = req.body;
+  const { title, content, roomId, resourceLink, resourceLabel } = req.body;
   const authorId = req.user.id;
   const authorUsername = req.user.username;
-   const authorRole = req.user.role;
+  const authorRole = req.user.role;
+
+  const image = req.file && req.file.mimetype.startsWith("image/")
+    ? `http://localhost:5000/uploads/${req.file.filename}`
+    : null;
+
+  const pdf = req.file && req.file.mimetype === "application/pdf"
+    ? `http://localhost:5000/uploads/${req.file.filename}`
+    : null;
 
   const newPost = postRepo.createPost({
     title,
@@ -13,6 +21,10 @@ const createPost = (req, res) => {
     authorId,
     authorUsername,
     authorRole,
+    image,
+    pdf,
+    resourceLink: resourceLink || null,
+    resourceLabel: resourceLabel || null,
   });
 
   res.status(201).json(newPost);
@@ -190,6 +202,46 @@ const searchPosts = (req, res) => {
   res.json(results);
 };
 
+
+const savePost = (req, res) => {
+  const userId = req.user.id;
+  const { postId } = req.params;
+  const userRepo = require("../repositories/user.repo");
+
+  const post = postRepo.getPostById(postId);
+  if (!post) return res.status(404).json({ message: "Post not found" });
+
+  const result = userRepo.savePost(userId, postId);
+  if (result.error) return res.status(400).json({ message: result.error });
+
+  res.json({ message: "Post saved" });
+};
+
+const unsavePost = (req, res) => {
+  const userId = req.user.id;
+  const { postId } = req.params;
+  const userRepo = require("../repositories/user.repo");
+
+  const result = userRepo.unsavePost(userId, postId);
+  if (result.error) return res.status(400).json({ message: result.error });
+
+  res.json({ message: "Post unsaved" });
+};
+
+const getSavedPosts = (req, res) => {
+  const userId = req.user.id;
+  const userRepo = require("../repositories/user.repo");
+
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const savedPosts = (user.savedPosts || [])
+    .map(postId => postRepo.getPostById(postId))
+    .filter(Boolean);
+
+  res.json(savedPosts);
+};
+
 module.exports = {
   createPost,
   getPostById,
@@ -205,4 +257,7 @@ module.exports = {
   // getMyStats,
   updateComment,
   searchPosts,
+  savePost,
+  unsavePost,
+  getSavedPosts,
 };

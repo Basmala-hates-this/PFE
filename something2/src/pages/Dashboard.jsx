@@ -78,6 +78,15 @@ const [subjectRoomsData, setSubjectRoomsData] = useState([]);
 const [subjectRoomsLoading, setSubjectRoomsLoading] = useState(false);
 
 
+//post attachment
+const [postAttachment, setPostAttachment] = useState(null);
+const [postResourceLink, setPostResourceLink] = useState("");
+const [postResourceLabel, setPostResourceLabel] = useState("");
+
+
+const [savedPostIds, setSavedPostIds] = useState([]);
+
+
   //
   // If user skipped info/register, send them back
 // +for guests
@@ -227,6 +236,18 @@ useEffect(() => {
 
       setUserRooms(allowedRooms);
 
+      //save posts/unsave...u get the idea
+      if (!isGuest) {
+          try {
+               const savedRes = await axios.get("http://localhost:5000/api/posts/saved", {
+                 headers: { Authorization: `Bearer ${token}` }
+             });
+            setSavedPostIds(savedRes.data.map(p => p.id));
+         } catch (err) {
+             console.error("Failed to fetch saved posts:", err);
+       }
+      }
+
       let url = "http://localhost:5000/api/posts";
       if (selectedRooms.length === 1) {
         url += `?roomId=${selectedRooms[0].value}`;
@@ -288,21 +309,28 @@ const handleSubmitPost = async () => {
   if (!postContent.trim() || !selectedPostRoom) return;
   try {
     const token = localStorage.getItem("token");
-    console.log("selectedPostRoom:", selectedPostRoom);
-    console.log("roomId being sent:", selectedPostRoom.value);
+
+    const formData = new FormData();
+    formData.append("content", postContent);
+    formData.append("title", postTitle || "Post");
+    formData.append("roomId", selectedPostRoom.value);
+    if (postAttachment) formData.append("attachment", postAttachment);
+    if (postResourceLink.trim()) formData.append("resourceLink", postResourceLink);
+    if (postResourceLabel.trim()) formData.append("resourceLabel", postResourceLabel);
+
     const response = await axios.post(
       "http://localhost:5000/api/posts",
-      {
-        content: postContent,
-        title: postTitle || "Post",
-        roomId: selectedPostRoom.value
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
+      formData,
+      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
     );
+
     setPosts(prev => [response.data, ...prev]);
     setPostContent("");
     setPostTitle("");
     setSelectedPostRoom(null);
+    setPostAttachment(null);
+    setPostResourceLink("");
+    setPostResourceLabel("");
     setIsModalOpen(false);
   } catch (err) {
     console.error("Failed to create post:", err);
@@ -642,6 +670,26 @@ const handleLeaveSubjectRoom = async (roomId) => {
 };
 
 
+
+const handleSavePost = async (postId) => {
+  try {
+    const token = localStorage.getItem("token");
+    if (savedPostIds.includes(postId)) {
+      await axios.delete(`http://localhost:5000/api/posts/${postId}/save`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSavedPostIds(prev => prev.filter(id => id !== postId));
+    } else {
+      await axios.post(`http://localhost:5000/api/posts/${postId}/save`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSavedPostIds(prev => [...prev, postId]);
+    }
+  } catch (err) {
+    console.error("Failed to save/unsave post:", err);
+  }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -856,6 +904,38 @@ const handleLeaveSubjectRoom = async (roomId) => {
   <small style={{opacity:0.6}}>{getRoomName(post.roomId)}</small>
 </div>
       <p>{post.content}</p>
+      {/* image attachment */}
+{post.image && (
+  <img 
+    src={post.image} 
+    alt="attachment" 
+    style={{maxWidth:"100%", borderRadius:"8px", marginBottom:"8px", display:"block"}}
+  />
+)}
+
+{/* pdf attachment */}
+{post.pdf && (
+  <a 
+    href={post.pdf} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(16, 15, 15, 0.25)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
+  >
+    📄 View PDF
+  </a>
+)}
+
+{/* resource link */}
+{post.resourceLink && (
+  <a 
+    href={post.resourceLink} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(100,118,175,0.3)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
+  >
+    🔗 {post.resourceLabel || "Open Resource"}
+  </a>
+)}
       <small>{new Date(post.createdAt).toLocaleString()}</small>
       <div style={{marginTop: "8px"}}>
         <button onClick={() => isGuest ? alert("Create an account to vote! 👋") :handleVote(post.id, "useful")}>{post.votes.useful}👍 Useful </button>
@@ -863,6 +943,14 @@ const handleLeaveSubjectRoom = async (roomId) => {
         <button onClick={() => setSelectedPost(post)}  style={{marginLeft: "8px"}}>
          Comments {post.comments.length}
         </button>
+           {!isGuest && (
+              <button
+              onClick={() => handleSavePost(post.id)}
+              style={{marginLeft:"8px", cursor:"pointer", color: savedPostIds.includes(post.id) ? "gold" : "inherit"}}
+               >
+                {savedPostIds.includes(post.id) ? "🔖 Saved" : "🔖 Save"}
+                </button>
+                  )}
 
         {currentUser?.id === post.authorId && (
   <button 
@@ -926,6 +1014,53 @@ const handleLeaveSubjectRoom = async (roomId) => {
         placeholder="Describe your flow..."
         style={{width:"100%", minHeight:"120px", padding:"10px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box", resize:"vertical"}}
       />
+
+{/* //////attachment thingies.....this is gonna be messy....he football player?! */}
+       {/* image/pdf attachment */}
+<div style={{marginTop:"10px"}}>
+  <label style={{display:"block", marginBottom:"6px", opacity:0.7, fontSize:"13px"}}>
+    📎 Attach Image or PDF
+  </label>
+  <input
+    type="file"
+    accept="image/*,.pdf"
+    onChange={(e) => setPostAttachment(e.target.files[0])}
+    style={{fontSize:"13px", color:"white"}}
+  />
+  {postAttachment && (
+    <small style={{display:"block", marginTop:"4px", opacity:0.6}}>
+      Selected: {postAttachment.name}
+      <button 
+        onClick={() => setPostAttachment(null)}
+        style={{marginLeft:"8px", background:"none", border:"none", color:"#fc0c0c", cursor:"pointer", fontSize:"11px"}}
+      >
+        ✕ Remove
+      </button>
+    </small>
+  )}
+</div>
+
+{/* resource link */}
+<div style={{marginTop:"10px"}}>
+  <label style={{display:"block", marginBottom:"6px", opacity:0.7, fontSize:"13px"}}>
+    🔗 Resource Link (Google Drive, GitHub, etc.)
+  </label>
+  <input
+    type="url"
+    placeholder="https://..."
+    value={postResourceLink}
+    onChange={(e) => setPostResourceLink(e.target.value)}
+    style={{width:"100%", padding:"8px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box", marginBottom:"6px"}}
+  />
+  <input
+    type="text"
+    placeholder="Label (optional, e.g. 'Chapter 3 Notes')"
+    value={postResourceLabel}
+    onChange={(e) => setPostResourceLabel(e.target.value)}
+    style={{width:"100%", padding:"8px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box"}}
+  />
+</div>
+
       <br/><br/>
 
       <div className="modal-actions" style={{display:"flex", justifyContent:"flex-end", gap:"10px"}}>

@@ -140,6 +140,38 @@ export default function PostModal({ postId, onClose, isGuest }) {
             <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
           </div>
           <p style={{margin:"0 0 8px"}}>{post.content}</p>
+          {/* image attachment */}
+{post.image && (
+  <img 
+    src={post.image} 
+    alt="attachment" 
+    style={{maxWidth:"100%", borderRadius:"8px", marginBottom:"8px", display:"block"}}
+  />
+)}
+
+{/* pdf attachment */}
+{post.pdf && (
+  <a 
+    href={post.pdf} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(255,255,255,0.1)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
+  >
+    📄 View PDF
+  </a>
+)}
+
+{/* resource link */}
+{post.resourceLink && (
+  <a 
+    href={post.resourceLink} 
+    target="_blank" 
+    rel="noopener noreferrer"
+    style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(100,118,175,0.3)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
+  >
+    🔗 {post.resourceLabel || "Open Resource"}
+  </a>
+)}
           <div style={{display:"flex", gap:"8px"}}>
             <button onClick={() => handleVote("useful")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
               👍 Useful {post.votes.useful}

@@ -127,6 +127,26 @@ const unfollowUser = (followerId, targetId) => {
 
 
 
+const savePost = (userId, postId) => {
+  const users = readUsers();
+  const user = users.find(u => u.id === userId);
+  if (!user) return { error: "User not found" };
+  if (!user.savedPosts) user.savedPosts = [];
+  if (user.savedPosts.includes(postId)) return { error: "Already saved" };
+  user.savedPosts.push(postId);
+  writeUsers(users);
+  return { success: true };
+};
+
+const unsavePost = (userId, postId) => {
+  const users = readUsers();
+  const user = users.find(u => u.id === userId);
+  if (!user) return { error: "User not found" };
+  user.savedPosts = (user.savedPosts || []).filter(id => id !== postId);
+  writeUsers(users);
+  return { success: true };
+};
+
 
 
 module.exports = {
@@ -140,4 +160,6 @@ module.exports = {
   readUsers,
   followUser,
   unfollowUser,
+  savePost,
+  unsavePost,
 };
