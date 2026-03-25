@@ -14,6 +14,11 @@ export default function PostModal({ postId, onClose, isGuest }) {
   const [commentInput, setCommentInput] = useState("");
 
 
+  const [commentAttachment, setCommentAttachment] = useState(null);
+const [commentResourceLink, setCommentResourceLink] = useState("");
+const [commentResourceLabel, setCommentResourceLabel] = useState("");
+
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -43,6 +48,11 @@ export default function PostModal({ postId, onClose, isGuest }) {
     setPost(response.data);
   };
 
+
+  /////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////
+
   const handleVote = async (voteType) => {
     if (isGuest) return alert("Create an account to vote! 👋");
     try {
@@ -57,21 +67,30 @@ export default function PostModal({ postId, onClose, isGuest }) {
     }
   };
 
-  const handleAddComment = async () => {
-    if (isGuest) return alert("Create an account to contribute....");
-    if (!commentInput.trim()) return;
-    try {
-      await axios.post(
-        `http://localhost:5000/api/posts/${postId}/comments`,
-        { content: commentInput },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setCommentInput("");
-      refetchPost();
-    } catch (err) {
-      console.error("Failed to add comment:", err);
-    }
-  };
+ const handleAddComment = async () => {
+  if (isGuest) return alert("Create an account to contribute....");
+  if (!commentInput.trim() && !commentAttachment) return;
+  try {
+    const formData = new FormData();
+    formData.append("content", commentInput);
+    if (commentAttachment) formData.append("attachment", commentAttachment);
+    if (commentResourceLink.trim()) formData.append("resourceLink", commentResourceLink);
+    if (commentResourceLabel.trim()) formData.append("resourceLabel", commentResourceLabel);
+
+    await axios.post(
+      `http://localhost:5000/api/posts/${postId}/comments`,
+      formData,
+      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+    );
+    setCommentInput("");
+    setCommentAttachment(null);
+    setCommentResourceLink("");
+    setCommentResourceLabel("");
+    refetchPost();
+  } catch (err) {
+    console.error("Failed to add comment:", err);
+  }
+};
 
   const handleCommentVote = async (commentId, voteType) => {
     if (isGuest) return alert("Create an account to vote! 👋");
@@ -142,11 +161,22 @@ export default function PostModal({ postId, onClose, isGuest }) {
           <p style={{margin:"0 0 8px"}}>{post.content}</p>
           {/* image attachment */}
 {post.image && (
-  <img 
-    src={post.image} 
-    alt="attachment" 
-    style={{maxWidth:"100%", borderRadius:"8px", marginBottom:"8px", display:"block"}}
-  />
+  <div style={{marginBottom:"8px"}}>
+    <a href={post.image} target="_blank" rel="noopener noreferrer">
+      <img 
+        src={post.image} 
+        alt="attachment" 
+        style={{maxWidth:"100%", borderRadius:"8px", display:"block", cursor:"pointer"}}
+      />
+    </a>
+    <a
+      href={post.image}
+      download
+      style={{display:"inline-block", marginTop:"4px", fontSize:"11px", color:"#8ca4c6"}}
+    >
+      ⬇️ Download Image
+    </a>
+  </div>
 )}
 
 {/* pdf attachment */}
@@ -196,6 +226,36 @@ export default function PostModal({ postId, onClose, isGuest }) {
                 </div>
 
                 <p style={{margin:"0 0 6px 32px", fontSize:"14px"}}>{comment.content}</p>
+                {/* comment image */}
+{comment.image && (
+  <div style={{margin:"6px 0 6px 32px"}}>
+    <a href={comment.image} target="_blank" rel="noopener noreferrer">
+      <img src={comment.image} alt="attachment" style={{maxWidth:"100%", borderRadius:"8px", display:"block", cursor:"pointer"}}/>
+    </a>
+    <a href={comment.image} download style={{fontSize:"11px", color:"#8ca4c6", display:"inline-block", marginTop:"4px"}}>⬇️ Download Image</a>
+  </div>
+)}
+
+{/* comment pdf */}
+{comment.pdf && (
+  <div style={{margin:"6px 0 6px 32px", display:"flex", gap:"8px"}}>
+    <a href={comment.pdf} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(255,255,255,0.1)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px"}}>
+      📄 View PDF
+    </a>
+    <a href={comment.pdf} download style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(255,255,255,0.1)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px"}}>
+      ⬇️ Download PDF
+    </a>
+  </div>
+)}
+
+{/* comment resource link */}
+{comment.resourceLink && (
+  <div style={{margin:"6px 0 6px 32px"}}>
+    <a href={comment.resourceLink} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(100,118,175,0.3)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px"}}>
+      🔗 {comment.resourceLabel || "Open Resource"}
+    </a>
+  </div>
+)}
 
                 {editingComment?.id === comment.id ? (
                   <div style={{margin:"0 0 0 32px"}}>
@@ -234,19 +294,64 @@ export default function PostModal({ postId, onClose, isGuest }) {
         </div>
 
         {/* add comment */}
-        <div style={{display:"flex", gap:"8px"}}>
-          <input
-            type="text"
-            value={commentInput}
-            onChange={(e) => setCommentInput(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
-            placeholder="Write a comment..."
-            style={{flex:1, padding:"8px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white"}}
-          />
-          <button onClick={handleAddComment} style={{padding:"8px 16px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}>
-            Send
-          </button>
-        </div>
+<div style={{borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:"10px"}}>
+  
+  {/* attachment preview */}
+  {commentAttachment && (
+    <div style={{marginBottom:"6px", fontSize:"12px", opacity:0.7, display:"flex", alignItems:"center", gap:"6px"}}>
+      📎 {commentAttachment.name}
+      <button onClick={() => setCommentAttachment(null)} style={{background:"none", border:"none", color:"#fc0c0c", cursor:"pointer", fontSize:"11px"}}>✕</button>
+    </div>
+  )}
+
+  {/* resource link inputs */}
+  <div style={{display:"flex", gap:"6px", marginBottom:"6px"}}>
+    <input
+      type="url"
+      placeholder="🔗 Resource link (optional)"
+      value={commentResourceLink}
+      onChange={(e) => setCommentResourceLink(e.target.value)}
+      style={{flex:1, padding:"6px", borderRadius:"6px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white", fontSize:"12px"}}
+    />
+    <input
+      type="text"
+      placeholder="Label (optional)"
+      value={commentResourceLabel}
+      onChange={(e) => setCommentResourceLabel(e.target.value)}
+      style={{flex:1, padding:"6px", borderRadius:"6px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white", fontSize:"12px"}}
+    />
+  </div>
+
+  {/* main input row */}
+  <div style={{display:"flex", gap:"8px", alignItems:"center"}}>
+    {/* hidden file input */}
+    <input
+      type="file"
+      id="commentFileInput"
+      accept="image/*,.pdf"
+      style={{display:"none"}}
+      onChange={(e) => setCommentAttachment(e.target.files[0])}
+    />
+    <button
+      onClick={() => document.getElementById("commentFileInput").click()}
+      style={{background:"none", border:"none", fontSize:"18px", cursor:"pointer", padding:"4px"}}
+    >
+      📎
+    </button>
+    <input
+      type="text"
+      value={commentInput}
+      onChange={(e) => setCommentInput(e.target.value)}
+      onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
+      placeholder="Write a comment..."
+      style={{flex:1, padding:"8px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white"}}
+    />
+    <button onClick={handleAddComment} style={{padding:"8px 16px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}>
+      Send
+    </button>
+  </div>
+
+</div>
 
       </div>
     </div>

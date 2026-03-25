@@ -906,12 +906,24 @@ const handleSavePost = async (postId) => {
       <p>{post.content}</p>
       {/* image attachment */}
 {post.image && (
-  <img 
-    src={post.image} 
-    alt="attachment" 
-    style={{maxWidth:"100%", borderRadius:"8px", marginBottom:"8px", display:"block"}}
-  />
+  <div style={{marginBottom:"8px"}}>
+    <a href={post.image} target="_blank" rel="noopener noreferrer">
+      <img 
+        src={post.image} 
+        alt="attachment" 
+        style={{maxWidth:"100%", borderRadius:"8px", display:"block", cursor:"pointer"}}
+      />
+    </a>
+    <a
+      href={post.image}
+      download
+      style={{display:"inline-block", marginTop:"4px", fontSize:"11px", color:"#8ca4c6"}}
+    >
+      ⬇️ Download Image
+    </a>
+  </div>
 )}
+
 
 {/* pdf attachment */}
 {post.pdf && (

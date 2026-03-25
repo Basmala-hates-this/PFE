@@ -20,8 +20,7 @@ router.get("/:id", protect,postController.getPostById);
 router.patch("/:id/vote", protect,guestBlock, postController.votePost);
 router.patch("/:id", protect,guestBlock, postController.updatePost);
 router.delete("/:id", protect,guestBlock, postController.deletePost);
-router.post("/:postId/comments", protect,guestBlock, postController.addComment);
-router.delete("/:postId/comments/:commentId", protect,guestBlock, postController.deleteComment);
+router.post("/:postId/comments", protect, guestBlock, upload.single("attachment"), postController.addComment);router.delete("/:postId/comments/:commentId", protect,guestBlock, postController.deleteComment);
 router.patch("/:postId/comments/:commentId/vote", protect,guestBlock, postController.voteComment);
 router.patch("/:postId/comments/:commentId", protect,guestBlock, postController.updateComment);
 

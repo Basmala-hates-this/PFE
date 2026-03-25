@@ -89,15 +89,27 @@ const deletePost = (req, res) => {
 
 const addComment = (req, res) => {
   const { postId } = req.params;
-  const { content, parentCommentId } = req.body;
+  const { content, parentCommentId, resourceLink, resourceLabel } = req.body;
   const authorId = req.user.id;
   const authorUsername = req.user.username;
+
+  const image = req.file && req.file.mimetype.startsWith("image/")
+    ? `http://localhost:5000/uploads/${req.file.filename}`
+    : null;
+
+  const pdf = req.file && req.file.mimetype === "application/pdf"
+    ? `http://localhost:5000/uploads/${req.file.filename}`
+    : null;
 
   const comment = postRepo.addComment(postId, {
     authorId,
     authorUsername,
     content,
-    parentCommentId
+    parentCommentId,
+    image,
+    pdf,
+    resourceLink: resourceLink || null,
+    resourceLabel: resourceLabel || null,
   });
 
   if (!comment) {

@@ -150,6 +150,10 @@ const addComment = (postId, commentData) => {
   createdAt: new Date().toISOString(),
   isUpdated: false,
   parentCommentId: commentData.parentCommentId || null,
+  image: commentData.image || null,
+  pdf: commentData.pdf || null,
+  resourceLink: commentData.resourceLink || null,
+  resourceLabel: commentData.resourceLabel || null,
   votes: { useful: 0, useless: 0, specialized: 0, voters: [] }
 };
 
@@ -254,6 +258,9 @@ const updateComment = (postId, commentId, userId, content) => {
   writePosts(posts);
   return comment;
 };
+
+
+
 
 module.exports = {
   createPost,
