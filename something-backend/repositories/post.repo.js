@@ -30,6 +30,9 @@ const createPost = (postData) => {
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
     isUpdated: false,
+    isHidden: false,
+    reports: [],
+    resourceApproved: null,
     votes: { useful: 0, useless: 0 },
     comments: [],
     image: postData.image || null,
@@ -48,6 +51,8 @@ const getPostById = (id) => {
   const posts = readPosts();
   return posts.find((p) => p.id === id);
 };
+
+
 const getPostsAll = (roomId) => {
     const posts = readPosts();
   if (roomId) {
@@ -149,6 +154,8 @@ const addComment = (postId, commentData) => {
   content: commentData.content,
   createdAt: new Date().toISOString(),
   isUpdated: false,
+  isHidden: false,
+  reports: [],
   parentCommentId: commentData.parentCommentId || null,
   image: commentData.image || null,
   pdf: commentData.pdf || null,
@@ -275,4 +282,5 @@ module.exports = {
   getPostsByUser,
   getCommentsByUser,
   updateComment,
+  writePosts,
 };

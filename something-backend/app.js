@@ -11,6 +11,8 @@ const app = express();
 const rateLimit = require("express-rate-limit");
 const messageRoutes = require("./routes/message.routes");
 
+const adminRoutes = require("./routes/admin.routes");
+
 
 
 const publicLimiter = rateLimit({
@@ -34,6 +36,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/posts", postRoutes);
 
 app.use("/api/users", userRoutes);
+
+app.use("/api/admin", adminRoutes);
 
 // app.use("/uploads", express.static("uploads"));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

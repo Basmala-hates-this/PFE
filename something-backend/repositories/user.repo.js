@@ -16,13 +16,18 @@ const writeUsers = (usersList) => {
 const createUser = (userData) => {
    const users = readUsers();
   const newUser = {
-    id: Date.now().toString(),
-    ...userData,
-     rating: 1,//starting oint because why the hell would u start with 0 reddit?that is annoying as hell
-    verificationStatus: userData.role === 'professor' ? 'pending' : 'none',
-    authorityLevel: 'user',
-    permissions: []   
-  };
+  id: Date.now().toString(),
+  ...userData,
+  rating: 1,
+  verificationStatus: userData.role === 'professor' ? 'pending' : 'none',
+  authorityLevel: 'user',
+  permissions: [],
+  suspendedUntil: null,
+  suspensionReason: null,
+  pendingReorientation: false,
+  violationCount: 0,
+  actionHistory: []
+};
 
    users.push(newUser);
   writeUsers(users);

@@ -251,6 +251,10 @@ const fetchSavedPosts = async () => {
       <li onClick={() => navigate(`/connections/${user?.id}`)}><span> Connections </span></li>
       <li onClick={()=> navigate("/edit")}><span> Edit </span></li>
       <li onClick={handleLogout}><span> Logout </span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
+      
+      {(user?.authorityLevel === "admin" || user?.authorityLevel === "superadmin") && (
+      <li onClick={() => navigate("/admin")}><span>🛡️ Admin Panel</span></li>
+      )}
       <li className="delete-item"  onClick={handleDeleteAccount}><span> Delete Account </span> </li>
     </ul>
 
