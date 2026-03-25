@@ -49,6 +49,10 @@ export default function Profile() {
     const [selectedPost, setSelectedPost] = useState(null);
 
 
+    const [savedTab, setSavedTab] = useState("all");
+    const [savedSearch, setSavedSearch] = useState("");
+
+
 useEffect(() => {
   const token = localStorage.getItem("token");
   axios.get("http://localhost:5000/api/users/me", {
@@ -491,29 +495,91 @@ const fetchSavedPosts = async () => {
         <button onClick={() => setShowSavedPosts(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
       </div>
 
+      {/* search */}
+      <input
+        type="text"
+        placeholder="Search saved posts..."
+        value={savedSearch}
+        onChange={(e) => setSavedSearch(e.target.value)}
+        style={{width:"100%", padding:"8px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white", boxSizing:"border-box", marginBottom:"12px"}}
+      />
+
+      {/* tabs */}
+      <div style={{display:"flex", gap:"6px", marginBottom:"15px", flexWrap:"wrap"}}>
+        {["all", "posts", "images", "files", "links"].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setSavedTab(tab)}
+            style={{
+              padding:"4px 12px", borderRadius:"20px", border:"none", cursor:"pointer", fontSize:"12px",
+              background: savedTab === tab ? "#6476af" : "rgba(255,255,255,0.1)",
+              color: "white"
+            }}
+          >
+            {tab === "all" && "📚 All"}
+            {tab === "posts" && "📝 Posts"}
+            {tab === "images" && "🖼️ Images"}
+            {tab === "files" && "📄 Files"}
+            {tab === "links" && "🔗 Links"}
+          </button>
+        ))}
+      </div>
+
       {savedPostsLoading ? (
         <p style={{opacity:0.5, textAlign:"center"}}>Loading...</p>
-      ) : savedPosts.length === 0 ? (
-        <p style={{opacity:0.5, textAlign:"center"}}>No saved posts yet.</p>
-      ) : (
-        savedPosts.map(post => (
-          <div
-            key={post.id}
-            onClick={() => { setShowSavedPosts(false); setSelectedPost(post); }}
-            style={{padding:"12px", background:"rgba(255,255,255,0.05)", borderRadius:"8px", marginBottom:"10px", cursor:"pointer"}}
-            onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
-            onMouseLeave={e => e.currentTarget.style.background="rgba(255,255,255,0.05)"}
-          >
-            <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
-              <strong style={{fontSize:"14px"}}>@{post.authorUsername}</strong>
-              <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
-            </div>
-            {post.title && <h4 style={{margin:"0 0 4px", fontSize:"14px"}}>{post.title}</h4>}
-            <p style={{margin:"0 0 6px", opacity:0.7, fontSize:"13px"}}>{post.content?.slice(0, 100)}...</p>
-            <small style={{opacity:0.4, fontSize:"11px"}}>{new Date(post.createdAt).toLocaleString()}</small>
-          </div>
-        ))
-      )}
+      ) : (() => {
+          const filtered = savedPosts.filter(post => {
+            // tab filter
+            if (savedTab === "posts" && (post.image || post.pdf || post.resourceLink)) return false;
+            if (savedTab === "images" && !post.image) return false;
+            if (savedTab === "files" && !post.pdf) return false;
+            if (savedTab === "links" && !post.resourceLink) return false;
+
+            // search filter
+            if (savedSearch.trim()) {
+              const q = savedSearch.toLowerCase();
+              return (
+                post.title?.toLowerCase().includes(q) ||
+                post.content?.toLowerCase().includes(q) ||
+                post.authorUsername?.toLowerCase().includes(q) ||
+                post.resourceLabel?.toLowerCase().includes(q)
+              );
+            }
+            return true;
+          });
+
+          return filtered.length === 0 ? (
+            <p style={{opacity:0.5, textAlign:"center"}}>Nothing here yet.</p>
+          ) : (
+            filtered.map(post => (
+              <div
+                key={post.id}
+                onClick={() => { setShowSavedPosts(false); setSelectedPost(post); }}
+                style={{padding:"12px", background:"rgba(255,255,255,0.05)", borderRadius:"8px", marginBottom:"10px", cursor:"pointer"}}
+                onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
+                onMouseLeave={e => e.currentTarget.style.background="rgba(255,255,255,0.05)"}
+              >
+                <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
+                  <strong style={{fontSize:"14px"}}>@{post.authorUsername}</strong>
+                  <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
+                  {/* attachment indicators */}
+                  <div style={{marginLeft:"auto", display:"flex", gap:"4px"}}>
+                    {post.image && <span style={{fontSize:"12px"}}>🖼️</span>}
+                    {post.pdf && <span style={{fontSize:"12px"}}>📄</span>}
+                    {post.resourceLink && <span style={{fontSize:"12px"}}>🔗</span>}
+                  </div>
+                </div>
+                {post.title && <h4 style={{margin:"0 0 4px", fontSize:"14px"}}>{post.title}</h4>}
+                <p style={{margin:"0 0 6px", opacity:0.7, fontSize:"13px"}}>{post.content?.slice(0, 100)}...</p>
+                {post.resourceLabel && (
+                  <small style={{opacity:0.5, fontSize:"11px"}}>🔗 {post.resourceLabel}</small>
+                )}
+                <small style={{display:"block", opacity:0.4, fontSize:"11px", marginTop:"4px"}}>{new Date(post.createdAt).toLocaleString()}</small>
+              </div>
+            ))
+          );
+        })()
+      }
 
     </div>
   </div>
