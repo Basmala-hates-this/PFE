@@ -1,9 +1,9 @@
-//minimale placeholder for lunching
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller");
+const upload = require("../middleware/upload");
 
-router.post("/register", authController.register);
+router.post("/register", upload.single("proofFile"), authController.register);
 router.post("/login", authController.login);
 
 const protect = require("../middleware/authMiddleware");

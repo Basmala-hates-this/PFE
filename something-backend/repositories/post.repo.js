@@ -87,9 +87,12 @@ else if (existingVote.type === voteType) {
   post.votes[voteType]--;
 }
 else {
-  post.votes[existingVote.type]--;
+  const oldType = existingVote.type;
+  post.votes[oldType.type]--;
   existingVote.type = voteType;
   post.votes[voteType]++;
+  userRepo.updateRating(post.authorId, oldType, "remove");   
+  userRepo.updateRating(post.authorId, voteType, "add"); 
 }
 if (!existingVote) {
   userRepo.updateRating(post.authorId, voteType, "add");

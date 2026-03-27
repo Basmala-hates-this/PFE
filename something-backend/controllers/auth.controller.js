@@ -9,13 +9,14 @@ const register = async (req, res) => {
   fullName,
   birthDate,
   email,
-  university,
+
   role,
-  majors,
+ 
   username,
   password } = req.body;
 
-
+  const university = JSON.parse(req.body.university);
+  const majors = JSON.parse(req.body.majors);
 
 
   const existing = userRepo.findByEmail(email);
@@ -29,6 +30,18 @@ const register = async (req, res) => {
 
   const hashed = await bcrypt.hash(password, 10);
 
+
+  
+
+  if (role === "professor" && !req.file) {
+  return res.status(400).json({ message: "Proof of professor status is required" });
+}
+
+
+const proofFile = req.file
+  ? `http://localhost:5000/uploads/${req.file.filename}`
+  : null;
+
   const user = userRepo.createUser({
     fullName,
     birthDate,
@@ -38,6 +51,7 @@ const register = async (req, res) => {
     majors,
     username,
     password: hashed,
+    proofFile,
     
   });
     // find or create public room
@@ -92,6 +106,9 @@ const updatedUser = userRepo.updateUser(user.id, { rooms: roomIds });
   process.env.JWT_SECRET,
   { expiresIn: "24h" }
 );
+
+
+
 
 res.status(201).json({ message: "User created", user: userWithoutPassword, token });  
 };
@@ -242,6 +259,10 @@ const guestLogin = (req, res) => {
 
   res.json({ guestToken });
 };
+
+
+
+
 
 
 module.exports = {

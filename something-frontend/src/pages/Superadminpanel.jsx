@@ -6,12 +6,14 @@ import Cat from "../photos/Cat.jpg";
 const API = "http://localhost:5000/api/admin";
 
 const PERMISSIONS = [
-  { key: "canModerateContent", label: "Moderate Content" },
-  { key: "canVerifyProfessors", label: "Verify Professors" },
-  { key: "canSuspendUsers", label: "Suspend Users" },
-  { key: "canManageRooms", label: "Manage Rooms" },
-  { key: "canValidateOther", label: "Validate Other Inputs" },
-  { key: "canHandleReports", label: "Handle Reports" },
+  { key: "SUSPEND_USERS",     label: "Suspend Users" },
+  { key: "VERIFY_PROFESSORS", label: "Verify Professors" },
+  { key: "HANDLE_REPORTS",    label: "Handle Reports" },
+  { key: "MODERATE_CONTENT",  label: "Moderate Content" },
+  { key: "MANAGE_ROOMS",      label: "Manage Rooms" },
+  { key: "VALIDATE_OTHER",    label: "Validate Other Inputs" },
+  { key: "APPROVE_RESOURCES", label: "Approve Resources" },
+  { key: "DELETE_INACTIVE",   label: "Delete Inactive Accounts" },
 ];
 
 export default function SuperAdminPanel() {

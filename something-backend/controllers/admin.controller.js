@@ -4,8 +4,13 @@ const roomRepo = require("../repositories/room.repo");
 const fs = require("fs");
 const path = require("path");
 
+
 const logsPath = path.join(__dirname, "../data/logs.json");
 const announcementsPath = path.join(__dirname, "../data/announcements.json");
+
+const PERMISSIONS = require("../config/permissions");
+
+const hasPermission = require("../utils/hasPermission");
 
 // helpers 
 
@@ -30,10 +35,18 @@ const addLog = (adminId, adminUsername, action, targetId, details) => {
 
 //  permission check helper
 
-const hasPermission = (user, permission) => {
-  if (user.authorityLevel === "superadmin") return true;
-  return user.permissions?.includes(permission);
-};
+// const hasPermission = (user, permission) => {
+//   if (user.authorityLevel === "superadmin") return true;
+//   return user.permissions?.includes(permission);
+// };
+//isolated in utils...maybe i'll use it in another code later
+// const hasPermission = (user, permission) => {
+//   if (!user) return false;
+
+//   if (user.authorityLevel === "superadmin") return true;
+
+//   return Array.isArray(user.permissions) && user.permissions.includes(permission);
+// };
 
 //USER MANAGEMENT 
 
@@ -51,7 +64,7 @@ const getAllUsers = (req, res) => {
 
 const suspendUser = (req, res) => {
   const admin = userRepo.findById(req.user.id);
-  if (!hasPermission(admin, "canSuspendUsers")) {
+  if (!hasPermission(admin, PERMISSIONS.SUSPEND_USERS)) {
     return res.status(403).json({ message: "No permission to suspend users" });
   }
 
@@ -82,7 +95,7 @@ const suspendUser = (req, res) => {
 
 const unsuspendUser = (req, res) => {
   const admin = userRepo.findById(req.user.id);
-  if (!hasPermission(admin, "canSuspendUsers")) {
+  if (!hasPermission(admin, PERMISSIONS.SUSPEND_USERS)) {
     return res.status(403).json({ message: "No permission" });
   }
 
@@ -122,7 +135,7 @@ const deleteUserAccount = (req, res) => {
 
 const getPendingProfessors = (req, res) => {
   const admin = userRepo.findById(req.user.id);
-  if (!hasPermission(admin, "canVerifyProfessors")) {
+  if (!hasPermission(admin, PERMISSIONS.VERIFY_PROFESSORS)){
     return res.status(403).json({ message: "No permission" });
   }
 
@@ -135,7 +148,7 @@ const getPendingProfessors = (req, res) => {
 
 const verifyProfessor = (req, res) => {
   const admin = userRepo.findById(req.user.id);
-  if (!hasPermission(admin, "canVerifyProfessors")) {
+  if (!hasPermission(admin, PERMISSIONS.VERIFY_PROFESSORS)) {
     return res.status(403).json({ message: "No permission" });
   }
 
@@ -158,7 +171,7 @@ const verifyProfessor = (req, res) => {
 
 const rejectProfessor = (req, res) => {
   const admin = userRepo.findById(req.user.id);
-  if (!hasPermission(admin, "canVerifyProfessors")) {
+  if (!hasPermission(admin, PERMISSIONS.VERIFY_PROFESSORS)) {
     return res.status(403).json({ message: "No permission" });
   }
 
@@ -187,7 +200,7 @@ const rejectProfessor = (req, res) => {
 
 const getReportedContent = (req, res) => {
   const admin = userRepo.findById(req.user.id);
-  if (!hasPermission(admin, "canHandleReports")) {
+  if (!hasPermission(admin, PERMISSIONS.HANDLE_REPORTS)) {
     return res.status(403).json({ message: "No permission" });
   }
 
@@ -210,7 +223,7 @@ const getReportedContent = (req, res) => {
 
 const hideContent = (req, res) => {
   const admin = userRepo.findById(req.user.id);
-  if (!hasPermission(admin, "canModerateContent")) {
+  if (!hasPermission(admin, PERMISSIONS.MODERATE_CONTENT)) {
     return res.status(403).json({ message: "No permission" });
   }
 
@@ -238,7 +251,7 @@ const hideContent = (req, res) => {
 
 const approveResource = (req, res) => {
   const admin = userRepo.findById(req.user.id);
-  if (!hasPermission(admin, "canModerateContent")) {
+  if (!hasPermission(admin, PERMISSIONS.APPROVE_RESOURCES)) {
     return res.status(403).json({ message: "No permission" });
   }
 

@@ -69,25 +69,39 @@ export default function Fin() {
 
   
    const registerUser = async () => {
-    try {
-     const response = await axios.post("http://localhost:5000/api/auth/register", newUser);
-    const data =response.data;
-     
-  localStorage.setItem("token", data.token);
- 
-  localStorage.setItem("currentUser", JSON.stringify(data.user));
-  
-  handleConfetti();
-   
+  try {
+    // build FormData instead of sending plain JSON
+    const formData = new FormData();
+    formData.append("fullName", newUser.fullName);
+    formData.append("birthDate", newUser.birthDate);
+    formData.append("email", newUser.email);
+    formData.append("university", JSON.stringify(newUser.university)); // object → string
+    formData.append("role", newUser.role);
+    formData.append("majors", JSON.stringify(newUser.majors)); // array → string
+    formData.append("username", newUser.username);
+    formData.append("password", newUser.password);
+
+    // only append file if professor uploaded one
+    if (newUser.profProof) {
+      formData.append("proofFile", newUser.profProof);
+    }
+
+    const response = await axios.post(
+      "http://localhost:5000/api/auth/register",
+      formData,
+      { headers: { "Content-Type": "multipart/form-data" } }
+    );
+
+    const data = response.data;
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("currentUser", JSON.stringify(data.user));
+    handleConfetti();
+
+  } catch (err) {
+    console.error("Error sending profile:", err);
+    navigate("/register");
   }
-
-
- catch (err) {
-  console.error("Error sending profile:", err);
-  navigate("/register");//should we send to home instead or what?
-}
- 
-  };
+};
   registerUser();
 
  
