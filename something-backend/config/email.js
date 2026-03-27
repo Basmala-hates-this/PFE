@@ -20,6 +20,7 @@ const sendResetEmail = async (toEmail, resetLink) => {
       <p>This link expires in 15 minutes.</p>
       <p>If you didn't request this, ignore this email.</p>
     `
+    
   });
 };
 
@@ -35,6 +36,7 @@ const sendFollowEmail = async (toEmail, followerUsername) => {
       <p><strong>@${followerUsername}</strong> started following you on StudyBuddy!</p>
       <p>Log in to check out their profile and follow them back.</p>
     `
+    //maybe add link to platform later
   });
 };
 
@@ -50,6 +52,7 @@ const sendRoomInviteEmail = async (toEmail, username, roomName, inviterUsername)
       <p><strong>@${inviterUsername}</strong> has added you to their private room: <strong>${roomName}</strong>.</p>
       <p>Log in to StudyBuddy to access it from your profile.</p>
     `
+    //add lonk to platform ...
   });
 };
 
