@@ -1,12 +1,10 @@
 
-
-
 const express = require("express");
 const router = express.Router();
 const userController = require("../controllers/user.controller");
 const protect = require("../middleware/authMiddleware");
 const upload = require("../middleware/upload");
-
+const {guestBlock}=require("../middleware/authMiddleware")
 
 
 
@@ -16,15 +14,20 @@ router.get("/me", protect, userController.getMe);
 router.delete("/me", protect, userController.deleteMe);
 router.get("/search", protect, userController.searchUsers);
 
+
 // follow routes BEFORE /:userId
 router.post("/:userId/follow", protect, userController.followUser);
 router.delete("/:userId/unfollow", protect, userController.unfollowUser);
 router.get("/:userId/followers", protect, userController.getFollowers);
 router.get("/:userId/following", protect, userController.getFollowing);
 
+router.post("/:userId/report", protect, guestBlock, userController.reportUser);
 // these must be last
 router.get("/:userId", protect, userController.getUserById);
+
 router.get("/:userId/stats", protect, userController.getStatsByUserId);
+
+
 
 
 

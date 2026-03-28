@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
+import ReportModal from "../assets/components/ReportModal.jsx";
 
 export default function PublicProfile() {
   const { userId } = useParams();
@@ -17,6 +18,12 @@ export default function PublicProfile() {
 
   const [isFollowing, setIsFollowing] = useState(false);
 const [followLoading, setFollowLoading] = useState(false);
+
+
+const [showReportUser, setShowReportUser] = useState(false);
+const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+
+//note to self...maybe change the local storage to a global state?....this might fix the resedue of the logout entirly..
 
 ////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -162,6 +169,15 @@ const handleFollow = async () => {
             >
                 View Connections
             </button>
+            {currentUser?.id !== userId && (
+               <button
+             onClick={() => setShowReportUser(true)}
+             style={{padding:"8px 20px", borderRadius:"8px", background:"transparent",
+              border:"1px solid #c0392b", color:"#c0392b", cursor:"pointer", fontSize:"14px"}}
+              >
+            🚩 Report
+          </button>
+          )}
       </div>
 
       {/* stats */}
@@ -218,6 +234,15 @@ const handleFollow = async () => {
           </div>
         ))
       )}
+
+
+      {showReportUser && (
+  <ReportModal
+    type="user"
+    targetId={userId}
+    onClose={() => setShowReportUser(false)}
+  />
+)}
 
     </div>
   );

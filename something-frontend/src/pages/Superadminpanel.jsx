@@ -245,7 +245,7 @@ export default function SuperAdminPanel() {
                             ✏️ Edit Permissions
                           </button>
                           <button onClick={() => handleRemoveAdmin(user.id)} style={btn("#c0392b")}>
-                            ❌ Remove Admin
+                             Remove Admin
                           </button>
                           <button onClick={() => handleUpgradeToSuperAdmin(user.id)} style={btn("#8e44ad")}>
                             ⚡ Make SuperAdmin
@@ -278,7 +278,7 @@ export default function SuperAdminPanel() {
                       </div>
                       <div style={{ display: "flex", gap: "8px" }}>
                         <button onClick={() => handleUpgradeAdmin(user.id)} style={btn("#27ae60")}>
-                          ✅ Confirm
+                           Confirm
                         </button>
                         <button onClick={() => { setUpgradingId(null); setSelectedPermissions([]); }} style={btn("rgba(255,255,255,0.1)")}>
                           Cancel

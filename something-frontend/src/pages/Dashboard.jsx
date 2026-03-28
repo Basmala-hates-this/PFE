@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 //dashboard too big...+i want it scalable...i'll isolate some things...
 import PostModal from "../assets/components/PostModal.jsx";
 
+import ReportModal from "../assets/components/ReportModal.jsx";
 
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
@@ -85,6 +86,9 @@ const [postResourceLabel, setPostResourceLabel] = useState("");
 
 
 const [savedPostIds, setSavedPostIds] = useState([]);
+
+//reporting shit
+const [reportTarget, setReportTarget] = useState(null);
 
 
   //
@@ -965,6 +969,15 @@ const handleSavePost = async (postId) => {
                 </button>
                   )}
 
+              {!isGuest && currentUser?.id !== post.authorId && (
+                  <button
+                   onClick={() => setReportTarget({ type: "post", postId: post.id })}
+                   style={{ marginLeft: "8px", cursor: "pointer", color: "#c0392b",
+                    background: "none", border: "none", fontSize: "13px" }}>
+                   🚩 Report
+                 </button>
+                )}
+
         {currentUser?.id === post.authorId && (
   <button 
     onClick={() => handleDeletePost(post.id)} 
@@ -1183,6 +1196,14 @@ const handleSavePost = async (postId) => {
 
     </div>
   </div>
+)}
+
+{reportTarget && (
+  <ReportModal
+    type={reportTarget.type}
+    postId={reportTarget.postId}
+    onClose={() => setReportTarget(null)}
+  />
 )}
 
 </div>

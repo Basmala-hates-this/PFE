@@ -270,6 +270,51 @@ const updateComment = (postId, commentId, userId, content) => {
 };
 
 
+const reportPost = (postId, reportData) => {
+  const posts = readPosts();
+  const post = posts.find((p) => p.id === postId);
+  if (!post) return { error: "Post not found" };
+
+  if (!post.reports) post.reports = [];
+
+  // prevent duplicate reports from same user
+  const alreadyReported = post.reports.some(r => r.reportedBy === reportData.reportedBy);
+  if (alreadyReported) return { error: "Already reported" };
+
+  post.reports.push({
+    reportedBy: reportData.reportedBy,
+    reason: reportData.reason,
+    details: reportData.details || "",
+    createdAt: new Date().toISOString()
+  });
+
+  writePosts(posts);
+  return post;
+};
+
+const reportComment = (postId, commentId, reportData) => {
+  const posts = readPosts();
+  const post = posts.find((p) => p.id === postId);
+  if (!post) return { error: "Post not found" };
+
+  const comment = post.comments.find((c) => c.id === commentId);
+  if (!comment) return { error: "Comment not found" };
+
+  if (!comment.reports) comment.reports = [];
+
+  const alreadyReported = comment.reports.some(r => r.reportedBy === reportData.reportedBy);
+  if (alreadyReported) return { error: "Already reported" };
+
+  comment.reports.push({
+    reportedBy: reportData.reportedBy,
+    reason: reportData.reason,
+    details: reportData.details || "",
+    createdAt: new Date().toISOString()
+  });
+
+  writePosts(posts);
+  return comment;
+};
 
 
 module.exports = {
@@ -286,4 +331,6 @@ module.exports = {
   getCommentsByUser,
   updateComment,
   writePosts,
+  reportPost,
+  reportComment,
 };

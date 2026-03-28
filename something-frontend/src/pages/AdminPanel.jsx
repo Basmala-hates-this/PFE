@@ -290,10 +290,10 @@ export default function AdminPanel() {
                   </div>
                   <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
                     {!isSuspended && user.authorityLevel === "user" && (
-                      <button onClick={() => handleSuspend(user.id)} style={btn("#c0392b")}>🚫 Suspend</button>
+                      <button onClick={() => handleSuspend(user.id)} style={btn("#c0392b")}>Suspend</button>
                     )}
                     {isSuspended && (
-                      <button onClick={() => handleUnsuspend(user.id)} style={btn("#27ae60")}>✅ Unsuspend</button>
+                      <button onClick={() => handleUnsuspend(user.id)} style={btn("#27ae60")}>Unsuspend</button>
                     )}
                   </div>
                 </div>
@@ -342,8 +342,8 @@ export default function AdminPanel() {
                   </div>
                 ) : (
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <button onClick={() => handleVerifyProfessor(prof.id)} style={btn("#27ae60")}>✅ Verify</button>
-                    <button onClick={() => setRejectingId(prof.id)} style={btn("#c0392b")}>❌ Reject</button>
+                    <button onClick={() => handleVerifyProfessor(prof.id)} style={btn("#27ae60")}>Verify</button>
+                    <button onClick={() => setRejectingId(prof.id)} style={btn("#c0392b")}>Reject</button>
                   </div>
                 )}
               </div>

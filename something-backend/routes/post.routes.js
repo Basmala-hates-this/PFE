@@ -9,6 +9,7 @@ router.post("/", protect, guestBlock, upload.single("attachment"), postControlle
 router.get("/",  postController.getPostsAll);
 router.get("/search", postController.searchPosts);//something to keep in mind,all routes should come befre IDs because things will break and u wont knw why.....
 
+
 router.post("/:postId/save", protect, guestBlock, postController.savePost);
 router.delete("/:postId/save", protect, guestBlock, postController.unsavePost);
 router.get("/saved", protect, postController.getSavedPosts);
@@ -25,6 +26,8 @@ router.patch("/:postId/comments/:commentId/vote", protect,guestBlock, postContro
 router.patch("/:postId/comments/:commentId", protect,guestBlock, postController.updateComment);
 
 
+router.post("/:postId/report", protect, guestBlock, postController.reportPost);
+router.post("/:postId/comments/:commentId/report", protect, guestBlock, postController.reportComment);
 
 
 

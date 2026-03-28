@@ -26,7 +26,8 @@ const createUser = (userData) => {
   suspensionReason: null,
   pendingReorientation: false,
   violationCount: 0,
-  actionHistory: []
+  actionHistory: [],
+  userReports: [],
 };
 
    users.push(newUser);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Cat from "../../photos/Cat.jpg";
+import ReportModal from "./ReportModal.jsx";
 
 export default function PostModal({ postId, onClose, isGuest }) {
   const token = localStorage.getItem("token");
@@ -17,7 +18,7 @@ export default function PostModal({ postId, onClose, isGuest }) {
   const [commentAttachment, setCommentAttachment] = useState(null);
 const [commentResourceLink, setCommentResourceLink] = useState("");
 const [commentResourceLabel, setCommentResourceLabel] = useState("");
-
+const [reportTarget, setReportTarget] = useState(null);
 
 
 
@@ -209,6 +210,14 @@ const [commentResourceLabel, setCommentResourceLabel] = useState("");
             <button onClick={() => handleVote("useless")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
               👎 Useless {post.votes.useless}
             </button>
+            {!isGuest && currentUser?.id !== post.authorId && (
+              <button
+                 onClick={() => setReportTarget({ type: "post", postId: post.id })}
+                 style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px",
+                 cursor: "pointer", color: "#c0392b", background: "none", border: "none" }}>
+                 🚩 Report
+                 </button>
+                )}
           </div>
         </div>
 
@@ -279,6 +288,15 @@ const [commentResourceLabel, setCommentResourceLabel] = useState("");
                       <button onClick={() => handleCommentVote(comment.id, "specialized")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", background:"#f0c040", border:"none"}}>
                         ✨ Specialized {comment.votes.specialized}
                       </button>
+                      
+                    )}
+                    {!isGuest && currentUser?.id !== comment.authorId && (
+                     <button
+                     onClick={() => setReportTarget({ type: "comment", postId: post.id, commentId: comment.id })}
+                     style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px",
+                     cursor: "pointer", color: "#c0392b", background: "none", border: "none" }}>
+                     🚩 Report
+                    </button>
                     )}
                     {currentUser?.id === comment.authorId && (
                       <>
@@ -353,6 +371,16 @@ const [commentResourceLabel, setCommentResourceLabel] = useState("");
 
 </div>
 
+
+
+{reportTarget && (
+  <ReportModal
+    type={reportTarget.type}
+    postId={reportTarget.postId}
+    commentId={reportTarget.commentId}
+    onClose={() => setReportTarget(null)}
+  />
+)}
       </div>
     </div>
   );

@@ -216,6 +216,33 @@ const getFollowing = (req, res) => {
   res.json(following);
 };
 
+
+const reportUser = (req, res) => {
+  const { userId } = req.params;
+  const { reason, details } = req.body;
+  const reportedBy = req.user.id;
+
+  if (!reason) return res.status(400).json({ message: "Report reason is required" });
+  if (reportedBy === userId) return res.status(400).json({ message: "Cannot report yourself" });
+
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const alreadyReported = (user.userReports || []).some(r => r.reportedBy === reportedBy);
+  if (alreadyReported) return res.status(400).json({ message: "Already reported this user" });
+
+  userRepo.updateUser(userId, {
+    userReports: [...(user.userReports || []), {
+      reportedBy,
+      reason,
+      details: details || "",
+      createdAt: new Date().toISOString()
+    }]
+  });
+
+  res.json({ message: "User reported successfully" });
+};
+
 module.exports = {
   getMyStats,
   getPostsByUser,
@@ -230,6 +257,7 @@ module.exports = {
   getFollowing,
   followUser,
   unfollowUser,
+  reportUser,
 
 
   

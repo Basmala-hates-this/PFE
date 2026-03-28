@@ -254,6 +254,34 @@ const getSavedPosts = (req, res) => {
   res.json(savedPosts);
 };
 
+
+
+const reportPost = (req, res) => {
+  const { postId } = req.params;
+  const { reason, details } = req.body;
+  const reportedBy = req.user.id;
+
+  if (!reason) return res.status(400).json({ message: "Report reason is required" });
+
+  const result = postRepo.reportPost(postId, { reportedBy, reason, details });
+  if (result?.error) return res.status(400).json({ message: result.error });
+
+  res.json({ message: "Post reported successfully" });
+};
+
+const reportComment = (req, res) => {
+  const { postId, commentId } = req.params;
+  const { reason, details } = req.body;
+  const reportedBy = req.user.id;
+
+  if (!reason) return res.status(400).json({ message: "Report reason is required" });
+
+  const result = postRepo.reportComment(postId, commentId, { reportedBy, reason, details });
+  if (result?.error) return res.status(400).json({ message: result.error });
+
+  res.json({ message: "Comment reported successfully" });
+};
+
 module.exports = {
   createPost,
   getPostById,
@@ -272,4 +300,6 @@ module.exports = {
   savePost,
   unsavePost,
   getSavedPosts,
+  reportPost,
+  reportComment,
 };
