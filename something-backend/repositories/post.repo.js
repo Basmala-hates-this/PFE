@@ -88,7 +88,7 @@ else if (existingVote.type === voteType) {
 }
 else {
   const oldType = existingVote.type;
-  post.votes[oldType.type]--;
+  post.votes[oldType]--;
   existingVote.type = voteType;
   post.votes[voteType]++;
   userRepo.updateRating(post.authorId, oldType, "remove");   
@@ -104,7 +104,17 @@ if (!existingVote) {
 }
 
 
-  writePosts(posts);
+ 
+
+  // auto-hide threshold
+const USELESS_THRESHOLD = 20;
+
+if (post.votes.useless >= USELESS_THRESHOLD && !post.isHidden) {
+  post.isHidden = true;
+  post.autoHidden = true; // flag so admins know it was auto-hidden vs manually hidden
+}
+
+ writePosts(posts);
   return post;
 };
 
@@ -229,6 +239,15 @@ if (!existingVote) {
 }
 
   writePosts(posts);
+
+  const USELESS_THRESHOLD = 20;
+
+if (comment.votes.useless >= USELESS_THRESHOLD && !comment.isHidden) {
+  comment.isHidden = true;
+  comment.autoHidden = true;
+}
+
+
   return post;
 }
 

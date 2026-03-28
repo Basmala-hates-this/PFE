@@ -30,7 +30,7 @@ import ReportModal from "../assets/components/ReportModal.jsx";
 //hheheheheheheh....since i hate my self now i can justify the pain i'm about to do....
 //i'll make mokeup posts....just simple numbered blocks that appear when clicking the button to write a post ...
 //this should be easy enough...but if not...then i already hate myself...maybe a nigative and a nigative will make it positive?hehehehehehe
-
+//about a month passed...waaaaayyyy passed that....FUCK
 
 
 
@@ -158,65 +158,6 @@ useEffect(() => {
   };
 }, []);
 
-//ehem...not so pround of that....eehhh...svaed global mock posts to local storage?->yeah,no..this gets them
-// useEffect(() => {
-//   const fetchRooms = async () => {
-//     console.log("isGuest:", localStorage.getItem("isGuest"));
-//     try {
-//       const token = localStorage.getItem("token");
-      
-//       if (localStorage.getItem("isGuest") === "true") {
-//         // fetch public + university rooms only
-//         const response = await axios.get("http://localhost:5000/api/rooms/public-rooms");
-//         const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
-//         const selectedCodes = guestUniversities.map(u => u.value);
-        
-//         // keep public room + only the universities the guest selected
-//         const filtered = response.data.filter(r => 
-//           r.type === "public" || selectedCodes.includes(r.university)
-//         );
-//         setUserRooms(filtered);
-//       } else {
-//         const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
-//           headers: { Authorization: `Bearer ${token}` }
-//         });
-//         setUserRooms(response.data);
-//       }
-//     } catch (err) {
-//       console.error("Failed to fetch rooms:", err);
-//     }
-//   };
-//   fetchRooms();
-// }, []); // reruns when selectedRooms changes
-
-//i just want to know what happens to perfectly working functions when i decide to have a day off....where the hell did fetchposts go?
-// useEffect(() => {
-//   const fetchPosts = async () => {
-//     setLoading(true);
-//     try {
-//       const token = localStorage.getItem("token");
-//       let url = "http://localhost:5000/api/posts";
-//       if (selectedRooms.length === 1) {
-//         url += `?roomId=${selectedRooms[0].value}`;
-//       }
-//       console.log("fetching posts from:", url);
-//       const response = await axios.get(url, {
-//         headers: token ? { Authorization: `Bearer ${token}` } : {}
-//       });
-//       console.log("posts received:", response.data);
-//       setPosts(response.data);
-//     } catch (err) {
-//       console.error("Failed to fetch posts:", err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-//   fetchPosts();
-// }, [selectedRooms]);
-//hope this one stays this time....
-
-//merge fetch rooms and posts so rooms runs before posts and i can avoid those stupid bugs and errors
-
  const fetchRoomsAndPosts = async () => {
     console.log("fetchRoomsAndPosts called");
     setLoading(true);
@@ -266,11 +207,7 @@ useEffect(() => {
         setPosts(postsResponse.data.filter(p => allowedRoomIds.includes(p.roomId)));
       } else {
        
-          // const publicPosts = postsResponse.data.filter(p => {
-          //   const room = allowedRooms.find(r => r.id === p.roomId);
-          //    console.log("post roomId:", p.roomId, "found room:", room?.name, "type:", room?.type);
-          //    return !room || room.type !== "private";
-          // });
+        
 
           const publicPosts = postsResponse.data.filter(p => {
              if (!p.roomId) return false;
@@ -340,26 +277,7 @@ const handleSubmitPost = async () => {
     console.error("Failed to create post:", err);
   }
 };
-
-//fetching ze rooms for room filtaa
-// useEffect(() => {
-//   const fetchRooms = async () => {
-//     try {
-//       const token = localStorage.getItem("token");
-//       const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
-//         headers: { Authorization: `Bearer ${token}` }
-//       });
-//       setUserRooms(response.data);
-//     } catch (err) {
-//       console.error("Failed to fetch rooms:", err);
-//     }
-//   };
-//   fetchRooms();
-// }, []);
-
-
-///////
-
+ 
 
 //the ammount of bugs is bugging me.....
 //me stupid used the wrong api...
@@ -398,12 +316,7 @@ const groupedRoomOptions = [
       }
       return groups;
     }, [])
-  // {
-  //   label: "Private Rooms",
-  //   options: userRooms
-  //     .filter(r => r.type === "private")
-  //     .map(r => ({ value: r.id, label: r.name }))
-  // }
+  
 ].filter(group => group.options.length > 0); // remove empty groups
 
 
@@ -417,9 +330,11 @@ const handleVote = async (postId, voteType) => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
     // update the post in the feed without refetching everything
-    setPosts(prev => prev.map(post => 
-      post.id === postId ? response.data : post
-    ));
+    setPosts(prev => prev
+  .map(post => post.id === postId ? response.data : post)
+  .filter(post => !post.isHidden)
+);
+//something is not right about the voting..
   } catch (err) {
     console.error("Failed to vote:", err);
   }
@@ -742,12 +657,7 @@ const handleSavePost = async (postId) => {
     <main className="dashMain">
         {/* <!-- Header --> */}
         <header className="header">
-            {/* <h1 className="welH1">Welcome <span id="usernameDisplay"></span></h1>...yeah it was a matter of time before i go back to react mind and remove dom shit */}
-            {/* might remove full name though.... */}
-            {/* <h1 className="welH1">
-  Welcome <span className="usernameDisplay">@{user?.username || user?.fullname || "User"} <small className="tag">{user?.role}
-</small></span>
-</h1> */}
+           
          <h1 className="welH1">
            Welcome <span className="usernameDisplay">
            @{isGuest ? "Guest" : (user?.username || "User")} 
@@ -890,7 +800,11 @@ const handleSavePost = async (postId) => {
 ) : posts.length === 0 ? (
   <p>No posts yet. Try writing one ✨</p>
 ) : (
-  posts.map(post => (
+  posts.map(post =>
+     {
+  if (post.isHidden) return null;
+  return ( 
+    
     <div key={post.id} className="mock-post" style={{border:"1px solid #ccc",borderRadius:"30%",marginBottom:"5px", padding:"14px", borderRadius:"6px"}}>
       <div style={{  display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
   <img 
@@ -1000,7 +914,7 @@ const handleSavePost = async (postId) => {
 )}
       </div>
     </div>
-  ))
+  )})
 )}
             </div>
         </section>
@@ -1041,7 +955,7 @@ const handleSavePost = async (postId) => {
         style={{width:"100%", minHeight:"120px", padding:"10px", borderRadius:"8px", border:"1px solid #ccc", boxSizing:"border-box", resize:"vertical"}}
       />
 
-{/* //////attachment thingies.....this is gonna be messy....he football player?! */}
+{/* //////attachment thingies.....this is gonna be messy....the football player?! */}
        {/* image/pdf attachment */}
 <div style={{marginTop:"10px"}}>
   <label style={{display:"block", marginBottom:"6px", opacity:0.7, fontSize:"13px"}}>

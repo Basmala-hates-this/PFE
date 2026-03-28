@@ -137,6 +137,19 @@ const [reportTarget, setReportTarget] = useState(null);
   if (!post) return null;
 
   
+  if (post.isHidden) return (
+  <div className="modal-overlay" onClick={onClose}>
+    <div className="modal" onClick={e => e.stopPropagation()} style={{padding:"30px", textAlign:"center"}}>
+      <p style={{fontSize:"24px"}}>🙈</p>
+      <p>This post has been hidden by the moderation team.</p>
+      <button onClick={onClose} style={{marginTop:"10px", padding:"8px 20px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}>
+        Close
+      </button>
+    </div>
+  </div>
+);
+
+  
 
   ////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -226,7 +239,14 @@ const [reportTarget, setReportTarget] = useState(null);
           {post.comments.length === 0 ? (
             <p style={{opacity:0.5, textAlign:"center"}}>No comments yet. Be the first!</p>
           ) : (
-            post.comments.map(comment => (
+            post.comments.map(comment =>
+              {
+  if (comment.isHidden) return (
+    <div key={comment.id} style={{padding:"10px", borderBottom:"1px solid rgba(255,255,255,0.1)", opacity:0.4, fontStyle:"italic", fontSize:"13px"}}>
+      🙈 This comment has been hidden.
+    </div>
+  );
+  return (
               <div key={comment.id} style={{padding:"10px", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
                 <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"4px"}}>
                   <img src={Cat} alt="pfp" style={{width:"24px", height:"24px", borderRadius:"50%"}}/>
@@ -307,7 +327,7 @@ const [reportTarget, setReportTarget] = useState(null);
                   </div>
                 )}
               </div>
-            ))
+            )})
           )}
         </div>
 

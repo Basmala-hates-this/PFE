@@ -30,6 +30,10 @@ export default function AdminPanel() {
  
   const [announcements, setAnnouncements] = useState([]);
   const [newAnnouncement, setNewAnnouncement] = useState("");
+
+
+  const [drillDown, setDrillDown] = useState(null);
+// shape: { type: "users"|"posts"|"comments"|"rooms"|"suspended"|"userHistory", data: [...], title: "" }
  
   const isSuperAdmin = currentUser?.authorityLevel === "superadmin";
  
@@ -178,6 +182,44 @@ export default function AdminPanel() {
     { id: "reports", label: "🚩 Reports" },
     { id: "announcements", label: "📢 Announcements" },
   ];
+
+
+  const fetchDrillDown = async (type) => {
+  try {
+    switch(type) {
+      case "users": {
+        const res = await axios.get(`${API}/users`, { headers });
+        setDrillDown({ type: "users", title: "All Users", data: res.data });
+        break;
+      }
+      case "suspended": {
+        const res = await axios.get(`${API}/users?status=suspended`, { headers });
+        setDrillDown({ type: "users", title: "Suspended Users", data: res.data });
+        break;
+      }
+      case "posts": {
+        const res = await axios.get(`${API}/posts`, { headers });
+        setDrillDown({ type: "posts", title: "All Posts", data: res.data });
+        break;
+      }
+      case "comments": {
+        const res = await axios.get(`${API}/posts`, { headers });
+        const comments = [];
+        res.data.forEach(post => {
+          post.comments?.forEach(c => comments.push({ ...c, postTitle: post.title || "Untitled" }));
+        });
+        setDrillDown({ type: "comments", title: "All Comments", data: comments });
+        break;
+      }
+      case "rooms": {
+      const res = await axios.get(`${API}/rooms`, { headers });
+       setDrillDown({ type: "rooms", title: "All Rooms", data: res.data });
+       break;
+      }
+      default: break;
+    }
+  } catch (err) { console.error(err); }
+};
  
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -219,23 +261,28 @@ export default function AdminPanel() {
           {!stats ? <p style={{ opacity: 0.5 }}>Loading...</p> : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "12px" }}>
               {[
-                { label: "Total Users", value: stats.totalUsers, icon: "👥" },
-                { label: "Total Posts", value: stats.totalPosts, icon: "📝" },
-                { label: "Total Comments", value: stats.totalComments, icon: "🗨️" },
-                { label: "Total Rooms", value: stats.totalRooms, icon: "🏠" },
-                { label: "Suspended Users", value: stats.suspendedUsers, icon: "🚫" },
-                { label: "Pending Professors", value: stats.pendingProfessors, icon: "🎓" },
-                { label: "Reported Content", value: stats.reportedContent, icon: "🚩" },
-              ].map(s => (
-                <div key={s.label} style={{ ...card, textAlign: "center" }}>
-                  <div style={{ fontSize: "28px", marginBottom: "6px" }}>{s.icon}</div>
-                  <strong style={{ fontSize: "24px", display: "block" }}>{s.value}</strong>
-                  <small style={{ opacity: 0.5 }}>{s.label}</small>
-                </div>
-              ))}
+  { label: "Total Users", value: stats.totalUsers, icon: "👥", action: () => fetchDrillDown("users") },
+  { label: "Total Posts", value: stats.totalPosts, icon: "📝", action: () => fetchDrillDown("posts") },
+  { label: "Total Comments", value: stats.totalComments, icon: "🗨️", action: () => fetchDrillDown("comments") },
+  { label: "Total Rooms", value: stats.totalRooms, icon: "🏠", action: () => fetchDrillDown("rooms") },
+  { label: "Suspended Users", value: stats.suspendedUsers, icon: "🚫", action: () => fetchDrillDown("suspended") },
+  { label: "Pending Professors", value: stats.pendingProfessors, icon: "🎓", action: () => setActiveTab("professors") },
+  { label: "Reported Content", value: stats.reportedContent, icon: "🚩", action: () => setActiveTab("reports") },
+].map(s => (
+  <div key={s.label} onClick={s.action} style={{ ...card, textAlign: "center", cursor: "pointer",
+    transition: "background 0.2s" }}
+    onMouseEnter={e => e.currentTarget.style.background = "#2f3655"}
+    onMouseLeave={e => e.currentTarget.style.background = "#252b45"}
+  >
+    <div style={{ fontSize: "28px", marginBottom: "6px" }}>{s.icon}</div>
+    <strong style={{ fontSize: "24px", display: "block" }}>{s.value}</strong>
+    <small style={{ opacity: 0.5 }}>{s.label}</small>
+  </div>
+))}
             </div>
           )}
         </div>
+        
       )}
  
       {/* ── USERS TAB ── */}
@@ -295,12 +342,29 @@ export default function AdminPanel() {
                     {isSuspended && (
                       <button onClick={() => handleUnsuspend(user.id)} style={btn("#27ae60")}>Unsuspend</button>
                     )}
+                    {user.actionHistory?.length > 0 && (
+                       <button
+                        onClick={() => setDrillDown({ 
+                         type: "history", 
+                         title: `@${user.username} History`, 
+                         data: user.actionHistory 
+                         })}
+                        style={btn()}
+                         >
+                        📋 History
+                       </button>
+                      )}
+                    
                   </div>
                 </div>
+                
               );
+              
             })
+            
           )}
         </div>
+        
       )}
  
       {/* ── PROFESSORS TAB ── */}
@@ -429,6 +493,121 @@ export default function AdminPanel() {
           )}
         </div>
       )}
+
+      {drillDown && (
+  <div className="modal-overlay" onClick={() => setDrillDown(null)}>
+    <div className="modal" onClick={e => e.stopPropagation()}
+      style={{ width: "650px", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
+      
+      {/* header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <h3 style={{ margin: 0 }}>{drillDown.title}</h3>
+        <button onClick={() => setDrillDown(null)}
+          style={{ background: "none", border: "none", color: "white", fontSize: "20px", cursor: "pointer" }}>✕</button>
+      </div>
+
+      <div style={{ overflowY: "auto", flex: 1 }}>
+
+        {/* USERS */}
+        {drillDown.type === "users" && drillDown.data.map(u => {
+          const isSuspended = u.suspendedUntil && new Date(u.suspendedUntil) > new Date();
+          return (
+            <div key={u.id} style={{ ...card, display: "flex", alignItems: "center", gap: "12px" }}>
+              <img src={u.profilePic || Cat} alt="pfp"
+                style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "4px" }}>
+                  <strong>@{u.username}</strong>
+                  <span style={badge("#6476af")}>{u.role}</span>
+                  {isSuspended && <span style={badge("#c0392b")}>suspended</span>}
+                  {u.verificationStatus === "pending" && <span style={badge("#e67e22")}>pending</span>}
+                </div>
+                <small style={{ opacity: 0.5 }}>{u.email} • rating: {u.rating ?? 1}/5 • violations: {u.violationCount || 0}</small>
+                {isSuspended && (
+                  <small style={{ display: "block", color: "#e74c3c", marginTop: "2px" }}>
+                    Until {new Date(u.suspendedUntil).toLocaleDateString()} — {u.suspensionReason}
+                  </small>
+                )}
+              </div>
+              {/* action history button */}
+              {u.actionHistory?.length > 0 && (
+                <button onClick={() => setDrillDown({ type: "history", title: `@${u.username} History`, data: u.actionHistory })}
+                  style={btn()}>📋 History</button>
+              )}
+            </div>
+          );
+        })}
+
+        {/* POSTS */}
+        {drillDown.type === "posts" && drillDown.data.map(post => (
+          <div key={post.id} style={card}>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+              <strong>@{post.authorUsername}</strong>
+              <span style={badge("#6476af")}>{post.authorRole}</span>
+              {post.isHidden && <span style={badge("#c0392b")}>hidden</span>}
+              {post.reports?.length > 0 && <span style={badge("#e67e22")}>🚩 {post.reports.length}</span>}
+              <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(post.createdAt).toLocaleDateString()}</small>
+            </div>
+            {post.title && <strong style={{ display: "block", marginBottom: "4px" }}>{post.title}</strong>}
+            <p style={{ margin: 0, opacity: 0.7, fontSize: "13px" }}>{post.content?.slice(0, 120)}...</p>
+            <small style={{ opacity: 0.4 }}>💬 {post.comments?.length || 0} comments • 👍 {post.votes?.useful || 0} • 👎 {post.votes?.useless || 0}</small>
+          </div>
+        ))}
+
+        {/* COMMENTS */}
+        {drillDown.type === "comments" && drillDown.data.map(comment => (
+          <div key={comment.id} style={card}>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
+              <strong>@{comment.authorUsername}</strong>
+              {comment.isHidden && <span style={badge("#c0392b")}>hidden</span>}
+              {comment.reports?.length > 0 && <span style={badge("#e67e22")}>🚩 {comment.reports.length}</span>}
+              <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(comment.createdAt).toLocaleDateString()}</small>
+            </div>
+            <p style={{ margin: "0 0 4px", opacity: 0.7, fontSize: "13px" }}>{comment.content?.slice(0, 120)}</p>
+            <small style={{ opacity: 0.4 }}>In post: {comment.postTitle}</small>
+          </div>
+        ))}
+
+        {/* ROOMS */}
+        {drillDown.type === "rooms" && drillDown.data.map(room => (
+          <div key={room.id} style={{ ...card, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <strong>{room.name}</strong>
+              <small style={{ display: "block", opacity: 0.5, marginTop: "4px" }}>
+                Type: {room.type} • Members: {room.members?.length || 0}
+                {room.university && ` • Uni: ${room.university}`}
+                {room.major && ` • Major: ${room.major}`}
+              </small>
+            </div>
+            <span style={badge(
+              room.type === "public" ? "#27ae60" :
+              room.type === "private" ? "#c0392b" :
+              room.type === "subject" ? "#f39c12" : "#6476af"
+            )}>{room.type}</span>
+          </div>
+        ))}
+
+        {/* ACTION HISTORY */}
+        {drillDown.type === "history" && drillDown.data.map((entry, i) => (
+          <div key={i} style={{ ...card, display: "flex", gap: "12px", alignItems: "flex-start" }}>
+            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#6476af", marginTop: "6px", flexShrink: 0 }} />
+            <div>
+              <strong style={{ fontSize: "13px" }}>{entry.action}</strong>
+              {entry.by && <small style={{ display: "block", opacity: 0.5 }}>By @{entry.by}</small>}
+              {entry.reason && <small style={{ display: "block", opacity: 0.5 }}>Reason: {entry.reason}</small>}
+              <small style={{ opacity: 0.4 }}>{new Date(entry.date).toLocaleString()}</small>
+            </div>
+          </div>
+        ))}
+
+        {drillDown.data?.length === 0 && (
+          <p style={{ opacity: 0.5, textAlign: "center" }}>Nothing to show.</p>
+        )}
+
+      </div>
+    </div>
+  </div>
+)}
  
     </div>
   );

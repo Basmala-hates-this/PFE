@@ -14,6 +14,12 @@ const adminOnly = (req, res, next) => {
 
 // user management 
 router.get("/users", protect, adminOnly, adminController.getAllUsers);
+
+
+router.get("/posts", protect, adminOnly, adminController.getAllPostsAdmin);
+router.get("/rooms", protect, adminOnly, adminController.getAllRoomsAdmin);
+
+
 router.patch("/users/:userId/suspend", protect, adminOnly, adminController.suspendUser);
 router.patch("/users/:userId/unsuspend", protect, adminOnly, adminController.unsuspendUser);
 router.delete("/users/:userId", protect, adminController.deleteUserAccount);

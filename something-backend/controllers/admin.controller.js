@@ -402,6 +402,21 @@ const deleteAnnouncement = (req, res) => {
   res.json({ message: "Announcement deleted" });
 };
 
+const getAllPostsAdmin = (req, res) => {
+  if (req.user.authorityLevel !== "superadmin") {
+    return res.status(403).json({ message: "No permission" });
+  }
+  const posts = postRepo.getPostsAll();
+  res.json(posts);
+};
+
+const getAllRoomsAdmin = (req, res) => {
+  if (!hasPermission(userRepo.findById(req.user.id), PERMISSIONS.MANAGE_ROOMS)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+  const rooms = roomRepo.getAllRooms();
+  res.json(rooms);
+};
 module.exports = {
   getAllUsers,
   suspendUser,
@@ -421,4 +436,6 @@ module.exports = {
   getAnnouncements,
   createAnnouncement,
   deleteAnnouncement,
+  getAllPostsAdmin,
+  getAllRoomsAdmin,
 };
