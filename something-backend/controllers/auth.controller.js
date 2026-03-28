@@ -127,6 +127,12 @@ const user = isEmail ? userRepo.findByEmail(identifier) : userRepo.findByUsernam
   if (!match) {
     return res.status(400).json({ message: "Invalid credentials" });
   }
+//suspended users wont log in
+   if (user.suspendedUntil && new Date(user.suspendedUntil) > new Date()) {
+    return res.status(403).json({ 
+      message: `Your account is suspended until ${new Date(user.suspendedUntil).toLocaleDateString()}. Reason: ${user.suspensionReason || "Policy violation"}`
+    });
+  }
 
   const token = jwt.sign(
     { id: user.id,
@@ -240,6 +246,7 @@ const resetPasswordAuth = async (req, res) => {
 
   const hashed = await bcrypt.hash(newPassword, 10);
   userRepo.updateUser(user.id, { password: hashed });
+
 
   res.json({ message: "Password updated successfully" });
 };

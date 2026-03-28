@@ -730,6 +730,7 @@ const handleSavePost = async (postId) => {
             {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
             right now, lets just keep it in the profile....should it have a confirmation? */}
             <li><button id="lgm" className="lgm"  >☀️Light Mode </button></li>
+            <li><a href="#">📢 Announcements</a></li>
         </ul>
     </aside>
 
