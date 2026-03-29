@@ -417,6 +417,138 @@ const getAllRoomsAdmin = (req, res) => {
   const rooms = roomRepo.getAllRooms();
   res.json(rooms);
 };
+
+// resources
+const getPendingResources = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  if (!hasPermission(admin, PERMISSIONS.APPROVE_RESOURCES)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+  const posts = postRepo.getPostsAll();
+  const pending = posts.filter(p =>
+    (p.pdf || p.image || p.resourceLink) && p.resourceApproved === null
+  );
+  res.json(pending);
+};
+
+// hidden Content
+const getHiddenContent = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  if (!hasPermission(admin, PERMISSIONS.MODERATE_CONTENT)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+  const posts = postRepo.getPostsAll();
+  const hidden = [];
+  posts.forEach(post => {
+    if (post.isHidden) hidden.push({ type: "post", ...post });
+    post.comments?.forEach(comment => {
+      if (comment.isHidden) hidden.push({ type: "comment", postId: post.id, postTitle: post.title, ...comment });
+    });
+  });
+  res.json(hidden);
+};
+
+// restore hidden content
+const restoreContent = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  if (!hasPermission(admin, PERMISSIONS.MODERATE_CONTENT)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+  const { type, postId, commentId } = req.body;
+  const posts = postRepo.getPostsAll();
+
+  if (type === "post") {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    post.isHidden = false;
+    post.autoHidden = false;
+    postRepo.writePosts(posts);
+    addLog(req.user.id, req.user.username, "restore_post", postId, "Post restored");
+  } else if (type === "comment") {
+    const post = posts.find(p => p.id === postId);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+    const comment = post.comments.find(c => c.id === commentId);
+    if (!comment) return res.status(404).json({ message: "Comment not found" });
+    comment.isHidden = false;
+    comment.autoHidden = false;
+    postRepo.writePosts(posts);
+    addLog(req.user.id, req.user.username, "restore_comment", commentId, "Comment restored");
+  }
+  res.json({ message: "Content restored" });
+};
+
+// other inputs
+const DEFAULT_UNI_CODES = [
+  "UA1","UA2","UA3","USTHB","ENP","ESNA","NHV","BMU",
+  "UB1","UB2","UBj","UBs","UBl1","Ubl2","UCh",
+  "UC1","UC2","UC3","UD","UG","UJ","UL","UM","UMs",
+  "UO1","UO2","USTO","UOr","USa","USBA","USk","USA",
+  "US1","US2","UTi","UTl","UTO"
+];
+
+const DEFAULT_MAJORS = [
+  "Computer Science","Mathematics","Physics","Chemistry","Biology",
+  "Civil Engineering","Mechanical Engineering","Electrical Engineering",
+  "Process Engineering","Architecture","Natural and Life Science","Agronomy",
+  "Renewable Energies","Geology","Medicine","Pharmacy","Dental Medicine",
+  "Veterinary Medicine","Law","Political Science & International Relations",
+  "Economics & Commerce & Management Science","History","Psychology",
+  "Sociology","Philosophy","Literature & Languages",
+  "Information & Communucation Science","Sport Science & Physical Education",
+  "Art & Design"
+];
+
+const getOtherInputs = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  if (!hasPermission(admin, PERMISSIONS.VALIDATE_OTHER)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+  const users = userRepo.readUsers();
+  const flagged = [];
+
+  users.forEach(({ password, ...u }) => {
+    const customUni = u.university?.code && !DEFAULT_UNI_CODES.includes(u.university.code)
+      ? u.university : null;
+    const customMajors = u.majors?.filter(m => !DEFAULT_MAJORS.includes(m)) || [];
+
+    if (customUni || customMajors.length > 0) {
+      flagged.push({
+        ...u,
+        customUni,
+        customMajors,
+        otherInputStatus: u.otherInputStatus || "pending"
+      });
+    }
+  });
+
+  res.json(flagged);
+};
+
+const validateOtherInput = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  if (!hasPermission(admin, PERMISSIONS.VALIDATE_OTHER)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+  const { userId, approved } = req.body;
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  userRepo.updateUser(userId, {
+    otherInputStatus: approved ? "approved" : "rejected",
+    actionHistory: [...(user.actionHistory || []), {
+      action: approved ? "other_input_approved" : "other_input_rejected",
+      by: req.user.username,
+      date: new Date().toISOString()
+    }]
+  });
+
+  addLog(req.user.id, req.user.username,
+    approved ? "approve_other_input" : "reject_other_input",
+    userId, `Custom input ${approved ? "approved" : "rejected"} for @${user.username}`
+  );
+  res.json({ message: `Input ${approved ? "approved" : "rejected"}` });
+};
+
 module.exports = {
   getAllUsers,
   suspendUser,
@@ -438,4 +570,9 @@ module.exports = {
   deleteAnnouncement,
   getAllPostsAdmin,
   getAllRoomsAdmin,
+  getPendingResources,
+  getOtherInputs,
+  validateOtherInput,
+  restoreContent,
+  getHiddenContent,
 };

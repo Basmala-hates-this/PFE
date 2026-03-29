@@ -38,6 +38,11 @@ export default function AdminPanel() {
   const isSuperAdmin = currentUser?.authorityLevel === "superadmin";
  
   const headers = { Authorization: `Bearer ${token}` };
+
+
+  const [pendingResources, setPendingResources] = useState([]);
+const [hiddenContent, setHiddenContent] = useState([]);
+const [otherInputs, setOtherInputs] = useState([]);
  //////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////////////////////////////
@@ -51,12 +56,15 @@ export default function AdminPanel() {
  
   
   useEffect(() => {
-    if (activeTab === "stats") fetchStats();
-    if (activeTab === "users") fetchUsers();
-    if (activeTab === "professors") fetchPendingProfessors();
-    if (activeTab === "reports") fetchReports();
-    if (activeTab === "announcements") fetchAnnouncements();
-  }, [activeTab]);
+  if (activeTab === "stats") fetchStats();
+  if (activeTab === "users") fetchUsers();
+  if (activeTab === "professors") fetchPendingProfessors();
+  if (activeTab === "reports") fetchReports();
+  if (activeTab === "resources") fetchPendingResources();
+  if (activeTab === "hidden") fetchHiddenContent();
+  if (activeTab === "other") fetchOtherInputs();
+  if (activeTab === "announcements") fetchAnnouncements();
+}, [activeTab]);
 
 
   ////////////////////////////////////////////////////////////////////////////
@@ -169,6 +177,30 @@ export default function AdminPanel() {
       fetchAnnouncements();
     } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
   };
+
+
+  const handleApproveResource = async (postId, approved) => {
+  try {
+    await axios.patch(`${API}/content/resource`, { postId, approved }, { headers });
+    fetchPendingResources();
+    fetchStats();
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
+
+const handleRestoreContent = async (type, postId, commentId = null) => {
+  if (!window.confirm(`Restore this ${type}?`)) return;
+  try {
+    await axios.patch(`${API}/content/restore`, { type, postId, commentId }, { headers });
+    fetchHiddenContent();
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
+
+const handleValidateOtherInput = async (userId, approved) => {
+  try {
+    await axios.patch(`${API}/other-inputs/validate`, { userId, approved }, { headers });
+    fetchOtherInputs();
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
  
  
   const card = { background: "#252b45", borderRadius: "10px", padding: "16px", marginBottom: "12px" };
@@ -176,12 +208,15 @@ export default function AdminPanel() {
   const btn = (color = "#6476af") => ({ padding: "6px 14px", borderRadius: "6px", background: color, border: "none", color: "white", cursor: "pointer", fontSize: "12px" });
  
   const tabs = [
-    { id: "stats", label: "📊 Stats" },
-    { id: "users", label: "👥 Users" },
-    { id: "professors", label: "🎓 Professors" },
-    { id: "reports", label: "🚩 Reports" },
-    { id: "announcements", label: "📢 Announcements" },
-  ];
+  { id: "stats", label: "📊 Stats" },
+  { id: "users", label: "👥 Users" },
+  { id: "professors", label: "🎓 Professors" },
+  { id: "reports", label: "🚩 Reports" },
+  { id: "resources", label: "📦 Resources" },
+  { id: "hidden", label: "🙈 Hidden" },
+  { id: "other", label: "🔤 Other Inputs" },
+  { id: "announcements", label: "📢 Announcements" },
+];
 
 
   const fetchDrillDown = async (type) => {
@@ -221,6 +256,28 @@ export default function AdminPanel() {
   } catch (err) { console.error(err); }
 };
  
+
+const fetchPendingResources = async () => {
+  try {
+    const res = await axios.get(`${API}/resources/pending`, { headers });
+    setPendingResources(res.data);
+  } catch (err) { console.error(err); }
+};
+
+const fetchHiddenContent = async () => {
+  try {
+    const res = await axios.get(`${API}/content/hidden`, { headers });
+    setHiddenContent(res.data);
+  } catch (err) { console.error(err); }
+};
+
+const fetchOtherInputs = async () => {
+  try {
+    const res = await axios.get(`${API}/other-inputs`, { headers });
+    setOtherInputs(res.data);
+  } catch (err) { console.error(err); }
+};
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////
@@ -454,6 +511,142 @@ export default function AdminPanel() {
           )}
         </div>
       )}
+      {/* ── RESOURCES TAB ── */}
+{activeTab === "resources" && (
+  <div>
+    <h3 style={{ marginBottom: "16px" }}>Pending Resource Approval</h3>
+    {pendingResources.length === 0 ? (
+      <p style={{ opacity: 0.5 }}>No pending resources.</p>
+    ) : (
+      pendingResources.map(post => (
+        <div key={post.id} style={card}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+            <strong>@{post.authorUsername}</strong>
+            <span style={badge("#6476af")}>{post.authorRole}</span>
+            <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(post.createdAt).toLocaleDateString()}</small>
+          </div>
+          {post.title && <strong style={{ display: "block", marginBottom: "4px" }}>{post.title}</strong>}
+          <p style={{ margin: "0 0 10px", opacity: 0.7, fontSize: "13px" }}>{post.content?.slice(0, 120)}</p>
+
+          {post.image && (
+            <a href={post.image} target="_blank" rel="noopener noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px", marginRight: "8px" }}>
+              🖼️ View Image
+            </a>
+          )}
+          {post.pdf && (
+            <a href={post.pdf} target="_blank" rel="noopener noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px", marginRight: "8px" }}>
+              📄 View PDF
+            </a>
+          )}
+          {post.resourceLink && (
+            <a href={post.resourceLink} target="_blank" rel="noopener noreferrer"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px" }}>
+              🔗 {post.resourceLabel || "Open Link"}
+            </a>
+          )}
+
+          <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+            <button onClick={() => handleApproveResource(post.id, true)} style={btn("#27ae60")}>✅ Approve</button>
+            <button onClick={() => handleApproveResource(post.id, false)} style={btn("#c0392b")}>❌ Reject</button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+)}
+
+{/* ── HIDDEN CONTENT TAB ── */}
+{activeTab === "hidden" && (
+  <div>
+    <h3 style={{ marginBottom: "16px" }}>Hidden Content</h3>
+    {hiddenContent.length === 0 ? (
+      <p style={{ opacity: 0.5 }}>No hidden content.</p>
+    ) : (
+      hiddenContent.map(item => (
+        <div key={item.id} style={card}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+            <span style={badge(item.type === "post" ? "#6476af" : "#4a3f6b")}>{item.type}</span>
+            <strong>@{item.authorUsername}</strong>
+            {item.autoHidden && <span style={badge("#e67e22")}>auto-hidden</span>}
+            {!item.autoHidden && <span style={badge("#c0392b")}>manually hidden</span>}
+            {item.type === "comment" && (
+              <small style={{ opacity: 0.5, fontSize: "11px" }}>in: {item.postTitle || item.postId}</small>
+            )}
+          </div>
+          <p style={{ margin: "0 0 10px", opacity: 0.7, fontSize: "13px" }}>{item.content?.slice(0, 150)}</p>
+          {item.reports?.length > 0 && (
+            <small style={{ display: "block", opacity: 0.5, marginBottom: "8px" }}>
+              🚩 {item.reports.length} report(s)
+            </small>
+          )}
+          <button
+            onClick={() => handleRestoreContent(
+              item.type,
+              item.type === "post" ? item.id : item.postId,
+              item.type === "comment" ? item.id : null
+            )}
+            style={btn("#27ae60")}
+          >
+            ♻️ Restore
+          </button>
+        </div>
+      ))
+    )}
+  </div>
+)}
+
+{/* ── OTHER INPUTS TAB ── */}
+{activeTab === "other" && (
+  <div>
+    <h3 style={{ marginBottom: "16px" }}>Custom University / Major Validation</h3>
+    {otherInputs.length === 0 ? (
+      <p style={{ opacity: 0.5 }}>No custom inputs pending.</p>
+    ) : (
+      otherInputs.map(u => (
+        <div key={u.id} style={card}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+            <strong>@{u.username}</strong>
+            <span style={badge("#6476af")}>{u.role}</span>
+            <span style={badge(
+              u.otherInputStatus === "approved" ? "#27ae60" :
+              u.otherInputStatus === "rejected" ? "#c0392b" : "#e67e22"
+            )}>{u.otherInputStatus || "pending"}</span>
+          </div>
+          <small style={{ opacity: 0.5, display: "block", marginBottom: "8px" }}>{u.email}</small>
+
+          {u.customUni && (
+            <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "6px" }}>
+              <small style={{ opacity: 0.6 }}>Custom University:</small>
+              <p style={{ margin: "4px 0 0", fontSize: "14px" }}>{u.customUni.name}</p>
+              <small style={{ opacity: 0.4 }}>Code: {u.customUni.code}</small>
+            </div>
+          )}
+
+          {u.customMajors?.length > 0 && (
+            <div style={{ marginBottom: "10px", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "6px" }}>
+              <small style={{ opacity: 0.6 }}>Custom Major(s):</small>
+              {u.customMajors.map((m, i) => (
+                <p key={i} style={{ margin: "4px 0 0", fontSize: "14px" }}>{m}</p>
+              ))}
+            </div>
+          )}
+
+          {u.otherInputStatus === "pending" && (
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button onClick={() => handleValidateOtherInput(u.id, true)} style={btn("#27ae60")}>✅ Approve</button>
+              <button onClick={() => handleValidateOtherInput(u.id, false)} style={btn("#c0392b")}>❌ Reject</button>
+            </div>
+          )}
+          {u.otherInputStatus !== "pending" && (
+            <small style={{ opacity: 0.5 }}>Already {u.otherInputStatus}</small>
+          )}
+        </div>
+      ))
+    )}
+  </div>
+)}
  
       {/* ── ANNOUNCEMENTS TAB ── */}
       {activeTab === "announcements" && (

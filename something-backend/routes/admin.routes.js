@@ -20,6 +20,13 @@ router.get("/posts", protect, adminOnly, adminController.getAllPostsAdmin);
 router.get("/rooms", protect, adminOnly, adminController.getAllRoomsAdmin);
 
 
+router.get("/resources/pending", protect, adminOnly, adminController.getPendingResources);
+router.get("/content/hidden", protect, adminOnly, adminController.getHiddenContent);
+router.patch("/content/restore", protect, adminOnly, adminController.restoreContent);
+router.get("/other-inputs", protect, adminOnly, adminController.getOtherInputs);
+router.patch("/other-inputs/validate", protect, adminOnly, adminController.validateOtherInput);
+
+
 router.patch("/users/:userId/suspend", protect, adminOnly, adminController.suspendUser);
 router.patch("/users/:userId/unsuspend", protect, adminOnly, adminController.unsuspendUser);
 router.delete("/users/:userId", protect, adminController.deleteUserAccount);
