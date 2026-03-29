@@ -171,7 +171,8 @@ module.exports = {
     addRoomAdmin,
     deleteRoom,
     renameRoom,
-    leaveRoom
+    leaveRoom,
+    writeRooms,
     
 }
 

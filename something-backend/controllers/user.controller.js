@@ -1,5 +1,6 @@
 const postRepo = require("../repositories/post.repo");
 const userRepo = require("../repositories/user.repo");
+const roomRepo = require("../repositories/room.repo");
 
 
 
@@ -243,6 +244,54 @@ const reportUser = (req, res) => {
   res.json({ message: "User reported successfully" });
 };
 
+//prof accepted-?then prof...
+//prof rejected->then become student and reorient to one major and remove the rest
+const selectMajorAfterRejection = async (req, res) => {
+  const userId = req.user.id;
+  const { selectedMajor } = req.body;
+
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  if (!user.pendingReorientation) return res.status(400).json({ message: "No reorientation pending" });
+  if (!user.majors?.includes(selectedMajor)) return res.status(400).json({ message: "Invalid major selection" });
+
+  // get all rooms and find ones to leave
+  const allRooms = roomRepo.getAllRooms();
+  const roomsToLeave = allRooms.filter(room => {
+    if (!room.members.includes(userId)) return false;
+    if (room.type === "major" && room.major !== selectedMajor) return true;
+    if (room.type === "subject" && room.major !== selectedMajor) return true;
+    return false;
+  });
+
+  // remove user from those rooms
+  const updatedRooms = allRooms.map(room => {
+    if (roomsToLeave.find(r => r.id === room.id)) {
+      return { ...room, members: room.members.filter(id => id !== userId) };
+    }
+    return room;
+  });
+  roomRepo.writeRooms(updatedRooms);
+
+  // update user
+  const remainingRoomIds = (user.rooms || []).filter(
+    roomId => !roomsToLeave.find(r => r.id === roomId)
+  );
+
+  userRepo.updateUser(userId, {
+    majors: [selectedMajor],
+    pendingReorientation: false,
+    rooms: remainingRoomIds,
+    actionHistory: [...(user.actionHistory || []), {
+      action: "major_selected_after_rejection",
+      major: selectedMajor,
+      date: new Date().toISOString()
+    }]
+  });
+
+  res.json({ message: "Major selected successfully", major: selectedMajor });
+};
+
 module.exports = {
   getMyStats,
   getPostsByUser,
@@ -258,6 +307,7 @@ module.exports = {
   followUser,
   unfollowUser,
   reportUser,
+  selectMajorAfterRejection,
 
 
   

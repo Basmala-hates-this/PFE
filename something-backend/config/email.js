@@ -56,7 +56,42 @@ const sendRoomInviteEmail = async (toEmail, username, roomName, inviterUsername)
   });
 };
 
+const sendProfessorRejectionEmail = async (toEmail, username, reason) => {
+  await transporter.sendMail({
+    from: `"StudyBuddy Platform" <${process.env.EMAIL_USER}>`,
+    to: toEmail,
+    subject: "Your Professor Status Request — Update",
+    html: `
+      <h2>Professor Verification Update</h2>
+      <p>Hey <strong>@${username}</strong>,</p>
+      <p>Unfortunately, your request for professor status has been <strong>rejected</strong>.</p>
+      ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ""}
+      <p>Your account has been set to <strong>student</strong> status.</p>
+      <p>If you registered with multiple majors, you will be asked to select one major to continue with on your next login.</p>
+      <p>If you believe this is a mistake, please contact the platform administrators.</p>
+    `
+  });
+};
+
+const sendProfessorVerificationEmail = async (toEmail, username) => {
+  await transporter.sendMail({
+    from: `"StudyBuddy Platform" <${process.env.EMAIL_USER}>`,
+    to: toEmail,
+    subject: "Your Professor Status Has Been Verified! 🎓",
+    html: `
+      <h2>Professor Status Verified 🎉</h2>
+      <p>Hey <strong>@${username}</strong>,</p>
+      <p>Great news! Your professor status has been <strong>verified</strong> by our team.</p>
+      <p>You now have full access to professor features on StudyBuddy.</p>
+      <p>Log in to get started!</p>
+    `
+  });
+};
+
 module.exports = {sendResetEmail,
   sendFollowEmail,
   sendRoomInviteEmail,
+  sendProfessorRejectionEmail,
+  sendProfessorVerificationEmail,
+
 }

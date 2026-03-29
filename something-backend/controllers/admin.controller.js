@@ -12,6 +12,8 @@ const PERMISSIONS = require("../config/permissions");
 
 const hasPermission = require("../utils/hasPermission");
 
+const { sendResetEmail, sendProfessorRejectionEmail, sendProfessorVerificationEmail } = require("../config/email");
+
 // helpers 
 
 const readLogs = () => JSON.parse(fs.readFileSync(logsPath, "utf8"));
@@ -146,7 +148,7 @@ const getPendingProfessors = (req, res) => {
   res.json(pending);
 };
 
-const verifyProfessor = (req, res) => {
+const verifyProfessor = async(req, res) => {
   const admin = userRepo.findById(req.user.id);
   if (!hasPermission(admin, PERMISSIONS.VERIFY_PROFESSORS)) {
     return res.status(403).json({ message: "No permission" });
@@ -164,12 +166,17 @@ const verifyProfessor = (req, res) => {
       date: new Date().toISOString()
     }]
   });
+  try {
+    await sendProfessorVerificationEmail(user.email, user.username);
+  } catch (err) {
+    console.error("Failed to send verification email:", err);
+  }
 
   addLog(req.user.id, req.user.username, "verify_professor", userId, `Verified @${user.username} as professor`);
   res.json({ message: "Professor verified" });
 };
 
-const rejectProfessor = (req, res) => {
+const rejectProfessor =async (req, res) => {
   const admin = userRepo.findById(req.user.id);
   if (!hasPermission(admin, PERMISSIONS.VERIFY_PROFESSORS)) {
     return res.status(403).json({ message: "No permission" });
@@ -191,6 +198,13 @@ const rejectProfessor = (req, res) => {
       date: new Date().toISOString()
     }]
   });
+
+  try {
+    await sendProfessorRejectionEmail(user.email, user.username, reason);
+  } catch (err) {
+    console.error("Failed to send rejection email:", err);
+  }
+
 
   addLog(req.user.id, req.user.username, "reject_professor", userId, `Rejected @${user.username}: ${reason}`);
   res.json({ message: "Professor rejected and demoted to student" });

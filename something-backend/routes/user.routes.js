@@ -15,6 +15,8 @@ router.delete("/me", protect, userController.deleteMe);
 router.get("/search", protect, userController.searchUsers);
 
 
+router.post("/select-major", protect, userController.selectMajorAfterRejection);
+
 // follow routes BEFORE /:userId
 router.post("/:userId/follow", protect, userController.followUser);
 router.delete("/:userId/unfollow", protect, userController.unfollowUser);
