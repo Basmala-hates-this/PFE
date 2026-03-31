@@ -292,6 +292,141 @@ const selectMajorAfterRejection = async (req, res) => {
   res.json({ message: "Major selected successfully", major: selectedMajor });
 };
 
+
+const selectValidInputs = async (req, res) => {
+  const userId = req.user.id;
+  const { selectedUniversity, selectedMajors } = req.body;
+
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  if (user.otherInputStatus !== "rejected") return res.status(400).json({ message: "No input correction needed" });
+
+  const DEFAULT_UNI_CODES = [
+    "UA1","UA2","UA3","USTHB","ENP","ESNA","NHV","BMU",
+    "UB1","UB2","UBj","UBs","UBl1","Ubl2","UCh",
+    "UC1","UC2","UC3","UD","UG","UJ","UL","UM","UMs",
+    "UO1","UO2","USTO","UOr","USa","USBA","USk","USA",
+    "US1","US2","UTi","UTl","UTO"
+  ];
+
+  const DEFAULT_MAJORS = [
+    "Computer Science","Mathematics","Physics","Chemistry","Biology",
+    "Civil Engineering","Mechanical Engineering","Electrical Engineering",
+    "Process Engineering","Architecture","Natural and Life Science","Agronomy",
+    "Renewable Energies","Geology","Medicine","Pharmacy","Dental Medicine",
+    "Veterinary Medicine","Law","Political Science & International Relations",
+    "Economics & Commerce & Management Science","History","Psychology",
+    "Sociology","Philosophy","Literature & Languages",
+    "Information & Communucation Science","Sport Science & Physical Education",
+    "Art & Design"
+  ];
+
+  const updates = {};
+  const hasCustomUni = user.university?.code && !DEFAULT_UNI_CODES.includes(user.university.code);
+  const hasCustomMajors = user.majors?.some(m => !DEFAULT_MAJORS.includes(m));
+
+  // validate and apply university
+  if (hasCustomUni) {
+    if (!selectedUniversity) return res.status(400).json({ message: "Please select a valid university" });
+    if (!DEFAULT_UNI_CODES.includes(selectedUniversity.code)) {
+      return res.status(400).json({ message: "Invalid university selection" });
+    }
+    updates.university = selectedUniversity;
+
+    // update university room membership
+    const allRooms = roomRepo.getAllRooms();
+    
+    // leave old university room
+    const oldUniRoom = allRooms.find(r => r.type === "university" && r.university === user.university.code);
+    // join or create new university room
+    let newUniRoom = allRooms.find(r => r.type === "university" && r.university === selectedUniversity.code);
+    
+    if (!newUniRoom) {
+      newUniRoom = roomRepo.createRoom({
+        name: selectedUniversity.name,
+        type: "university",
+        university: selectedUniversity.code
+      });
+    }
+
+    const updatedRooms = roomRepo.getAllRooms().map(room => {
+      if (oldUniRoom && room.id === oldUniRoom.id) {
+        return { ...room, members: room.members.filter(id => id !== userId) };
+      }
+      return room;
+    });
+    roomRepo.writeRooms(updatedRooms);
+    roomRepo.addMember(newUniRoom.id, userId);
+
+    // update user rooms list
+    const newRoomsList = (user.rooms || [])
+      .filter(id => id !== oldUniRoom?.id)
+      .concat(newUniRoom.id);
+    updates.rooms = [...new Set(newRoomsList)];
+  }
+
+  // validate and apply majors
+  if (hasCustomMajors) {
+    if (!selectedMajors?.length) return res.status(400).json({ message: "Please select valid majors" });
+    const allValid = selectedMajors.every(m => DEFAULT_MAJORS.includes(m));
+    if (!allValid) return res.status(400).json({ message: "Invalid major selection" });
+
+    // find old custom major rooms to leave
+    const allRooms = roomRepo.getAllRooms();
+    const customMajors = user.majors.filter(m => !DEFAULT_MAJORS.includes(m));
+    
+    const roomsToLeave = allRooms.filter(room =>
+      room.members.includes(userId) &&
+      (room.type === "major" || room.type === "subject") &&
+      customMajors.includes(room.major)
+    );
+
+    if (roomsToLeave.length > 0) {
+      const updatedRooms = roomRepo.getAllRooms().map(room => {
+        if (roomsToLeave.find(r => r.id === room.id)) {
+          return { ...room, members: room.members.filter(id => id !== userId) };
+        }
+        return room;
+      });
+      roomRepo.writeRooms(updatedRooms);
+    }
+
+    // join new major rooms
+    for (const major of selectedMajors) {
+      let majorRoom = allRooms.find(r => r.type === "major" && r.major === major);
+      if (!majorRoom) {
+        majorRoom = roomRepo.createRoom({ name: major, type: "major", major });
+      }
+      roomRepo.addMember(majorRoom.id, userId);
+    }
+
+    // keep valid existing majors + add new selections
+    const validExisting = user.majors.filter(m => DEFAULT_MAJORS.includes(m));
+    updates.majors = [...new Set([...validExisting, ...selectedMajors])];
+
+    // update rooms list
+    const currentRooms = updates.rooms || user.rooms || [];
+    const leftRoomIds = roomsToLeave.map(r => r.id);
+    const newMajorRoomIds = selectedMajors.map(major => {
+      const r = roomRepo.getAllRooms().find(r => r.type === "major" && r.major === major);
+      return r?.id;
+    }).filter(Boolean);
+
+    updates.rooms = [...new Set(
+      currentRooms.filter(id => !leftRoomIds.includes(id)).concat(newMajorRoomIds)
+    )];
+  }
+
+  updates.otherInputStatus = "corrected";
+  updates.actionHistory = [...(user.actionHistory || []), {
+    action: "valid_inputs_selected",
+    date: new Date().toISOString()
+  }];
+
+  userRepo.updateUser(userId, updates);
+  res.json({ message: "Inputs updated successfully" });
+};
+
 module.exports = {
   getMyStats,
   getPostsByUser,
@@ -308,7 +443,7 @@ module.exports = {
   unfollowUser,
   reportUser,
   selectMajorAfterRejection,
-
+  selectValidInputs,
 
   
 };

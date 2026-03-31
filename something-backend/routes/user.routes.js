@@ -16,6 +16,7 @@ router.get("/search", protect, userController.searchUsers);
 
 
 router.post("/select-major", protect, userController.selectMajorAfterRejection);
+router.post("/select-valid-inputs", protect, userController.selectValidInputs);
 
 // follow routes BEFORE /:userId
 router.post("/:userId/follow", protect, userController.followUser);

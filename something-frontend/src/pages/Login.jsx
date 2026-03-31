@@ -85,7 +85,10 @@ const handleSubmit =async (e) => {
   // check if professor was rejected and needs to pick a major
 if (data.user.pendingReorientation) {
   navigate("/reorientation");
+} else if (data.user.otherInputStatus === "rejected") {
+  navigate("/correct-inputs");
 } else {
+ 
   //le legin est successful...i'll add a star emoji to this comment later...
   alert("Login Successful!!!!");
   navigate("/dashboard");
