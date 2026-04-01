@@ -24,6 +24,10 @@ export default function RoomChat() {
   //names better then ids....
   const [memberDetails, setMemberDetails] = useState([]);
 
+  const isImage = (fileUrl) => {
+  return /\.(jpg|jpeg|png|gif|webp)$/i.test(fileUrl);
+};
+
   ////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
@@ -210,11 +214,7 @@ const handleLeaveRoom = async () => {
           <div key={msg.id} style={{display:"flex", flexDirection:"column", alignItems: msg.authorId === currentUser?.id ? "flex-end" : "flex-start"}}>
             
             {/* reply preview */}
-            {/* {msg.replyTo && (
-              <div style={{fontSize:"11px", color:"rgba(255,255,255,0.4)", marginBottom:"4px", padding:"4px 8px", background:"rgba(255,255,255,0.05)", borderRadius:"6px", maxWidth:"60%"}}>
-                ↩ replying to a message
-              </div>
-            )} */}
+           
             {msg.replyTo && (
                 <div style={{fontSize:"11px", color:"rgba(255,255,255,0.4)", marginBottom:"4px", padding:"4px 8px", background:"rgba(255,255,255,0.05)", borderRadius:"6px", maxWidth:"60%"}}>
                      ↩ {messages.find(m => m.id === msg.replyTo)?.authorUsername 
@@ -242,9 +242,36 @@ const handleLeaveRoom = async () => {
                 <p style={{margin:"4px 0 0", color:"white"}}>{msg.content}</p>
               )}
 
-              {msg.attachment && (
+              {/* {msg.attachment && (
                 <img src={msg.attachment} alt="attachment" style={{maxWidth:"200px", borderRadius:"8px", marginTop:"6px"}}/>
-              )}
+              )} */}
+              {msg.attachment && (
+  isImage(msg.attachment) ? (
+    <img
+      src={msg.attachment}
+      alt="attachment"
+      style={{ maxWidth: "200px", borderRadius: "8px", marginTop: "6px" }}
+    />
+  ) : (
+    <a
+      href={msg.attachment}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: "inline-block",
+        marginTop: "6px",
+        padding: "6px 10px",
+        background: "rgba(255,255,255,0.1)",
+        borderRadius: "6px",
+        color: "white",
+        textDecoration: "none",
+        fontSize: "12px"
+      }}
+    >
+      📄 Open File
+    </a>
+  )
+)}
 
               <small style={{opacity:0.5, fontSize:"10px"}}>{new Date(msg.createdAt).toLocaleTimeString()}</small>
               {msg.isEdited && <small style={{opacity:0.4, fontSize:"10px"}}> (edited)</small>}
@@ -281,7 +308,8 @@ const handleLeaveRoom = async () => {
       <input
         type="file"
         id="attachmentInput"
-        accept="image/*"
+        // accept="image/*"
+        accept="image/*,.pdf,.doc,.docx,.txt,.zip"
         style={{display:"none"}}
         onChange={(e) => setAttachment(e.target.files[0])}
       />

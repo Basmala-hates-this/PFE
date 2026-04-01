@@ -89,7 +89,9 @@ const [savedPostIds, setSavedPostIds] = useState([]);
 
 //reporting shit
 const [reportTarget, setReportTarget] = useState(null);
-
+//announcment shits
+const [announcements, setAnnouncements] = useState([]);
+const [showAnnouncements, setShowAnnouncements] = useState(false);
 
   //
   // If user skipped info/register, send them back
@@ -609,6 +611,17 @@ const handleSavePost = async (postId) => {
   }
 };
 
+
+//announcment shit.....that damn word is long tf?
+const fetchAnnouncements = async () => {
+  try {
+    const res = await axios.get("http://localhost:5000/api/admin/announcements");
+    setAnnouncements(res.data);
+  } catch (err) {
+    console.error("Failed to fetch announcements:", err);
+  }
+};
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -649,7 +662,11 @@ const handleSavePost = async (postId) => {
             {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
             right now, lets just keep it in the profile....should it have a confirmation? */}
             <li><button id="lgm" className="lgm"  >☀️Light Mode </button></li>
-            <li><a href="#">📢 Announcements</a></li>
+            <li><a href="#" onClick={(e) => {
+    e.preventDefault();
+    fetchAnnouncements();
+    setShowAnnouncements(true);
+  }}>📢 Announcements</a></li>
         </ul>
     </aside>
 
@@ -1118,6 +1135,40 @@ const handleSavePost = async (postId) => {
     postId={reportTarget.postId}
     onClose={() => setReportTarget(null)}
   />
+)}
+
+
+{showAnnouncements && (
+  <div className="modal-overlay" onClick={() => setShowAnnouncements(false)}>
+    <div className="modal" onClick={(e) => e.stopPropagation()}
+      style={{ maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
+
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <h3 style={{ margin: 0 }}>📢 Announcements</h3>
+        <button onClick={() => setShowAnnouncements(false)}
+          style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
+      </div>
+
+      <div style={{ overflowY: "auto", flex: 1 }}>
+        {announcements.length === 0 ? (
+          <p style={{ opacity: 0.5, textAlign: "center" }}>No announcements yet.</p>
+        ) : (
+          announcements.map(a => (
+            <div key={a.id} style={{
+              background: "#252b45", borderRadius: "10px",
+              padding: "14px", marginBottom: "10px"
+            }}>
+              <p style={{ margin: "0 0 8px" }}>{a.message}</p>
+              <small style={{ opacity: 0.5 }}>
+                By @{a.createdBy} — {new Date(a.createdAt).toLocaleString()}
+              </small>
+            </div>
+          ))
+        )}
+      </div>
+
+    </div>
+  </div>
 )}
 
 </div>
