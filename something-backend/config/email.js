@@ -88,10 +88,41 @@ const sendProfessorVerificationEmail = async (toEmail, username) => {
   });
 };
 
+const sendAdminApplicationAcceptedEmail = async (to, username) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject: "Your Admin Application Was Accepted 🎉",
+    html: `
+      <h2>Congratulations @${username}!</h2>
+      <p>Your application to become an admin on StudyBuddy has been accepted.</p>
+      <p>You now have access to the admin panel. Use your new role responsibly!</p>
+    `
+  });
+};
+
+const sendAdminApplicationRejectedEmail = async (to, username, reason) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject: "Your Admin Application Was Reviewed",
+    html: `
+      <h2>Hello @${username},</h2>
+      <p>Thank you for applying. Unfortunately your application has not been accepted at this time.</p>
+      <p><strong>Reason:</strong> ${reason}</p>
+      <p>You're welcome to reapply in the future.</p>
+    `
+  });
+};
+
+//do i need more creative emails with more personality?....or unhinged?....KEEP THOSE THOUGHTS AWAY
+
 module.exports = {sendResetEmail,
   sendFollowEmail,
   sendRoomInviteEmail,
   sendProfessorRejectionEmail,
   sendProfessorVerificationEmail,
+  sendAdminApplicationAcceptedEmail,
+  sendAdminApplicationRejectedEmail,
 
 }

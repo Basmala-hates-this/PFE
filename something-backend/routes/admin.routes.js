@@ -27,6 +27,8 @@ router.get("/other-inputs", protect, adminOnly, adminController.getOtherInputs);
 router.patch("/other-inputs/validate", protect, adminOnly, adminController.validateOtherInput);
 
 
+
+
 router.patch("/users/:userId/suspend", protect, adminOnly, adminController.suspendUser);
 router.patch("/users/:userId/unsuspend", protect, adminOnly, adminController.unsuspendUser);
 router.delete("/users/:userId", protect, adminController.deleteUserAccount);
@@ -48,9 +50,18 @@ router.patch("/users/:userId/upgrade-superadmin", protect, adminController.upgra
 router.get("/logs", protect, adminController.getLogs);
 router.get("/stats", protect, adminController.getStats);
 
+//admin aplicats
+router.post("/apply", protect, adminController.applyForAdmin);
+router.delete("/apply", protect, adminController.withdrawApplication);
+router.get("/applications", protect, adminController.getApplications);
+router.post("/applications/reject", protect, adminController.rejectApplication);
+
+
 // announcements 
 router.get("/announcements", adminController.getAnnouncements);
 router.post("/announcements", protect, adminController.createAnnouncement);
 router.delete("/announcements/:id", protect, adminController.deleteAnnouncement);
+
+
 
 module.exports = router;

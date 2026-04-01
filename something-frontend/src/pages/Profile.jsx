@@ -52,6 +52,9 @@ export default function Profile() {
     const [savedTab, setSavedTab] = useState("all");
     const [savedSearch, setSavedSearch] = useState("");
 
+    //aplicats
+    const [application, setApplication] = useState(null); // null = no application
+
 
 useEffect(() => {
   const token = localStorage.getItem("token");
@@ -165,7 +168,22 @@ useEffect(() => {
   fetchFollowing();
 }, [showCreateRoom]);
 
-
+//aplicats
+useEffect(() => {
+  const fetchApplication = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:5000/api/admin/applications", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const mine = res.data.find(a => a.userId === user?.id);
+      setApplication(mine || null);
+    } catch (err) {
+      // not an admin/superadmin, can't fetch — that's fine
+    }
+  };
+  if (user) fetchApplication();
+}, [user]);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -233,6 +251,35 @@ const fetchSavedPosts = async () => {
     setSavedPostsLoading(false);
   }
 };
+
+const handleApplyForAdmin = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.post("http://localhost:5000/api/admin/apply", {}, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    alert("Application submitted!");
+    setApplication({ appliedAt: new Date().toISOString() });
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
+
+const handleWithdrawApplication = async () => {
+  if (!window.confirm("Withdraw your admin application?")) return;
+  try {
+    const token = localStorage.getItem("token");
+    await axios.delete("http://localhost:5000/api/admin/apply", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    alert("Application withdrawn.");
+    setApplication(null);
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
+
+
 /////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -276,6 +323,47 @@ const fetchSavedPosts = async () => {
          <p>rating: {user?.rating ?? 1} / 5 </p>  {/* <!-- ⭐⭐⭐☆☆this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
       </div>
     </div>
+
+    {/* i'll put applicats here and see if i can find a better place when i can see again....deal? */}
+    {user?.authorityLevel === "user" && (user?.rating ?? 1) >= 3.5 && (
+  <div style={{ margin: "16px 0", padding: "14px", background: "rgba(100,118,175,0.15)", borderRadius: "10px" }}>
+    {!application ? (
+      <>
+        <p style={{ margin: "0 0 10px", fontSize: "14px", opacity: 0.8 }}>
+          🛡️ Your rating qualifies you to apply for an admin role.
+        </p>
+        <button onClick={handleApplyForAdmin} style={{
+          padding: "8px 18px", borderRadius: "8px", background: "#6476af",
+          border: "none", color: "white", cursor: "pointer"
+        }}>
+          Apply for Admin
+        </button>
+      </>
+    ) : (() => {
+      const hoursSince = (Date.now() - new Date(application.appliedAt).getTime()) / (1000 * 60 * 60);
+      const canWithdraw = hoursSince < 2;
+      return (
+        <div>
+          <p style={{ margin: "0 0 6px", fontSize: "14px", color: "#27ae60" }}>
+            ✅ Application submitted — pending superadmin review.
+          </p>
+          {canWithdraw ? (
+            <button onClick={handleWithdrawApplication} style={{
+              padding: "6px 14px", borderRadius: "8px", background: "#c0392b",
+              border: "none", color: "white", cursor: "pointer", fontSize: "13px"
+            }}>
+              Withdraw Application
+            </button>
+          ) : (
+            <small style={{ opacity: 0.5 }}>
+              Withdrawal window passed. Contact a superadmin to remove your application.
+            </small>
+          )}
+        </div>
+      );
+    })()}
+  </div>
+)}
 {/* 
     <!-- STATS --> */}
     <div className="stats">

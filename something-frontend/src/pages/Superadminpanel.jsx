@@ -34,6 +34,12 @@ export default function SuperAdminPanel() {
 
   const headers = { Authorization: `Bearer ${token}` };
 
+
+  const [applications, setApplications] = useState([]);
+  const [rejectingAppId, setRejectingAppId] = useState(null);
+const [rejectAppReason, setRejectAppReason] = useState("");
+
+
   useEffect(() => {
     if (currentUser?.authorityLevel !== "superadmin") {
       navigate("/dashboard");
@@ -41,10 +47,10 @@ export default function SuperAdminPanel() {
   }, []);
 
   useEffect(() => {
-    if (activeTab === "stats") fetchStats();
-    if (activeTab === "logs") fetchLogs();
-    if (activeTab === "admins") fetchAllUsers();
-  }, [activeTab]);
+  if (activeTab === "stats") fetchStats();
+  if (activeTab === "logs") fetchLogs();
+  if (activeTab === "admins") fetchApplications();
+}, [activeTab]);
 
 
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -135,6 +141,25 @@ export default function SuperAdminPanel() {
     { id: "logs", label: "📋 Platform Logs" },
   ];
 
+  //aplicats
+  const fetchApplications = async () => {
+  try {
+    const res = await axios.get(`${API}/applications`, { headers });
+    setApplications(res.data);
+  } catch (err) { console.error(err); }
+};
+
+
+const handleRejectApplication = async (userId) => {
+  if (!rejectAppReason.trim()) return alert("Please enter a rejection reason.");
+  try {
+    await axios.post(`${API}/applications/reject`, { userId, reason: rejectAppReason }, { headers });
+    alert("Application rejected.");
+    setRejectingAppId(null);
+    setRejectAppReason("");
+    fetchApplications();
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
 
   //////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,106 +217,97 @@ export default function SuperAdminPanel() {
         </div>
       )}
 
-      {/* ── ADMIN MANAGEMENT TAB ── */}
-      {activeTab === "admins" && (
-        <div>
-          <h3 style={{ marginBottom: "16px" }}>Admin Management</h3>
+{/* admin tab for only aplicats */}
+     {activeTab === "admins" && (
+  <div>
+    <h3 style={{ marginBottom: "16px" }}>Admin Applications</h3>
 
-          <div style={{ display: "flex", gap: "10px", marginBottom: "16px" }}>
-            <input
-              type="text" placeholder="Search users..."
-              value={adminSearch} onChange={(e) => setAdminSearch(e.target.value)}
-              style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white" }}
-            />
-            <button onClick={fetchAllUsers} style={btn()}>Search</button>
-          </div>
+    {applications.length === 0 ? (
+      <p style={{ opacity: 0.5 }}>No pending applications.</p>
+    ) : (
+      applications.map(app => {
+        const isRejecting = rejectingAppId === app.userId;
+        const isUpgrading = upgradingId === app.userId;
 
-          {allUsers.length === 0 ? <p style={{ opacity: 0.5 }}>No users found.</p> : (
-            allUsers.map(user => {
-              const isSuspended = user.suspendedUntil && new Date(user.suspendedUntil) > new Date();
-              const isUpgrading = upgradingId === user.id;
-
-              return (
-                <div key={user.id} style={card}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: isUpgrading ? "12px" : "0" }}>
-                    <img src={user.profilePic || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-                        <strong>@{user.username}</strong>
-                        <span style={badge("#6476af")}>{user.role}</span>
-                        {user.authorityLevel !== "user" && <span style={badge("#4a3f6b")}>{user.authorityLevel}</span>}
-                        {isSuspended && <span style={badge("#c0392b")}>suspended</span>}
-                      </div>
-                      <small style={{ opacity: 0.5 }}>
-                        {user.email} • rating: {user.rating ?? 1}/5 • violations: {user.violationCount || 0}
-                      </small>
-                      {user.permissions?.length > 0 && (
-                        <small style={{ display: "block", opacity: 0.5, marginTop: "2px" }}>
-                          Permissions: {user.permissions.join(", ")}
-                        </small>
-                      )}
-                    </div>
-
-                    {/* action buttons */}
-                    <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
-                      {user.authorityLevel === "user" && (
-                        <button onClick={() => { setUpgradingId(user.id); setSelectedPermissions([]); }} style={btn("#f39c12")}>
-                          🛡️ Make Admin
-                        </button>
-                      )}
-                      {user.authorityLevel === "admin" && (
-                        <>
-                          <button onClick={() => { setUpgradingId(user.id); setSelectedPermissions(user.permissions || []); }} style={btn("#f39c12")}>
-                            ✏️ Edit Permissions
-                          </button>
-                          <button onClick={() => handleRemoveAdmin(user.id)} style={btn("#c0392b")}>
-                             Remove Admin
-                          </button>
-                          <button onClick={() => handleUpgradeToSuperAdmin(user.id)} style={btn("#8e44ad")}>
-                            ⚡ Make SuperAdmin
-                          </button>
-                        </>
-                      )}
-                      {user.authorityLevel === "user" && (
-                        <button onClick={() => handleDeleteAccount(user.id, user.username)} style={btn("#7f0000")}>
-                          🗑️ Delete Account
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* permission picker */}
-                  {isUpgrading && (
-                    <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
-                      <p style={{ margin: "0 0 10px", fontSize: "13px", opacity: 0.7 }}>Select permissions:</p>
-                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
-                        {PERMISSIONS.map(p => (
-                          <label key={p.key} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px" }}>
-                            <input
-                              type="checkbox"
-                              checked={selectedPermissions.includes(p.key)}
-                              onChange={() => togglePermission(p.key)}
-                            />
-                            {p.label}
-                          </label>
-                        ))}
-                      </div>
-                      <div style={{ display: "flex", gap: "8px" }}>
-                        <button onClick={() => handleUpgradeAdmin(user.id)} style={btn("#27ae60")}>
-                           Confirm
-                        </button>
-                        <button onClick={() => { setUpgradingId(null); setSelectedPermissions([]); }} style={btn("rgba(255,255,255,0.1)")}>
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  )}
+        return (
+          <div key={app.userId} style={card}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: isUpgrading || isRejecting ? "12px" : "0" }}>
+              
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                  <strong>@{app.username}</strong>
+                  <span style={badge("#6476af")}>applicant</span>
+                  <span style={badge("#f39c12")}>⭐ {app.rating}/5</span>
                 </div>
-              );
-            })
-          )}
-        </div>
-      )}
+                <small style={{ opacity: 0.5 }}>
+                  {app.email} • Applied {new Date(app.appliedAt).toLocaleString()}
+                </small>
+              </div>
+
+              <div style={{ display: "flex", gap: "6px" }}>
+                <button onClick={() => { setUpgradingId(app.userId); setSelectedPermissions([]); }} style={btn("#f39c12")}>
+                  🛡️ Accept
+                </button>
+                <button onClick={() => { setRejectingAppId(app.userId); setRejectAppReason(""); }} style={btn("#c0392b")}>
+                  ✕ Reject
+                </button>
+              </div>
+            </div>
+
+            {/* permission picker on accept */}
+            {isUpgrading && (
+              <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
+                <p style={{ margin: "0 0 10px", fontSize: "13px", opacity: 0.7 }}>Select permissions:</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+                  {PERMISSIONS.map(p => (
+                    <label key={p.key} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px" }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedPermissions.includes(p.key)}
+                        onChange={() => togglePermission(p.key)}
+                      />
+                      {p.label}
+                    </label>
+                  ))}
+                </div>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button onClick={() => handleUpgradeAdmin(app.userId)} style={btn("#27ae60")}>
+                    Confirm
+                  </button>
+                  <button onClick={() => { setUpgradingId(null); setSelectedPermissions([]); }} style={btn("rgba(255,255,255,0.1)")}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* reason input on reject */}
+            {isRejecting && (
+              <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
+                <input
+                  type="text"
+                  placeholder="Reason for rejection..."
+                  value={rejectAppReason}
+                  onChange={(e) => setRejectAppReason(e.target.value)}
+                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }}
+                />
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button onClick={() => handleRejectApplication(app.userId)} style={btn("#c0392b")}>
+                    Confirm Reject
+                  </button>
+                  <button onClick={() => { setRejectingAppId(null); setRejectAppReason(""); }} style={btn("rgba(255,255,255,0.1)")}>
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        );
+      })
+    )}
+  </div>
+)}
 
       {/* ── LOGS TAB ── */}
       {activeTab === "logs" && (

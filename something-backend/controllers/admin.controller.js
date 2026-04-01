@@ -12,7 +12,15 @@ const PERMISSIONS = require("../config/permissions");
 
 const hasPermission = require("../utils/hasPermission");
 
-const { sendResetEmail, sendProfessorRejectionEmail, sendProfessorVerificationEmail } = require("../config/email");
+const { sendResetEmail,
+   sendProfessorRejectionEmail,
+   sendProfessorVerificationEmail,
+  sendAdminApplicationAcceptedEmail,
+  sendAdminApplicationRejectedEmail
+ } = require("../config/email");
+const applicationsPath = path.join(__dirname, "../data/adminApplications.json");
+const readApplications = () => JSON.parse(fs.readFileSync(applicationsPath, "utf8"));
+const writeApplications = (data) => fs.writeFileSync(applicationsPath, JSON.stringify(data));
 
 // helpers 
 
@@ -283,7 +291,7 @@ const approveResource = (req, res) => {
 
 // SUPERADMIN ONLY 
 
-const upgradeToAdmin = (req, res) => {
+const upgradeToAdmin = async (req, res) => {
   if (req.user.authorityLevel !== "superadmin") {
     return res.status(403).json({ message: "Only superadmin can upgrade users" });
   }
@@ -303,6 +311,16 @@ const upgradeToAdmin = (req, res) => {
       date: new Date().toISOString()
     }]
   });
+
+  // remove application
+  const applications = readApplications();
+  writeApplications(applications.filter(a => a.userId !== userId));
+
+  try {
+    await sendAdminApplicationAcceptedEmail(user.email, user.username);
+  } catch (err) {
+    console.error("Failed to send acceptance email:", err);
+  }
 
   addLog(req.user.id, req.user.username, "upgrade_to_admin", userId, `Upgraded @${user.username} to admin`);
   res.json({ message: "User upgraded to admin" });
@@ -563,6 +581,88 @@ const validateOtherInput = (req, res) => {
   res.json({ message: `Input ${approved ? "approved" : "rejected"}` });
 };
 
+
+// ADMIN APPLICATIONS
+
+const applyForAdmin= (req, res) => {
+  const user = userRepo.findById(req.user.id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  if ((user.rating ?? 1) < 3.5) {
+    return res.status(403).json({ message: "Rating too low to apply" });
+  }
+
+  if (user.authorityLevel !== "user") {
+    return res.status(400).json({ message: "Already an admin" });
+  }
+
+  const applications = readApplications();
+
+  const existing = applications.find(a => a.userId === user.id);
+  if (existing) {
+    return res.status(400).json({ message: "You already have a pending application" });
+  }
+
+  applications.push({
+    userId: user.id,
+    username: user.username,
+    email: user.email,
+    rating: user.rating ?? 1,
+    appliedAt: new Date().toISOString()
+  });
+
+  writeApplications(applications);
+  res.json({ message: "Application submitted!" });
+};
+
+const withdrawApplication = (req, res) => {
+  const applications = readApplications();
+  const app = applications.find(a => a.userId === req.user.id);
+
+  if (!app) return res.status(404).json({ message: "No application found" });
+
+  const hoursSince = (Date.now() - new Date(app.appliedAt).getTime()) / (1000 * 60 * 60);
+  if (hoursSince > 2) {
+    return res.status(403).json({ 
+      message: "Withdrawal window has passed. Please contact a superadmin to remove your application." 
+    });
+  }
+
+  writeApplications(applications.filter(a => a.userId !== req.user.id));
+  res.json({ message: "Application withdrawn." });
+};
+
+const getApplications = (req, res) => {
+  if (req.user.authorityLevel !== "superadmin") {
+    return res.status(403).json({ message: "Only superadmin can view applications" });
+  }
+  res.json(readApplications());
+};
+
+const rejectApplication = async (req, res) => {
+  if (req.user.authorityLevel !== "superadmin") {
+    return res.status(403).json({ message: "Only superadmin can reject applications" });
+  }
+
+  const { userId, reason } = req.body;
+  const applications = readApplications();
+  const app = applications.find(a => a.userId === userId);
+  if (!app) return res.status(404).json({ message: "Application not found" });
+
+  writeApplications(applications.filter(a => a.userId !== userId));
+
+  const user = userRepo.findById(userId);
+  try {
+    await sendAdminApplicationRejectedEmail(user.email, user.username, reason);
+  } catch (err) {
+    console.error("Failed to send rejection email:", err);
+  }
+
+  addLog(req.user.id, req.user.username, "reject_admin_application", userId, 
+    `Rejected admin application from @${app.username}: ${reason}`);
+  res.json({ message: "Application rejected." });
+};
+
 module.exports = {
   getAllUsers,
   suspendUser,
@@ -589,4 +689,8 @@ module.exports = {
   validateOtherInput,
   restoreContent,
   getHiddenContent,
+  applyForAdmin,
+  withdrawApplication,
+  getApplications,
+  rejectApplication,
 };
