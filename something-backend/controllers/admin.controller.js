@@ -11,12 +11,17 @@ const announcementsPath = path.join(__dirname, "../data/announcements.json");
 const PERMISSIONS = require("../config/permissions");
 
 const hasPermission = require("../utils/hasPermission");
+const roomRequestsPath = path.join(__dirname, "../data/roomRequests.json");
+const readRoomRequests = () => JSON.parse(fs.readFileSync(roomRequestsPath, "utf8"));
+const writeRoomRequests = (data) => fs.writeFileSync(roomRequestsPath, JSON.stringify(data));
 
 const { sendResetEmail,
    sendProfessorRejectionEmail,
    sendProfessorVerificationEmail,
   sendAdminApplicationAcceptedEmail,
-  sendAdminApplicationRejectedEmail
+  sendAdminApplicationRejectedEmail,
+  sendRoomRequestApprovedEmail,
+  sendRoomRequestRejectedEmail,
  } = require("../config/email");
 const applicationsPath = path.join(__dirname, "../data/adminApplications.json");
 const readApplications = () => JSON.parse(fs.readFileSync(applicationsPath, "utf8"));
@@ -663,6 +668,132 @@ const rejectApplication = async (req, res) => {
   res.json({ message: "Application rejected." });
 };
 
+
+// ROOM REQUESTS...KILL ME PLS
+
+const requestSubjectRoom = (req, res) => {
+  const user = userRepo.findById(req.user.id);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const { major, subject } = req.body;
+  if (!major || !subject) return res.status(400).json({ message: "Major and subject are required" });
+
+  // make sure major belongs to user
+  if (!user.majors?.includes(major)) {
+    return res.status(403).json({ message: "You can only request rooms for your own majors" });
+  }
+
+  const requests = readRoomRequests();
+
+  // check for duplicate pending request
+  const duplicate = requests.find(
+    r => r.major === major && 
+    r.subject.toLowerCase() === subject.toLowerCase() && 
+    r.status === "pending"
+  );
+
+  if (duplicate) {
+    // add user to notifyUsers if not already there
+    if (!duplicate.notifyUsers.includes(req.user.id)) {
+      duplicate.notifyUsers.push(req.user.id);
+      writeRoomRequests(requests);
+    }
+    return res.status(200).json({ 
+      message: "A request for this room is already pending. You'll be notified when it's approved." 
+    });
+  }
+
+  requests.push({
+    id: Date.now().toString(),
+    userId: req.user.id,
+    username: req.user.username,
+    email: user.email,
+    major,
+    subject,
+    status: "pending",
+    requestedAt: new Date().toISOString(),
+    notifyUsers: [req.user.id] // everyone to notify on approval
+  });
+
+  writeRoomRequests(requests);
+  res.json({ message: "Room request submitted! You'll be notified when it's reviewed." });
+};
+
+const getRoomRequests = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  if (!hasPermission(admin, PERMISSIONS.MANAGE_ROOMS)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+  res.json(readRoomRequests().filter(r => r.status === "pending"));
+};
+
+const handleRoomRequest = async (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  if (!hasPermission(admin, PERMISSIONS.MANAGE_ROOMS)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+
+  const { requestId, approved, reason } = req.body;
+  const requests = readRoomRequests();
+  const request = requests.find(r => r.id === requestId);
+  if (!request) return res.status(404).json({ message: "Request not found" });
+
+  request.status = approved ? "approved" : "rejected";
+  writeRoomRequests(requests);
+
+  if (approved) {
+    // create the room
+    const rooms = roomRepo.getAllRooms();
+    const newRoom = {
+      id: Date.now().toString(),
+      name: request.subject,
+      type: "subject",
+      major: request.major,
+      members: request.notifyUsers,
+      createdAt: new Date().toISOString()
+    };
+    rooms.push(newRoom);
+    roomRepo.writeRooms(rooms);
+
+    // add room to each notified user
+    request.notifyUsers.forEach(userId => {
+      const u = userRepo.findById(userId);
+      if (u) {
+        userRepo.updateUser(userId, {
+          rooms: [...(u.rooms || []), newRoom.id]
+        });
+      }
+    });
+
+    // send approval emails to all notifyUsers
+    for (const userId of request.notifyUsers) {
+      const u = userRepo.findById(userId);
+      if (u) {
+        try {
+          await sendRoomRequestApprovedEmail(u.email, u.username, request.subject, request.major);
+        } catch (err) {
+          console.error("Failed to send approval email:", err);
+        }
+      }
+    }
+
+    addLog(req.user.id, req.user.username, "approve_room_request", requestId,
+      `Approved room "${request.subject}" under ${request.major}`);
+  } else {
+    // rejection email only to original requester
+    try {
+      await sendRoomRequestRejectedEmail(request.email, request.username, request.subject, request.major, reason);
+    } catch (err) {
+      console.error("Failed to send rejection email:", err);
+    }
+
+    addLog(req.user.id, req.user.username, "reject_room_request", requestId,
+      `Rejected room "${request.subject}" under ${request.major}: ${reason}`);
+  }
+
+  res.json({ message: approved ? "Room created and users notified." : "Request rejected." });
+};
+
 module.exports = {
   getAllUsers,
   suspendUser,
@@ -693,4 +824,9 @@ module.exports = {
   withdrawApplication,
   getApplications,
   rejectApplication,
+  requestSubjectRoom,
+  getRoomRequests,
+  handleRoomRequest,
 };
+
+//this one is getting humangasoures....this is bad but not so bad...it has all admin shit which is bad...

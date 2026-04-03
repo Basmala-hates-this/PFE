@@ -62,6 +62,10 @@ router.get("/announcements", adminController.getAnnouncements);
 router.post("/announcements", protect, adminController.createAnnouncement);
 router.delete("/announcements/:id", protect, adminController.deleteAnnouncement);
 
+//subject room request
+router.post("/room-requests", protect, adminController.getRoomRequests);
+router.get("/room-requests", protect, adminController.getRoomRequests);
+router.post("/room-requests/handle", protect, adminController.handleRoomRequest);
 
 
 module.exports = router;

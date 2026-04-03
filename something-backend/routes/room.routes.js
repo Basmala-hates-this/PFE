@@ -3,6 +3,7 @@ const router = express.Router();
 const roomController = require("../controllers/room.controller");
 const protect = require("../middleware/authMiddleware");
 const { guestBlock } = require("../middleware/authMiddleware");
+const adminController= require("../controllers/admin.controller")
 
 
 
@@ -20,6 +21,9 @@ router.delete("/subject-rooms/:roomId/leave", protect, guestBlock, roomControlle
 
 
 router.post("/subject-rooms/create", protect, guestBlock, roomController.createSubjectRoom);
+
+//subejct room request
+router.post("/subject-rooms/request", protect, adminController.requestSubjectRoom);
 
 
 router.delete("/private/:roomId", protect, guestBlock, roomController.deletePrivateRoom);

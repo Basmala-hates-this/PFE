@@ -43,6 +43,12 @@ export default function AdminPanel() {
   const [pendingResources, setPendingResources] = useState([]);
 const [hiddenContent, setHiddenContent] = useState([]);
 const [otherInputs, setOtherInputs] = useState([]);
+
+const [roomRequests, setRoomRequests] = useState([]);
+const [rejectingRoomId, setRejectingRoomId] = useState(null);
+const [rejectRoomReason, setRejectRoomReason] = useState("");
+
+const [roomRequestLoading, setRoomRequestLoading] = useState(null); // stores the requestId being processed
  //////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +61,7 @@ const [otherInputs, setOtherInputs] = useState([]);
   }, []);
  
   
-  useEffect(() => {
+ useEffect(() => {
   if (activeTab === "stats") fetchStats();
   if (activeTab === "users") fetchUsers();
   if (activeTab === "professors") fetchPendingProfessors();
@@ -64,8 +70,8 @@ const [otherInputs, setOtherInputs] = useState([]);
   if (activeTab === "hidden") fetchHiddenContent();
   if (activeTab === "other") fetchOtherInputs();
   if (activeTab === "announcements") fetchAnnouncements();
+  if (activeTab === "rooms") fetchRoomRequests();
 }, [activeTab]);
-
 
   ////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
@@ -207,15 +213,34 @@ const handleValidateOtherInput = async (userId, approved) => {
   const badge = (color) => ({ background: color, color: "white", padding: "2px 8px", borderRadius: "10px", fontSize: "11px" });
   const btn = (color = "#6476af") => ({ padding: "6px 14px", borderRadius: "6px", background: color, border: "none", color: "white", cursor: "pointer", fontSize: "12px" });
  
-  const tabs = [
+//   const tabs = [
+//   { id: "stats", label: "📊 Stats" },
+//   { id: "users", label: "👥 Users" },
+//   { id: "professors", label: "🎓 Professors" },
+//   { id: "reports", label: "🚩 Reports" },
+//   { id: "resources", label: "📦 Resources" },
+//   { id: "hidden", label: "🙈 Hidden" },
+//   { id: "other", label: "🔤 Other Inputs" },
+//   { id: "announcements", label: "📢 Announcements" },
+// ];
+//this mess so only realated tabs show based on permissions
+const tabs = [
   { id: "stats", label: "📊 Stats" },
-  { id: "users", label: "👥 Users" },
-  { id: "professors", label: "🎓 Professors" },
-  { id: "reports", label: "🚩 Reports" },
-  { id: "resources", label: "📦 Resources" },
-  { id: "hidden", label: "🙈 Hidden" },
-  { id: "other", label: "🔤 Other Inputs" },
   { id: "announcements", label: "📢 Announcements" },
+  ...(isSuperAdmin || currentUser?.permissions?.includes("SUSPEND_USERS")
+    ? [{ id: "users", label: "👥 Users" }] : []),
+  ...(isSuperAdmin || currentUser?.permissions?.includes("VERIFY_PROFESSORS")
+    ? [{ id: "professors", label: "🎓 Professors" }] : []),
+  ...(isSuperAdmin || currentUser?.permissions?.includes("HANDLE_REPORTS")
+    ? [{ id: "reports", label: "🚩 Reports" }] : []),
+  ...(isSuperAdmin || currentUser?.permissions?.includes("APPROVE_RESOURCES")
+    ? [{ id: "resources", label: "📦 Resources" }] : []),
+  ...(isSuperAdmin || currentUser?.permissions?.includes("MODERATE_CONTENT")
+    ? [{ id: "hidden", label: "🙈 Hidden" }] : []),
+  ...(isSuperAdmin || currentUser?.permissions?.includes("VALIDATE_OTHER")
+    ? [{ id: "other", label: "🔤 Other Inputs" }] : []),
+  ...(isSuperAdmin || currentUser?.permissions?.includes("MANAGE_ROOMS")
+    ? [{ id: "rooms", label: "🏠Subject Rooms Requests" }] : []),
 ];
 
 
@@ -277,6 +302,33 @@ const fetchOtherInputs = async () => {
     setOtherInputs(res.data);
   } catch (err) { console.error(err); }
 };
+
+
+const fetchRoomRequests = async () => {
+  try {
+    const res = await axios.get(`${API}/room-requests`, { headers });
+    setRoomRequests(res.data);
+  } catch (err) { console.error(err); }
+};
+
+const handleRoomRequest = async (requestId, approved) => {
+  if (!approved && !rejectRoomReason.trim()) return alert("Please enter a rejection reason.");
+  setRoomRequestLoading(requestId);
+  try {
+    await axios.post(`${API}/room-requests/handle`, 
+      { requestId, approved, reason: rejectRoomReason }, 
+      { headers }
+    );
+    setRejectingRoomId(null);
+    setRejectRoomReason("");
+    fetchRoomRequests();
+  } catch (err) { 
+    alert(err.response?.data?.message || "Something went wrong."); 
+  } finally {
+    setRoomRequestLoading(null);
+  }
+};
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -686,6 +738,74 @@ const fetchOtherInputs = async () => {
           )}
         </div>
       )}
+
+      {/* ── REQUEST SUBJECT ROOMS TAB ── */}
+
+      {activeTab === "rooms" && (
+  <div>
+    <h3 style={{ marginBottom: "16px" }}>Subject Room Requests</h3>
+    {roomRequests.length === 0 ? (
+      <p style={{ opacity: 0.5 }}>No pending room requests.</p>
+    ) : (
+      roomRequests.map(req => (
+        <div key={req.id} style={card}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+            <strong>@{req.username}</strong>
+            <span style={badge("#6476af")}>{req.major}</span>
+            <small style={{ marginLeft: "auto", opacity: 0.5 }}>
+              {new Date(req.requestedAt).toLocaleDateString()}
+            </small>
+          </div>
+
+          <p style={{ margin: "0 0 4px", fontSize: "14px" }}>
+            Subject: <strong>{req.subject}</strong>
+          </p>
+          <small style={{ opacity: 0.5, display: "block", marginBottom: "10px" }}>
+            {req.notifyUsers.length} user(s) waiting on this room
+          </small>
+
+          {rejectingRoomId === req.id ? (
+            <div>
+              <input
+                type="text"
+                placeholder="Reason for rejection..."
+                value={rejectRoomReason}
+                onChange={(e) => setRejectRoomReason(e.target.value)}
+                style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }}
+              />
+              <div style={{ display: "flex", gap: "8px" }}>
+                <button onClick={() => handleRoomRequest(req.id, false)} style={btn("#c0392b")}>
+                  Confirm Reject
+                </button>
+                <button onClick={() => { setRejectingRoomId(null); setRejectRoomReason(""); }} style={btn("rgba(255,255,255,0.1)")}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ display: "flex", gap: "8px" }}>
+              
+                <button 
+                    onClick={() => handleRoomRequest(req.id, true)} 
+                     disabled={roomRequestLoading === req.id}
+                     style={btn(roomRequestLoading === req.id ? "#1a6b40" : "#27ae60")}>
+                     {roomRequestLoading === req.id ? "Processing..." : "✅ Approve"}
+                      </button>
+                     <button 
+                     onClick={() => { setRejectingRoomId(req.id); setRejectRoomReason(""); }} 
+                     disabled={roomRequestLoading === req.id}
+                     style={btn("#c0392b")}>
+                      ❌ Reject
+                        </button>
+             </div>
+             
+           
+          )}
+        </div>
+      ))
+    )}
+  </div>
+)}
 
       {drillDown && (
   <div className="modal-overlay" onClick={() => setDrillDown(null)}>

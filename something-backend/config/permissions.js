@@ -9,4 +9,7 @@ const PERMISSIONS = {
   DELETE_INACTIVE:    "DELETE_INACTIVE",
 };
 
+//do u think this is al the perissions that i need?
+//meh starting point that is...i need to remember that this is a damn prototype...
+//and spare my self the pain of perfectionism......
 module.exports = PERMISSIONS;

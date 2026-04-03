@@ -93,6 +93,17 @@ const [reportTarget, setReportTarget] = useState(null);
 const [announcements, setAnnouncements] = useState([]);
 const [showAnnouncements, setShowAnnouncements] = useState(false);
 
+//subject room requests....
+const [requestSubject, setRequestSubject] = useState("");
+const [requestMajor, setRequestMajor] = useState("");
+const [requestFeedback, setRequestFeedback] = useState("");
+const [requestLoading, setRequestLoading] = useState(false);
+
+
+/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+
   //
   // If user skipped info/register, send them back
 // +for guests
@@ -228,10 +239,16 @@ useEffect(() => {
   };
 
 
+  
+
 useEffect(() => {
  
   fetchRoomsAndPosts();
 }, [selectedRooms]);
+
+////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////
 
 //ze function to(can i call it function? or component? this entire page is a compenent though...anyhow finish the comment)create mock
 const handleMockPost = () => {
@@ -622,6 +639,27 @@ const fetchAnnouncements = async () => {
   }
 };
 
+
+
+const handleRequestSubjectRoom = async () => {
+  if (!requestMajor || !requestSubject.trim()) return;
+  setRequestLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      "http://localhost:5000/api/rooms/subject-rooms/request",
+      { major: requestMajor, subject: requestSubject.trim() },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setRequestFeedback(res.data.message);
+    setRequestSubject("");
+    setRequestMajor("");
+  } catch (err) {
+    setRequestFeedback(err.response?.data?.message || "Something went wrong.");
+  } finally {
+    setRequestLoading(false);
+  }
+};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1125,7 +1163,53 @@ const fetchAnnouncements = async () => {
         ))
       )}
 
+
+       {/* request a subject room */}
+<div style={{ marginTop: "24px", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "16px" }}>
+  <h4 style={{ margin: "0 0 12px", opacity: 0.7, fontSize: "13px" }}>
+    Can't find your subject? Request it:
+  </h4>
+
+  {/* major dropdown — only user's own majors */}
+  <select
+    value={requestMajor}
+    onChange={(e) => { setRequestMajor(e.target.value); setRequestFeedback(""); }}
+    style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "#252b45", color: "white", marginBottom: "8px" }}
+  >
+    <option value="">Select your major...</option>
+    {user?.majors?.map(m => (
+      <option key={m} value={m}>{m}</option>
+    ))}
+  </select>
+
+  <input
+    type="text"
+    placeholder="Subject name..."
+    value={requestSubject}
+    onChange={(e) => { setRequestSubject(e.target.value); setRequestFeedback(""); }}
+    style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }}
+  />
+
+  {requestFeedback && (
+    <p style={{ 
+      margin: "0 0 8px", fontSize: "13px",
+      color: requestFeedback.includes("notified") || requestFeedback.includes("submitted") ? "#27ae60" : "#e74c3c" 
+    }}>
+      {requestFeedback}
+    </p>
+  )}
+
+  <button
+    onClick={handleRequestSubjectRoom}
+    disabled={!requestMajor || !requestSubject.trim() || requestLoading}
+    style={{ padding: "8px 16px", borderRadius: "6px", background: "#6476af", border: "none", color: "white", cursor: "pointer", fontSize: "13px", opacity: (!requestMajor || !requestSubject.trim()) ? 0.5 : 1 }}
+  >
+    {requestLoading ? "Sending..." : "Send Request"}
+  </button>
+</div>
+
     </div>
+   
   </div>
 )}
 

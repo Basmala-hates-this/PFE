@@ -115,8 +115,38 @@ const sendAdminApplicationRejectedEmail = async (to, username, reason) => {
   });
 };
 
-//do i need more creative emails with more personality?....or unhinged?....KEEP THOSE THOUGHTS AWAY
+const sendRoomRequestApprovedEmail = async (to, username, subject, major) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject: "Your Room Request Was Approved 🎉",
+    html: `
+      <h2>Hello @${username}!</h2>
+      <p>Your request for a subject room has been approved.</p>
+      <p><strong>Subject:</strong> ${subject}<br/>
+      <strong>Major:</strong> ${major}</p>
+      <p>You've been added to the room. Head to Browse Rooms to find it!</p>
+    `
+  });
+};
 
+const sendRoomRequestRejectedEmail = async (to, username, subject, major, reason) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to,
+    subject: "Your Room Request Was Reviewed",
+    html: `
+      <h2>Hello @${username},</h2>
+      <p>Your request for the following subject room was not approved:</p>
+      <p><strong>Subject:</strong> ${subject}<br/>
+      <strong>Major:</strong> ${major}</p>
+      <p><strong>Reason:</strong> ${reason}</p>
+    `
+  });
+};
+
+//do i need more creative emails with more personality?....or unhinged?....KEEP THOSE THOUGHTS AWAY
+//what i know is i should have went with smaller damn names.....
 module.exports = {sendResetEmail,
   sendFollowEmail,
   sendRoomInviteEmail,
@@ -124,5 +154,7 @@ module.exports = {sendResetEmail,
   sendProfessorVerificationEmail,
   sendAdminApplicationAcceptedEmail,
   sendAdminApplicationRejectedEmail,
+  sendRoomRequestApprovedEmail,
+  sendRoomRequestRejectedEmail,
 
 }
