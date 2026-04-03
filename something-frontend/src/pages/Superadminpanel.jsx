@@ -40,6 +40,13 @@ export default function SuperAdminPanel() {
 const [rejectAppReason, setRejectAppReason] = useState("");
 
 
+const [selectedRooms, setSelectedRooms] = useState([]);
+const [allRooms, setAllRooms] = useState([]);
+
+//////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////
+
   useEffect(() => {
     if (currentUser?.authorityLevel !== "superadmin") {
       navigate("/dashboard");
@@ -49,7 +56,7 @@ const [rejectAppReason, setRejectAppReason] = useState("");
   useEffect(() => {
   if (activeTab === "stats") fetchStats();
   if (activeTab === "logs") fetchLogs();
-  if (activeTab === "admins") fetchApplications();
+  if (activeTab === "admins")  { fetchApplications(); fetchAllRooms(); }
 }, [activeTab]);
 
 
@@ -86,6 +93,9 @@ const [rejectAppReason, setRejectAppReason] = useState("");
       setUpgradingId(null);
       setSelectedPermissions([]);
       fetchAllUsers();
+      setSelectedRooms([]);
+      fetchApplications();
+      fetchAllRooms();
     } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
   };
 
@@ -159,6 +169,14 @@ const handleRejectApplication = async (userId) => {
     setRejectAppReason("");
     fetchApplications();
   } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
+
+
+const fetchAllRooms = async () => {
+  try {
+    const res = await axios.get(`${API}/rooms-moderation`, { headers });
+    setAllRooms(res.data);
+  } catch (err) { console.error(err); }
 };
 
   //////////////////////////////////////////////////////////////////////////////////////////////
@@ -255,31 +273,64 @@ const handleRejectApplication = async (userId) => {
             </div>
 
             {/* permission picker on accept */}
-            {isUpgrading && (
-              <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
-                <p style={{ margin: "0 0 10px", fontSize: "13px", opacity: 0.7 }}>Select permissions:</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
-                  {PERMISSIONS.map(p => (
-                    <label key={p.key} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px" }}>
-                      <input
-                        type="checkbox"
-                        checked={selectedPermissions.includes(p.key)}
-                        onChange={() => togglePermission(p.key)}
-                      />
-                      {p.label}
-                    </label>
-                  ))}
-                </div>
-                <div style={{ display: "flex", gap: "8px" }}>
-                  <button onClick={() => handleUpgradeAdmin(app.userId)} style={btn("#27ae60")}>
-                    Confirm
-                  </button>
-                  <button onClick={() => { setUpgradingId(null); setSelectedPermissions([]); }} style={btn("rgba(255,255,255,0.1)")}>
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
+           {isUpgrading && (
+  <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
+    <p style={{ margin: "0 0 10px", fontSize: "13px", opacity: 0.7 }}>Select permissions:</p>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+      {PERMISSIONS.map(p => (
+        <label key={p.key} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px" }}>
+          <input
+            type="checkbox"
+            checked={selectedPermissions.includes(p.key)}
+            onChange={() => togglePermission(p.key)}
+          />
+          {p.label}
+        </label>
+      ))}
+    </div>
+
+    {/* room assignment — only if MANAGE_ROOMS is checked */}
+    {selectedPermissions.includes("MANAGE_ROOMS") && (
+      <div style={{ marginBottom: "12px" }}>
+        <p style={{ margin: "0 0 8px", fontSize: "13px", opacity: 0.7 }}>
+          Assign rooms to moderate:
+        </p>
+        {allRooms.filter(r => r.type !== "private" && r.type !== "public").length === 0 ? (
+          <small style={{ opacity: 0.5 }}>No rooms available.</small>
+        ) : (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", maxHeight: "150px", overflowY: "auto" }}>
+            {allRooms
+              .filter(r => r.type !== "private" && r.type !== "public")
+              .map(room => (
+                <label key={room.id} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px", background: "rgba(255,255,255,0.05)", padding: "4px 10px", borderRadius: "6px" }}>
+                  <input
+                    type="checkbox"
+                    checked={selectedRooms.includes(room.id)}
+                    onChange={() => setSelectedRooms(prev =>
+                      prev.includes(room.id)
+                        ? prev.filter(id => id !== room.id)
+                        : [...prev, room.id]
+                    )}
+                  />
+                  <span>{room.name}</span>
+                  <small style={{ opacity: 0.5, fontSize: "11px" }}>{room.type}</small>
+                </label>
+              ))}
+          </div>
+        )}
+      </div>
+    )}
+
+    <div style={{ display: "flex", gap: "8px" }}>
+      <button onClick={() => handleUpgradeAdmin(app.userId)} style={btn("#27ae60")}>
+        Confirm
+      </button>
+      <button onClick={() => { setUpgradingId(null); setSelectedPermissions([]); setSelectedRooms([]); }} style={btn("rgba(255,255,255,0.1)")}>
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
 
             {/* reason input on reject */}
             {isRejecting && (

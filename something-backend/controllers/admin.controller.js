@@ -302,7 +302,7 @@ const upgradeToAdmin = async (req, res) => {
   }
 
   const { userId } = req.params;
-  const { permissions } = req.body;
+  const { permissions, assignedRooms } = req.body;
 
   const user = userRepo.findById(userId);
   if (!user) return res.status(404).json({ message: "User not found" });
@@ -310,6 +310,7 @@ const upgradeToAdmin = async (req, res) => {
   userRepo.updateUser(userId, {
     authorityLevel: "admin",
     permissions: permissions || [],
+    assignedRooms: assignedRooms || [], 
     actionHistory: [...(user.actionHistory || []), {
       action: "upgraded_to_admin",
       by: req.user.username,
@@ -794,6 +795,121 @@ const handleRoomRequest = async (req, res) => {
   res.json({ message: approved ? "Room created and users notified." : "Request rejected." });
 };
 
+//room moderation shit face
+// ROOM MODERATION
+
+const getRoomsForAdmin = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  const rooms = roomRepo.getAllRooms();
+
+  if (req.user.authorityLevel === "superadmin") {
+    return res.json(rooms);
+  }
+
+  if (!hasPermission(admin, PERMISSIONS.MANAGE_ROOMS)) {
+    return res.status(403).json({ message: "No permission" });
+  }
+
+  // only return assigned rooms
+  const assignedRooms = rooms.filter(r => 
+    admin.assignedRooms?.includes(r.id)
+  );
+  res.json(assignedRooms);
+};
+
+const suspendFromRoom = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+  
+  if (req.user.authorityLevel !== "superadmin") {
+    if (!hasPermission(admin, PERMISSIONS.MANAGE_ROOMS)) {
+      return res.status(403).json({ message: "No permission" });
+    }
+    // check admin is assigned to this room
+    if (!admin.assignedRooms?.includes(req.body.roomId)) {
+      return res.status(403).json({ message: "You are not assigned to this room" });
+    }
+  }
+
+  const { roomId, userId, days, reason } = req.body;
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  const until = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toISOString();
+  
+  roomRepo.suspendMemberFromRoom(roomId, userId, until, reason);
+
+  // increment room violation count
+  const roomViolations = user.roomViolations || {};
+  roomViolations[roomId] = (roomViolations[roomId] || 0) + 1;
+  
+  userRepo.updateUser(userId, {
+    violationCount: (user.violationCount || 0) + 1,
+    roomViolations,
+    actionHistory: [...(user.actionHistory || []), {
+      action: "room_suspended",
+      roomId,
+      by: req.user.username,
+      reason,
+      until,
+      date: new Date().toISOString()
+    }]
+  });
+
+  addLog(req.user.id, req.user.username, "room_suspend", userId,
+    `Suspended @${user.username} from room ${roomId} for ${days} days: ${reason}`);
+  res.json({ message: `User suspended from room for ${days} days` });
+};
+
+const unsuspendFromRoom = (req, res) => {
+  const admin = userRepo.findById(req.user.id);
+
+  if (req.user.authorityLevel !== "superadmin") {
+    if (!hasPermission(admin, PERMISSIONS.MANAGE_ROOMS)) {
+      return res.status(403).json({ message: "No permission" });
+    }
+    if (!admin.assignedRooms?.includes(req.body.roomId)) {
+      return res.status(403).json({ message: "You are not assigned to this room" });
+    }
+  }
+
+  const { roomId, userId } = req.body;
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  roomRepo.unsuspendMemberFromRoom(roomId, userId);
+
+  userRepo.updateUser(userId, {
+    actionHistory: [...(user.actionHistory || []), {
+      action: "room_unsuspended",
+      roomId,
+      by: req.user.username,
+      date: new Date().toISOString()
+    }]
+  });
+
+  addLog(req.user.id, req.user.username, "room_unsuspend", userId,
+    `Lifted room suspension for @${user.username} in room ${roomId}`);
+  res.json({ message: "Room suspension lifted" });
+};
+
+const deleteRoomAdmin = (req, res) => {
+  if (req.user.authorityLevel !== "superadmin") {
+    return res.status(403).json({ message: "Only superadmin can delete rooms" });
+  }
+
+  const { roomId } = req.params;
+  const room = roomRepo.getRoomById(roomId);
+  if (!room) return res.status(404).json({ message: "Room not found" });
+
+  const rooms = roomRepo.getAllRooms().filter(r => r.id !== roomId);
+  roomRepo.writeRooms(rooms);
+
+  addLog(req.user.id, req.user.username, "delete_room", roomId,
+    `Deleted room "${room.name}"`);
+  res.json({ message: "Room deleted" });
+};
+
+
 module.exports = {
   getAllUsers,
   suspendUser,
@@ -827,6 +943,10 @@ module.exports = {
   requestSubjectRoom,
   getRoomRequests,
   handleRoomRequest,
+  getRoomsForAdmin,
+  suspendFromRoom,
+  unsuspendFromRoom,
+  deleteRoomAdmin,
 };
 
 //this one is getting humangasoures....this is bad but not so bad...it has all admin shit which is bad...

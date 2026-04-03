@@ -158,6 +158,30 @@ const leaveRoom = (roomId, userId) => {
   return { success: true };
 };
 
+const suspendMemberFromRoom = (roomId, userId, until, reason) => {
+  const rooms = readRooms();
+  const room = rooms.find(r => r.id === roomId);
+  if (!room) return null;
+
+  if (!room.suspendedMembers) room.suspendedMembers = [];
+
+  // remove existing suspension if any then add new one
+  room.suspendedMembers = room.suspendedMembers.filter(s => s.userId !== userId);
+  room.suspendedMembers.push({ userId, until, reason });
+
+  writeRooms(rooms);
+  return room;
+};
+
+const unsuspendMemberFromRoom = (roomId, userId) => {
+  const rooms = readRooms();
+  const room = rooms.find(r => r.id === roomId);
+  if (!room) return null;
+
+  room.suspendedMembers = (room.suspendedMembers || []).filter(s => s.userId !== userId);
+  writeRooms(rooms);
+  return room;
+};
 
 module.exports = {
     createRoom,
@@ -173,6 +197,9 @@ module.exports = {
     renameRoom,
     leaveRoom,
     writeRooms,
+    suspendMemberFromRoom,
+    unsuspendMemberFromRoom,
     
 }
+//screw writing function names that actuallu make sense but are ridiculously long...
 

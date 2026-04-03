@@ -49,6 +49,17 @@ const [rejectingRoomId, setRejectingRoomId] = useState(null);
 const [rejectRoomReason, setRejectRoomReason] = useState("");
 
 const [roomRequestLoading, setRoomRequestLoading] = useState(null); // stores the requestId being processed
+
+
+const [moderationRooms, setModerationRooms] = useState([]);
+const [selectedRoom, setSelectedRoom] = useState(null);
+const [roomSuspendingId, setRoomSuspendingId] = useState(null);
+const [roomSuspendDays, setRoomSuspendDays] = useState("");
+const [roomSuspendReason, setRoomSuspendReason] = useState("");
+
+//i want search in room tab...
+const [roomSearch, setRoomSearch] = useState("");
+const [roomTypeFilter, setRoomTypeFilter] = useState("");
  //////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////////////////////////////
@@ -70,7 +81,8 @@ const [roomRequestLoading, setRoomRequestLoading] = useState(null); // stores th
   if (activeTab === "hidden") fetchHiddenContent();
   if (activeTab === "other") fetchOtherInputs();
   if (activeTab === "announcements") fetchAnnouncements();
-  if (activeTab === "rooms") fetchRoomRequests();
+  if (activeTab === "room-requests") fetchRoomRequests();
+  if (activeTab === "rooms") fetchModerationRooms();
 }, [activeTab]);
 
   ////////////////////////////////////////////////////////////////////////////
@@ -240,7 +252,11 @@ const tabs = [
   ...(isSuperAdmin || currentUser?.permissions?.includes("VALIDATE_OTHER")
     ? [{ id: "other", label: "🔤 Other Inputs" }] : []),
   ...(isSuperAdmin || currentUser?.permissions?.includes("MANAGE_ROOMS")
-    ? [{ id: "rooms", label: "🏠Subject Rooms Requests" }] : []),
+  ? [
+      { id: "room-requests", label: "📬 Room Requests" },
+      { id: "rooms", label: "🏠 Room Moderation" }
+    ] 
+  : []),
 ];
 
 
@@ -327,6 +343,52 @@ const handleRoomRequest = async (requestId, approved) => {
   } finally {
     setRoomRequestLoading(null);
   }
+};
+
+const fetchModerationRooms = async () => {
+  try {
+    const [roomsRes, usersRes] = await Promise.all([
+      axios.get(`${API}/rooms-moderation`, { headers }),
+      axios.get(`${API}/users`, { headers })
+    ]);
+    setModerationRooms(roomsRes.data);
+    setUsers(usersRes.data);
+  } catch (err) { console.error(err); }
+};
+
+const handleRoomSuspend = async (roomId, userId) => {
+  if (!roomSuspendDays || !roomSuspendReason.trim()) return alert("Please fill in days and reason.");
+  try {
+    await axios.patch(`${API}/rooms-moderation/suspend`, 
+      { roomId, userId, days: Number(roomSuspendDays), reason: roomSuspendReason },
+      { headers }
+    );
+    setRoomSuspendingId(null);
+    setRoomSuspendDays("");
+    setRoomSuspendReason("");
+    // refresh selected room members
+    const res = await axios.get(`${API}/rooms-moderation`, { headers });
+    setModerationRooms(res.data);
+    setSelectedRoom(res.data.find(r => r.id === roomId));
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
+
+const handleRoomUnsuspend = async (roomId, userId) => {
+  try {
+    await axios.patch(`${API}/rooms-moderation/unsuspend`, { roomId, userId }, { headers });
+    const res = await axios.get(`${API}/rooms-moderation`, { headers });
+    setModerationRooms(res.data);
+    setSelectedRoom(res.data.find(r => r.id === roomId));
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
+
+const handleDeleteRoom = async (roomId) => {
+  if (!window.confirm("Permanently delete this room?")) return;
+  try {
+    await axios.delete(`${API}/rooms-moderation/${roomId}`, { headers });
+    setSelectedRoom(null);
+    fetchModerationRooms();
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
 };
 
 
@@ -524,6 +586,8 @@ const handleRoomRequest = async (requestId, approved) => {
           )}
         </div>
       )}
+
+      
  
       {/* ── REPORTS TAB ── */}
       {activeTab === "reports" && (
@@ -741,7 +805,7 @@ const handleRoomRequest = async (requestId, approved) => {
 
       {/* ── REQUEST SUBJECT ROOMS TAB ── */}
 
-      {activeTab === "rooms" && (
+      {activeTab === "room-requests" && (
   <div>
     <h3 style={{ marginBottom: "16px" }}>Subject Room Requests</h3>
     {roomRequests.length === 0 ? (
@@ -803,6 +867,185 @@ const handleRoomRequest = async (requestId, approved) => {
           )}
         </div>
       ))
+    )}
+  </div>
+)}
+
+{activeTab === "rooms" && (
+  <div>
+    <h3 style={{ marginBottom: "16px" }}>Room Moderation</h3>
+    {moderationRooms.length === 0 ? (
+      <p style={{ opacity: 0.5 }}>No rooms assigned.</p>
+    ) : (
+      <>
+      {/* search and filter */}
+      <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+  <input
+    type="text"
+    placeholder="Search rooms..."
+    value={roomSearch}
+    onChange={e => setRoomSearch(e.target.value)}
+    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white" }}
+  />
+  <select
+    value={roomTypeFilter}
+    onChange={e => setRoomTypeFilter(e.target.value)}
+    style={{ padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "#252b45", color: "white" }}
+  >
+    <option value="">All Types</option>
+    {isSuperAdmin && <option value="public">Public</option>}
+    <option value="university">University</option>
+    <option value="major">Major</option>
+    <option value="subject">Subject</option>
+  </select>
+</div>
+        {/* stat cards */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "24px" }}>
+          {moderationRooms
+             .filter(r => isSuperAdmin ? r.type !== "private" : true)
+  .filter(r => roomTypeFilter ? r.type === roomTypeFilter : true)
+  .filter(r => roomSearch.trim() ? r.name?.toLowerCase().includes(roomSearch.toLowerCase()) : true)
+  .map(room => {
+              const activeSuspensions = room.suspendedMembers?.filter(
+                s => new Date(s.until) > new Date()
+              ).length || 0;
+              return (
+                <div key={room.id} onClick={() => setSelectedRoom(room)}
+                  style={{ ...card, cursor: "pointer", textAlign: "center" }}
+                  onMouseEnter={e => e.currentTarget.style.background = "#2f3655"}
+                  onMouseLeave={e => e.currentTarget.style.background = "#252b45"}
+                >
+                  <div style={{ marginBottom: "8px" }}>
+                    <span style={{
+                      ...badge(
+                        room.type === "public" ? "#27ae60" :
+                        room.type === "subject" ? "#f39c12" :
+                        room.type === "university" ? "#6476af" : "#4a3f6b"
+                      )
+                    }}>{room.type}</span>
+                  </div>
+                  <strong style={{ display: "block", marginBottom: "6px" }}>{room.name}</strong>
+                  <small style={{ opacity: 0.5, display: "block" }}>
+                    👥 {room.members?.length || 0} members
+                  </small>
+                  {activeSuspensions > 0 && (
+                    <small style={{ color: "#e74c3c", display: "block", marginTop: "4px" }}>
+                      🚫 {activeSuspensions} suspended
+                    </small>
+                  )}
+                </div>
+              );
+            })}
+        </div>
+      </>
+    )}
+
+    {/* room drill-down modal */}
+    {selectedRoom && (
+      <div className="modal-overlay" onClick={() => setSelectedRoom(null)}>
+        <div className="modal" onClick={e => e.stopPropagation()}
+          style={{ width: "650px", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <div>
+              <h3 style={{ margin: "0 0 4px" }}>{selectedRoom.name}</h3>
+              <small style={{ opacity: 0.5 }}>{selectedRoom.type} • {selectedRoom.members?.length || 0} members</small>
+            </div>
+            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+              {isSuperAdmin && (
+                <button onClick={() => handleDeleteRoom(selectedRoom.id)} style={btn("#7f0000")}>
+                  🗑️ Delete Room
+                </button>
+              )}
+              <button onClick={() => setSelectedRoom(null)}
+                style={{ background: "none", border: "none", color: "white", fontSize: "20px", cursor: "pointer" }}>✕</button>
+            </div>
+          </div>
+
+          <div style={{ overflowY: "auto", flex: 1 }}>
+            {selectedRoom.members?.length === 0 ? (
+              <p style={{ opacity: 0.5 }}>No members.</p>
+            ) : (
+              selectedRoom.members.map(memberId => {
+                const memberUser = users.find(u => u.id === memberId);
+                const suspension = selectedRoom.suspendedMembers?.find(
+                  s => s.userId === memberId && new Date(s.until) > new Date()
+                );
+                const isSuspendedInRoom = !!suspension;
+                const isSuspending = roomSuspendingId === memberId;
+
+                return (
+                  <div key={memberId} style={{ ...card, marginBottom: "8px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          <strong style={{ fontSize: "13px" }}>
+                            {memberUser ? `@${memberUser.username}` : memberId}
+                          </strong>
+                          {memberUser && <span style={badge("#6476af")}>{memberUser.role}</span>}
+                          {isSuspendedInRoom && <span style={badge("#c0392b")}>suspended in room</span>}
+                        </div>
+                        {isSuspendedInRoom && (
+                          <small style={{ color: "#e74c3c", display: "block", marginTop: "2px" }}>
+                            Until {new Date(suspension.until).toLocaleDateString()} — {suspension.reason}
+                          </small>
+                        )}
+                        {memberUser?.roomViolations?.[selectedRoom.id] > 0 && (
+                          <small style={{ opacity: 0.5, display: "block" }}>
+                            Room violations: {memberUser.roomViolations[selectedRoom.id]}
+                          </small>
+                        )}
+                      </div>
+
+                      <div style={{ display: "flex", gap: "6px" }}>
+                        {!isSuspendedInRoom ? (
+                          <button onClick={() => setRoomSuspendingId(memberId)} style={btn("#c0392b")}>
+                            Suspend
+                          </button>
+                        ) : (
+                          <button onClick={() => handleRoomUnsuspend(selectedRoom.id, memberId)} style={btn("#27ae60")}>
+                            Unsuspend
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* suspend form */}
+                    {isSuspending && (
+                      <div style={{ marginTop: "10px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "10px" }}>
+                        <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                          <input
+                            type="number"
+                            placeholder="Days..."
+                            value={roomSuspendDays}
+                            onChange={e => setRoomSuspendDays(e.target.value)}
+                            style={{ width: "80px", padding: "6px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white" }}
+                          />
+                          <input
+                            type="text"
+                            placeholder="Reason..."
+                            value={roomSuspendReason}
+                            onChange={e => setRoomSuspendReason(e.target.value)}
+                            style={{ flex: 1, padding: "6px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white" }}
+                          />
+                        </div>
+                        <div style={{ display: "flex", gap: "8px" }}>
+                          <button onClick={() => handleRoomSuspend(selectedRoom.id, memberId)} style={btn("#c0392b")}>
+                            Confirm
+                          </button>
+                          <button onClick={() => { setRoomSuspendingId(null); setRoomSuspendDays(""); setRoomSuspendReason(""); }} style={btn("rgba(255,255,255,0.1)")}>
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+      </div>
     )}
   </div>
 )}

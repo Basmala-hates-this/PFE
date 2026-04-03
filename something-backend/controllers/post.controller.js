@@ -1,10 +1,24 @@
 const postRepo = require("../repositories/post.repo");
+const roomRepo = require("../repositories/room.repo");
+
+
+const isUserSuspendedInRoom = (roomId, userId) => {
+  const room = roomRepo.getRoomById(roomId);
+  if (!room) return false;
+  const suspension = room.suspendedMembers?.find(s => s.userId === userId);
+  if (!suspension) return false;
+  return new Date(suspension.until) > new Date();
+};
 
 const createPost = (req, res) => {
   const { title, content, roomId, resourceLink, resourceLabel } = req.body;
   const authorId = req.user.id;
   const authorUsername = req.user.username;
   const authorRole = req.user.role;
+
+  if (isUserSuspendedInRoom(roomId, authorId)) {
+  return res.status(403).json({ message: "You are suspended from posting in this room." });
+}
 
   const image = req.file && req.file.mimetype.startsWith("image/")
     ? `http://localhost:5000/uploads/${req.file.filename}`
@@ -50,6 +64,9 @@ const votePost = (req, res) => {
   const { voteType } = req.body;
     const userId = req.user.id;
 
+    
+
+
   const post = postRepo.votePost(id, userId, voteType);
   if (!post) {
     return res.status(404).json({ message: "Post not found" });
@@ -57,8 +74,13 @@ const votePost = (req, res) => {
   if (post.error) {//case of trying to vote on own post
     return res.status(403).json({ message: post.error });
   }
+  //suspended ahole
+if (isUserSuspendedInRoom(post.roomId, userId)) {
+  return res.status(403).json({ message: "You are suspended from voting in this room." });
+}
   res.json(post);
 };
+
 
 const updatePost = (req, res) => {
   const { id } = req.params;
@@ -92,6 +114,13 @@ const addComment = (req, res) => {
   const { content, parentCommentId, resourceLink, resourceLabel } = req.body;
   const authorId = req.user.id;
   const authorUsername = req.user.username;
+
+  const post = postRepo.getPostById(postId);
+if (!post) return res.status(404).json({ message: "Post not found" });
+
+if (isUserSuspendedInRoom(post.roomId, authorId)) {
+  return res.status(403).json({ message: "You are suspended from commenting in this room." });
+}
 
   const image = req.file && req.file.mimetype.startsWith("image/")
     ? `http://localhost:5000/uploads/${req.file.filename}`
@@ -145,6 +174,11 @@ const voteComment = (req, res) => {
   if (post.error) {
     return res.status(403).json({ message: post.error });
   }
+
+if (isUserSuspendedInRoom(post.roomId, userId)) {
+  return res.status(403).json({ message: "You are suspended from voting in this room." });
+}
+
   res.json(post);
 };
 

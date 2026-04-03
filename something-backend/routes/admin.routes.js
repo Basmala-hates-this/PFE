@@ -67,5 +67,11 @@ router.post("/room-requests", protect, adminController.getRoomRequests);
 router.get("/room-requests", protect, adminController.getRoomRequests);
 router.post("/room-requests/handle", protect, adminController.handleRoomRequest);
 
+//room mod things ...........not gonna comment
+router.get("/rooms-moderation", protect, adminController.getRoomsForAdmin);
+router.patch("/rooms-moderation/suspend", protect, adminController.suspendFromRoom);
+router.patch("/rooms-moderation/unsuspend", protect, adminController.unsuspendFromRoom);
+router.delete("/rooms-moderation/:roomId", protect, adminController.deleteRoomAdmin);
+
 
 module.exports = router;
