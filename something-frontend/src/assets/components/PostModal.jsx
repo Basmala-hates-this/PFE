@@ -3,6 +3,98 @@ import axios from "axios";
 import Cat from "../../photos/Cat.jpg";
 import ReportModal from "./ReportModal.jsx";
 
+//threaded comments are more complicated then i thought
+
+function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, onEdit, onReply, editingComment, editCommentContent, setEditCommentContent, handleEditComment, setEditingComment, depth = 0 }) {
+  if (comment.isHidden) return (
+    <div style={{ marginLeft: depth > 0 ? "20px" : "0", padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)", opacity: 0.4, fontStyle: "italic", fontSize: "13px" }}>
+      🙈 This comment has been hidden.
+    </div>
+  );
+
+  return (
+    <div style={{ marginLeft: depth > 0 ? "20px" : "0", borderLeft: depth > 0 ? "2px solid rgba(100,118,175,0.3)" : "none", paddingLeft: depth > 0 ? "10px" : "0" }}>
+      <div style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+        
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+          <strong style={{ fontSize: "13px" }}>@{comment.authorUsername}</strong>
+          {depth > 0 && <small style={{ opacity: 0.4, fontSize: "11px" }}>↩ reply</small>}
+          <small style={{ opacity: 0.5, fontSize: "11px" }}>{new Date(comment.createdAt).toLocaleString()}</small>
+        </div>
+
+        <p style={{ margin: "0 0 6px", fontSize: "14px" }}>{comment.content}</p>
+
+        {/* attachments */}
+        {comment.image && (
+          <div style={{ marginBottom: "6px" }}>
+            <a href={comment.image} target="_blank" rel="noopener noreferrer">
+              <img src={comment.image} alt="attachment" style={{ maxWidth: "100%", borderRadius: "8px", display: "block", cursor: "pointer" }} />
+            </a>
+          </div>
+        )}
+        {comment.pdf && (
+          <a href={comment.pdf} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "6px" }}>
+            📄 View PDF
+          </a>
+        )}
+        {comment.resourceLink && (
+          <a href={comment.resourceLink} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "6px" }}>
+            🔗 {comment.resourceLabel || "Open Resource"}
+          </a>
+        )}
+
+        {/* actions */}
+        {editingComment?.id === comment.id ? (
+          <div>
+            <input value={editCommentContent} onChange={e => setEditCommentContent(e.target.value)}
+              style={{ width: "100%", padding: "4px", borderRadius: "4px", marginBottom: "6px" }} />
+            <button onClick={() => handleEditComment(comment.id)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "4px", marginRight: "6px" }}>Save</button>
+            <button onClick={() => setEditingComment(null)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "4px" }}>Cancel</button>
+          </div>
+        ) : (
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button onClick={() => onVote(comment.id, "useful")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" }}>
+              👍 {comment.votes.useful}
+            </button>
+            <button onClick={() => onVote(comment.id, "useless")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" }}>
+              👎 {comment.votes.useless}
+            </button>
+            {(currentUser?.id === comment.authorId || currentUser?.rating >= 4) && (
+              <button onClick={() => onVote(comment.id, "specialized")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", background: "#f0c040", border: "none" }}>
+                ✨ {comment.votes.specialized}
+              </button>
+            )}
+            {!isGuest && (
+              <button onClick={() => onReply(comment)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", background: "rgba(100,118,175,0.3)", border: "none", color: "white" }}>
+                ↩ Reply
+              </button>
+            )}
+            {currentUser?.id === comment.authorId && (
+              <>
+                <button onClick={() => onDelete(comment.id)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", color: "red" }}>🗑️</button>
+                <button onClick={() => { setEditingComment(comment); setEditCommentContent(comment.content); }} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", color: "green" }}>✏️</button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* replies */}
+      {comment.replies?.map(reply => (
+        <CommentNode key={reply.id} comment={reply} postId={postId} currentUser={currentUser}
+          isGuest={isGuest} onVote={onVote} onDelete={onDelete} onEdit={onEdit} onReply={onReply}
+          editingComment={editingComment} editCommentContent={editCommentContent}
+          setEditCommentContent={setEditCommentContent} handleEditComment={handleEditComment}
+          setEditingComment={setEditingComment} depth={depth + 1} />
+      ))}
+    </div>
+  );
+}
+
+//////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+
 export default function PostModal({ postId, onClose, isGuest }) {
   const token = localStorage.getItem("token");
   const guestToken = localStorage.getItem("guestToken");
@@ -19,6 +111,8 @@ export default function PostModal({ postId, onClose, isGuest }) {
 const [commentResourceLink, setCommentResourceLink] = useState("");
 const [commentResourceLabel, setCommentResourceLabel] = useState("");
 const [reportTarget, setReportTarget] = useState(null);
+
+const [replyingTo, setReplyingTo] = useState(null); 
 
 
 
@@ -68,12 +162,13 @@ const [reportTarget, setReportTarget] = useState(null);
     }
   };
 
- const handleAddComment = async () => {
+const handleAddComment = async () => {
   if (isGuest) return alert("Create an account to contribute....");
   if (!commentInput.trim() && !commentAttachment) return;
   try {
     const formData = new FormData();
     formData.append("content", commentInput);
+    if (replyingTo) formData.append("parentCommentId", replyingTo.id);
     if (commentAttachment) formData.append("attachment", commentAttachment);
     if (commentResourceLink.trim()) formData.append("resourceLink", commentResourceLink);
     if (commentResourceLabel.trim()) formData.append("resourceLabel", commentResourceLabel);
@@ -87,6 +182,7 @@ const [reportTarget, setReportTarget] = useState(null);
     setCommentAttachment(null);
     setCommentResourceLink("");
     setCommentResourceLabel("");
+    setReplyingTo(null); 
     refetchPost();
   } catch (err) {
     console.error("Failed to add comment:", err);
@@ -148,6 +244,21 @@ const [reportTarget, setReportTarget] = useState(null);
     </div>
   </div>
 );
+
+//threaded comments tree builders:
+const buildCommentTree = (comments) => {
+  const map = {};
+  const roots = [];
+  comments.forEach(c => { map[c.id] = { ...c, replies: [] }; });
+  comments.forEach(c => {
+    if (c.parentCommentId && map[c.parentCommentId]) {
+      map[c.parentCommentId].replies.push(map[c.id]);
+    } else {
+      roots.push(map[c.id]);
+    }
+  });
+  return roots;
+};
 
   
 
@@ -233,107 +344,40 @@ const [reportTarget, setReportTarget] = useState(null);
                 )}
           </div>
         </div>
-
+{/* //////////////////////////////////////////////////////// */}
         {/* comments list */}
-        <div style={{flex:1, overflowY:"auto", marginBottom:"15px"}}>
-          {post.comments.length === 0 ? (
-            <p style={{opacity:0.5, textAlign:"center"}}>No comments yet. Be the first!</p>
-          ) : (
-            post.comments.map(comment =>
-              {
-  if (comment.isHidden) return (
-    <div key={comment.id} style={{padding:"10px", borderBottom:"1px solid rgba(255,255,255,0.1)", opacity:0.4, fontStyle:"italic", fontSize:"13px"}}>
-      🙈 This comment has been hidden.
-    </div>
-  );
-  return (
-              <div key={comment.id} style={{padding:"10px", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
-                <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"4px"}}>
-                  <img src={Cat} alt="pfp" style={{width:"24px", height:"24px", borderRadius:"50%"}}/>
-                  <strong style={{fontSize:"13px"}}>@{comment.authorUsername}</strong>
-                  <small style={{opacity:0.5, fontSize:"11px"}}>{new Date(comment.createdAt).toLocaleString()}</small>
-                </div>
-
-                <p style={{margin:"0 0 6px 32px", fontSize:"14px"}}>{comment.content}</p>
-                {/* comment image */}
-{comment.image && (
-  <div style={{margin:"6px 0 6px 32px"}}>
-    <a href={comment.image} target="_blank" rel="noopener noreferrer">
-      <img src={comment.image} alt="attachment" style={{maxWidth:"100%", borderRadius:"8px", display:"block", cursor:"pointer"}}/>
-    </a>
-    <a href={comment.image} download style={{fontSize:"11px", color:"#8ca4c6", display:"inline-block", marginTop:"4px"}}>⬇️ Download Image</a>
-  </div>
-)}
-
-{/* comment pdf */}
-{comment.pdf && (
-  <div style={{margin:"6px 0 6px 32px", display:"flex", gap:"8px"}}>
-    <a href={comment.pdf} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(255,255,255,0.1)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px"}}>
-      📄 View PDF
-    </a>
-    <a href={comment.pdf} download style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(255,255,255,0.1)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px"}}>
-      ⬇️ Download PDF
-    </a>
-  </div>
-)}
-
-{/* comment resource link */}
-{comment.resourceLink && (
-  <div style={{margin:"6px 0 6px 32px"}}>
-    <a href={comment.resourceLink} target="_blank" rel="noopener noreferrer" style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(100,118,175,0.3)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px"}}>
-      🔗 {comment.resourceLabel || "Open Resource"}
-    </a>
-  </div>
-)}
-
-                {editingComment?.id === comment.id ? (
-                  <div style={{margin:"0 0 0 32px"}}>
-                    <input
-                      value={editCommentContent}
-                      onChange={(e) => setEditCommentContent(e.target.value)}
-                      style={{width:"100%", padding:"4px", borderRadius:"4px", marginBottom:"6px"}}
-                    />
-                    <button onClick={() => handleEditComment(comment.id)} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"4px", marginRight:"6px"}}>Save</button>
-                    <button onClick={() => setEditingComment(null)} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"4px"}}>Cancel</button>
-                  </div>
-                ) : (
-                  <div style={{margin:"4px 0 0 32px", display:"flex", gap:"8px", flexWrap:"wrap"}}>
-                    <button onClick={() => handleCommentVote(comment.id, "useful")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
-                      👍 Useful {comment.votes.useful}
-                    </button>
-                    <button onClick={() => handleCommentVote(comment.id, "useless")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
-                      👎 Useless {comment.votes.useless}
-                    </button>
-                    {(currentUser?.id === post.authorId || currentUser?.rating >= 4) && (
-                      <button onClick={() => handleCommentVote(comment.id, "specialized")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", background:"#f0c040", border:"none"}}>
-                        ✨ Specialized {comment.votes.specialized}
-                      </button>
-                      
-                    )}
-                    {!isGuest && currentUser?.id !== comment.authorId && (
-                     <button
-                     onClick={() => setReportTarget({ type: "comment", postId: post.id, commentId: comment.id })}
-                     style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px",
-                     cursor: "pointer", color: "#c0392b", background: "none", border: "none" }}>
-                     🚩 Report
-                    </button>
-                    )}
-                    {currentUser?.id === comment.authorId && (
-                      <>
-                        <button onClick={() => handleDeleteComment(comment.id)} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", color:"red"}}>🗑️ Delete</button>
-                        <button onClick={() => { setEditingComment(comment); setEditCommentContent(comment.content); }} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", color:"green"}}>✏️ Edit</button>
-                      </>
-                    )}
-                  </div>
-                )}
-              </div>
-            )})
-          )}
-        </div>
+       <div style={{ flex: 1, overflowY: "auto", marginBottom: "15px" }}>
+  {post.comments.length === 0 ? (
+    <p style={{ opacity: 0.5, textAlign: "center" }}>No comments yet. Be the first!</p>
+  ) : (
+    buildCommentTree(post.comments).map(comment => (
+      <CommentNode
+        key={comment.id}
+        comment={comment}
+        postId={postId}
+        currentUser={currentUser}
+        isGuest={isGuest}
+        onVote={handleCommentVote}
+        onDelete={handleDeleteComment}
+        onReply={(c) => setReplyingTo({ id: c.id, username: c.authorUsername })}
+        editingComment={editingComment}
+        editCommentContent={editCommentContent}
+        setEditCommentContent={setEditCommentContent}
+        handleEditComment={handleEditComment}
+        setEditingComment={setEditingComment}
+      />
+    ))
+  )}
+</div>
 
         {/* add comment */}
 <div style={{borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:"10px"}}>
-  
+  {replyingTo && (
+  <div style={{ marginBottom: "6px", fontSize: "12px", display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px", background: "rgba(100,118,175,0.2)", borderRadius: "6px" }}>
+    ↩ Replying to <strong>@{replyingTo.username}</strong>
+    <button onClick={() => setReplyingTo(null)} style={{ background: "none", border: "none", color: "#fc0c0c", cursor: "pointer", fontSize: "11px", marginLeft: "auto" }}>✕ Cancel</button>
+  </div>
+)}
   {/* attachment preview */}
   {commentAttachment && (
     <div style={{marginBottom:"6px", fontSize:"12px", opacity:0.7, display:"flex", alignItems:"center", gap:"6px"}}>

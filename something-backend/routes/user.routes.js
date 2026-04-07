@@ -18,6 +18,11 @@ router.get("/search", protect, userController.searchUsers);
 router.post("/select-major", protect, userController.selectMajorAfterRejection);
 router.post("/select-valid-inputs", protect, userController.selectValidInputs);
 
+//for stat cards
+router.get("/me/comments", protect, userController.getCommentsByUser); // wait — see note below
+router.get("/me/received-votes", protect, userController.getMyReceivedVotes);
+router.get("/me/comments", protect, userController.getMyComments);
+
 // follow routes BEFORE /:userId
 router.post("/:userId/follow", protect, userController.followUser);
 router.delete("/:userId/unfollow", protect, userController.unfollowUser);

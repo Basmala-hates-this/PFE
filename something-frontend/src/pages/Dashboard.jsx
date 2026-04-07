@@ -672,39 +672,40 @@ const handleRequestSubjectRoom = async () => {
     <aside className="sidebar">
         <h2>DASHBOARD</h2>
         <ul>
-            <li><a href="#" id="home-link" onClick={() => navigate("/dashboard")}>Home</a></li>
+            <li id="home-link" onClick={() => navigate("/dashboard")}>Home</li>
             {!isGuest && (
                <>
-                  <li><a href="#" id="rooms-link" onClick={(e) => {
+                  <li id="rooms-link" onClick={(e) => {
                       e.preventDefault();
                        setShowBrowseRooms(true);
                        fetchSubjectRooms();
-                        }}>Browse Rooms</a></li>
-                  <li><a href="#" onClick={() => navigate("/profile")}>Profile</a></li>
+                        }}> Browse Rooms</li>
+                  <li onClick={() => navigate("/profile")}>Profile</li>
                 </>
              )}
              {isGuest && (
                  <>
-                    <li><a href="#" onClick={() => {
+                    <li onClick={() => {
                         localStorage.removeItem("guestToken");
                         localStorage.removeItem("guestUniversities");
                          navigate("/");
-                     }}>Leave Guest Mode</a></li>
-                   <li><a href="#" onClick={() => {
+                     }}>Leave Guest Mode</li>
+                   <li onClick={() => {
                       localStorage.removeItem("guestToken");
                       localStorage.removeItem("guestUniversities");
                       navigate("/info");      
-                        }}>Create Account</a></li>
+                        }}>Create Account</li>
                  </>
                 )}
             {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
             right now, lets just keep it in the profile....should it have a confirmation? */}
             <li><button id="lgm" className="lgm"  >☀️Light Mode </button></li>
-            <li><a href="#" onClick={(e) => {
+            {/* the theme button is the only now to cause issues with clicking anywhere that is not the middle */}
+            <li  onClick={(e) => {
     e.preventDefault();
     fetchAnnouncements();
     setShowAnnouncements(true);
-  }}>📢 Announcements</a></li>
+  }}>📢 Announcements</li>
         </ul>
     </aside>
 

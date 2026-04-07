@@ -55,6 +55,14 @@ export default function Profile() {
     //aplicats
     const [application, setApplication] = useState(null); // null = no application
 
+    //the stat cards
+   
+const [drilldown, setDrilldown] = useState(null); // { type, label, data, loading }
+
+
+//
+const [subjectRoomsByMajor, setSubjectRoomsByMajor] = useState([]);
+
 
 useEffect(() => {
   const token = localStorage.getItem("token");
@@ -185,6 +193,23 @@ useEffect(() => {
   if (user) fetchApplication();
 }, [user]);
 
+
+useEffect(() => {
+  if (!isProfessor) return;
+  const fetchSubjectRooms = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await axios.get("http://localhost:5000/api/rooms/subject-rooms", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setSubjectRoomsByMajor(res.data);
+    } catch (err) {
+      console.error("Failed to fetch subject rooms:", err);
+    }
+  };
+  fetchSubjectRooms();
+}, [isProfessor]);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////// 
@@ -280,6 +305,36 @@ const handleWithdrawApplication = async () => {
 };
 
 
+const handleStatClick = async (type) => {
+  setDrilldown({ type, label: type, data: [], loading: true });
+  const token = localStorage.getItem("token");
+  try {
+    let data = [];
+    if (type === "posts") {
+      const res = await axios.get(`http://localhost:5000/api/posts/user/${user.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      data = res.data;
+    } else if (type === "comments") {
+      const res = await axios.get("http://localhost:5000/api/users/me/comments", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      data = res.data;
+    } else if (["useful", "useless", "specialized"].includes(type)) {
+      const res = await axios.get(`http://localhost:5000/api/users/me/received-votes?type=${type}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      data = res.data;
+    } else if (type === "rooms") {
+      data = userRooms; // already fetched
+    }
+    setDrilldown({ type, data, loading: false });
+  } catch (err) {
+    console.error("Drilldown failed:", err);
+    setDrilldown({ type, data: [], loading: false });
+  }
+};
+
 /////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
@@ -366,14 +421,27 @@ const handleWithdrawApplication = async () => {
 )}
 {/* 
     <!-- STATS --> */}
-    <div className="stats">
-      <div className="stat-card"><span> Posts 📝</span><strong>{stats?.postsCount || 0}</strong></div>
-      <div className="stat-card"><span>Comments 🗨️</span><strong>{stats?.commentsCount || 0}</strong></div>
-      <div className="stat-card"><span>Usefull Count👍</span><strong>{stats?.usefulReceived || 0}</strong></div>
-      <div className="stat-card"><span> Useless Count ❌</span><strong>{stats?.uselessReceived || 0}</strong></div>
-      <div className="stat-card"><span> Specialized✨</span><strong>{stats?.specializedReceived || 0}</strong></div>
-      <div className="stat-card"><span>Rooms Joined 🏠</span><strong>{user?.rooms?.length || 0}</strong></div>
+   <div className="stats">
+  {[
+    { type: "posts", label: "Posts 📝", value: stats?.postsCount || 0 },
+    { type: "comments", label: "Comments 🗨️", value: stats?.commentsCount || 0 },
+    { type: "useful", label: "Useful Count 👍", value: stats?.usefulReceived || 0 },
+    { type: "useless", label: "Useless Count ❌", value: stats?.uselessReceived || 0 },
+    { type: "specialized", label: "Specialized ✨", value: stats?.specializedReceived || 0 },
+    { type: "rooms", label: "Rooms Joined 🏠", value: user?.rooms?.length || 0 },
+  ].map(({ type, label, value }) => (
+    <div
+      key={type}
+      className="stat-card"
+      onClick={() => handleStatClick(type)}
+      style={{ cursor: "pointer" }}
+      title={`Click to see your ${type}`}
+    >
+      <span>{label}</span>
+      <strong>{value}</strong>
     </div>
+  ))}
+</div>
 
     {/* <!-- COURSES this.....i still dont know how to use....bisicaly the distingtive factor of prof profile from student profile 
     how or what to do with it....i still dont know....maybe a list of majors and each major some rooms?--> */}
@@ -397,14 +465,37 @@ const handleWithdrawApplication = async () => {
     </div>
 )} */}
 {/* soooo...dynamic display of majors? */}
-{isProfessor && user?.majors?.length > 0 && (
+{isProfessor && subjectRoomsByMajor.length > 0 && (
   <div className="courses">
     <h3 style={{ marginBottom: "15px", color: "#5DADE2" }}>Specialty Majors</h3>
-
-    {user.majors.map((major, index) => (
-      <div className="course" key={index}>
-        <span style={{ color: "#85C1E9" }}>{major}</span>
-        {/* the listing of rooms maybe? */}
+    {subjectRoomsByMajor.map((entry, index) => (
+      <div key={index} style={{ marginBottom: "16px" }}>
+        <span style={{ color: "#85C1E9", fontWeight: "bold", fontSize: "15px" }}>
+          {entry.major}
+        </span>
+        {entry.rooms.length === 0 ? (
+          <p style={{ opacity: 0.4, fontSize: "12px", marginLeft: "12px" }}>
+            No subject rooms joined yet
+          </p>
+        ) : (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: "6px", marginLeft: "12px" }}>
+            {entry.rooms.map(room => (
+              <span
+                key={room.id}
+                style={{
+                  background: "rgba(100,118,175,0.2)",
+                  border: "1px solid rgba(100,118,175,0.4)",
+                  borderRadius: "12px",
+                  padding: "3px 10px",
+                  fontSize: "12px",
+                  color: "#a8b8e8"
+                }}
+              >
+                {room.name}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     ))}
   </div>
@@ -683,6 +774,74 @@ const handleWithdrawApplication = async () => {
     onClose={() => setSelectedPost(null)}
     isGuest={false}
   />
+)}
+
+
+
+{drilldown && (
+  <div className="modal-overlay" onClick={() => setDrilldown(null)}>
+    <div className="modal" onClick={e => e.stopPropagation()} style={{ maxHeight: "80vh", overflowY: "auto" }}>
+      
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+        <h3 style={{ margin: 0 }}>
+          {{
+            posts: "📝 My Posts",
+            comments: "🗨️ My Comments",
+            useful: "👍 Posts/Comments that got Useful votes",
+            useless: "❌ Posts that got Useless votes",
+            specialized: "✨ Comments that got Specialized votes",
+            rooms: "🏠 My Rooms"
+          }[drilldown.type]}
+        </h3>
+        <button onClick={() => setDrilldown(null)} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
+      </div>
+
+      {drilldown.loading ? (
+        <p style={{ opacity: 0.5, textAlign: "center" }}>Loading...</p>
+      ) : drilldown.data.length === 0 ? (
+        <p style={{ opacity: 0.5, textAlign: "center" }}>Nothing here yet.</p>
+      ) : drilldown.type === "rooms" ? (
+        drilldown.data.map(room => (
+          <div key={room.id} style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <strong>{room.name}</strong>
+              <small style={{ marginLeft: "8px", background: "#6476af", color: "white", padding: "2px 8px", borderRadius: "10px", fontSize: "11px" }}>{room.type}</small>
+            </div>
+            {room.type === "private" && (
+              <button onClick={() => { setDrilldown(null); navigate(`/rooms/${room.id}`); }}
+                style={{ padding: "6px 12px", borderRadius: "6px", background: "#6476af", border: "none", color: "white", cursor: "pointer" }}>
+                Open Chat
+              </button>
+            )}
+          </div>
+        ))
+      ) : (
+        drilldown.data.map(item => (
+          <div
+            key={item.id}
+            onClick={() => { setDrilldown(null); setSelectedPost({ id: item.postId || item.id }); }}
+            style={{ padding: "12px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", marginBottom: "10px", cursor: "pointer" }}
+            onMouseEnter={e => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+            onMouseLeave={e => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
+              <small style={{ background: item.postId ? "#4a6a4a" : "#6476af", color: "white", padding: "2px 8px", borderRadius: "10px", fontSize: "11px" }}>
+                {item.postId ? "comment" : "post"}
+              </small>
+              <small style={{ opacity: 0.4, fontSize: "11px" }}>{new Date(item.createdAt).toLocaleString()}</small>
+              <div style={{ marginLeft: "auto", display: "flex", gap: "8px", fontSize: "12px", opacity: 0.7 }}>
+                {item.votes?.useful > 0 && <span>👍 {item.votes.useful}</span>}
+                {item.votes?.useless > 0 && <span>❌ {item.votes.useless}</span>}
+                {item.votes?.specialized > 0 && <span>✨ {item.votes.specialized}</span>}
+              </div>
+            </div>
+            {item.title && <h4 style={{ margin: "0 0 4px", fontSize: "14px" }}>{item.title}</h4>}
+            <p style={{ margin: 0, opacity: 0.7, fontSize: "13px" }}>{item.content?.slice(0, 120)}...</p>
+          </div>
+        ))
+      )}
+    </div>
+  </div>
 )}
 
 </div>

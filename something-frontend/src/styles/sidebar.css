@@ -22,6 +22,7 @@
 }
 
 .sidebar li {
+
   padding: 16px;
   border-radius: 12px;
   cursor: pointer;
@@ -33,6 +34,7 @@
   transition: 0.3s;
   margin-left: 0;
   color: var(--text-main);
+  border: #020617 solid 3px;
  
 }
 .sidebar li.active {

@@ -39,7 +39,10 @@ const getMyStats = (req, res) => {
   });
 };
 
-
+const getMyComments = (req, res) => {
+  const comments = postRepo.getCommentsByUser(req.user.id);
+  res.json(comments);
+};
 
 
 //the amount of stupid namings because i cant think right at night.....
@@ -427,6 +430,40 @@ const selectValidInputs = async (req, res) => {
   res.json({ message: "Inputs updated successfully" });
 };
 
+const getMyReceivedVotes = (req, res) => {
+  const userId = req.user.id;
+  const { type } = req.query; // "useful", "useless", "specialized"
+
+  const posts = postRepo.getPostsByUser(userId);
+  const comments = postRepo.getCommentsByUser(userId);
+
+  let results = [];
+
+  if (type === "useful") {
+    const votedPosts = posts
+      .filter(p => p.votes.useful > 0)
+      .map(p => ({ ...p, sourceType: "post" }));
+    const votedComments = comments
+      .filter(c => c.votes.useful > 0)
+      .map(c => ({ ...c, sourceType: "comment" }));
+    results = [...votedPosts, ...votedComments];
+
+  } else if (type === "useless") {
+    results = posts
+      .filter(p => p.votes.useless > 0)
+      .map(p => ({ ...p, sourceType: "post" }));
+
+  } else if (type === "specialized") {
+    results = comments
+      .filter(c => c.votes.specialized > 0)
+      .map(c => ({ ...c, sourceType: "comment" }));
+  }
+
+  res.json(results);
+};
+
+
+
 module.exports = {
   getMyStats,
   getPostsByUser,
@@ -444,6 +481,8 @@ module.exports = {
   reportUser,
   selectMajorAfterRejection,
   selectValidInputs,
+  getMyReceivedVotes,
+  getMyComments,
 
-  
+
 };
