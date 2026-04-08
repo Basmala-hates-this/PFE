@@ -232,6 +232,7 @@ const handleCreateRoom = async () => {
 
     const createdRoom = response.data;
     setRoomFeedback(`Room created! Your passkey is: ${createdRoom.passKey} — share this with people you want to invite.`);
+    setUserRooms(prev => [...prev, createdRoom]);//updats the damn room list without fricking refreshing the page....gotta love react
     setRoomName("");
     setRoomPassKey("");
     setUseGeneratedKey(true);
@@ -319,6 +320,7 @@ const handleStatClick = async (type) => {
       const res = await axios.get("http://localhost:5000/api/users/me/comments", {
         headers: { Authorization: `Bearer ${token}` }
       });
+      
       data = res.data;
     } else if (["useful", "useless", "specialized"].includes(type)) {
       const res = await axios.get(`http://localhost:5000/api/users/me/received-votes?type=${type}`, {

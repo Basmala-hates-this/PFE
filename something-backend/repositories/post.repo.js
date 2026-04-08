@@ -256,13 +256,14 @@ const getPostsByUser = (userId) => {
   const posts = readPosts();
   return posts.filter((p) => p.authorId === userId);
 };
-
 const getCommentsByUser = (userId) => {
   const posts = readPosts();
   const comments = [];
   posts.forEach(post => {
     post.comments.forEach(comment => {
-      if (comment.authorId === userId) comments.push(comment);
+      if (comment.authorId === userId) {
+        comments.push({ ...comment, postId: post.id }); // 👈 attach it here
+      }
     });
   });
   return comments;
