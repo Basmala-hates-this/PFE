@@ -12,7 +12,7 @@
   text-align: center;
   margin-bottom: 25px;
   color: var(--text-muted);
-}
+} 
 
 .sidebar ul {
   list-style: none;
@@ -63,4 +63,24 @@
 .sidebar li:hover {
   background: var(--accent-hover);
   transform: translateX(8px);
+}
+
+
+
+/* toggle sidebar */
+/*  */
+
+.sidebar {
+  transition: width 0.3s ease, padding 0.3s ease, min-width 0.3s ease;
+}
+
+.sidebar-collapsed .sidebar {
+  width: 0;
+  overflow: hidden;
+  padding: 0;
+  min-width: 0;
+}
+
+.sidebar-collapsed .dashMain {
+  width: 100%;
 }

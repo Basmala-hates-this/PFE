@@ -100,6 +100,13 @@ const [requestFeedback, setRequestFeedback] = useState("");
 const [requestLoading, setRequestLoading] = useState(false);
 
 
+//sort thing....anything but the things i need
+const [sortBy, setSortBy] = useState("random");
+
+///not proud of this...toggle sidebar
+const [sidebarOpen, setSidebarOpen] = useState(true);
+
+
 /////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
@@ -660,19 +667,53 @@ const handleRequestSubjectRoom = async () => {
     setRequestLoading(false);
   }
 };
+
+const sortedPosts = [...posts].sort((a, b) => {
+  if (sortBy === "recent") return new Date(b.createdAt) - new Date(a.createdAt);
+  if (sortBy === "popular") return (b.votes.useful - b.votes.useless) - (a.votes.useful - a.votes.useless);
+  return 0; // random = no sort, just as fetched
+});
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     return (
         <div id="body5">
             
-<div className="dashboard">
+<div className={`dashboard ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
+
+  <button
+    onClick={() => setSidebarOpen(prev => !prev)}
+    style={{
+      position: "fixed",
+      top: "12px",
+      left: sidebarOpen ? "12px" : "12px",
+      zIndex: 1000,
+      background: "#6476af",
+      border: "none",
+      borderRadius: "6px",
+      color: "white",
+      width: "32px",
+      height: "32px",
+      cursor: "pointer",
+      fontSize: "20px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      marginTop: "10px",
+      marginLeft: sidebarOpen ? "17px" : "1px",
+      transition: "margin-left 0.3s ease"
+    }}
+  >
+    {sidebarOpen ? "✖" : "☰"}
+  </button>
 
     {/* <!-- Sidebar --> */}
     <aside className="sidebar">
         <h2>DASHBOARD</h2>
         <ul>
-            <li id="home-link" onClick={() => navigate("/dashboard")}>Home</li>
+            <li id="home-link" onClick={()=>fetchRoomsAndPosts()}>Refresh Feed</li>
             {!isGuest && (
                <>
                   <li id="rooms-link" onClick={(e) => {
@@ -699,13 +740,14 @@ const handleRequestSubjectRoom = async () => {
                 )}
             {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
             right now, lets just keep it in the profile....should it have a confirmation? */}
-            <li><button id="lgm" className="lgm"  >☀️Light Mode </button></li>
+            <li id="lgm">☀️Light Mode </li>
             {/* the theme button is the only now to cause issues with clicking anywhere that is not the middle */}
             <li  onClick={(e) => {
     e.preventDefault();
     fetchAnnouncements();
     setShowAnnouncements(true);
   }}>📢 Announcements</li>
+ 
         </ul>
     </aside>
 
@@ -849,6 +891,26 @@ const handleRequestSubjectRoom = async () => {
         {/* <!-- Feed --> */}
         <section className="fyp-container">
             <h2 className="H2feed">Feed</h2>
+            <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
+  {[
+     { key: "random", label: "All" },
+  { key: "recent", label: "Most Recent" },
+  { key: "popular", label: "Most Popular" },
+  ].map(({ key, label }) => (
+    <button
+      key={key}
+      onClick={() => setSortBy(key)}
+      style={{
+        padding: "4px 12px", borderRadius: "20px", border: "none",
+        cursor: "pointer", fontSize: "12px",
+        background: sortBy === key ? "#6476af" : "rgba(255,255,255,0.1)",
+        color: "balck"
+      }}
+    >
+      {label}
+    </button>
+  ))}
+</div>
             <div className="fyp-feed" id="fyp-feed">
                 <p>ehh...the mock are just for funsies....this will not be at all the way this will be..i hope</p><br /><br />
                 {loading ? (
@@ -856,7 +918,7 @@ const handleRequestSubjectRoom = async () => {
 ) : posts.length === 0 ? (
   <p>No posts yet. Try writing one ✨</p>
 ) : (
-  posts.map(post =>
+  sortedPosts.map(post =>
      {
   if (post.isHidden) return null;
   return ( 

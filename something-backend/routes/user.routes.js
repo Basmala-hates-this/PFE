@@ -19,7 +19,6 @@ router.post("/select-major", protect, userController.selectMajorAfterRejection);
 router.post("/select-valid-inputs", protect, userController.selectValidInputs);
 
 //for stat cards
-
 router.get("/me/received-votes", protect, userController.getMyReceivedVotes);
 router.get("/me/comments", protect, userController.getMyComments);
 
