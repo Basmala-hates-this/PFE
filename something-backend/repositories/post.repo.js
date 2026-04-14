@@ -94,14 +94,14 @@ else {
   userRepo.updateRating(post.authorId, oldType, "remove");   
   userRepo.updateRating(post.authorId, voteType, "add"); 
 }
-if (!existingVote) {
-  userRepo.updateRating(post.authorId, voteType, "add");
-} else if (existingVote.type === voteType) {
-  userRepo.updateRating(post.authorId, voteType, "remove");
-} else {
-  userRepo.updateRating(post.authorId, existingVote.type, "remove");
-  userRepo.updateRating(post.authorId, voteType, "add");
-}
+// if (!existingVote) {
+//   userRepo.updateRating(post.authorId, voteType, "add");
+// } else if (existingVote.type === voteType) {
+//   userRepo.updateRating(post.authorId, voteType, "remove");
+// } else {
+//   userRepo.updateRating(post.authorId, existingVote.type, "remove");
+//   userRepo.updateRating(post.authorId, voteType, "add");
+// }
 
 
  
