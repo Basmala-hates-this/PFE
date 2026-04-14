@@ -3,7 +3,7 @@ import logo2 from "../photos/logo2.png"
  import { useNavigate } from "react-router-dom";
  import { useState } from "react";
 import Select from "react-select";
-import { customSelect } from "../assets/components/selectStyles";
+
 import axios from "axios";
 
 
@@ -54,7 +54,86 @@ export default function Welcome(){
   { "value": "UTO", "label": "University of Tizi Ouzou - Mouloud Mammeri" }
 ]
 
+const customSelect = {
+  control: (provided, state) => ({
+    ...provided,
+    backgroundColor: "white",
+   
+    border: "2px solid black", 
+    borderRadius: "12px",
+    padding: "7px",
+    transition: "all 0.2s ease",
+      
+   minHeight: "10px",
+    fontSize: "16px",
+    display: "flex",
+    alignItems: "center", 
+    
+  }),valueContainer: (provided) => ({
+    ...provided,
+    paddingTop: "2px",     
+   
+    display: "flex",
+    alignItems: "center"
+  }),
 
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#ecf1fa",
+    borderRadius: "12px",
+    overflow: "hidden",
+    fontSize: "16px"
+  }),
+
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? "#b3bfe5"
+      : state.isFocused
+      ? "#6791d5"
+      : "#ced7ea",
+    color: "#000000",
+    cursor: "pointer",
+    padding: "10px",
+    
+  
+  }),
+
+  multiValue: (provided) => ({
+    ...provided,
+    backgroundColor: "#6476af",
+    borderRadius: "8px",
+     marginTop: "2px",       
+    marginBottom: "2px"
+  }),
+
+  multiValueLabel: (provided) => ({
+    ...provided,
+    color: "#ffffff"
+  }),
+
+  multiValueRemove: (provided) => ({
+    ...provided,
+    color: "#ffffff",
+    
+  }),
+
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#000000",
+    marginTop: "2px",
+  }),
+
+  placeholder: (provided) => ({
+    ...provided,
+    color: "#1e1e1f"
+  }),
+
+  input: (provided) => ({
+    ...provided,
+    color: "#232326"
+  })
+};
 
   return (
     <div id="body0">
@@ -73,10 +152,10 @@ export default function Welcome(){
 
 {/* //guest shit */}
   {showGuestModal && (
-  <div className="modal-overlay" onClick={() => setShowGuestModal(false)}>
+  <div style={{borderRadius:"9px",backgroundColor:"#537a87c5"}} className="modal-overlay" onClick={() => setShowGuestModal(false)}>
     <div className="modal" onClick={(e) => e.stopPropagation()}>
       
-      <h3>Select up to 5 universities to browse</h3>
+      <h3 style={{color:"black"}}>Select up to 5 universities to browse</h3>
       <br/>
       <Select
         isMulti
@@ -86,13 +165,16 @@ export default function Welcome(){
           if (selected.length <= 5) setSelectedUniversities(selected);
         }}
         placeholder="Select universities..."
-        // styles={customSelect}
+        styles={customSelect}
       />
       <br/>
       <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
-        <button onClick={() => setShowGuestModal(false)}>Cancel</button>
+        <button onClick={() => setShowGuestModal(false)} style={{backgroundColor:"crimson", width:"250px",marginRight:"10px",height:"40px" ,color:"white",borderRadius:"8px"}}>Cancel</button>
         {/* is it stupid to write the entire function derectly into the element?not illegall....just stupid... */}
-        <button onClick={async () => {
+        <button 
+style={{backgroundColor:"green", width:"250px",marginRight:"10px",height:"40px" ,color:"white",borderRadius:"8px"}}
+
+        onClick={async () => {
   try {
     const response = await axios.post("http://localhost:5000/api/auth/guest", {
       selectedUniversities
