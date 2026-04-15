@@ -11,7 +11,7 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
       🙈 This comment has been hidden.
     </div>
   );
-
+ 
   return (
     <div style={{ marginLeft: depth > 0 ? "20px" : "0", borderLeft: depth > 0 ? "2px solid rgba(100,118,175,0.3)" : "none", paddingLeft: depth > 0 ? "10px" : "0" }}>
       <div style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
@@ -53,10 +53,10 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
           </div>
         ) : (
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            <button onClick={() => onVote(comment.id, "useful")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" }}>
+            <button onClick={() => onVote(comment.id, "useful")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#27ae60", background: "none", border: "1px solid #27ae60b3"  }}>
               👍 {comment.votes.useful}
             </button>
-            <button onClick={() => onVote(comment.id, "useless")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" }}>
+            <button onClick={() => onVote(comment.id, "useless")} style={{ fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#c0392b", background:"none", border:"1px solid #c0392bb3" }}>
               👎 {comment.votes.useless}
             </button>
             {(currentUser?.id === comment.authorId || currentUser?.rating >= 4) && (
@@ -328,10 +328,10 @@ const buildCommentTree = (comments) => {
   </a>
 )}
           <div style={{display:"flex", gap:"8px"}}>
-            <button onClick={() => handleVote("useful")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
+            <button onClick={() => handleVote("useful")} style={{fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#27ae60", background: "none", border: "1px solid #27ae60b3"}}>
               👍 Useful {post.votes.useful}
             </button>
-            <button onClick={() => handleVote("useless")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer"}}>
+            <button onClick={() => handleVote("useless")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#c0392b", background:"none", border:"1px solid #c0392bb3"}}>
               👎 Useless {post.votes.useless}
             </button>
             {!isGuest && currentUser?.id !== post.authorId && (

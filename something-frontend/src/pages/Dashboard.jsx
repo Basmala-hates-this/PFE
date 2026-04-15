@@ -1,5 +1,6 @@
 import "../styles/Dash.css";
 import "../styles/sidebar.css";
+import "../styles/pallette.css";
 import Cat from "../photos/Cat.jpg";
  import { useNavigate } from "react-router-dom";
  import axios from "axios";
@@ -675,6 +676,86 @@ const sortedPosts = [...posts].sort((a, b) => {
 });
 
 
+
+ const cSelect = {
+  control: (provided, state) => ({
+    ...provided,
+    backgroundColor: "transparent",
+    border: "2px solid rgba(255, 255, 255, 0.68)",
+    borderRadius: "12px",
+    padding: "4px",
+    transition: "all 0.2s ease",
+    minHeight: "10px",
+    fontSize: "16px",
+    boxShadow: "none",
+    width:"40%",
+    height:"50px",
+
+    "&:hover": {
+      border: "2px solid rgba(255,255,255,0.6)",
+    }
+  }),
+  menu: (provided) => ({
+    ...provided,
+    backgroundColor: "#1e2a3a",
+    borderRadius: "12px",
+    overflow: "hidden",
+    fontSize: "16px",
+    border: "1px solid rgba(255,255,255,0.1)"
+  }),
+  option: (provided, state) => ({
+    ...provided,
+    backgroundColor: state.isSelected
+      ? "#4a5568"
+      : state.isFocused
+      ? "#2d3748"
+      : "transparent",
+    color: "#ffffff",
+    cursor: "pointer",
+    padding: "10px",
+  }),
+  groupHeading: (provided) => ({
+    ...provided,
+    color: "#a0aec0",
+    fontSize: "11px",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    letterSpacing: "1px",
+    padding: "8px 12px 4px"
+  }),
+  multiValue: (provided) => ({
+    ...provided,
+    backgroundColor: "#4a5568",
+    borderRadius: "8px",
+  }),
+  multiValueLabel: (provided) => ({
+    ...provided,
+    color: "#ffffff"
+  }),
+  multiValueRemove: (provided) => ({
+    ...provided,
+    color: "#ffffff",
+  }),
+  singleValue: (provided) => ({
+    ...provided,
+    color: "#ffffff",
+  }),
+  placeholder: (provided) => ({
+    ...provided,
+    color: "rgba(0, 0, 0, 0.8)"
+  }),
+  input: (provided) => ({
+    ...provided,
+    color: "#ffffff"
+  }),
+  valueContainer: (provided) => ({
+    ...provided,
+    display: "flex",
+    alignItems: "center"
+  })
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -702,7 +783,7 @@ const sortedPosts = [...posts].sort((a, b) => {
       alignItems: "center",
       justifyContent: "center",
       marginTop: "10px",
-      marginLeft: sidebarOpen ? "17px" : "1px",
+      marginLeft: sidebarOpen ? "15px" : "1px",
       transition: "margin-left 0.3s ease"
     }}
   >
@@ -783,7 +864,7 @@ const sortedPosts = [...posts].sort((a, b) => {
       value={selectedRooms}
       onChange={(selected) => setSelectedRooms(selected || [])}
       placeholder="Select rooms to view..."
-      styles={customSelect}
+      styles={cSelect}
     />
   </div>
 {/* this is gonna hurt.... */}
@@ -928,7 +1009,7 @@ const sortedPosts = [...posts].sort((a, b) => {
   <img 
     src={user?.profilePic || Cat} 
     alt="pfp" 
-    style={{width:"32px", height:"32px", borderRadius:"50%", objectFit:"cover"}}
+    style={{width:"40px", height:"40px", borderRadius:"50%", objectFit:"cover",border:"1px solid var(--dark)", padding:"2px"}}
   />
   <strong>@{post.authorUsername}</strong>
   <small style={{
@@ -940,7 +1021,20 @@ const sortedPosts = [...posts].sort((a, b) => {
   }}>{post.authorRole || "user"}</small>
   <small style={{opacity:0.6}}>{getRoomName(post.roomId)}</small>
 </div>
-      <p>{post.content}</p>
+      <div className="post-body" style={{ marginTop: "10px", marginBottom: "10px" }}>
+  {post.title && (
+    <h3 style={{ 
+      margin: "0 0 8px 0", 
+      fontSize: "1.2rem", 
+      color: "var(--text-postTitle)", 
+    }}>
+      {post.title}
+    </h3>
+  )}
+  <p style={{ margin: 0, lineHeight: "1.5", opacity: 0.9 }}>
+    {post.content}
+  </p>
+</div>
       {/* image attachment */}
 {post.image && (
   <div style={{marginBottom:"8px"}}>
@@ -948,13 +1042,13 @@ const sortedPosts = [...posts].sort((a, b) => {
       <img 
         src={post.image} 
         alt="attachment" 
-        style={{maxWidth:"100%", borderRadius:"8px", display:"block", cursor:"pointer"}}
+        style={{maxWidth:"100%",width:"70%", borderRadius:"8px", display:"block", cursor:"pointer"}}
       />
     </a>
     <a
       href={post.image}
       download
-      style={{display:"inline-block", marginTop:"4px", fontSize:"11px", color:"#8ca4c6"}}
+      style={{display:"inline-block", marginTop:"4px", fontSize:"13px", color:"#d4dfed",backgroundColor:"#2b2b2b7d", textDecoration:"none",border:"1px solid #ffffff7d", padding:"2px 8px", borderRadius:"6px"}}
     >
       ⬇️ Download Image
     </a>
@@ -980,22 +1074,23 @@ const sortedPosts = [...posts].sort((a, b) => {
     href={post.resourceLink} 
     target="_blank" 
     rel="noopener noreferrer"
-    style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(100,118,175,0.3)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
+    style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(100,118,175,0.3)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px",height:"30px"}}
   >
     🔗 {post.resourceLabel || "Open Resource"}
   </a>
 )}
       <small>{new Date(post.createdAt).toLocaleString()}</small>
       <div style={{marginTop: "8px"}}>
-        <button onClick={() => isGuest ? alert("Create an account to vote! 👋") :handleVote(post.id, "useful")}>{post.votes.useful}👍 Useful </button>
-        <button onClick={() =>isGuest ? alert("Create an account to vote! 👋") : handleVote(post.id, "useless")} style={{marginLeft: "8px"}}>{post.votes.useless}👎 Useless </button>
-        <button onClick={() => setSelectedPost(post)}  style={{marginLeft: "8px"}}>
+        <button onClick={() => isGuest ? alert("Create an account to vote! 👋") :handleVote(post.id, "useful")} style={{fontSize: "13px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#000000", backgroundColor: "#27ae5f9a", border: "1px solid #27ae60b3",height:"30px"}}>{post.votes.useful}👍 Useful </button>
+        <button onClick={() =>isGuest ? alert("Create an account to vote! 👋") : handleVote(post.id, "useless")} style={{marginLeft: "8px",fontSize:"13px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#000000", backgroundColor:"#d9770693", border:"1px solid #c0392bb3",height:"30px"}}>{post.votes.useless}👎 Useless </button>
+        <button onClick={() => setSelectedPost(post)}  style={{marginLeft: "8px", fontSize:"13px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", color:"#000000", backgroundColor:"#297fb990", border:"1px solid #6cb1df",height:"30px"}} >
          Comments {post.comments.length}
         </button>
            {!isGuest && (
               <button
               onClick={() => handleSavePost(post.id)}
-              style={{marginLeft:"8px", cursor:"pointer", color: savedPostIds.includes(post.id) ? "green" : "inherit"}}
+              style={{marginLeft:"8px", cursor:"pointer", color: savedPostIds.includes(post.id) ? "black" : "inherit", background: "none",borderRadius:"8px", fontSize: "13px",height:"30px", padding:"4px",
+                 border: savedPostIds.includes(post.id) ? "2px solid #31d073" : "2px solid rgba(10, 10, 10, 0.5)"}}
                >
                 {savedPostIds.includes(post.id) ? "🔖 Saved" : "🔖 Save"}
                 </button>
@@ -1004,8 +1099,8 @@ const sortedPosts = [...posts].sort((a, b) => {
               {!isGuest && currentUser?.id !== post.authorId && (
                   <button
                    onClick={() => setReportTarget({ type: "post", postId: post.id })}
-                   style={{ marginLeft: "8px", cursor: "pointer", color: "#c0392b",
-                    background: "none", border: "none", fontSize: "13px" }}>
+                   style={{ marginLeft: "8px", cursor: "pointer", color: "#ffffff",
+                    backgroundColor: "#868686cb", borderColor: "#c0392b", fontSize: "13px", height:"30px", padding:"4px", borderRadius:"8px" }}>
                    🚩 Report
                  </button>
                 )}
@@ -1013,7 +1108,8 @@ const sortedPosts = [...posts].sort((a, b) => {
         {currentUser?.id === post.authorId && (
   <button 
     onClick={() => handleDeletePost(post.id)} 
-    style={{marginLeft: "8px", color:"red", cursor:"pointer"}}>
+    style={{marginLeft: "8px", cursor: "pointer", color: "#f6f4f4",
+                    backgroundColor: "#868686db", border: "2px,solid, #ff0101", fontSize: "13px", height:"30px", padding:"4px", borderRadius:"8px" }}>
     🗑️ Delete
   </button>
   
@@ -1025,7 +1121,7 @@ const sortedPosts = [...posts].sort((a, b) => {
       setEditPostTitle(post.title);
       setEditPostContent(post.content);
     }}  
-    style={{marginLeft: "8px", color:"green", cursor:"pointer"}}>
+    style={{marginLeft: "8px", color:"#fff", cursor:"pointer", backgroundColor: "#868686d6", border: "2px solid green", fontSize: "13px", height:"30px", padding:"4px", borderRadius:"8px" ,width:"60px", textAlign:"center"}} >
     Edit
   </button>
   
@@ -1239,7 +1335,7 @@ const sortedPosts = [...posts].sort((a, b) => {
     onChange={(e) => { setRequestMajor(e.target.value); setRequestFeedback(""); }}
     style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "#252b45", color: "white", marginBottom: "8px" }}
   >
-    <option value="">Select your major...</option>
+    <option value="">Select the major...</option>
     {user?.majors?.map(m => (
       <option key={m} value={m}>{m}</option>
     ))}

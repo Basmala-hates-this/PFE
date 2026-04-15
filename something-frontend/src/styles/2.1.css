@@ -318,7 +318,7 @@ body, .sidebar, .main, .header, .fyp-container, .fyp-feed {
 }
 
 .modal {
-  background: #1e2a3a;
+  background: #1e2a3a8f;
   border-radius: 16px;
   padding: 24px;
   width: 500px;

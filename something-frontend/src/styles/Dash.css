@@ -173,27 +173,75 @@ font-size: 0.8rem;
 }
 
 
-/* back to adding extras....this should be fun..right?heh */
+
+
+
+
+/* the looks of the post overlay....try outs....shit... */
 .modal-overlay {
   position: fixed;
-  inset: 0;
-  margin-left: 25%;
-  margin-top: 35px;
-  margin-bottom: 10%;
-  background: rgba(15, 28, 84, 0.854);
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
-  align-items: center;
   justify-content: center;
-  border: 2px,solid, whitesmoke;
-  width: 50%;
-  height: 90%;
-  color: white;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  overflow: auto;
 }
 
 .modal {
-  background: var(--card-bg);
-  padding: 20px;
-  width: 400px;
-  height: auto;
-  border-radius: 10px;
+  background: #1e2a3a8f;
+  border-radius: 16px;
+  padding: 24px;
+  width: 500px;
+  max-width: 90vw;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  color: white;
+  overflow: auto;
+}
+
+.modal h3 {
+  color: white;
+  font-size: 1.3rem;
+}
+
+.modal input,
+.modal textarea {
+  background: rgba(255,255,255,0.1) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  color: white !important;
+  border-radius: 8px;
+}
+
+.modal input::placeholder,
+.modal textarea::placeholder {
+  color: rgba(255,255,255,0.4);
+}
+
+.modal-actions button {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-actions button:first-child {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.modal-actions button:last-child {
+  background: #6476af;
+  color: white;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }

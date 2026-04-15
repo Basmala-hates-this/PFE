@@ -19,15 +19,16 @@ didnt use most of them...+the namings are bad...idc*/
   --text-main: #e5e7eb;     
   --text-muted: #9ca3af;  
   --text-soft: #b4bac6;
+  --text-postTitle: #ffffff;
 
   /* === Accent  === */
   --accent: #38bdf8;        
   --accent-hover: #0ea5e9;
   --accent-glow: #22d3ee;
-  --accent-neon:
+  --accent-neon:	#1F51FF;
 
   /* === Borders & Effects === */
-  --border-soft: rgba(255,255,255,0.08);
+  --border-soft: #6665652f;
   --shadow-soft: 0 10px 30px rgba(0,0,0,0.4);
 
   /* === Status === */
@@ -52,6 +53,7 @@ didnt use most of them...+the namings are bad...idc*/
   --text-main: #020617;
   --text-muted: #475569;
   --text-soft: #64748b;
+  --text-postTitle: #000000;
 
   /* === Accent === */
   --accent: #0315a0;
