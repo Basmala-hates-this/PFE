@@ -1042,7 +1042,7 @@ const sortedPosts = [...posts].sort((a, b) => {
       <img 
         src={post.image} 
         alt="attachment" 
-        style={{maxWidth:"100%",width:"70%", borderRadius:"8px", display:"block", cursor:"pointer"}}
+        style={{maxWidth:"100%",width:"60%", borderRadius:"8px", display:"block", cursor:"pointer"}}
       />
     </a>
     <a
