@@ -1031,7 +1031,7 @@ const sortedPosts = [...posts].sort((a, b) => {
       {post.title}
     </h3>
   )}
-  <p style={{ margin: 0, lineHeight: "1.5", opacity: 0.9 }}>
+  <p style={{ margin: 0, lineHeight: "1.5", opacity:1 }}>
     {post.content}
   </p>
 </div>
