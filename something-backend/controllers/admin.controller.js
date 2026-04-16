@@ -910,6 +910,40 @@ const deleteRoomAdmin = (req, res) => {
 };
 
 
+const getCurrentAdmins = (req, res) => {
+  if (req.user.authorityLevel !== "superadmin") {
+    return res.status(403).json({ message: "Only superadmin can view admins" });
+  }
+  const admins = userRepo.readUsers()
+    .filter(u => u.authorityLevel === "admin")
+    .map(({ password, ...u }) => u);
+  res.json(admins);
+};
+
+const editAdminPermissions = (req, res) => {
+  if (req.user.authorityLevel !== "superadmin") {
+    return res.status(403).json({ message: "Only superadmin can edit permissions" });
+  }
+  const { userId } = req.params;
+  const { permissions, assignedRooms } = req.body;
+  const user = userRepo.findById(userId);
+  if (!user) return res.status(404).json({ message: "User not found" });
+
+  userRepo.updateUser(userId, {
+    permissions: permissions || [],
+    assignedRooms: assignedRooms || [],
+    actionHistory: [...(user.actionHistory || []), {
+      action: "permissions_edited",
+      by: req.user.username,
+      date: new Date().toISOString()
+    }]
+  });
+
+  addLog(req.user.id, req.user.username, "edit_admin_permissions", userId,
+    `Updated permissions for @${user.username}: ${permissions?.join(", ")}`);
+  res.json({ message: "Permissions updated" });
+};
+
 module.exports = {
   getAllUsers,
   suspendUser,
@@ -947,6 +981,8 @@ module.exports = {
   suspendFromRoom,
   unsuspendFromRoom,
   deleteRoomAdmin,
+  getCurrentAdmins,
+  editAdminPermissions,
 };
 
 //this one is getting humangasoures....this is bad but not so bad...it has all admin shit which is bad...

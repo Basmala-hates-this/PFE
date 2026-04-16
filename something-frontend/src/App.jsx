@@ -24,6 +24,8 @@ import SuperAdminPanel from "./pages/Superadminpanel.jsx";
 import ReorientationPage from "./pages/ReorientationPage";
 import CorrectInputsPage from "./pages/CorrectInputsPage";
 
+import Guide from "./pages/Guide.jsx";
+
 function App() {
   return (
     <Router>
@@ -50,6 +52,7 @@ function App() {
 
         <Route path="/reorientation" element={<ReorientationPage />} />
         <Route path="/correct-inputs" element={<CorrectInputsPage />} />
+        <Route path="/guide" element={<Guide />} />
 
       </Routes>
             </RegistrationProvider>

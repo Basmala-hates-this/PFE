@@ -828,6 +828,7 @@ const sortedPosts = [...posts].sort((a, b) => {
     fetchAnnouncements();
     setShowAnnouncements(true);
   }}>📢 Announcements</li>
+  <li onClick={() => navigate("/guide")} >Guide</li>
  
         </ul>
     </aside>
