@@ -2,6 +2,15 @@ import React, { useRef } from "react";
 import "../styles/guide.css";
 import { useNavigate } from "react-router-dom";
 
+import dash from "../photos/dash.jpg";
+import join from "../photos/join.jpg";
+import req from "../photos/req.jpg";
+import roomChat from "../photos/roomchat.jpg";
+import subj from "../photos/subj.jpg";
+import profile from "../photos/profile.jpg";
+import actionBtns from "../photos/actionbtns.jpg";
+import edit from "../photos/edit.jpg";
+
 export default function Guide() {
       const navigate = useNavigate();
 
@@ -32,7 +41,7 @@ export default function Guide() {
       <aside className="guide-nav">
         <h2>StudyBuddy Guide</h2>
         <ul>
-          <li style={{backgroundColor:"#0859d38d",borderColor:"#08d3d38d"}} onClick={() => navigate("/dashboard")}>Back To Dashboard</li>
+          <li  style={{backgroundColor:"#0859d38d",borderColor:"#08d3d38d"}} onClick={() => navigate("/dashboard")}>← Back To Dashboard</li>
           <li onClick={() => scrollTo("overview")}>Overview</li>
           <li onClick={() => scrollTo("dashboard")}>Dashboard</li>
           <li onClick={() => scrollTo("rooms")}>Rooms</li>
@@ -67,12 +76,34 @@ export default function Guide() {
           <h1>Dashboard</h1>
           <p>Your main control center. Use it to navigate across StudyBuddy.</p>
           <ol>
-            <li>Use sidebar navigation</li>
+            <li>Use sidebar for navigation and quick actions</li>
             <li>Select a feature</li>
             <li>Interact with content</li>
           </ol>
-          <img src="../photos/dash.jpg" alt="Dashboard" />
+          <img src={dash} alt="Dashboard" />
+
+          
+
         </section>
+          {/* Actions */}
+        <section ref={sections.actions}>
+          <h1>Stat Cards</h1>
+          <p>Stat cards track events and decisions inside the platform.could be accessed from the profile.</p>
+          <ul>
+            <li>View history</li>
+            <li>Track user activity</li>
+            <li>Understand changes</li>
+          </ul>
+          <img src={profile} alt="Profile" />
+          <p>Clicking on the stat cards will show you the details of the action and the related discussion.</p>
+
+          <p>another useful thing is the action sidebar</p>
+          <img src={actionBtns} alt="sidebar" />
+         
+
+
+        </section>
+
 
         {/* Rooms */}
         <section ref={sections.rooms}>
@@ -84,21 +115,14 @@ export default function Guide() {
             <li>Start or participate in discussions</li>
             <li>View related actions</li>
           </ul>
-          <img src="../photos/rooms.png" alt="Rooms" />
+          
+          <img src={join} alt="Join Room" />
+          <img src={req} alt="Request Room" />
+          <img src={roomChat} alt="Room Chat" />
+          <img src={subj} alt="Subject Room" />
         </section>
 
-        {/* Actions */}
-        <section ref={sections.actions}>
-          <h1>Stat Cards</h1>
-          <p>Stat cards track events and decisions inside the platform.could be accessed from the profile.</p>
-          <ul>
-            <li>View history</li>
-            <li>Track user activity</li>
-            <li>Understand changes</li>
-          </ul>
-          <img src="/images/actions.png" alt="Actions" />
-        </section>
-
+      
         {/* Roles */}
         <section ref={sections.roles}>
           <h1>Roles & Permissions</h1>
@@ -114,13 +138,16 @@ export default function Guide() {
         <section ref={sections.interaction}>
           <h1>User Interaction</h1>
           <p>Users interact through discussions and actions.</p>
+          <p>Engage in discussions, make decisions, and track outcomes.
+            <p>try posting,commenting,voting,searching</p>
+          </p>
         </section>
 
         {/* Account */}
         <section ref={sections.account}>
           <h1> Edit Account</h1>
           <p>Edit your profile and personalize your identity in this platform.</p>
-          <img src="../photos/edit.jpg" alt="edit" />
+          <img src={edit} alt="edit" />
         </section>
 
         {/* Navigation */}
