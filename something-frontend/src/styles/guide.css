@@ -3,7 +3,7 @@
   --bg-card: #152a4a;
   --accent: #38bdf8;
   --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
+  --text-muted: #d0d6e0;
   --border: #00b815;
 }
 
@@ -57,15 +57,7 @@
   color: var(--accent);
 }
 
-/* Specialized Back Button */
-.back-btn {
-  background: var(--accent) !important;
-  color: var(--bg-dark) !important;
-  font-weight: 600;
-  text-align: center;
-  justify-content: center;
-  margin-bottom: 20px !important;
-}
+
 
 /* Content Area */
 .guide-content {
@@ -81,7 +73,7 @@
 }
 
 .guide-content h1 {
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 20px;
   color: var(--text-main);
   border-bottom: 2px solid var(--border);
@@ -109,7 +101,7 @@
   max-height: 700px;
   height: auto;
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
   margin: 25px 0;
   box-shadow: 0 10px 25px rgba(0,0,0,0.3);
   transition: transform 0.3s ease;
