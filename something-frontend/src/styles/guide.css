@@ -1,10 +1,10 @@
 :root {
-  --bg-dark: #0f172a;
-  --bg-card: #1e293b;
+  --bg-dark: #132041;
+  --bg-card: #152a4a;
   --accent: #38bdf8;
   --text-main: #f1f5f9;
   --text-muted: #94a3b8;
-  --border: #334155;
+  --border: #00b815;
 }
 
 .guide-container {
@@ -24,6 +24,7 @@
   flex-direction: column;
   gap: 20px;
   border-right: 1px solid var(--border);
+  border-radius: 0 20px 20px 0;
 }
 
 .guide-nav h2 {
