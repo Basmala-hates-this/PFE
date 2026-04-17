@@ -48,6 +48,7 @@ router.patch("/users/:userId/upgrade-admin", protect, adminController.upgradeToA
 router.patch("/users/:userId/remove-admin", protect, adminController.removeAdmin);
 router.patch("/users/:userId/upgrade-superadmin", protect, adminController.upgradToSuperAdmin);
 router.get("/logs", protect, adminController.getLogs);
+router.post("/logs/:logId/override", protect, adminController.overrideLog);
 router.get("/stats", protect, adminController.getStats);
 
 //admin aplicats

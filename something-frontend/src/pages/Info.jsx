@@ -173,7 +173,7 @@ useEffect(() => {
   { code: "UTl", name: "University of Tlemcen - Abou Bekr Belkaid" },
   { code: "UTO", name: "University of Tizi Ouzou - Mouloud Mammeri" },
   
-];
+]; 
 
   const storedUniversities = JSON.parse(localStorage.getItem("universities")) || [];
 

@@ -944,6 +944,128 @@ const editAdminPermissions = (req, res) => {
   res.json({ message: "Permissions updated" });
 };
 
+//to override or not to override....quite a question...eh what the hell ,lets just go for it
+const overrideLog = (req, res) => {
+  if (req.user.authorityLevel !== "superadmin") {
+    return res.status(403).json({ message: "Only superadmin can override actions" });
+  }
+
+  const { logId } = req.params;
+  const { reason } = req.body;
+
+  if (!reason?.trim()) {
+    return res.status(400).json({ message: "Override reason is required" });
+  }
+
+  const logs = readLogs();
+  const log = logs.find(l => l.id === logId);
+  if (!log) return res.status(404).json({ message: "Log not found" });
+  if (log.overriddenBy) return res.status(400).json({ message: "This action has already been overridden" });
+
+  const posts = postRepo.getPostsAll();
+
+  try {
+    switch (log.action) {
+
+      case "suspend_user": {
+        const user = userRepo.findById(log.targetId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+        userRepo.updateUser(log.targetId, {
+          suspendedUntil: null,
+          suspensionReason: null,
+          actionHistory: [...(user.actionHistory || []), {
+            action: "suspension_overridden",
+            by: req.user.username,
+            reason,
+            date: new Date().toISOString()
+          }]
+        });
+        break;
+      }
+
+      case "hide_post": {
+        const post = posts.find(p => p.id === log.targetId);
+        if (!post) return res.status(404).json({ message: "Post not found" });
+        post.isHidden = false;
+        post.autoHidden = false;
+        postRepo.writePosts(posts);
+        break;
+      }
+
+      case "hide_comment": {
+        // targetId is commentId, need to find which post contains it
+        let found = false;
+        for (const post of posts) {
+          const comment = post.comments?.find(c => c.id === log.targetId);
+          if (comment) {
+            comment.isHidden = false;
+            comment.autoHidden = false;
+            found = true;
+            break;
+          }
+        }
+        if (!found) return res.status(404).json({ message: "Comment not found" });
+        postRepo.writePosts(posts);
+        break;
+      }
+
+      case "room_suspend": {
+        // details format: "Suspended @username from room ROOMID for X days: reason"
+        // targetId is the userId here
+        const user = userRepo.findById(log.targetId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        // extract roomId from details string
+        const roomIdMatch = log.details.match(/from room (\S+) for/);
+        if (!roomIdMatch) return res.status(400).json({ message: "Could not parse room ID from log" });
+        const roomId = roomIdMatch[1];
+
+        roomRepo.unsuspendMemberFromRoom(roomId, log.targetId);
+        userRepo.updateUser(log.targetId, {
+          actionHistory: [...(user.actionHistory || []), {
+            action: "room_suspension_overridden",
+            roomId,
+            by: req.user.username,
+            reason,
+            date: new Date().toISOString()
+          }]
+        });
+        break;
+      }
+
+      case "approve_resource":
+      case "reject_resource": {
+        const post = posts.find(p => p.id === log.targetId);
+        if (!post) return res.status(404).json({ message: "Post not found" });
+        // flip it
+        post.resourceApproved = log.action === "approve_resource" ? false : null;
+        postRepo.writePosts(posts);
+        break;
+      }
+
+      default:
+        return res.status(400).json({ message: `Action "${log.action}" is not overridable` });
+    }
+
+  } catch (err) {
+    console.error("Override error:", err);
+    return res.status(500).json({ message: "Override failed" });
+  }
+
+  // mark the original log as overridden
+  log.overriddenBy = req.user.username;
+  log.overrideReason = reason;
+  log.overriddenAt = new Date().toISOString();
+  writeLogs(logs);
+
+  // write a new audit log for the override itself
+  addLog(req.user.id, req.user.username, "override_action", log.targetId,
+    `Overrode "${log.action}" (log #${log.id}): ${reason}`
+  );
+
+  res.json({ message: "Action overridden successfully" });
+};
+
 module.exports = {
   getAllUsers,
   suspendUser,
@@ -983,6 +1105,7 @@ module.exports = {
   deleteRoomAdmin,
   getCurrentAdmins,
   editAdminPermissions,
+  overrideLog,
 };
 
 //this one is getting humangasoures....this is bad but not so bad...it has all admin shit which is bad...

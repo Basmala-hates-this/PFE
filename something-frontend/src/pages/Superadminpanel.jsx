@@ -45,6 +45,10 @@ export default function SuperAdminPanel() {
 
   const [drillDown, setDrillDown] = useState(null);
 
+  //override this shit
+  const [overridingLogId, setOverridingLogId] = useState(null);
+const [overrideReason, setOverrideReason] = useState("");
+
   //////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -337,6 +341,21 @@ export default function SuperAdminPanel() {
       console.error(err);
     }
   };
+
+
+
+  const handleOverride = async (logId) => {
+  if (!overrideReason.trim()) return alert("Please enter a reason for the override.");
+  try {
+    await axios.post(`${API}/logs/${logId}/override`, { reason: overrideReason }, { headers });
+    alert("Action overridden successfully.");
+    setOverridingLogId(null);
+    setOverrideReason("");
+    fetchLogs(); // refresh so the overridden badge shows immediately
+  } catch (err) {
+    alert(err.response?.data?.message || "Override failed.");
+  }
+};
 
   //////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1037,63 +1056,96 @@ export default function SuperAdminPanel() {
 
       {/* ── LOGS TAB ── */}
       {activeTab === "logs" && (
-        <div>
-          <h3 style={{ marginBottom: "16px" }}>Platform Action Logs</h3>
-          {logs.length === 0 ? (
-            <p style={{ opacity: 0.5 }}>No logs yet.</p>
-          ) : (
-            logs.map((log) => (
-              <div
-                key={log.id}
-                style={{
-                  ...card,
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "12px",
-                }}
-              >
-                <div
+  <div>
+    <h3 style={{ marginBottom: "16px" }}>Platform Action Logs</h3>
+    {logs.length === 0 ? (
+      <p style={{ opacity: 0.5 }}>No logs yet.</p>
+    ) : (
+      logs.map((log) => {
+        const isOverridable = ["suspend_user", "hide_post", "hide_comment", "room_suspend", "approve_resource", "reject_resource"].includes(log.action);
+        const isOverriding = overridingLogId === log.id;
+
+        return (
+          <div key={log.id} style={{ ...card, opacity: log.overriddenBy ? 0.5 : 1 }}>
+            {/* main log row */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{
+                width: "8px", height: "8px", borderRadius: "50%",
+                background: log.overriddenBy ? "#555" : logActionColor(log.action),
+                flexShrink: 0,
+              }} />
+              <div style={{ flex: 1 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <strong style={{ fontSize: "13px" }}>@{log.adminUsername}</strong>
+                  <span style={{ ...badge(log.overriddenBy ? "#555" : logActionColor(log.action)), fontSize: "10px" }}>
+                    {log.action}
+                  </span>
+                  {log.overriddenBy && (
+                    <span style={{ ...badge("#7f8c8d"), fontSize: "10px" }}>
+                      ↩ overridden by @{log.overriddenBy}
+                    </span>
+                  )}
+                </div>
+                <small style={{ opacity: 0.6 }}>{log.details}</small>
+                {log.overriddenBy && (
+                  <small style={{ display: "block", opacity: 0.4, marginTop: "2px" }}>
+                    Reason: {log.overrideReason} • {new Date(log.overriddenAt).toLocaleString()}
+                  </small>
+                )}
+              </div>
+              <small style={{ opacity: 0.4, fontSize: "11px", flexShrink: 0 }}>
+                {new Date(log.createdAt).toLocaleString()}
+              </small>
+              {/* override button — only for overridable actions that haven't been overridden yet */}
+              {isOverridable && !log.overriddenBy && (
+                <button
+                  onClick={() => {
+                    setOverridingLogId(isOverriding ? null : log.id);
+                    setOverrideReason("");
+                  }}
+                  style={btn(isOverriding ? "rgba(255,255,255,0.1)" : "#c0392b")}
+                >
+                  {isOverriding ? "Cancel" : "↩ Override"}
+                </button>
+              )}
+            </div>
+
+            {/* inline override form */}
+            {isOverriding && (
+              <div style={{
+                marginTop: "10px",
+                background: "rgba(255,255,255,0.05)",
+                borderRadius: "8px",
+                padding: "12px",
+                display: "flex",
+                gap: "8px",
+                alignItems: "center",
+              }}>
+                <input
+                  value={overrideReason}
+                  onChange={(e) => setOverrideReason(e.target.value)}
+                  placeholder="Reason for override..."
                   style={{
-                    width: "8px",
-                    height: "8px",
-                    borderRadius: "50%",
-                    background: logActionColor(log.action),
-                    flexShrink: 0,
+                    flex: 1,
+                    background: "rgba(255,255,255,0.08)",
+                    border: "1px solid rgba(255,255,255,0.15)",
+                    borderRadius: "6px",
+                    padding: "6px 10px",
+                    color: "white",
+                    fontSize: "13px",
                   }}
                 />
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "8px",
-                    }}
-                  >
-                    <strong style={{ fontSize: "13px" }}>
-                      @{log.adminUsername}
-                    </strong>
-                    <span
-                      style={{
-                        ...badge(logActionColor(log.action)),
-                        fontSize: "10px",
-                      }}
-                    >
-                      {log.action}
-                    </span>
-                  </div>
-                  <small style={{ opacity: 0.6 }}>{log.details}</small>
-                </div>
-                <small
-                  style={{ opacity: 0.4, fontSize: "11px", flexShrink: 0 }}
-                >
-                  {new Date(log.createdAt).toLocaleString()}
-                </small>
+                <button onClick={() => handleOverride(log.id)} style={btn("#e74c3c")}>
+                  Confirm Override
+                </button>
               </div>
-            ))
-          )}
-        </div>
-      )}
-
+            )}
+          </div>
+        );
+      })
+    )}
+  </div>
+)}
       {/* this could go so wrong in so many places... */}
       {drillDown && (
         <div className="modal-overlay" onClick={() => setDrillDown(null)}>
