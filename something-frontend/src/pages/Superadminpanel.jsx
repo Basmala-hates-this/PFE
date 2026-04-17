@@ -43,6 +43,9 @@ const [rejectAppReason, setRejectAppReason] = useState("");
 const [selectedRooms, setSelectedRooms] = useState([]);
 const [allRooms, setAllRooms] = useState([]);
 
+const [currentAdmins, setCurrentAdmins] = useState([]);
+const [editingAdminId, setEditingAdminId] = useState(null);
+
 //////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,7 +59,7 @@ const [allRooms, setAllRooms] = useState([]);
   useEffect(() => {
   if (activeTab === "stats") fetchStats();
   if (activeTab === "logs") fetchLogs();
-  if (activeTab === "admins")  { fetchApplications(); fetchAllRooms(); }
+  if (activeTab === "admins") { fetchApplications(); fetchCurrentAdmins(); fetchAllRooms(); }
 }, [activeTab]);
 
 
@@ -179,6 +182,30 @@ const fetchAllRooms = async () => {
   } catch (err) { console.error(err); }
 };
 
+
+
+const fetchCurrentAdmins = async (search = "") => {
+  try {
+    const params = search ? `?q=${search}` : "";
+    const res = await axios.get(`${API}/admins${params}`, { headers });
+    setCurrentAdmins(res.data);
+  } catch (err) { console.error(err); }
+};
+
+const handleEditAdminPermissions = async (adminId) => {
+  try {
+    await axios.patch(`${API}/users/${adminId}/edit-permissions`,
+      { permissions: selectedPermissions, assignedRooms: selectedRooms },
+      { headers }
+    );
+    alert("Permissions updated!");
+    setEditingAdminId(null);
+    setSelectedPermissions([]);
+    setSelectedRooms([]);
+    fetchCurrentAdmins();
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
+
   //////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////
@@ -238,19 +265,17 @@ const fetchAllRooms = async () => {
 {/* admin tab for only aplicats */}
      {activeTab === "admins" && (
   <div>
+    {/* ── APPLICATIONS ── */}
     <h3 style={{ marginBottom: "16px" }}>Admin Applications</h3>
-
     {applications.length === 0 ? (
-      <p style={{ opacity: 0.5 }}>No pending applications.</p>
+      <p style={{ opacity: 0.5, marginBottom: "32px" }}>No pending applications.</p>
     ) : (
       applications.map(app => {
         const isRejecting = rejectingAppId === app.userId;
         const isUpgrading = upgradingId === app.userId;
-
         return (
           <div key={app.userId} style={card}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: isUpgrading || isRejecting ? "12px" : "0" }}>
-              
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                   <strong>@{app.username}</strong>
@@ -261,9 +286,8 @@ const fetchAllRooms = async () => {
                   {app.email} • Applied {new Date(app.appliedAt).toLocaleString()}
                 </small>
               </div>
-
               <div style={{ display: "flex", gap: "6px" }}>
-                <button onClick={() => { setUpgradingId(app.userId); setSelectedPermissions([]); }} style={btn("#f39c12")}>
+                <button onClick={() => { setUpgradingId(app.userId); setSelectedPermissions([]); setSelectedRooms([]); setEditingAdminId(null); }} style={btn("#f39c12")}>
                   🛡️ Accept
                 </button>
                 <button onClick={() => { setRejectingAppId(app.userId); setRejectAppReason(""); }} style={btn("#c0392b")}>
@@ -272,91 +296,153 @@ const fetchAllRooms = async () => {
               </div>
             </div>
 
-            {/* permission picker on accept */}
-           {isUpgrading && (
-  <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
-    <p style={{ margin: "0 0 10px", fontSize: "13px", opacity: 0.7 }}>Select permissions:</p>
-    <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
-      {PERMISSIONS.map(p => (
-        <label key={p.key} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px" }}>
-          <input
-            type="checkbox"
-            checked={selectedPermissions.includes(p.key)}
-            onChange={() => togglePermission(p.key)}
-          />
-          {p.label}
-        </label>
-      ))}
-    </div>
-
-    {/* room assignment — only if MANAGE_ROOMS is checked */}
-    {selectedPermissions.includes("MANAGE_ROOMS") && (
-      <div style={{ marginBottom: "12px" }}>
-        <p style={{ margin: "0 0 8px", fontSize: "13px", opacity: 0.7 }}>
-          Assign rooms to moderate:
-        </p>
-        {allRooms.filter(r => r.type !== "private" && r.type !== "public").length === 0 ? (
-          <small style={{ opacity: 0.5 }}>No rooms available.</small>
-        ) : (
-          <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", maxHeight: "150px", overflowY: "auto" }}>
-            {allRooms
-              .filter(r => r.type !== "private" && r.type !== "public")
-              .map(room => (
-                <label key={room.id} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px", background: "rgba(255,255,255,0.05)", padding: "4px 10px", borderRadius: "6px" }}>
-                  <input
-                    type="checkbox"
-                    checked={selectedRooms.includes(room.id)}
-                    onChange={() => setSelectedRooms(prev =>
-                      prev.includes(room.id)
-                        ? prev.filter(id => id !== room.id)
-                        : [...prev, room.id]
-                    )}
-                  />
-                  <span>{room.name}</span>
-                  <small style={{ opacity: 0.5, fontSize: "11px" }}>{room.type}</small>
-                </label>
-              ))}
-          </div>
-        )}
-      </div>
-    )}
-
-    <div style={{ display: "flex", gap: "8px" }}>
-      <button onClick={() => handleUpgradeAdmin(app.userId)} style={btn("#27ae60")}>
-        Confirm
-      </button>
-      <button onClick={() => { setUpgradingId(null); setSelectedPermissions([]); setSelectedRooms([]); }} style={btn("rgba(255,255,255,0.1)")}>
-        Cancel
-      </button>
-    </div>
-  </div>
-)}
-
-            {/* reason input on reject */}
-            {isRejecting && (
+            {isUpgrading && (
               <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
-                <input
-                  type="text"
-                  placeholder="Reason for rejection..."
-                  value={rejectAppReason}
-                  onChange={(e) => setRejectAppReason(e.target.value)}
-                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }}
-                />
+                <p style={{ margin: "0 0 10px", fontSize: "13px", opacity: 0.7 }}>Select permissions:</p>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+                  {PERMISSIONS.map(p => (
+                    <label key={p.key} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px" }}>
+                      <input type="checkbox" checked={selectedPermissions.includes(p.key)} onChange={() => togglePermission(p.key)} />
+                      {p.label}
+                    </label>
+                  ))}
+                </div>
+                {selectedPermissions.includes("MANAGE_ROOMS") && (
+                  <div style={{ marginBottom: "12px" }}>
+                    <p style={{ margin: "0 0 8px", fontSize: "13px", opacity: 0.7 }}>Assign rooms to moderate:</p>
+                    {allRooms.filter(r => r.type !== "private" && r.type !== "public").length === 0 ? (
+                      <small style={{ opacity: 0.5 }}>No rooms available.</small>
+                    ) : (
+                      <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", maxHeight: "150px", overflowY: "auto" }}>
+                        {allRooms.filter(r => r.type !== "private" && r.type !== "public").map(room => (
+                          <label key={room.id} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px", background: "rgba(255,255,255,0.05)", padding: "4px 10px", borderRadius: "6px" }}>
+                            <input type="checkbox" checked={selectedRooms.includes(room.id)}
+                              onChange={() => setSelectedRooms(prev => prev.includes(room.id) ? prev.filter(id => id !== room.id) : [...prev, room.id])} />
+                            <span>{room.name}</span>
+                            <small style={{ opacity: 0.5, fontSize: "11px" }}>{room.type}</small>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
                 <div style={{ display: "flex", gap: "8px" }}>
-                  <button onClick={() => handleRejectApplication(app.userId)} style={btn("#c0392b")}>
-                    Confirm Reject
-                  </button>
-                  <button onClick={() => { setRejectingAppId(null); setRejectAppReason(""); }} style={btn("rgba(255,255,255,0.1)")}>
-                    Cancel
-                  </button>
+                  <button onClick={() => handleUpgradeAdmin(app.userId)} style={btn("#27ae60")}>Confirm</button>
+                  <button onClick={() => { setUpgradingId(null); setSelectedPermissions([]); setSelectedRooms([]); }} style={btn("rgba(255,255,255,0.1)")}>Cancel</button>
                 </div>
               </div>
             )}
 
+            {isRejecting && (
+              <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
+                <input type="text" placeholder="Reason for rejection..."
+                  value={rejectAppReason} onChange={(e) => setRejectAppReason(e.target.value)}
+                  style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }} />
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <button onClick={() => handleRejectApplication(app.userId)} style={btn("#c0392b")}>Confirm Reject</button>
+                  <button onClick={() => { setRejectingAppId(null); setRejectAppReason(""); }} style={btn("rgba(255,255,255,0.1)")}>Cancel</button>
+                </div>
+              </div>
+            )}
           </div>
         );
       })
     )}
+
+    {/* ── CURRENT ADMINS ── */}
+    <div style={{ borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "24px", marginTop: "8px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+        <h3 style={{ margin: 0 }}>Current Admins</h3>
+        <input type="text" placeholder="Search admins..."
+          value={adminSearch} onChange={(e) => { setAdminSearch(e.target.value); fetchCurrentAdmins(e.target.value); }}
+          style={{ padding: "7px 12px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", width: "220px" }} />
+      </div>
+
+      {currentAdmins.length === 0 ? (
+        <p style={{ opacity: 0.5 }}>No admins yet.</p>
+      ) : (
+        currentAdmins.map(admin => {
+          const isEditing = editingAdminId === admin.id;
+          return (
+            <div key={admin.id} style={card}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <img src={admin.profilePic || Cat} alt="pfp"
+                  style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
+                <div style={{ flex: 1 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <strong>@{admin.username}</strong>
+                    <span style={badge("#4a3f6b")}>admin</span>
+                    <span style={badge("#f39c12")}>⭐ {admin.rating ?? 1}/5</span>
+                  </div>
+                  <small style={{ opacity: 0.5, display: "block" }}>{admin.email}</small>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginTop: "6px" }}>
+                    {admin.permissions?.length > 0 ? admin.permissions.map(p => (
+                      <span key={p} style={{ ...badge("#2d3b6b"), fontSize: "10px" }}>{p}</span>
+                    )) : <small style={{ opacity: 0.4 }}>No permissions</small>}
+                  </div>
+                  {admin.assignedRooms?.length > 0 && (
+                    <small style={{ opacity: 0.4, display: "block", marginTop: "4px" }}>
+                      Rooms: {admin.assignedRooms.map(rid => allRooms.find(r => r.id === rid)?.name || rid).join(", ")}
+                    </small>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                  <button
+                    onClick={() => {
+                      setEditingAdminId(isEditing ? null : admin.id);
+                      setSelectedPermissions(isEditing ? [] : [...(admin.permissions || [])]);
+                      setSelectedRooms(isEditing ? [] : [...(admin.assignedRooms || [])]);
+                      setUpgradingId(null);
+                    }}
+                    style={btn(isEditing ? "rgba(255,255,255,0.1)" : "#6476af")}>
+                    {isEditing ? "Cancel" : "✏️ Edit"}
+                  </button>
+                  <button onClick={() => handleRemoveAdmin(admin.id)} style={btn("#c0392b")}>
+                    🗑️ Remove
+                  </button>
+                </div>
+              </div>
+
+              {isEditing && (
+                <div style={{ marginTop: "12px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "12px" }}>
+                  <p style={{ margin: "0 0 10px", fontSize: "13px", opacity: 0.7 }}>Edit permissions:</p>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginBottom: "12px" }}>
+                    {PERMISSIONS.map(p => (
+                      <label key={p.key} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px" }}>
+                        <input type="checkbox" checked={selectedPermissions.includes(p.key)} onChange={() => togglePermission(p.key)} />
+                        {p.label}
+                      </label>
+                    ))}
+                  </div>
+                  {selectedPermissions.includes("MANAGE_ROOMS") && (
+                    <div style={{ marginBottom: "12px" }}>
+                      <p style={{ margin: "0 0 8px", fontSize: "13px", opacity: 0.7 }}>Assigned rooms:</p>
+                      {allRooms.filter(r => r.type !== "private" && r.type !== "public").length === 0 ? (
+                        <small style={{ opacity: 0.5 }}>No rooms available.</small>
+                      ) : (
+                        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", maxHeight: "150px", overflowY: "auto" }}>
+                          {allRooms.filter(r => r.type !== "private" && r.type !== "public").map(room => (
+                            <label key={room.id} style={{ display: "flex", alignItems: "center", gap: "6px", cursor: "pointer", fontSize: "13px", background: "rgba(255,255,255,0.05)", padding: "4px 10px", borderRadius: "6px" }}>
+                              <input type="checkbox" checked={selectedRooms.includes(room.id)}
+                                onChange={() => setSelectedRooms(prev => prev.includes(room.id) ? prev.filter(id => id !== room.id) : [...prev, room.id])} />
+                              <span>{room.name}</span>
+                              <small style={{ opacity: 0.5, fontSize: "11px" }}>{room.type}</small>
+                            </label>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <button onClick={() => handleEditAdminPermissions(admin.id)} style={btn("#27ae60")}>
+                    Save Changes
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })
+      )}
+    </div>
   </div>
 )}
 
