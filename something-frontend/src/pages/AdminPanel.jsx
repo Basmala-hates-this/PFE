@@ -237,7 +237,7 @@ const handleValidateOtherInput = async (userId, approved) => {
 // ];
 //this mess so only realated tabs show based on permissions
 const tabs = [
-  { id: "stats", label: "📊 Stats" },
+  // { id: "stats", label: "📊 Stats" },
   { id: "announcements", label: "📢 Announcements" },
   ...(isSuperAdmin || currentUser?.permissions?.includes("SUSPEND_USERS")
     ? [{ id: "users", label: "👥 Users" }] : []),
@@ -425,8 +425,8 @@ const handleDeleteRoom = async (roomId) => {
         ))}
       </div>
  
-      {/* ── STATS TAB ── */}
-      {activeTab === "stats" && (
+      {/* ── STATS TAB ──....maybe admins should not have this and only supperadmin should? */}
+      {/* {activeTab === "stats" && (
         <div>
           <h3 style={{ marginBottom: "16px" }}>Platform Overview</h3>
           {!stats ? <p style={{ opacity: 0.5 }}>Loading...</p> : (
@@ -454,7 +454,7 @@ const handleDeleteRoom = async (roomId) => {
           )}
         </div>
         
-      )}
+      )} */}
  
       {/* ── USERS TAB ── */}
       {activeTab === "users" && (
@@ -1112,7 +1112,7 @@ const handleDeleteRoom = async (roomId) => {
 
         {/* COMMENTS */}
         {drillDown.type === "comments" && drillDown.data.map(comment => (
-          <div key={comment.id} style={card}>
+          <div key={comment.id} style={card}> 
             <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
               <strong>@{comment.authorUsername}</strong>
               {comment.isHidden && <span style={badge("#c0392b")}>hidden</span>}
