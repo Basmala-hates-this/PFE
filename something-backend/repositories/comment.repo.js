@@ -29,7 +29,14 @@ const getCommentById = async (id) => {
 
 const getCommentsByPost = async (postId) => {
   const result = await pool.query(
-    `SELECT * FROM comments WHERE post_id = $1 ORDER BY created_at ASC`,
+    `SELECT c.*,
+      COALESCE(v.useful, 0)::int as vote_useful,
+ COALESCE(v.useless, 0)::int as vote_useless,
+ COALESCE(v.specialized, 0)::int as vote_specialized
+     FROM comments c
+     LEFT JOIN comment_vote_counts v ON v.comment_id = c.id
+     WHERE c.post_id = $1
+     ORDER BY c.created_at ASC`,
     [postId]
   );
   return toCamel(result.rows);
@@ -46,7 +53,7 @@ const getCommentsByUser = async (userId) => {
 const updateComment = async (commentId, userId, content) => {
   const comment = await getCommentById(commentId);
   if (!comment) return null;
-  if (comment.user_id !== userId) return { error: 'Not authorized to edit this comment' };
+  if (comment.userId !== userId) return { error: 'Not authorized to edit this comment' };
 
   const result = await pool.query(
     `UPDATE comments SET content = $1, is_updated = true WHERE id = $2 RETURNING *`,
@@ -58,7 +65,7 @@ const updateComment = async (commentId, userId, content) => {
 const deleteComment = async (commentId, userId) => {
   const comment = await getCommentById(commentId);
   if (!comment) return false;
-  if (comment.user_id !== userId) return { error: 'Not authorized to delete this comment' };
+  if (comment.userId !== userId) return { error: 'Not authorized to delete this comment' };
 
   await pool.query(`DELETE FROM comments WHERE id = $1`, [commentId]);
   return true;

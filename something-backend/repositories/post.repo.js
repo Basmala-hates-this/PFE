@@ -470,8 +470,8 @@ const unhidePost = async (postId) => {
 const getSavedPostsByUser = async (userId) => {
   const result = await pool.query(
     `SELECT p.*,
-      COALESCE(v.useful, 0) as vote_useful,
-      COALESCE(v.useless, 0) as vote_useless,
+      COALESCE(v.useful, 0)::int as vote_useful,
+COALESCE(v.useless, 0)::int as vote_useless,
       COUNT(DISTINCT c.id) as comment_count
      FROM posts p
      JOIN saved_posts sp ON sp.post_id = p.id

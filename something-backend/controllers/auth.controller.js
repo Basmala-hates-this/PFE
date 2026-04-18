@@ -290,6 +290,7 @@ const userRepo = require('../repositories/user.repo');
 const roomRepo = require('../repositories/room.repo');
 const pool = require('../db');
 const { sendResetEmail } = require('../config/email');
+const toCamel = require('../utils/toCamel');
 
 const register = async (req, res) => {
   const { fullName, birthDate, email, role, username, password } = req.body;
@@ -370,21 +371,21 @@ const register = async (req, res) => {
     }
   }
 
-  const token = jwt.sign(
-    {
-      id: user.id,
-      role: user.role,
-      email: user.email,
-      username: user.username,
-      authorityLevel: user.authority_level,
-      verificationStatus: user.verification_status,
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
+ const token = jwt.sign(
+  {
+    id: user.id,
+    role: user.role,
+    email: user.email,
+    username: user.username,
+    authorityLevel: user.authorityLevel,
+    verificationStatus: user.verificationStatus,
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: '24h' }
+);
 
-  const { password_hash, ...userWithoutPassword } = user;
-  res.status(201).json({ message: 'User created', user: userWithoutPassword, token });
+const { passwordHash: _pw, ...userWithoutPassword } = user;
+res.status(201).json({ message: 'User created', user: userWithoutPassword, token });
 };
 
 const login = async (req, res) => {
@@ -397,30 +398,30 @@ const login = async (req, res) => {
 
   if (!user) return res.status(400).json({ message: 'Invalid credentials' });
 
-  const match = await bcrypt.compare(password, user.password_hash);
+  const match = await bcrypt.compare(password, user.passwordHash);
   if (!match) return res.status(400).json({ message: 'Invalid credentials' });
 
-  if (user.suspended_until && new Date(user.suspended_until) > new Date()) {
-    return res.status(403).json({
-      message: `Your account is suspended until ${new Date(user.suspended_until).toLocaleDateString()}. Reason: ${user.suspension_reason || 'Policy violation'}`
-    });
-  }
+ if (user.suspendedUntil && new Date(user.suspendedUntil) > new Date()) {
+  return res.status(403).json({
+    message: `Your account is suspended until ${new Date(user.suspendedUntil).toLocaleDateString()}. Reason: ${user.suspensionReason || 'Policy violation'}`
+  });
+}
 
-  const token = jwt.sign(
-    {
-      id: user.id,
-      role: user.role,
-      email: user.email,
-      username: user.username,
-      authorityLevel: user.authority_level,
-      verificationStatus: user.verification_status,
-    },
-    process.env.JWT_SECRET,
-    { expiresIn: '24h' }
-  );
+ const token = jwt.sign(
+  {
+    id: user.id,
+    role: user.role,
+    email: user.email,
+    username: user.username,
+    authorityLevel: user.authorityLevel,
+    verificationStatus: user.verificationStatus,
+  },
+  process.env.JWT_SECRET,
+  { expiresIn: '24h' }
+);
 
-  const { password_hash, ...userWithoutPassword } = user;
-  res.json({ token, user: userWithoutPassword });
+const { passwordHash: _pw, ...userWithoutPassword } = user;
+res.json({ token, user: userWithoutPassword });
 };
 
 const checkEmail = async (req, res) => {

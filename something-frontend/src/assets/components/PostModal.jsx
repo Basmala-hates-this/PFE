@@ -25,15 +25,15 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
         <p style={{ margin: "0 0 6px", fontSize: "14px" }}>{comment.content}</p>
 
         {/* attachments */}
-        {comment.image && (
+        {comment.imageUrl && (
           <div style={{ marginBottom: "6px" }}>
-            <a href={comment.image} target="_blank" rel="noopener noreferrer">
-              <img src={comment.image} alt="attachment" style={{ maxWidth: "100%", borderRadius: "8px", display: "block", cursor: "pointer" }} />
+            <a href={comment.imageUrl} target="_blank" rel="noopener noreferrer">
+              <img src={comment.imageUrl} alt="attachment" style={{ maxWidth: "100%", borderRadius: "8px", display: "block", cursor: "pointer" }} />
             </a>
           </div>
         )}
-        {comment.pdf && (
-          <a href={comment.pdf} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "6px" }}>
+        {comment.pdfUrl && (
+          <a href={comment.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "6px" }}>
             📄 View PDF
           </a>
         )}
@@ -54,14 +54,14 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
         ) : (
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button onClick={() => onVote(comment.id, "useful")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#27ae60", background: "none", border: "1px solid #27ae60b3"  }}>
-              👍 {comment.votes.useful}
+              👍 {comment.votesUseful}
             </button>
             <button onClick={() => onVote(comment.id, "useless")} style={{ fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#c0392b", background:"none", border:"1px solid #c0392bb3" }}>
-              👎 {comment.votes.useless}
+              👎 {comment.votesUseless}
             </button>
-            {(currentUser?.id === comment.authorId || currentUser?.rating >= 4) && (
+            {(currentUser?.id === comment.userId|| currentUser?.rating >= 4) && (
               <button onClick={() => onVote(comment.id, "specialized")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", background: "#f0c040", border: "none" }}>
-                ✨ {comment.votes.specialized}
+                ✨ {comment.votesSpecialized}
               </button>
             )}
             {!isGuest && (
@@ -114,6 +114,8 @@ const [reportTarget, setReportTarget] = useState(null);
 
 const [replyingTo, setReplyingTo] = useState(null); 
 
+const [comments, setComments] = useState([]);
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -135,35 +137,38 @@ const [replyingTo, setReplyingTo] = useState(null);
     fetchPost();
   }, [postId]);
 
-  const refetchPost = async () => {
-    const response = await axios.get(
-      `http://localhost:5000/api/posts/${postId}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setPost(response.data);
-  };
+  
+  
+const refetchPost = async () => {
+  const [postRes, commentsRes] = await Promise.all([
+    axios.get(`http://localhost:5000/api/posts/${postId}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+    axios.get(`http://localhost:5000/api/posts/${postId}/comments`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+    })
+  ]);
+  setPost(postRes.data);
+  setComments(commentsRes.data);
+};
+
+useEffect(() => {
+  refetchPost();
+}, [postId]);
 
 
   /////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////
 
-const handleVote = async (postId, voteType) => {
+ const handleVote = async (postId, voteType) => {
   try {
-    const token = localStorage.getItem("token");
     await axios.patch(
       `http://localhost:5000/api/posts/${postId}/vote`,
       { voteType },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    const response = await axios.get(
-      `http://localhost:5000/api/posts/${postId}`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
-    setPosts(prev => prev
-      .map(post => post.id === postId ? response.data : post)
-      .filter(post => !post.isHidden)
-    );
+    refetchPost();
   } catch (err) {
     console.error("Failed to vote:", err);
   }
@@ -185,6 +190,7 @@ const handleAddComment = async () => {
       formData,
       { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
     );
+    console.log("first comment:", comments[0]);
     setCommentInput("");
     setCommentAttachment(null);
     setCommentResourceLink("");
@@ -267,6 +273,7 @@ const buildCommentTree = (comments) => {
   return roots;
 };
 
+
   
 
   ////////////////////////////////////////////////////////////////////
@@ -292,17 +299,17 @@ const buildCommentTree = (comments) => {
           </div>
           <p style={{margin:"0 0 8px"}}>{post.content}</p>
           {/* image attachment */}
-{post.image && (
+{post.imageUrl && (
   <div style={{marginBottom:"8px"}}>
-    <a href={post.image} target="_blank" rel="noopener noreferrer">
+    <a href={post.imageUrl} target="_blank" rel="noopener noreferrer">
       <img 
-        src={post.image} 
+        src={post.imageUrl} 
         alt="attachment" 
         style={{maxWidth:"100%", borderRadius:"8px", display:"block", cursor:"pointer"}}
       />
     </a>
     <a
-      href={post.image}
+      href={post.imageUrl}
       download
       style={{display:"inline-block", marginTop:"4px", fontSize:"11px", color:"#8ca4c6"}}
     >
@@ -312,9 +319,9 @@ const buildCommentTree = (comments) => {
 )}
 
 {/* pdf attachment */}
-{post.pdf && (
+{post.pdfUrl && (
   <a 
-    href={post.pdf} 
+    href={post.pdfUrl} 
     target="_blank" 
     rel="noopener noreferrer"
     style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(255,255,255,0.1)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
@@ -336,12 +343,12 @@ const buildCommentTree = (comments) => {
 )}
           <div style={{display:"flex", gap:"8px"}}>
             <button onClick={() => handleVote("useful")} style={{fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#27ae60", background: "none", border: "1px solid #27ae60b3"}}>
-              👍 Useful {post.votes.useful}
+              👍 Useful {post.votesUseful}
             </button>
             <button onClick={() => handleVote("useless")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#c0392b", background:"none", border:"1px solid #c0392bb3"}}>
-              👎 Useless {post.votes.useless}
+              👎 Useless {post.votesUseless}
             </button>
-            {!isGuest && currentUser?.id !== post.authorId && (
+            {!isGuest && currentUser?.id !== post.userId && (
               <button
                  onClick={() => setReportTarget({ type: "post", postId: post.id })}
                  style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px",
@@ -354,10 +361,10 @@ const buildCommentTree = (comments) => {
 {/* //////////////////////////////////////////////////////// */}
         {/* comments list */}
        <div style={{ flex: 1, overflowY: "auto", marginBottom: "15px" }}>
-  {post.comments.length === 0 ? (
+  {comments.length === 0 ? (
     <p style={{ opacity: 0.5, textAlign: "center" }}>No comments yet. Be the first!</p>
   ) : (
-    buildCommentTree(post.comments).map(comment => (
+    buildCommentTree(comments).map(comment => (
       <CommentNode
         key={comment.id}
         comment={comment}

@@ -303,6 +303,7 @@ const handleSubmitPost = async () => {
   } catch (err) {
     console.error("Failed to create post:", err);
   }
+  console.log(posts[0].createdAt)
 };
  
 
@@ -1082,7 +1083,8 @@ const sortedPosts = [...posts].sort((a, b) => {
     🔗 {post.resourceLabel || "Open Resource"}
   </a>
 )}
-<small>{post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}</small>      <div style={{marginTop: "8px"}}>
+<small>{post.createdAt ? new Date(post.createdAt).toLocaleString() : "—"}</small>
+    <div style={{marginTop: "8px"}}>
         <button onClick={() => isGuest ? alert("Create an account to vote! 👋") :handleVote(post.id, "useful")} style={{fontSize: "13px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#000000", backgroundColor: "#27ae5f9a", border: "1px solid #27ae60b3",height:"30px"}}>{post.voteUseful}👍 Useful </button>
         <button onClick={() =>isGuest ? alert("Create an account to vote! 👋") : handleVote(post.id, "useless")} style={{marginLeft: "8px",fontSize:"13px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#000000", backgroundColor:"#d9770693", border:"1px solid #c0392bb3",height:"30px"}}>{post.voteUseless}👎 Useless </button>
         <button onClick={() => setSelectedPost(post)}  style={{marginLeft: "8px", fontSize:"13px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", color:"#000000", backgroundColor:"#297fb990", border:"1px solid #6cb1df",height:"30px"}} >
