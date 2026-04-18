@@ -13,7 +13,7 @@ import "../styles/pallette.css"
 import { useEffect, useState } from "react";
 
 //dashboard too big...+i want it scalable...i'll isolate some things...
-import PostModal from "../assets/components/PostModal.jsx";
+import PostModal from "../assets/components/PostModal.jsx"; 
 
 import ReportModal from "../assets/components/ReportModal.jsx";
 
@@ -191,8 +191,8 @@ useEffect(() => {
         const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
         const selectedCodes = guestUniversities.map(u => u.value);
         allowedRooms = response.data.filter(r =>
-          r.type === "public" || selectedCodes.includes(r.university)
-        );
+  r.type === "public" || selectedCodes.includes(r.universityCode)
+);
       } else {
         const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
           headers: { Authorization: `Bearer ${token}` }
@@ -329,21 +329,21 @@ const groupedRoomOptions = [
       .filter(r => r.type === "major")
       .map(r => ({ value: r.id, label: r.name }))
   },
-   ...userRooms
+ ...userRooms
     .filter(r => r.type === "subject")
     .reduce((groups, room) => {
-      const existing = groups.find(g => g.label === `${room.major} — Subjects`);
+      const label = "Subjects";
+      const existing = groups.find(g => g.label === label);
       if (existing) {
         existing.options.push({ value: room.id, label: room.name });
       } else {
         groups.push({
-          label: `${room.major} — Subjects`,
+          label,
           options: [{ value: room.id, label: room.name }]
         });
       }
       return groups;
     }, [])
-  
 ].filter(group => group.options.length > 0); // remove empty groups
 
 
@@ -351,17 +351,19 @@ const groupedRoomOptions = [
 const handleVote = async (postId, voteType) => {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.patch(
+    await axios.patch(
       `http://localhost:5000/api/posts/${postId}/vote`,
       { voteType },
       { headers: { Authorization: `Bearer ${token}` } }
     );
-    // update the post in the feed without refetching everything
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
     setPosts(prev => prev
-  .map(post => post.id === postId ? response.data : post)
-  .filter(post => !post.isHidden)
-);
-//something is not right about the voting..
+      .map(post => post.id === postId ? response.data : post)
+      .filter(post => !post.isHidden)
+    );
   } catch (err) {
     console.error("Failed to vote:", err);
   }
@@ -671,7 +673,7 @@ const handleRequestSubjectRoom = async () => {
 
 const sortedPosts = [...posts].sort((a, b) => {
   if (sortBy === "recent") return new Date(b.createdAt) - new Date(a.createdAt);
-  if (sortBy === "popular") return (b.votes.useful - b.votes.useless) - (a.votes.useful - a.votes.useless);
+  if (sortBy === "popular") return (b.voteUseful - b.voteUseless) - (a.voteUseful - a.voteUseless);
   return 0; // random = no sort, just as fetched
 });
 
@@ -848,7 +850,7 @@ const sortedPosts = [...posts].sort((a, b) => {
 
 
 
-            <img src={user?.profilePic || Cat} alt="pfp" className="pfp" />
+            <img src={user?.profilePicUrl || Cat} alt="pfp" className="pfp" />
         </header>
 
         {/* why is simple css so damn hell?....was using css framwork going to make this worst or better?..guess we never gonna know */}
@@ -928,7 +930,7 @@ const sortedPosts = [...posts].sort((a, b) => {
               onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
               onMouseLeave={e => e.currentTarget.style.background="transparent"}
             >
-              <img src={u.profilePic || Cat} alt="pfp" style={{width:"28px", height:"28px", borderRadius:"50%", objectFit:"cover"}}/>
+              <img src={u.profilePicUrl || Cat} alt="pfp" style={{width:"28px", height:"28px", borderRadius:"50%", objectFit:"cover"}}/>
               <div>
                 <strong style={{fontSize:"12px", color:"white"}}>@{u.username}</strong>
                 <small style={{display:"block", color:"rgba(255,255,255,0.5)", fontSize:"11px"}}>{u.role}</small>
@@ -1008,7 +1010,7 @@ const sortedPosts = [...posts].sort((a, b) => {
     <div key={post.id} className="mock-post" style={{border:"1px solid #ccc",borderRadius:"30%",marginBottom:"5px", padding:"14px", borderRadius:"6px"}}>
       <div style={{  display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
   <img 
-    src={user?.profilePic || Cat} 
+    src={user?.profilePicUrl || Cat} 
     alt="pfp" 
     style={{width:"40px", height:"40px", borderRadius:"50%", objectFit:"cover",border:"1px solid var(--dark)", padding:"2px"}}
   />
@@ -1037,17 +1039,17 @@ const sortedPosts = [...posts].sort((a, b) => {
   </p>
 </div>
       {/* image attachment */}
-{post.image && (
+{post.imageUrl && (
   <div style={{marginBottom:"8px"}}>
-    <a href={post.image} target="_blank" rel="noopener noreferrer">
+    <a href={post.imageUrl} target="_blank" rel="noopener noreferrer">
       <img 
-        src={post.image} 
+        src={post.imageUrl} 
         alt="attachment" 
         style={{maxWidth:"100%",width:"60%", borderRadius:"8px", display:"block", cursor:"pointer"}}
       />
     </a>
     <a
-      href={post.image}
+      href={post.imageUrl}
       download
       style={{display:"inline-block", marginTop:"4px", fontSize:"13px", color:"#d4dfed",backgroundColor:"#2b2b2b7d", textDecoration:"none",border:"1px solid #ffffff7d", padding:"2px 8px", borderRadius:"6px"}}
     >
@@ -1058,9 +1060,9 @@ const sortedPosts = [...posts].sort((a, b) => {
 
 
 {/* pdf attachment */}
-{post.pdf && (
+{post.pdfUrl && (
   <a 
-    href={post.pdf} 
+    href={post.pdfUrl} 
     target="_blank" 
     rel="noopener noreferrer"
     style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(16, 15, 15, 0.25)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
@@ -1080,12 +1082,11 @@ const sortedPosts = [...posts].sort((a, b) => {
     🔗 {post.resourceLabel || "Open Resource"}
   </a>
 )}
-      <small>{new Date(post.createdAt).toLocaleString()}</small>
-      <div style={{marginTop: "8px"}}>
-        <button onClick={() => isGuest ? alert("Create an account to vote! 👋") :handleVote(post.id, "useful")} style={{fontSize: "13px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#000000", backgroundColor: "#27ae5f9a", border: "1px solid #27ae60b3",height:"30px"}}>{post.votes.useful}👍 Useful </button>
-        <button onClick={() =>isGuest ? alert("Create an account to vote! 👋") : handleVote(post.id, "useless")} style={{marginLeft: "8px",fontSize:"13px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#000000", backgroundColor:"#d9770693", border:"1px solid #c0392bb3",height:"30px"}}>{post.votes.useless}👎 Useless </button>
+<small>{post.createdAt ? new Date(post.createdAt).toLocaleString() : ""}</small>      <div style={{marginTop: "8px"}}>
+        <button onClick={() => isGuest ? alert("Create an account to vote! 👋") :handleVote(post.id, "useful")} style={{fontSize: "13px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#000000", backgroundColor: "#27ae5f9a", border: "1px solid #27ae60b3",height:"30px"}}>{post.voteUseful}👍 Useful </button>
+        <button onClick={() =>isGuest ? alert("Create an account to vote! 👋") : handleVote(post.id, "useless")} style={{marginLeft: "8px",fontSize:"13px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#000000", backgroundColor:"#d9770693", border:"1px solid #c0392bb3",height:"30px"}}>{post.voteUseless}👎 Useless </button>
         <button onClick={() => setSelectedPost(post)}  style={{marginLeft: "8px", fontSize:"13px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer", color:"#000000", backgroundColor:"#297fb990", border:"1px solid #6cb1df",height:"30px"}} >
-         Comments {post.comments.length}
+         Comments {post.commentCount}
         </button>
            {!isGuest && (
               <button
@@ -1097,7 +1098,7 @@ const sortedPosts = [...posts].sort((a, b) => {
                 </button>
                   )}
 
-              {!isGuest && currentUser?.id !== post.authorId && (
+              {!isGuest && currentUser?.id !== post.userId && (
                   <button
                    onClick={() => setReportTarget({ type: "post", postId: post.id })}
                    style={{ marginLeft: "8px", cursor: "pointer", color: "#ffffff",
@@ -1106,7 +1107,7 @@ const sortedPosts = [...posts].sort((a, b) => {
                  </button>
                 )}
 
-        {currentUser?.id === post.authorId && (
+        {currentUser?.id === post.userId &&  (
   <button 
     onClick={() => handleDeletePost(post.id)} 
     style={{marginLeft: "8px", cursor: "pointer", color: "#f6f4f4",
@@ -1115,7 +1116,7 @@ const sortedPosts = [...posts].sort((a, b) => {
   </button>
   
 )}
-  {currentUser?.id === post.authorId && (
+  {currentUser?.id === post.userId && (
   <button 
     onClick={() => {
       setEditingPost(post);
@@ -1337,8 +1338,8 @@ const sortedPosts = [...posts].sort((a, b) => {
     style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "#252b45", color: "white", marginBottom: "8px" }}
   >
     <option value="">Select the major...</option>
-    {user?.majors?.map(m => (
-      <option key={m} value={m}>{m}</option>
+   {subjectRoomsData.map(({ major }) => (
+      <option key={major} value={major}>{major}</option>
     ))}
   </select>
 

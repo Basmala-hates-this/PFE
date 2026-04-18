@@ -148,19 +148,26 @@ const [replyingTo, setReplyingTo] = useState(null);
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////
 
-  const handleVote = async (voteType) => {
-    if (isGuest) return alert("Create an account to vote! 👋");
-    try {
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/vote`,
-        { voteType },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      refetchPost();
-    } catch (err) {
-      console.error("Failed to vote:", err);
-    }
-  };
+const handleVote = async (postId, voteType) => {
+  try {
+    const token = localStorage.getItem("token");
+    await axios.patch(
+      `http://localhost:5000/api/posts/${postId}/vote`,
+      { voteType },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    setPosts(prev => prev
+      .map(post => post.id === postId ? response.data : post)
+      .filter(post => !post.isHidden)
+    );
+  } catch (err) {
+    console.error("Failed to vote:", err);
+  }
+};
 
 const handleAddComment = async () => {
   if (isGuest) return alert("Create an account to contribute....");

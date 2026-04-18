@@ -381,13 +381,33 @@ const createPost = async (postData) => {
 };
 
 const getPostById = async (id) => {
-  const result = await pool.query(`SELECT * FROM posts WHERE id = $1`, [id]);
+  const result = await pool.query(
+    `SELECT p.*,
+      COALESCE(v.useful, 0) as vote_useful,
+      COALESCE(v.useless, 0) as vote_useless,
+      COUNT(DISTINCT c.id) as comment_count
+     FROM posts p
+     LEFT JOIN post_vote_counts v ON v.post_id = p.id
+     LEFT JOIN comments c ON c.post_id = p.id
+     WHERE p.id = $1
+     GROUP BY p.id, v.useful, v.useless`,
+    [id]
+  );
   return toCamel(result.rows[0]) || null;
 };
 
 const getPostsByRoom = async (roomId) => {
   const result = await pool.query(
-    `SELECT * FROM posts WHERE room_id = $1 ORDER BY created_at DESC`,
+    `SELECT p.*,
+      COALESCE(v.useful, 0) as vote_useful,
+      COALESCE(v.useless, 0) as vote_useless,
+      COUNT(DISTINCT c.id) as comment_count
+     FROM posts p
+     LEFT JOIN post_vote_counts v ON v.post_id = p.id
+     LEFT JOIN comments c ON c.post_id = p.id
+     WHERE p.room_id = $1
+     GROUP BY p.id, v.useful, v.useless
+     ORDER BY p.created_at DESC`,
     [roomId]
   );
   return toCamel(result.rows);
@@ -395,7 +415,16 @@ const getPostsByRoom = async (roomId) => {
 
 const getPostsByUser = async (userId) => {
   const result = await pool.query(
-    `SELECT * FROM posts WHERE user_id = $1 ORDER BY created_at DESC`,
+    `SELECT p.*,
+      COALESCE(v.useful, 0) as vote_useful,
+      COALESCE(v.useless, 0) as vote_useless,
+      COUNT(DISTINCT c.id) as comment_count
+     FROM posts p
+     LEFT JOIN post_vote_counts v ON v.post_id = p.id
+     LEFT JOIN comments c ON c.post_id = p.id
+     WHERE p.user_id = $1
+     GROUP BY p.id, v.useful, v.useless
+     ORDER BY p.created_at DESC`,
     [userId]
   );
   return toCamel(result.rows);
@@ -437,11 +466,19 @@ const unhidePost = async (postId) => {
   );
 };
 
+
 const getSavedPostsByUser = async (userId) => {
   const result = await pool.query(
-    `SELECT p.* FROM posts p
+    `SELECT p.*,
+      COALESCE(v.useful, 0) as vote_useful,
+      COALESCE(v.useless, 0) as vote_useless,
+      COUNT(DISTINCT c.id) as comment_count
+     FROM posts p
      JOIN saved_posts sp ON sp.post_id = p.id
+     LEFT JOIN post_vote_counts v ON v.post_id = p.id
+     LEFT JOIN comments c ON c.post_id = p.id
      WHERE sp.user_id = $1
+     GROUP BY p.id, v.useful, v.useless, sp.saved_at
      ORDER BY sp.saved_at DESC`,
     [userId]
   );

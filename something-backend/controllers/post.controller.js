@@ -345,6 +345,7 @@ const voteRepo = require('../repositories/vote.repo');
 const roomRepo = require('../repositories/room.repo');
 const userRepo = require('../repositories/user.repo');
 const pool = require('../db');
+const toCamel = require('../utils/toCamel');
 
 // --- suspension check ---
 const isUserSuspendedInRoom = async (roomId, userId) => {
@@ -396,20 +397,35 @@ const getPostsAll = async (req, res) => {
   if (roomId) {
     if (sort === 'top') {
       const result = await pool.query(
-        `SELECT p.*, COALESCE(v.useful, 0) as useful_count
+        `SELECT p.*,
+          COALESCE(v.useful, 0) as vote_useful,
+          COALESCE(v.useless, 0) as vote_useless,
+          COUNT(DISTINCT c.id) as comment_count
          FROM posts p
          LEFT JOIN post_vote_counts v ON v.post_id = p.id
+         LEFT JOIN comments c ON c.post_id = p.id
          WHERE p.room_id = $1
-         ORDER BY useful_count DESC`,
+         GROUP BY p.id, v.useful, v.useless
+         ORDER BY vote_useful DESC`,
         [roomId]
       );
-      posts = result.rows;
+      posts = toCamel(result.rows);
     } else {
       posts = await postRepo.getPostsByRoom(roomId);
     }
   } else {
-    const result = await pool.query(`SELECT * FROM posts ORDER BY created_at DESC`);
-    posts = result.rows;
+    const result = await pool.query(
+      `SELECT p.*,
+        COALESCE(v.useful, 0) as vote_useful,
+        COALESCE(v.useless, 0) as vote_useless,
+        COUNT(DISTINCT c.id) as comment_count
+       FROM posts p
+       LEFT JOIN post_vote_counts v ON v.post_id = p.id
+       LEFT JOIN comments c ON c.post_id = p.id
+       GROUP BY p.id, v.useful, v.useless
+       ORDER BY p.created_at DESC`
+    );
+    posts = toCamel(result.rows);
   }
 
   res.json(posts);
