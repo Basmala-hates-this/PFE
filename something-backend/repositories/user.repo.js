@@ -170,7 +170,7 @@
 //   unsavePost,
 // };
 
-
+const toCamel = require('../utils/toCamel');
 const pool = require('../db');
 
 const createUser = async (userData) => {
@@ -196,7 +196,7 @@ const createUser = async (userData) => {
     [fullName, birthDate, email, username, passwordHash, role, universityCode, universityName, verificationStatus, profilePicUrl]
   );
 
-  return result.rows[0];
+  return toCamel(result.rows[0]);
 };
 
 const findByEmail = async (email) => {
@@ -204,7 +204,7 @@ const findByEmail = async (email) => {
     `SELECT * FROM users WHERE email = $1`,
     [email]
   );
-  return result.rows[0] || null;
+  return toCamel(result.rows[0]) || null;
 };
 
 const findByUsername = async (username) => {
@@ -212,7 +212,7 @@ const findByUsername = async (username) => {
     `SELECT * FROM users WHERE username = $1`,
     [username]
   );
-  return result.rows[0] || null;
+ return toCamel(result.rows[0]) || null;
 };
 
 const findById = async (id) => {
@@ -220,7 +220,7 @@ const findById = async (id) => {
     `SELECT * FROM users WHERE id = $1`,
     [id]
   );
-  return result.rows[0] || null;
+  return toCamel(result.rows[0]) || null;
 };
 
 const updateUser = async (id, updatedData) => {
@@ -257,7 +257,7 @@ const updateUser = async (id, updatedData) => {
     [...values, id]
   );
 
-  return result.rows[0] || null;
+  return toCamel(result.rows[0]) || null;
 };
 
 const updateRating = async (userId, voteType, action) => {
@@ -283,7 +283,7 @@ const deleteUser = async (id) => {
 
 const getAllUsers = async () => {
   const result = await pool.query(`SELECT * FROM users`);
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 // --- follows ---

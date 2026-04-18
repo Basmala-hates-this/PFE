@@ -63,6 +63,8 @@
 // };
 
 
+const toCamel = require('../utils/toCamel');
+
 const pool = require('../db');
 
 const getMessagesByRoom = async (roomId) => {
@@ -74,7 +76,7 @@ const getMessagesByRoom = async (roomId) => {
      ORDER BY m.created_at ASC`,
     [roomId]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const createMessage = async (messageData) => {
@@ -90,7 +92,7 @@ const createMessage = async (messageData) => {
       messageData.replyTo || null,
     ]
   );
-  return result.rows[0];
+  return toCamel(result.rows[0]);
 };
 
 const deleteMessage = async (messageId, userId) => {
@@ -119,7 +121,7 @@ const editMessage = async (messageId, userId, newContent) => {
     `UPDATE messages SET content = $1 WHERE id = $2 RETURNING *`,
     [newContent, messageId]
   );
-  return result.rows[0];
+  return toCamel(result.rows[0]);
 };
 
 module.exports = {

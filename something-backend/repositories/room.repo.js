@@ -203,6 +203,8 @@
 // }
 // //screw writing function names that actuallu make sense but are ridiculously long...
 
+const toCamel = require('../utils/toCamel');
+
 const pool = require('../db');
 
 const createRoom = async (roomData) => {
@@ -224,7 +226,7 @@ const createRoom = async (roomData) => {
     [name, type, universityCode, majorId, isPrivate, passKey, memberLimit, createdBy]
   );
 
-  return result.rows[0];
+  return toCamel(result.rows[0]);
 };
 
 const getRoomById = async (id) => {
@@ -232,12 +234,12 @@ const getRoomById = async (id) => {
     `SELECT * FROM rooms WHERE id = $1`,
     [id]
   );
-  return result.rows[0] || null;
+ return toCamel(result.rows[0]) || null;
 };
 
 const getAllRooms = async () => {
   const result = await pool.query(`SELECT * FROM rooms`);
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const getRoomsByType = async (type, filter = null) => {
@@ -246,7 +248,7 @@ const getRoomsByType = async (type, filter = null) => {
       `SELECT * FROM rooms WHERE type = $1`,
       [type]
     );
-    return result.rows;
+    return toCamel(result.rows); 
   }
 
   const result = await pool.query(
@@ -262,7 +264,7 @@ const getRoomsByIds = async (ids) => {
     `SELECT * FROM rooms WHERE id = ANY($1::uuid[])`,
     [ids]
   );
-  return result.rows;
+ return toCamel(result.rows);
 };
 
 // --- members ---
@@ -274,7 +276,7 @@ const addMember = async (roomId, userId, role = 'member') => {
        ON CONFLICT (room_id, user_id) DO NOTHING`,
       [roomId, userId, role]
     );
-    return await getRoomById(roomId);
+    return toCamel(await getRoomById(roomId));
   } catch (err) {
     throw err;
   }
@@ -295,7 +297,7 @@ const getRoomMembers = async (roomId) => {
      WHERE rm.room_id = $1`,
     [roomId]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const isMember = async (roomId, userId) => {
@@ -329,7 +331,7 @@ const getUserRooms = async (userId) => {
      WHERE rm.user_id = $1`,
     [userId]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 // --- private room ---
@@ -359,7 +361,7 @@ const joinRoomByPassKey = async (passKey, userId) => {
   if (count >= room.member_limit) return { error: 'Room full' };
 
   await addMember(room.id, userId);
-  return { success: true, room };
+ return { success: true, room: toCamel(room) };
 };
 
 const addRoomAdmin = async (roomId, memberId, requesterId = null) => {
@@ -373,7 +375,7 @@ const addRoomAdmin = async (roomId, memberId, requesterId = null) => {
     [roomId, memberId]
   );
 
-  return await getRoomById(roomId);
+  return toCamel(await getRoomById(roomId));
 };
 
 const deleteRoom = async (roomId, userId) => {
@@ -381,7 +383,7 @@ const deleteRoom = async (roomId, userId) => {
   if (!room) return null;
 
   const requesterIsAdmin = await isAdmin(roomId, userId);
-  if (room.created_by !== userId && !requesterIsAdmin) {
+  if (room.createdBy !== userId && !requesterIsAdmin) {
     return { error: 'Not authorized' };
   }
 
@@ -394,7 +396,7 @@ const renameRoom = async (roomId, userId, newName) => {
   if (!room) return null;
 
   const requesterIsAdmin = await isAdmin(roomId, userId);
-  if (room.created_by !== userId && !requesterIsAdmin) {
+  if (room.createdBy !== userId && !requesterIsAdmin) {
     return { error: 'Not authorized' };
   }
 
@@ -402,7 +404,7 @@ const renameRoom = async (roomId, userId, newName) => {
     `UPDATE rooms SET name = $1 WHERE id = $2 RETURNING *`,
     [newName, roomId]
   );
-  return result.rows[0];
+  return toCamel(result.rows[0]);
 };
 
 const leaveRoom = async (roomId, userId) => {
@@ -412,7 +414,7 @@ const leaveRoom = async (roomId, userId) => {
   const room = await getRoomById(roomId);
 
   // if creator wants to leave, check for another admin
-  if (room.created_by === userId) {
+ if (room.createdBy === userId) {
     const result = await pool.query(
       `SELECT 1 FROM room_members WHERE room_id = $1 AND user_id != $2 AND role = 'admin'`,
       [roomId, userId]
@@ -436,7 +438,7 @@ const suspendMemberFromRoom = async (roomId, userId, until, reason) => {
      SET suspended_until = $3, reason = $4`,
     [roomId, userId, until, reason]
   );
-  return await getRoomById(roomId);
+  return toCamel(await getRoomById(roomId));
 };
 
 const unsuspendMemberFromRoom = async (roomId, userId) => {
@@ -444,7 +446,7 @@ const unsuspendMemberFromRoom = async (roomId, userId) => {
     `DELETE FROM room_suspensions WHERE room_id = $1 AND user_id = $2`,
     [roomId, userId]
   );
-  return await getRoomById(roomId);
+  return toCamel(await getRoomById(roomId));
 };
 
 const getRoomSuspension = async (roomId, userId) => {
@@ -452,7 +454,7 @@ const getRoomSuspension = async (roomId, userId) => {
     `SELECT * FROM room_suspensions WHERE room_id = $1 AND user_id = $2`,
     [roomId, userId]
   );
-  return result.rows[0] || null;
+ return toCamel(result.rows[0]) || null;
 };
 
 module.exports = {

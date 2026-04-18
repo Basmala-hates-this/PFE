@@ -355,7 +355,7 @@
 //   reportComment,
 // };
 
-
+const toCamel = require('../utils/toCamel');
 const pool = require('../db');
 
 const createPost = async (postData) => {
@@ -377,12 +377,12 @@ const createPost = async (postData) => {
       postData.resourceLabel || null,
     ]
   );
-  return result.rows[0];
+  return toCamel(result.rows[0]);
 };
 
 const getPostById = async (id) => {
   const result = await pool.query(`SELECT * FROM posts WHERE id = $1`, [id]);
-  return result.rows[0] || null;
+  return toCamel(result.rows[0]) || null;
 };
 
 const getPostsByRoom = async (roomId) => {
@@ -390,7 +390,7 @@ const getPostsByRoom = async (roomId) => {
     `SELECT * FROM posts WHERE room_id = $1 ORDER BY created_at DESC`,
     [roomId]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const getPostsByUser = async (userId) => {
@@ -398,26 +398,26 @@ const getPostsByUser = async (userId) => {
     `SELECT * FROM posts WHERE user_id = $1 ORDER BY created_at DESC`,
     [userId]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const updatePost = async (postId, userId, updatedData) => {
-  const post = await getPostById(postId);
-  if (!post) return null;
-  if (post.user_id !== userId) return { error: 'Not authorized to edit this post' };
+ const post = await getPostById(postId);
+if (!post) return null;
+if (post.userId !== userId) return { error: 'Not authorized to edit this post' };
 
   const result = await pool.query(
     `UPDATE posts SET title = $1, content = $2, is_updated = true
      WHERE id = $3 RETURNING *`,
     [updatedData.title, updatedData.content, postId]
   );
-  return result.rows[0];
+  return toCamel(result.rows[0]);
 };
 
 const deletePost = async (postId, userId) => {
   const post = await getPostById(postId);
   if (!post) return false;
-  if (post.user_id !== userId) return { error: 'Not authorized to delete this post' };
+if (post.userId !== userId) return { error: 'Not authorized to delete this post' };
 
   await pool.query(`DELETE FROM posts WHERE id = $1`, [postId]);
   return true;
@@ -445,7 +445,7 @@ const getSavedPostsByUser = async (userId) => {
      ORDER BY sp.saved_at DESC`,
     [userId]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const approveResource = async (postId, approved) => {
@@ -453,7 +453,7 @@ const approveResource = async (postId, approved) => {
     `UPDATE posts SET resource_approved = $1 WHERE id = $2 RETURNING *`,
     [approved, postId]
   );
-  return result.rows[0];
+ return toCamel(result.rows[0]);
 };
 
 module.exports = {

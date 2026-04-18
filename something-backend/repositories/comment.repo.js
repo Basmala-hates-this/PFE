@@ -1,3 +1,4 @@
+const toCamel = require('../utils/toCamel');
 const pool = require('../db');
 
 const createComment = async (commentData) => {
@@ -18,12 +19,12 @@ const createComment = async (commentData) => {
       commentData.resourceLabel || null,
     ]
   );
-  return result.rows[0];
+  return toCamel(result.rows[0]);
 };
 
 const getCommentById = async (id) => {
   const result = await pool.query(`SELECT * FROM comments WHERE id = $1`, [id]);
-  return result.rows[0] || null;
+  return toCamel(result.rows[0]) || null;
 };
 
 const getCommentsByPost = async (postId) => {
@@ -31,7 +32,7 @@ const getCommentsByPost = async (postId) => {
     `SELECT * FROM comments WHERE post_id = $1 ORDER BY created_at ASC`,
     [postId]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const getCommentsByUser = async (userId) => {
@@ -39,7 +40,7 @@ const getCommentsByUser = async (userId) => {
     `SELECT * FROM comments WHERE user_id = $1 ORDER BY created_at DESC`,
     [userId]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const updateComment = async (commentId, userId, content) => {
@@ -51,7 +52,7 @@ const updateComment = async (commentId, userId, content) => {
     `UPDATE comments SET content = $1, is_updated = true WHERE id = $2 RETURNING *`,
     [content, commentId]
   );
-  return result.rows[0];
+  return toCamel(result.rows[0]) ;
 };
 
 const deleteComment = async (commentId, userId) => {

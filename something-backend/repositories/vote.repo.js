@@ -1,4 +1,5 @@
 const pool = require('../db');
+const toCamel = require('../utils/toCamel');
 
 const getPostVote = async (userId, postId) => {
   const result = await pool.query(
@@ -21,7 +22,7 @@ const getVoteCountsForPost = async (postId) => {
     `SELECT * FROM post_vote_counts WHERE post_id = $1`,
     [postId]
   );
-  return result.rows[0] || { useful: 0, useless: 0 };
+  return toCamel(result.rows[0]) || { useful: 0, useless: 0 };
 };
 
 const getVoteCountsForComment = async (commentId) => {
@@ -29,7 +30,7 @@ const getVoteCountsForComment = async (commentId) => {
     `SELECT * FROM comment_vote_counts WHERE comment_id = $1`,
     [commentId]
   );
-  return result.rows[0] || { useful: 0, useless: 0, specialized: 0 };
+  return toCamel(result.rows[0]) || { useful: 0, useless: 0, specialized: 0 };
 };
 
 const votePost = async (postId, userId, voteType) => {
@@ -93,7 +94,7 @@ const getUserVotesForPosts = async (userId, postIds) => {
     `SELECT post_id, type FROM votes WHERE user_id = $1 AND post_id = ANY($2::uuid[])`,
     [userId, postIds]
   );
-  return result.rows;
+  return toCamel(result.rows);
 };
 
 const getUserVotesForComments = async (userId, commentIds) => {
@@ -102,7 +103,7 @@ const getUserVotesForComments = async (userId, commentIds) => {
     `SELECT comment_id, type FROM votes WHERE user_id = $1 AND comment_id = ANY($2::uuid[])`,
     [userId, commentIds]
   );
-  return result.rows;
+ return toCamel(result.rows);
 };
 
 module.exports = {
