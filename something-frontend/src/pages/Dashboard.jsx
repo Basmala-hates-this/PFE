@@ -582,16 +582,18 @@ const handleJoinSubjectRoom = async (roomId) => {
 };
 
 
-const handleCreateAndJoinSubjectRoom = async (major, subject) => {
+const handleCreateAndJoinSubjectRoom = async (major, majorId, subject) => {
    console.log("handleCreateAndJoinSubjectRoom called", major, subject);
   const confirm = window.confirm(`Join "${subject}" under ${major}?`);
   if (!confirm) return;
   try {
+  
     const token = localStorage.getItem("token");
     await axios.post("http://localhost:5000/api/rooms/subject-rooms/create", 
-      { major, subject },
+      { majorId, subject },
       { headers: { Authorization: `Bearer ${token}` } }
     );
+  
   await  fetchSubjectRooms();
    await fetchRoomsAndPosts();
   } catch (err) {
@@ -1290,7 +1292,7 @@ const sortedPosts = [...posts].sort((a, b) => {
       ) : subjectRoomsData.length === 0 ? (
         <p style={{opacity:0.5, textAlign:"center"}}>No rooms available.</p>
       ) : (
-        subjectRoomsData.map(({ major, rooms, available }) => (
+        subjectRoomsData.map(({  major, majorId, rooms, available }) => (
           <div key={major} style={{marginBottom:"20px"}}>
             <h4 style={{margin:"0 0 10px", color:"#6476af", borderBottom:"1px solid rgba(255,255,255,0.1)", paddingBottom:"6px"}}>
               {major}
@@ -1314,7 +1316,7 @@ const sortedPosts = [...posts].sort((a, b) => {
               <div key={subject} style={{display:"flex", justifyContent:"space-between", alignItems:"center", padding:"8px 10px", marginBottom:"6px", background:"rgba(255,255,255,0.05)", borderRadius:"8px"}}>
                 <span style={{opacity:0.7}}>{subject}</span>
                 <button
-                  onClick={() => handleCreateAndJoinSubjectRoom(major, subject)}
+                  onClick={() => handleCreateAndJoinSubjectRoom(major, majorId, subject)}
                   style={{fontSize:"11px", padding:"3px 10px", borderRadius:"6px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}
                 >
                   Join

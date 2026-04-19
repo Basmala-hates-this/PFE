@@ -63,6 +63,8 @@ const [drilldown, setDrilldown] = useState(null); // { type, label, data, loadin
 //
 const [subjectRoomsByMajor, setSubjectRoomsByMajor] = useState([]);
 
+const [userMajors, setUserMajors] = useState([]);
+
 
 useEffect(() => {
   const token = localStorage.getItem("token");
@@ -209,6 +211,16 @@ useEffect(() => {
   };
   fetchSubjectRooms();
 }, [isProfessor]);
+
+
+useEffect(() => {
+  if (!user) return;
+  const token = localStorage.getItem("token");
+  axios.get("http://localhost:5000/api/users/me/majors", {
+    headers: { Authorization: `Bearer ${token}` }
+  }).then(res => setUserMajors(res.data))
+  .catch(err => console.error("Failed to fetch majors:", err));
+}, [user]);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -368,13 +380,13 @@ const handleStatClick = async (type) => {
 
     {/* <!-- PROFILE --> */}
     <div className="profile-card">
-      <img src={user?.profilePic || cat} alt="Profile Picture" className="profile-pic" />
+      <img src={user?.profilePicUrl || cat} alt="Profile Picture" className="profile-pic" />
       <div className="profile-info">
         {/* yay dynamic updates in profile */}
         <h2>@{user?.username}</h2>
         <p>Email: {user?.email}</p>
 
-        <p>Major(s): {user?.majors?.join(", ")}</p>
+        <p>Major(s): {userMajors.join(", ")}</p>
         
           <p >tag: {user?.role}</p>{/*<!-- only one that showes later --> */}
          <p>rating: {user?.rating ?? 1} / 5 </p>  {/* <!-- ⭐⭐⭐☆☆this should be either stars, number on 5 or a progress bar...maybe number is our best go here --> */}
@@ -430,7 +442,7 @@ const handleStatClick = async (type) => {
     { type: "useful", label: "Useful Count 👍", value: stats?.usefulReceived || 0 },
     { type: "useless", label: "Useless Count ❌", value: stats?.uselessReceived || 0 },
     { type: "specialized", label: "Specialized ✨", value: stats?.specializedReceived || 0 },
-    { type: "rooms", label: "Rooms Joined 🏠", value: user?.rooms?.length || 0 },
+    { type: "rooms", label: "Rooms Joined 🏠", value: userRooms?.length || 0 },
   ].map(({ type, label, value }) => (
     <div
       key={type}
@@ -714,9 +726,9 @@ const handleStatClick = async (type) => {
       ) : (() => {
           const filtered = savedPosts.filter(post => {
             // tab filter
-            if (savedTab === "posts" && (post.image || post.pdf || post.resourceLink)) return false;
-            if (savedTab === "images" && !post.image) return false;
-            if (savedTab === "files" && !post.pdf) return false;
+           if (savedTab === "posts" && (post.imageUrl || post.pdfUrl || post.resourceLink)) return false;
+if (savedTab === "images" && !post.imageUrl) return false;
+if (savedTab === "files" && !post.pdfUrl) return false;
             if (savedTab === "links" && !post.resourceLink) return false;
 
             // search filter
@@ -748,8 +760,8 @@ const handleStatClick = async (type) => {
                   <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
                   {/* attachment indicators */}
                   <div style={{marginLeft:"auto", display:"flex", gap:"4px"}}>
-                    {post.image && <span style={{fontSize:"12px"}}>🖼️</span>}
-                    {post.pdf && <span style={{fontSize:"12px"}}>📄</span>}
+                    {post.imageUrl && <span style={{fontSize:"12px"}}>🖼️</span>}
+                    {post.pdfUrl && <span style={{fontSize:"12px"}}>📄</span>}
                     {post.resourceLink && <span style={{fontSize:"12px"}}>🔗</span>}
                   </div>
                 </div>
@@ -832,9 +844,9 @@ const handleStatClick = async (type) => {
               </small>
               <small style={{ opacity: 0.4, fontSize: "11px" }}>{new Date(item.createdAt).toLocaleString()}</small>
               <div style={{ marginLeft: "auto", display: "flex", gap: "8px", fontSize: "12px", opacity: 0.7 }}>
-                {item.votes?.useful > 0 && <span>👍 {item.votes.useful}</span>}
-                {item.votes?.useless > 0 && <span>❌ {item.votes.useless}</span>}
-                {item.votes?.specialized > 0 && <span>✨ {item.votes.specialized}</span>}
+                {item.votes?.useful > 0 && <span>👍 {item.votesUseful}</span>}
+                {item.votes?.useless > 0 && <span>❌ {item.votesUseless}</span>}
+                {item.votes?.specialized > 0 && <span>✨ {item.votesSpecialized}</span>}
               </div>
             </div>
             {item.title && <h4 style={{ margin: "0 0 4px", fontSize: "14px" }}>{item.title}</h4>}

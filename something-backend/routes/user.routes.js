@@ -22,6 +22,8 @@ router.post("/select-valid-inputs", protect, userController.selectValidInputs);
 router.get("/me/received-votes", protect, userController.getMyReceivedVotes);
 router.get("/me/comments", protect, userController.getMyComments);
 
+router.get('/me/majors', protect, userController.getMyMajors);
+
 // follow routes BEFORE /:userId
 router.post("/:userId/follow", protect, userController.followUser);
 router.delete("/:userId/unfollow", protect, userController.unfollowUser);
