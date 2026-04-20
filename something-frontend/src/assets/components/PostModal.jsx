@@ -54,14 +54,14 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
         ) : (
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
             <button onClick={() => onVote(comment.id, "useful")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#27ae60", background: "none", border: "1px solid #27ae60b3"  }}>
-              👍 {comment.votesUseful}
+              👍 {comment.voteUseful}
             </button>
             <button onClick={() => onVote(comment.id, "useless")} style={{ fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#c0392b", background:"none", border:"1px solid #c0392bb3" }}>
-              👎 {comment.votesUseless}
+              👎 {comment.voteUseless}
             </button>
             {(currentUser?.id === comment.userId|| currentUser?.rating >= 4) && (
               <button onClick={() => onVote(comment.id, "specialized")} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", background: "#f0c040", border: "none" }}>
-                ✨ {comment.votesSpecialized}
+                ✨ {comment.voteSpecialized}
               </button>
             )}
             {!isGuest && (
@@ -69,7 +69,7 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
                 ↩ Reply
               </button>
             )}
-            {currentUser?.id === comment.authorId && (
+            {currentUser?.id === comment.userId && (
               <>
                 <button onClick={() => onDelete(comment.id)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", color: "red" }}>🗑️</button>
                 <button onClick={() => { setEditingComment(comment); setEditCommentContent(comment.content); }} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", color: "green" }}>✏️</button>
@@ -142,12 +142,13 @@ const [comments, setComments] = useState([]);
 const refetchPost = async () => {
   const [postRes, commentsRes] = await Promise.all([
     axios.get(`http://localhost:5000/api/posts/${postId}`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} // ← fix here
     }),
     axios.get(`http://localhost:5000/api/posts/${postId}/comments`, {
       headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
     })
   ]);
+  console.log("comment sample:", commentsRes.data[0]);
   setPost(postRes.data);
   setComments(commentsRes.data);
 };

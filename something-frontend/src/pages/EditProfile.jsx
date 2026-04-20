@@ -27,10 +27,13 @@ useEffect(() => {
   axios.get("http://localhost:5000/api/users/me", {
     headers: { Authorization: `Bearer ${token}` }
   }).then((res) => {
+   
     setUsername(res.data.username);
     setEditEmail(res.data.email);
+     console.log("me data:", res.data.profile_pic_url);
+    console.log("me full data:", res.data);
     if (res.data.profilePicUrl) {
-      setProfilePreview(res.data.profilePic);
+      setProfilePreview(res.data.profilePicUrl);
     }
   }).catch((err) => {
     console.error("Failed to fetch user:", err);
