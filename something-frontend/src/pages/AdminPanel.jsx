@@ -488,7 +488,7 @@ const handleDeleteRoom = async (roomId) => {
               const isSuspended = user.suspendedUntil && new Date(user.suspendedUntil) > new Date();
               return (
                 <div key={user.id} style={{ ...card, display: "flex", alignItems: "center", gap: "12px" }}>
-                  <img src={user.profilePic || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
+                  <img src={user.profilePicUrl || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                       <strong>@{user.username}</strong>

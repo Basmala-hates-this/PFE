@@ -66,17 +66,19 @@ const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) 
         // filter by user's own rooms
         const roomsRes = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
           headers: { Authorization: `Bearer ${token}` }
+
         });
+        console.log("rooms sample:", roomsRes.data[0]);
+console.log("posts sample:", results[0].data[0]);
         const allowedRoomIds = roomsRes.data
           .filter(r => r.type !== "private")
           .map(r => r.id);
-        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
+        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.room_id));
       }
 
       setPosts(filteredPosts);
       const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-      setUsers(isGuest ? [] : results[1].data).filter(u => u.id !== currentUser.id);
-
+setUsers(isGuest ? [] : results[1].data.filter(u => u.id !== currentUser.id));
     } catch (err) {
       console.error("Search failed:", err);
     } finally {
@@ -137,12 +139,12 @@ const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) 
                        onMouseLeave={e => e.currentTarget.style.background="#252b45"}
                     >
                     <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"8px"}}>
-                      <strong>@{post.authorUsername}</strong>
-                      <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
+                      <strong>@{post.author_username}</strong>
+                      <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.author_role || "user"}</small>
                     </div>
                     {post.title && <h3 style={{margin:"0 0 6px", fontSize:"15px"}}>{post.title}</h3>}
                     <p style={{margin:"0 0 8px", opacity:0.8, fontSize:"14px"}}>{post.content}</p>
-                    <small style={{opacity:0.5}}>{new Date(post.createdAt).toLocaleString()}</small>
+                    <small style={{opacity:0.5}}>{new Date(post.created_at).toLocaleString()}</small>
                   </div>
                 ))
               )}
@@ -163,7 +165,7 @@ const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) 
                      onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
                      onMouseLeave={e => e.currentTarget.style.background="#252b45"}
                    >
-                    <img src={user.profilePic || Cat} alt="pfp" style={{width:"45px", height:"45px", borderRadius:"50%", objectFit:"cover"}}/>
+                    <img src={user.profile_pic || Cat} alt="pfp" style={{width:"45px", height:"45px", borderRadius:"50%", objectFit:"cover"}}/>
                     <div>
                       <strong>@{user.username}</strong>
                       <small style={{display:"block", opacity:0.5, marginTop:"2px"}}>{user.role} • rating: {user.rating ?? 1} / 5</small>

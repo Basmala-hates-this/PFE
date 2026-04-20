@@ -907,6 +907,16 @@ const getMyMajors = async (req, res) => {
   res.json(result.rows.map(r => r.name));
 };
 
+const getUserMajors = async (req, res) => {
+  const result = await pool.query(
+    `SELECT m.name FROM user_majors um
+     JOIN majors m ON m.id = um.major_id
+     WHERE um.user_id = $1`,
+    [req.params.userId]
+  );
+  res.json(result.rows.map(r => r.name));
+};
+
 module.exports = {
   getMe,
   updateMe,
@@ -927,4 +937,5 @@ module.exports = {
   selectMajorAfterRejection,
   selectValidInputs,
   getMyMajors,
+  getUserMajors,
 };

@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
 import ReportModal from "../assets/components/ReportModal.jsx";
+import  "../styles/pallette.css"
 
 export default function PublicProfile() {
   const { userId } = useParams();
@@ -23,6 +24,8 @@ const [followLoading, setFollowLoading] = useState(false);
 const [showReportUser, setShowReportUser] = useState(false);
 const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
+const [majors, setMajors] = useState([]);
+
 //note to self...maybe change the local storage to a global state?....this might fix the resedue of the logout entirly..
 
 ////////////////////////////////////////////////////////////////
@@ -32,7 +35,8 @@ const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   useEffect(() => {
   const fetchProfile = async () => {
     try {
-      const [userRes, statsRes, postsRes, followersRes] = await Promise.all([
+      const [userRes, statsRes, postsRes, followersRes, majorsRes] = await Promise.all([
+        
         axios.get(`http://localhost:5000/api/users/${userId}`, {
           headers: { Authorization: `Bearer ${token}` }
         }),
@@ -44,12 +48,23 @@ const currentUser = JSON.parse(localStorage.getItem("currentUser"));
         }),
         axios.get(`http://localhost:5000/api/users/${userId}/followers`, {
           headers: { Authorization: `Bearer ${token}` }
-        })
+        }),
+        axios.get(`http://localhost:5000/api/users/${userId}/majors`,
+        {
+ headers: { Authorization: `Bearer ${token}` }
+        }),
+        
       ]);
+
+console.log("user:", userRes.data);
+console.log("stats:", statsRes.data);
+console.log("posts sample:", postsRes.data[0]);
+console.log("followers sample:", followersRes.data[0]);
 
       setUser(userRes.data);
       setStats(statsRes.data);
       setPosts(postsRes.data);
+      setMajors(majorsRes.data);
 
       const currentUser = JSON.parse(localStorage.getItem("currentUser"));
       const alreadyFollowing = followersRes.data.some(f => f.id === currentUser?.id);
@@ -134,18 +149,18 @@ const handleFollow = async () => {
 /////////////////////////////////////////////////////////////////
 
   return (
-    <div style={{minHeight:"100vh", background:"#1a1f35", color:"white", padding:"20px"}}>
+    <div style={{minHeight:"100vh", background:"var(--blue-dark)", color:"white", padding:"20px"}}>
       
       {/* back button */}
       <button onClick={() => navigate(-1)} style={{background:"none", border:"none", color:"white", fontSize:"20px", cursor:"pointer", marginBottom:"20px"}}>←</button>
 
       {/* profile card */}
       <div style={{background:"#252b45", borderRadius:"12px", padding:"20px", display:"flex", alignItems:"center", gap:"20px", marginBottom:"20px"}}>
-        <img src={user?.profilePic || Cat} alt="pfp" style={{width:"80px", height:"80px", borderRadius:"50%", objectFit:"cover"}}/>
+        <img src={user?.profilePicUrl || Cat} alt="pfp" style={{width:"80px", height:"80px", borderRadius:"50%", objectFit:"cover"}}/>
         <div>
           <h2 style={{margin:"0 0 6px"}}>@{user?.username}</h2>
           <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"12px"}}>{user?.role}</small>
-          <p style={{margin:"8px 0 4px", opacity:0.7}}>Major(s): {user?.majors?.join(", ")}</p>
+          <p style={{margin:"8px 0 4px", opacity:0.7}}>Major(s): {majors.join(", ")}</p>
           <p style={{margin:0, opacity:0.7}}>Rating: {user?.rating ?? 1} / 5</p>
         </div>
         <button 
@@ -210,16 +225,17 @@ const handleFollow = async () => {
 
 
 {/* the major thinggis for profs....the ammount of shit i'm doing is insane.. */}
-{user?.role === "professor" && user?.majors?.length > 0 && (
+{user?.role === "professor" && majors?.length > 0 && (
   <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", marginBottom:"20px"}}>
     <h3 style={{margin:"0 0 15px", color:"#5DADE2"}}>Specialty Majors</h3>
-    {user.majors.map((major, index) => (
+    
+  {majors.map((major, index) => (
       <div key={index} style={{padding:"8px 0", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
         <span style={{color:"#85C1E9"}}>{major}</span>
       </div>
     ))}
   </div>
-)}
+)} 
 
       {/* recent posts */}
       <h3 style={{marginBottom:"15px"}}>Recent Posts</h3>
