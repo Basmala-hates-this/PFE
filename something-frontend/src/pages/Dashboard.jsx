@@ -181,10 +181,13 @@ useEffect(() => {
 
  const fetchRoomsAndPosts = async () => {
     console.log("fetchRoomsAndPosts called");
+    
     setLoading(true);
     try {
       const token = localStorage.getItem("token");
       let allowedRooms = [];
+      
+
 
       if (isGuest) {
         const response = await axios.get("http://localhost:5000/api/rooms/public-rooms");
@@ -192,6 +195,7 @@ useEffect(() => {
         const selectedCodes = guestUniversities.map(u => u.value);
         allowedRooms = response.data.filter(r =>
   r.type === "public" || selectedCodes.includes(r.universityCode)
+  
 );
       } else {
         const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
@@ -199,7 +203,7 @@ useEffect(() => {
         });
         allowedRooms = response.data;
       }
-      console.log("post sample:", posts[0]);
+     
 
       setUserRooms(allowedRooms);
 
@@ -236,6 +240,7 @@ useEffect(() => {
              const room = allowedRooms.find(r => r.id === p.roomId);
              return room ? room.type !== "private" : false;
             });
+            
          setPosts(publicPosts);
 }
       
@@ -1410,7 +1415,7 @@ const sortedPosts = [...posts].sort((a, b) => {
             }}>
               <p style={{ margin: "0 0 8px" }}>{a.message}</p>
               <small style={{ opacity: 0.5 }}>
-                By @{a.createdBy} — {new Date(a.createdAt).toLocaleString()}
+By @{a.created_by_username} — {new Date(a.created_at).toLocaleString()}
               </small>
             </div>
           ))

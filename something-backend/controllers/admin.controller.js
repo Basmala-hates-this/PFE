@@ -1117,6 +1117,7 @@ const roomRepo = require('../repositories/room.repo');
 const pool = require('../db');
 const PERMISSIONS = require('../config/permissions');
 const hasPermission = require('../utils/hasPermission');
+const toCamel = require('../utils/toCamel');
 
 const {
   sendProfessorRejectionEmail,
@@ -1542,7 +1543,10 @@ const getStats = async (req, res) => {
 
 const getAnnouncements = async (req, res) => {
   const result = await pool.query(
-    `SELECT * FROM announcements ORDER BY created_at DESC`
+    `SELECT a.*, u.username as created_by_username 
+     FROM announcements a
+     LEFT JOIN users u ON u.id = a.created_by
+     ORDER BY a.created_at DESC`
   );
   res.json(result.rows);
 };
@@ -1555,7 +1559,7 @@ const createAnnouncement = async (req, res) => {
   const { message } = req.body;
   const result = await pool.query(
     `INSERT INTO announcements (message, created_by) VALUES ($1,$2) RETURNING *`,
-    [message, req.user.username]
+    [message, req.user.id]
   );
 
   await addLog(req.user.id, req.user.username, 'create_announcement', null, message);
@@ -2149,6 +2153,17 @@ const overrideLog = async (req, res) => {
   res.json({ message: 'Action overridden successfully' });
 };
 
+
+const getAllCommentsAdmin = async (req, res) => {
+  const result = await pool.query(
+    `SELECT c.*, p.title as post_title 
+     FROM comments c
+     LEFT JOIN posts p ON p.id = c.post_id
+     ORDER BY c.created_at DESC`
+  );
+  res.json(toCamel(result.rows));
+};
+
 // --- exports ---
 
 module.exports = {
@@ -2191,4 +2206,5 @@ module.exports = {
   unsuspendFromRoom,
   deleteRoomAdmin,
   overrideLog,
+  getAllCommentsAdmin,
 };

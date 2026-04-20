@@ -104,6 +104,7 @@ const [roomTypeFilter, setRoomTypeFilter] = useState("");
       if (userStatusFilter) params.append("status", userStatusFilter);
       const res = await axios.get(`${API}/users?${params}`, { headers });
       setUsers(res.data);
+      console.log("user sample:", res.data[0]);
     } catch (err) { console.error(err); }
   };
  
@@ -111,20 +112,28 @@ const [roomTypeFilter, setRoomTypeFilter] = useState("");
     try {
       const res = await axios.get(`${API}/professors/pending`, { headers });
       setPendingProfessors(res.data);
+      console.log("prof sample:", res.data[0]);
     } catch (err) { console.error(err); }
   };
  
-  const fetchReports = async () => {
-    try {
-      const res = await axios.get(`${API}/reports`, { headers });
-      setReports(res.data);
-    } catch (err) { console.error(err); }
-  };
+
+  //just noting that this might be a problem causer....
+ const fetchReports = async () => {
+  try {
+    const res = await axios.get(`${API}/reports`, { headers });
+    const flat = [
+      ...res.data.posts.map(p => ({ ...p, type: "post" })),
+      ...res.data.comments.map(c => ({ ...c, type: "comment" }))
+    ];
+    setReports(flat);
+  } catch (err) { console.error(err); }
+};
  
   const fetchAnnouncements = async () => {
     try {
       const res = await axios.get(`${API}/announcements`);
       setAnnouncements(res.data);
+      console.log("announcements raw:", res.data[0]);
     } catch (err) { console.error(err); }
   };
  
@@ -302,13 +311,18 @@ const fetchPendingResources = async () => {
   try {
     const res = await axios.get(`${API}/resources/pending`, { headers });
     setPendingResources(res.data);
+    console.log("resource sample:", res.data[0]);
   } catch (err) { console.error(err); }
 };
 
 const fetchHiddenContent = async () => {
   try {
     const res = await axios.get(`${API}/content/hidden`, { headers });
-    setHiddenContent(res.data);
+    const flat = [
+      ...res.data.posts.map(p => ({ ...p, type: "post" })),
+      ...res.data.comments.map(c => ({ ...c, type: "comment" }))
+    ];
+    setHiddenContent(flat);
   } catch (err) { console.error(err); }
 };
 
@@ -485,24 +499,25 @@ const handleDeleteRoom = async (roomId) => {
  
           {users.length === 0 ? <p style={{ opacity: 0.5 }}>No users found.</p> : (
             users.map(user => {
-              const isSuspended = user.suspendedUntil && new Date(user.suspendedUntil) > new Date();
+              const isSuspended = user.suspended_until && new Date(user.suspended_until) > new Date();
               return (
                 <div key={user.id} style={{ ...card, display: "flex", alignItems: "center", gap: "12px" }}>
-                  <img src={user.profilePicUrl || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
+                  <img src={user.profile_pic_url || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
                       <strong>@{user.username}</strong>
                       <span style={badge("#6476af")}>{user.role}</span>
-                      {user.authorityLevel !== "user" && <span style={badge("#4a3f6b")}>{user.authorityLevel}</span>}
+{user.authority_level !== "user" && <span style={badge("#4a3f6b")}>{user.authority_level}</span>}
                       {isSuspended && <span style={badge("#c0392b")}>suspended</span>}
-                      {user.verificationStatus === "pending" && <span style={badge("#e67e22")}>pending prof</span>}
+{user.verification_status === "pending" && <span style={badge("#e67e22")}>pending prof</span>}
                     </div>
                     <small style={{ opacity: 0.5 }}>
-                      {user.email} • rating: {user.rating ?? 1}/5 • violations: {user.violationCount || 0}
+                      {user.email} • rating: {user.rating ?? 1}/5 • violations: {user.violation_count || 0}
+
                     </small>
                     {isSuspended && (
                       <small style={{ display: "block", color: "#e74c3c", marginTop: "2px" }}>
-                        Suspended until {new Date(user.suspendedUntil).toLocaleDateString()} — {user.suspensionReason}
+Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.suspension_reason}
                       </small>
                     )}
                   </div>
@@ -548,16 +563,16 @@ const handleDeleteRoom = async (roomId) => {
             pendingProfessors.map(prof => (
               <div key={prof.id} style={card}>
                 <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
-                  <img src={prof.profilePic || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
+                  <img src={prof.profile_pic_url || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
                   <div>
                     <strong>@{prof.username}</strong>
                     <small style={{ display: "block", opacity: 0.5 }}>{prof.email}</small>
-                    <small style={{ display: "block", opacity: 0.5 }}>Majors: {prof.majors?.join(", ")}</small>
+<small style={{ display: "block", opacity: 0.5 }}>University: {prof.university_code}</small>
                   </div>
                 </div>
  
                 {prof.proofFile && (
-                  <a href={prof.proofFile} target="_blank" rel="noopener noreferrer"
+                  <a href={prof.proof_file_url} target="_blank" rel="noopener noreferrer"
                     style={{ display: "inline-block", marginBottom: "10px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px" }}>
                     📄 View Proof Document
                   </a>
@@ -637,29 +652,29 @@ const handleDeleteRoom = async (roomId) => {
       pendingResources.map(post => (
         <div key={post.id} style={card}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-            <strong>@{post.authorUsername}</strong>
-            <span style={badge("#6476af")}>{post.authorRole}</span>
-            <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(post.createdAt).toLocaleDateString()}</small>
+            <strong>@{post.author_username}</strong>
+            <span style={badge("#6476af")}>{post.author_role}</span>
+            <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(post.created_at).toLocaleDateString()}</small>
           </div>
           {post.title && <strong style={{ display: "block", marginBottom: "4px" }}>{post.title}</strong>}
           <p style={{ margin: "0 0 10px", opacity: 0.7, fontSize: "13px" }}>{post.content?.slice(0, 120)}</p>
 
-          {post.image && (
-            <a href={post.image} target="_blank" rel="noopener noreferrer"
+          {post.image_url && (
+            <a href={post.image_url} target="_blank" rel="noopener noreferrer"
               style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px", marginRight: "8px" }}>
               🖼️ View Image
             </a>
           )}
-          {post.pdf && (
-            <a href={post.pdf} target="_blank" rel="noopener noreferrer"
+          {post.pdf_url && (
+            <a href={post.pdf_url} target="_blank" rel="noopener noreferrer"
               style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px", marginRight: "8px" }}>
               📄 View PDF
             </a>
           )}
-          {post.resourceLink && (
-            <a href={post.resourceLink} target="_blank" rel="noopener noreferrer"
+          {post.resource_link && (
+            <a href={post.resource_link} target="_blank" rel="noopener noreferrer"
               style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px" }}>
-              🔗 {post.resourceLabel || "Open Link"}
+              🔗 {post.resource_label || "Open Link"}
             </a>
           )}
 
@@ -791,7 +806,9 @@ const handleDeleteRoom = async (roomId) => {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                   <div>
                     <p style={{ margin: "0 0 6px" }}>{a.message}</p>
-                    <small style={{ opacity: 0.5 }}>By @{a.createdBy} — {new Date(a.createdAt).toLocaleString()}</small>
+                    <small style={{ opacity: 0.5 }}>
+                      By @{a.created_by_username} — {new Date(a.created_at).toLocaleString()}
+                      </small>
                   </div>
                   {isSuperAdmin && (
                     <button onClick={() => handleDeleteAnnouncement(a.id)} style={{ background: "none", border: "none", color: "#e74c3c", cursor: "pointer", fontSize: "16px" }}>🗑️</button>
@@ -1066,10 +1083,10 @@ const handleDeleteRoom = async (roomId) => {
 
         {/* USERS */}
         {drillDown.type === "users" && drillDown.data.map(u => {
-          const isSuspended = u.suspendedUntil && new Date(u.suspendedUntil) > new Date();
+const isSuspended = u.suspended_until && new Date(u.suspended_until) > new Date();
           return (
             <div key={u.id} style={{ ...card, display: "flex", alignItems: "center", gap: "12px" }}>
-              <img src={u.profilePic || Cat} alt="pfp"
+              <img src={u.profile_pic_url || Cat} alt="pfp"
                 style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "4px" }}>
@@ -1078,10 +1095,10 @@ const handleDeleteRoom = async (roomId) => {
                   {isSuspended && <span style={badge("#c0392b")}>suspended</span>}
                   {u.verificationStatus === "pending" && <span style={badge("#e67e22")}>pending</span>}
                 </div>
-                <small style={{ opacity: 0.5 }}>{u.email} • rating: {u.rating ?? 1}/5 • violations: {u.violationCount || 0}</small>
+                <small style={{ opacity: 0.5 }}>{u.email} • rating: {u.rating ?? 1}/5 • violations: {u.violation_count || 0}</small>
                 {isSuspended && (
                   <small style={{ display: "block", color: "#e74c3c", marginTop: "2px" }}>
-                    Until {new Date(u.suspendedUntil).toLocaleDateString()} — {u.suspensionReason}
+Until {new Date(u.suspended_until).toLocaleDateString()} — {u.suspension_reason}
                   </small>
                 )}
               </div>
@@ -1102,7 +1119,7 @@ const handleDeleteRoom = async (roomId) => {
               <span style={badge("#6476af")}>{post.authorRole}</span>
               {post.isHidden && <span style={badge("#c0392b")}>hidden</span>}
               {post.reports?.length > 0 && <span style={badge("#e67e22")}>🚩 {post.reports.length}</span>}
-              <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(post.createdAt).toLocaleDateString()}</small>
+              <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(post.created_at).toLocaleDateString()}</small>
             </div>
             {post.title && <strong style={{ display: "block", marginBottom: "4px" }}>{post.title}</strong>}
             <p style={{ margin: 0, opacity: 0.7, fontSize: "13px" }}>{post.content?.slice(0, 120)}...</p>

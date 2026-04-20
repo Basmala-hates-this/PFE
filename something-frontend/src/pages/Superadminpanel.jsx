@@ -88,6 +88,7 @@ const [overrideReason, setOverrideReason] = useState("");
     try {
       const res = await axios.get(`${API}/logs`, { headers });
       setLogs([...res.data].reverse());
+      console.log("log sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -229,6 +230,7 @@ const [overrideReason, setOverrideReason] = useState("");
     try {
       const res = await axios.get(`${API}/applications`, { headers });
       setApplications(res.data);
+      console.log("application sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -266,6 +268,7 @@ const [overrideReason, setOverrideReason] = useState("");
       const params = search ? `?q=${search}` : "";
       const res = await axios.get(`${API}/admins${params}`, { headers });
       setCurrentAdmins(res.data);
+      console.log("admin sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -311,24 +314,17 @@ const [overrideReason, setOverrideReason] = useState("");
         }
         case "posts": {
           const res = await axios.get(`${API}/posts`, { headers });
+          
           setDrillDown({ type: "posts", title: "All Posts", data: res.data });
+          console.log("post sample for drilldown:", res.data[0]);
           break;
         }
-        case "comments": {
-          const res = await axios.get(`${API}/posts`, { headers });
-          const comments = [];
-          res.data.forEach((post) => {
-            post.comments?.forEach((c) =>
-              comments.push({ ...c, postTitle: post.title || "Untitled" }),
-            );
-          });
-          setDrillDown({
-            type: "comments",
-            title: "All Comments",
-            data: comments,
-          });
-          break;
-        }
+       case "comments": {
+  const res = await axios.get(`${API}/comments`, { headers });
+  console.log("comment sample:", res.data[0]);
+  setDrillDown({ type: "comments", title: "All Comments", data: res.data });
+  break;
+}
         case "rooms": {
           const res = await axios.get(`${API}/rooms`, { headers });
           setDrillDown({ type: "rooms", title: "All Rooms", data: res.data });
@@ -813,7 +809,7 @@ const [overrideReason, setOverrideReason] = useState("");
                       }}
                     >
                       <img
-                        src={admin.profilePic || Cat}
+                        src={admin.profile_pic_url || Cat}
                         alt="pfp"
                         style={{
                           width: "40px",
@@ -1066,38 +1062,38 @@ const [overrideReason, setOverrideReason] = useState("");
         const isOverriding = overridingLogId === log.id;
 
         return (
-          <div key={log.id} style={{ ...card, opacity: log.overriddenBy ? 0.5 : 1 }}>
+          <div key={log.id} style={{ ...card, opacity: log.overridden_by ? 0.5 : 1 }}>
             {/* main log row */}
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{
                 width: "8px", height: "8px", borderRadius: "50%",
-                background: log.overriddenBy ? "#555" : logActionColor(log.action),
+                background: log.overridden_by ? "#555" : logActionColor(log.action),
                 flexShrink: 0,
               }} />
               <div style={{ flex: 1 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <strong style={{ fontSize: "13px" }}>@{log.adminUsername}</strong>
-                  <span style={{ ...badge(log.overriddenBy ? "#555" : logActionColor(log.action)), fontSize: "10px" }}>
+                  <strong style={{ fontSize: "13px" }}>@{log.admin_username}</strong>
+                  <span style={{ ...badge(log.overridden_by ? "#555" : logActionColor(log.action)), fontSize: "10px" }}>
                     {log.action}
                   </span>
-                  {log.overriddenBy && (
+                  {log.overridden_by && (
                     <span style={{ ...badge("#7f8c8d"), fontSize: "10px" }}>
-                      ↩ overridden by @{log.overriddenBy}
+                      ↩ overridden by @{log.overridden_by}
                     </span>
                   )}
                 </div>
                 <small style={{ opacity: 0.6 }}>{log.details}</small>
-                {log.overriddenBy && (
+                {log.overridden_by && (
                   <small style={{ display: "block", opacity: 0.4, marginTop: "2px" }}>
-                    Reason: {log.overrideReason} • {new Date(log.overriddenAt).toLocaleString()}
+                    Reason: {log.override_reason} • {new Date(log.overridden_at).toLocaleString()}
                   </small>
                 )}
               </div>
               <small style={{ opacity: 0.4, fontSize: "11px", flexShrink: 0 }}>
-                {new Date(log.createdAt).toLocaleString()}
+                {new Date(log.created_at).toLocaleString()}
               </small>
               {/* override button — only for overridable actions that haven't been overridden yet */}
-              {isOverridable && !log.overriddenBy && (
+              {isOverridable && !log.overridden_by && (
                 <button
                   onClick={() => {
                     setOverridingLogId(isOverriding ? null : log.id);
@@ -1188,7 +1184,7 @@ const [overrideReason, setOverrideReason] = useState("");
               {drillDown.type === "users" && Array.isArray(drillDown.data) &&
                 drillDown.data.map((u) => {
                   const isSuspended =
-                    u.suspendedUntil && new Date(u.suspendedUntil) > new Date();
+                    u.suspended_until && new Date(u.suspended_until) > new Date();
                   return (
                     <div
                       key={u.id}
@@ -1200,7 +1196,7 @@ const [overrideReason, setOverrideReason] = useState("");
                       }}
                     >
                       <img
-                        src={u.profilePic || Cat}
+                        src={u.profile_pic_url || Cat}
                         alt="pfp"
                         style={{
                           width: "36px",
@@ -1223,13 +1219,13 @@ const [overrideReason, setOverrideReason] = useState("");
                           {isSuspended && (
                             <span style={badge("#c0392b")}>suspended</span>
                           )}
-                          {u.verificationStatus === "pending" && (
+                          {u.verification_status === "pending" && (
                             <span style={badge("#e67e22")}>pending</span>
                           )}
                         </div>
                         <small style={{ opacity: 0.5 }}>
                           {u.email} • rating: {u.rating ?? 1}/5 • violations:{" "}
-                          {u.violationCount || 0}
+                          {u.violation_count || 0}
                         </small>
                         {isSuspended && (
                           <small
@@ -1240,19 +1236,19 @@ const [overrideReason, setOverrideReason] = useState("");
                             }}
                           >
                             Until{" "}
-                            {new Date(u.suspendedUntil).toLocaleDateString()} —{" "}
-                            {u.suspensionReason}
+                            {new Date(u.suspended_until).toLocaleDateString()} —{" "}
+                            {u.suspension_reason}
                           </small>
                         )}
                       </div>
                       {/* action history button */}
-                      {u.actionHistory?.length > 0 && (
+                      {u.action_history?.length > 0 && (
                         <button
                           onClick={() =>
                             setDrillDown({
                               type: "history",
                               title: `@${u.username} History`,
-                              data: u.actionHistory,
+                              data: u.action_history,
                             })
                           }
                           style={btn()}
@@ -1276,8 +1272,8 @@ const [overrideReason, setOverrideReason] = useState("");
                         marginBottom: "6px",
                       }}
                     >
-                      <strong>@{post.authorUsername}</strong>
-                      <span style={badge("#6476af")}>{post.authorRole}</span>
+                      <strong>@{post.author_username}</strong>
+                      <span style={badge("#6476af")}>{post.author_role}</span>
                       {post.isHidden && (
                         <span style={badge("#c0392b")}>hidden</span>
                       )}
@@ -1287,7 +1283,7 @@ const [overrideReason, setOverrideReason] = useState("");
                         </span>
                       )}
                       <small style={{ marginLeft: "auto", opacity: 0.5 }}>
-                        {new Date(post.createdAt).toLocaleDateString()}
+                        {new Date(post.created_at).toLocaleDateString()}
                       </small>
                     </div>
                     {post.title && (

@@ -51,6 +51,8 @@ router.get("/logs", protect, adminController.getLogs);
 router.post("/logs/:logId/override", protect, adminController.overrideLog);
 router.get("/stats", protect, adminController.getStats);
 
+router.get("/comments", protect,  adminController.getAllCommentsAdmin);
+
 //admin aplicats
 router.post("/apply", protect, adminController.applyForAdmin);
 router.delete("/apply", protect, adminController.withdrawApplication);
