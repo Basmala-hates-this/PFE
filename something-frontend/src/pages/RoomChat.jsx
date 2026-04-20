@@ -211,7 +211,7 @@ const handleLeaveRoom = async () => {
         <p style={{color:"rgba(255,255,255,0.4)", textAlign:"center"}}>No messages yet. Say something! 👋</p>
       ) : (
         messages.map(msg => (
-          <div key={msg.id} style={{display:"flex", flexDirection:"column", alignItems: msg.authorId === currentUser?.id ? "flex-end" : "flex-start"}}>
+          <div key={msg.id} style={{display:"flex", flexDirection:"column", alignItems: msg.senderId === currentUser?.id ? "flex-end" : "flex-start"}}>
             
             {/* reply preview */}
            
@@ -223,7 +223,7 @@ const handleLeaveRoom = async () => {
                 </div>
             )}
 
-            <div style={{maxWidth:"60%", padding:"10px 14px", borderRadius:"12px", background: msg.authorId === currentUser?.id ? "#6476af" : "#2d3350"}}>
+            <div style={{maxWidth:"60%", padding:"10px 14px", borderRadius:"12px", background:  msg.senderId  === currentUser?.id ? "#6476af" : "#2d3350"}}>
               <small style={{opacity:0.7, fontSize:"11px"}}>@{msg.authorUsername}</small>
               
               {editingMessage?.id === msg.id ? (
@@ -280,7 +280,7 @@ const handleLeaveRoom = async () => {
             {/* message actions */}
             <div style={{display:"flex", gap:"6px", marginTop:"4px"}}>
               <button onClick={() => setReplyTo(msg)} style={{fontSize:"10px", background:"none", border:"none", color:"rgba(255,255,255,0.4)", cursor:"pointer"}}>↩ Reply</button>
-              {msg.authorId === currentUser?.id && (
+              {msg.senderId=== currentUser?.id && (
                 <>
                   <button onClick={() => { setEditingMessage(msg); setEditContent(msg.content); }} style={{fontSize:"10px", background:"none", border:"none", color:"rgba(255,255,255,0.4)", cursor:"pointer"}}>✏️ Edit</button>
                   <button onClick={() => handleDeleteMessage(msg.id)} style={{fontSize:"10px", background:"none", border:"none", color:"#fc0c0c", cursor:"pointer"}}>🗑️ Delete</button>

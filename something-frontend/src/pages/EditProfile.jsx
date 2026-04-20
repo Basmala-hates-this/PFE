@@ -29,7 +29,7 @@ useEffect(() => {
   }).then((res) => {
     setUsername(res.data.username);
     setEditEmail(res.data.email);
-    if (res.data.profilePic) {
+    if (res.data.profilePicUrl) {
       setProfilePreview(res.data.profilePic);
     }
   }).catch((err) => {

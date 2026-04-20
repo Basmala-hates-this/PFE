@@ -398,15 +398,17 @@ const getPostsAll = async (req, res) => {
     if (sort === 'top') {
       const result = await pool.query(
         `SELECT p.*,
-          COALESCE(v.useful, 0) as vote_useful,
-          COALESCE(v.useless, 0) as vote_useless,
-          COUNT(DISTINCT c.id) as comment_count
-         FROM posts p
-         LEFT JOIN post_vote_counts v ON v.post_id = p.id
-         LEFT JOIN comments c ON c.post_id = p.id
-         WHERE p.room_id = $1
-         GROUP BY p.id, v.useful, v.useless
-         ORDER BY vote_useful DESC`,
+  COALESCE(v.useful, 0) as vote_useful,
+  COALESCE(v.useless, 0) as vote_useless,
+  COUNT(DISTINCT c.id) as comment_count,
+  u.profile_pic_url as author_profile_pic
+ FROM posts p
+ LEFT JOIN post_vote_counts v ON v.post_id = p.id
+ LEFT JOIN comments c ON c.post_id = p.id
+ LEFT JOIN users u ON u.id = p.user_id
+ WHERE p.room_id = $1
+ GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
+ ORDER BY vote_useful DESC`,
         [roomId]
       );
       posts = toCamel(result.rows);
@@ -415,16 +417,18 @@ const getPostsAll = async (req, res) => {
     }
   } else {
     const result = await pool.query(
-      `SELECT p.*,
-        COALESCE(v.useful, 0) as vote_useful,
-        COALESCE(v.useless, 0) as vote_useless,
-        COUNT(DISTINCT c.id) as comment_count
-       FROM posts p
-       LEFT JOIN post_vote_counts v ON v.post_id = p.id
-       LEFT JOIN comments c ON c.post_id = p.id
-       GROUP BY p.id, v.useful, v.useless
-       ORDER BY p.created_at DESC`
-    );
+  `SELECT p.*,
+    COALESCE(v.useful, 0) as vote_useful,
+    COALESCE(v.useless, 0) as vote_useless,
+    COUNT(DISTINCT c.id) as comment_count,
+    u.profile_pic_url as author_profile_pic
+   FROM posts p
+   LEFT JOIN post_vote_counts v ON v.post_id = p.id
+   LEFT JOIN comments c ON c.post_id = p.id
+   LEFT JOIN users u ON u.id = p.user_id
+   GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
+   ORDER BY p.created_at DESC`
+);
     posts = toCamel(result.rows);
   }
 

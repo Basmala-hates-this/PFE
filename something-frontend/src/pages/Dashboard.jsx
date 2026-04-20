@@ -199,6 +199,7 @@ useEffect(() => {
         });
         allowedRooms = response.data;
       }
+      console.log("post sample:", posts[0]);
 
       setUserRooms(allowedRooms);
 
@@ -1013,7 +1014,7 @@ const sortedPosts = [...posts].sort((a, b) => {
     <div key={post.id} className="mock-post" style={{border:"1px solid #ccc",borderRadius:"30%",marginBottom:"5px", padding:"14px", borderRadius:"6px"}}>
       <div style={{  display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
   <img 
-    src={user?.profilePicUrl || Cat} 
+    src={post.authorProfilePic || Cat}
     alt="pfp" 
     style={{width:"40px", height:"40px", borderRadius:"50%", objectFit:"cover",border:"1px solid var(--dark)", padding:"2px"}}
   />
