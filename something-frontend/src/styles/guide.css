@@ -10,26 +10,26 @@
 .guide-container {
   display: flex;
   height: 100vh;
-  background: var(--bg-dark);
-  color: var(--text-main);
+  background: #132041;
+  color: #f1f5f9;
   font-family: 'Inter', system-ui, sans-serif;
 }
 
 /* Sidebar Styling */
 .guide-nav {
   width: 280px;
-  background: var(--bg-card);
+  background: #152a4a;
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-  border-right: 1px solid var(--border);
+  border-right: 1px solid #00b815;
   border-radius: 0 20px 20px 0;
 }
 
 .guide-nav h2 {
   font-size: 1.25rem;
-  color: var(--accent);
+  color: #38bdf8;
   margin-bottom: 20px;
   font-weight: 700;
   letter-spacing: -0.5px;
@@ -47,14 +47,14 @@
   border-radius: 8px;
   margin-bottom: 4px;
   font-size: 0.95rem;
-  color: var(--text-muted);
+  color: #d0d6e0;
   transition: all 0.2s ease;
   border: 1px solid transparent;
 }
 
 .guide-nav li:hover {
   background: rgba(56, 189, 248, 0.1);
-  color: var(--accent);
+  color: #38bdf8;
 }
 
 
@@ -75,20 +75,20 @@
 .guide-content h1 {
   font-size: 2rem;
   margin-bottom: 20px;
-  color: var(--text-main);
-  border-bottom: 2px solid var(--border);
+  color: #f1f5f9;
+  border-bottom: 2px solid #00b815;
   padding-bottom: 10px;
 }
 
 .guide-content p {
   line-height: 1.7;
   font-size: 1.1rem;
-  color: var(--text-muted);
+  color: #d0d6e0;
 }
 
 .guide-content ul, .guide-content ol {
   margin: 20px 0;
-  color: var(--text-muted);
+  color: #d0d6e0;
 }
 
 .guide-content li {
@@ -101,7 +101,7 @@
   max-height: 700px;
   height: auto;
   border-radius: 12px;
-  border: 2px solid var(--border);
+  border: 2px solid #00b815;
   margin: 25px 0;
   box-shadow: 0 10px 25px rgba(0,0,0,0.3);
   transition: transform 0.3s ease;
@@ -113,11 +113,37 @@
 
 /* Links/Email */
 .mail {
-  color: var(--accent);
+  color:#38bdf8;
   text-decoration: none;
   font-weight: 500;
 }
 
 .mail:hover {
   text-decoration: underline;
+}
+
+.guideHeader {
+  display: flex;
+  flex-direction:row;
+  
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.guide-quote {
+  font-style: italic;
+  opacity: 1;
+
+  margin-top: 4rem;
+  
+}
+.guideLogo {
+  max-width: 150px;
+  width: 60px;
+  height: auto;
+ 
+  border: 2px solid antiquewhite;
+   border-radius: 600px;
+  filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));
+  margin-bottom: 1.5rem;
 }

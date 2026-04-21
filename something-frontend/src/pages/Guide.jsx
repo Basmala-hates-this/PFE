@@ -10,11 +10,12 @@ import subj from "../photos/subj.jpg";
 import profile from "../photos/profile.jpg";
 import actionBtns from "../photos/actionbtns.jpg";
 import edit from "../photos/edit.jpg";
+import logo from "../photos/logo2.png";
 
 export default function Guide() {
       const navigate = useNavigate();
 
-  
+   
   const sections = {
     overview: useRef(null),
     dashboard: useRef(null),
@@ -57,8 +58,14 @@ export default function Guide() {
       </aside>
 
       {/* Content */}
+     < header className="guide-header">
+    
+     </header>
       <main className="guide-content">
-
+        <div className="guideHeader">
+        <img src={logo} alt="logo" className="guideLogo" />
+         <p className="guide-quote">Perfection is overrated. Persistence builds better stories.Join us and we can Learn, Teach and Build — Together....</p>
+</div>
         {/* Overview */}
         <section ref={sections.overview}>
           <h1>Overview</h1>

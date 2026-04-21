@@ -141,7 +141,7 @@ const customSelect = {
     <img src={logo2} alt="Logo" className="logo"/>
 
     <h1 className="welcome">Welcome <span className="wave">👋</span></h1>
-    <p className="quote">Perfection is overrated. Persistence builds better stories.Join us and we can Learn, Teach and Build — Together....</p>
+    <p className="quote">Perfection is overrated. Persistence builds better stories.Join us and we can Learn, Teach and Build — Together....</p> 
     <div className="buttons">
       <button id="guestBtn"  onClick={() => setShowGuestModal(true)}>Continue as Guest</button>
       <button id="createBtn" onClick={() => navigate("/info")}>Create Account</button>
