@@ -1208,7 +1208,6 @@ export default function Dashboard() {
                       className="mock-post"
                       style={{
                         border: "1px solid #ccc",
-                        borderRadius: "30%",
                         marginBottom: "5px",
                         padding: "14px",
                         borderRadius: "6px",

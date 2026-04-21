@@ -746,11 +746,27 @@ const reportUser = async (req, res) => {
 
 const selectMajorAfterRejection = async (req, res) => {
   const userId = req.user.id;
-  const { selectedMajorId } = req.body;
+ 
+  const { selectedMajor } = req.body;
+  console.log("selectedMajor received:", selectedMajor);
+   console.log("userId:", userId);
 
   const user = await userRepo.findById(userId);
+  console.log("user.pending_reorientation:", user.pending_reorientation);
   if (!user) return res.status(404).json({ message: 'User not found' });
-  if (!user.pending_reorientation) return res.status(400).json({ message: 'No reorientation pending' });
+  if (!user.pendingReorientation) return res.status(400).json({ message: 'No reorientation pending' });
+
+
+
+
+const majorLookup = await pool.query(
+  `SELECT id FROM majors WHERE name = $1`,
+  [selectedMajor]
+);
+if (majorLookup.rows.length === 0) {
+  return res.status(400).json({ message: 'Major not found' });
+}
+const selectedMajorId = majorLookup.rows[0].id;
 
   // verify user is enrolled in this major
   const majorCheck = await pool.query(

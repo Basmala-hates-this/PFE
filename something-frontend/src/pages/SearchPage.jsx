@@ -60,21 +60,28 @@ const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) 
         const allowedRooms = roomsRes.data.filter(r =>
           r.type === "public" || selectedCodes.includes(r.university)
         );
+        console.log("guest allowed rooms sample:", allowedRooms[0]);
+        console.log("post sample:", filteredPosts[0]);
         const allowedRoomIds = allowedRooms.map(r => r.id);
-        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
+        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.room_id));
       } else {
         // filter by user's own rooms
         const roomsRes = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
           headers: { Authorization: `Bearer ${token}` }
+          
 
         });
         console.log("rooms sample:", roomsRes.data[0]);
 console.log("posts sample:", results[0].data[0]);
+
         const allowedRoomIds = roomsRes.data
           .filter(r => r.type !== "private")
           .map(r => r.id);
+
         filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.room_id));
+        
       }
+      
 
       setPosts(filteredPosts);
       const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");

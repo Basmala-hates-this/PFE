@@ -33,6 +33,7 @@ export default function ReorientationPage() {
         pendingReorientation: false
       };
       localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+      console.log(currentUser);
 
       alert("Major selected! Welcome to StudyBuddy.");
       navigate("/dashboard");
@@ -41,6 +42,7 @@ export default function ReorientationPage() {
     } finally {
       setLoading(false);
     }
+    
   };
 
   return (

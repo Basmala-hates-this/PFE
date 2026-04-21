@@ -582,14 +582,18 @@ const searchPosts = async (req, res) => {
   if (!q) return res.json([]);
 
   const result = await pool.query(
-    `SELECT * FROM posts
-     WHERE content ILIKE $1 OR title ILIKE $1
-     ORDER BY created_at DESC
+    `SELECT p.*,
+      u.username as author_username,
+      u.profile_pic_url as author_profile_pic
+     FROM posts p
+     LEFT JOIN users u ON u.id = p.user_id
+     WHERE p.content ILIKE $1 OR p.title ILIKE $1
+     ORDER BY p.created_at DESC
      LIMIT 20`,
     [`%${q}%`]
   );
 
-  res.json(result.rows);
+  res.json(toCamel(result.rows));
 };
 
 // --- saved posts ---

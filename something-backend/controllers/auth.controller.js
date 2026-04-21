@@ -292,6 +292,19 @@ const pool = require('../db');
 const { sendResetEmail } = require('../config/email');
 const toCamel = require('../utils/toCamel');
 
+
+
+const getUserMajors = async (userId) => {
+  const result = await pool.query(
+    `SELECT m.name FROM majors m
+     JOIN user_majors um ON um.major_id = m.id
+     WHERE um.user_id = $1`,
+    [userId]
+  );
+  return result.rows.map(r => r.name);
+};
+
+
 const register = async (req, res) => {
   const { fullName, birthDate, email, role, username, password } = req.body;
   const university = JSON.parse(req.body.university);
@@ -385,7 +398,8 @@ const register = async (req, res) => {
 );
 
 const { passwordHash: _pw, ...userWithoutPassword } = user;
-res.status(201).json({ message: 'User created', user: userWithoutPassword, token });
+ majors = await getUserMajors(user.id);
+res.status(201).json({ message: 'User created', user: { ...userWithoutPassword, majors }, token });
 };
 
 const login = async (req, res) => {
@@ -421,7 +435,8 @@ const login = async (req, res) => {
 );
 
 const { passwordHash: _pw, ...userWithoutPassword } = user;
-res.json({ token, user: userWithoutPassword });
+const majors = await getUserMajors(user.id);
+res.json({ token, user: { ...userWithoutPassword, majors } });
 };
 
 const checkEmail = async (req, res) => {
