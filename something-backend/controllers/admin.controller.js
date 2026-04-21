@@ -1496,8 +1496,37 @@ const validateOtherInput = async (req, res) => {
     userId,
     `Custom input ${approved ? 'approved' : 'rejected'} for @${user.username}`
   );
+  if (approved) {
+  // save custom university to universities table if not already there
+  await pool.query(
+    `INSERT INTO universities (code, name)
+     VALUES ($1, $2)
+     ON CONFLICT (code) DO NOTHING`,
+    [user.university_code, user.university_name]
+  );
+
+  // save any custom majors to majors table if not already there
+  const userMajors = await pool.query(
+    `SELECT m.name FROM user_majors um
+     JOIN majors m ON m.id = um.major_id
+     WHERE um.user_id = $1`,
+    [userId]
+  );
+  for (const { name } of userMajors.rows) {
+    await pool.query(
+      `INSERT INTO majors (name) VALUES ($1)
+       ON CONFLICT (name) DO NOTHING`,
+      [name]
+    );
+  }
+}
+
+await userRepo.updateUser(userId, {
+  otherInputStatus: approved ? 'approved' : 'rejected',
+});
 
   res.json({ message: `Input ${approved ? 'approved' : 'rejected'}` });
+  
 };
 
 // --- superadmin ---

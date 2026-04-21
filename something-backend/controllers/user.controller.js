@@ -806,7 +806,7 @@ const selectedMajorId = majorLookup.rows[0].id;
 
 const selectValidInputs = async (req, res) => {
   const userId = req.user.id;
-  const { selectedUniversityCode, selectedMajorIds } = req.body;
+  const { selectedUniversityCode, selectedMajorNames } = req.body;
 
   const user = await userRepo.findById(userId);
   if (!user) return res.status(404).json({ message: 'User not found' });
@@ -850,17 +850,18 @@ const selectValidInputs = async (req, res) => {
   }
 
   // handle major correction
-  if (selectedMajorIds?.length) {
-    // validate all selected majors exist in DB
-    const validCheck = await pool.query(
-      `SELECT id FROM majors WHERE id = ANY($1::uuid[])`,
-      [selectedMajorIds]
+  if (selectedMajorNames?.length) {
+    // look up ids from names
+    const majorResults = await pool.query(
+      `SELECT id, name FROM majors WHERE name = ANY($1::text[])`,
+      [selectedMajorNames]
     );
-    if (validCheck.rows.length !== selectedMajorIds.length) {
+    if (majorResults.rows.length !== selectedMajorNames.length) {
       return res.status(400).json({ message: 'Invalid major selection' });
     }
+    const selectedMajorIds = majorResults.rows.map(r => r.id);
 
-    // get current invalid major ids (not in majors table)
+    // get current invalid major ids
     const currentMajors = await pool.query(
       `SELECT major_id FROM user_majors WHERE user_id = $1`,
       [userId]
@@ -874,14 +875,11 @@ const selectValidInputs = async (req, res) => {
     const validCurrentIds = validMajors.rows.map(r => r.id);
     const invalidCurrentIds = currentMajorIds.filter(id => !validCurrentIds.includes(id));
 
-    // leave rooms for invalid majors
     if (invalidCurrentIds.length > 0) {
       await pool.query(
-        `DELETE FROM room_members
-         WHERE user_id = $1
+        `DELETE FROM room_members WHERE user_id = $1
          AND room_id IN (
-           SELECT id FROM rooms
-           WHERE type IN ('major','subject')
+           SELECT id FROM rooms WHERE type IN ('major','subject')
            AND major_id = ANY($2::uuid[])
          )`,
         [userId, invalidCurrentIds]
@@ -892,7 +890,6 @@ const selectValidInputs = async (req, res) => {
       );
     }
 
-    // add new valid majors and join their rooms
     for (const majorId of selectedMajorIds) {
       await pool.query(
         `INSERT INTO user_majors (user_id, major_id) VALUES ($1,$2)

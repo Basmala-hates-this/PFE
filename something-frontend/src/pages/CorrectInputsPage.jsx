@@ -55,7 +55,7 @@ const DEFAULT_MAJORS = [
   "Information & Communucation Science","Sport Science & Physical Education",
   "Art & Design"
 ];
-
+ 
 export default function CorrectInputsPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -66,9 +66,10 @@ export default function CorrectInputsPage() {
   const [loading, setLoading] = useState(false);
 
   // figure out what needs correction
-  const hasCustomUni = currentUser?.university?.code &&
-    !DEFAULT_UNIVERSITIES.find(u => u.code === currentUser.university.code);
-  const hasCustomMajors = currentUser?.majors?.some(m => !DEFAULT_MAJORS.includes(m));
+  const hasCustomUni = currentUser?.universityCode &&
+  !DEFAULT_UNIVERSITIES.find(u => u.code === currentUser.universityCode);
+
+const hasCustomMajors = currentUser?.majors?.some(m => !DEFAULT_MAJORS.includes(m));
   const isProfessor = currentUser?.role === "professor";
 
   useEffect(() => {
@@ -80,45 +81,37 @@ export default function CorrectInputsPage() {
   const uniOptions = DEFAULT_UNIVERSITIES.map(u => ({ value: u.code, label: u.name, uni: u }));
   const majorOptions = DEFAULT_MAJORS.map(m => ({ value: m, label: m }));
 
-  const handleSubmit = async () => {
-    if (hasCustomUni && !selectedUniversity) {
-      return alert("Please select a valid university.");
-    }
-    if (hasCustomMajors && selectedMajors.length === 0) {
-      return alert("Please select at least one valid major.");
-    }
-    if (!isProfessor && hasCustomMajors && selectedMajors.length !== 1) {
-      return alert("Students must select exactly one major.");
-    }
+const handleSubmit = async () => {
+  if (hasCustomUni && !selectedUniversity) return alert("Please select a valid university.");
+  if (hasCustomMajors && selectedMajors.length === 0) return alert("Please select at least one valid major.");
 
-    setLoading(true);
-    try {
-      await axios.post(
-        "http://localhost:5000/api/users/select-valid-inputs",
-        {
-          selectedUniversity: hasCustomUni ? selectedUniversity.uni : null,
-          selectedMajors: hasCustomMajors ? selectedMajors.map(m => m.value) : null,
-        },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  setLoading(true);
+  try {
+    await axios.post(
+      "http://localhost:5000/api/users/select-valid-inputs",
+      {
+        selectedUniversityCode: hasCustomUni ? selectedUniversity.value : null,
+        selectedMajorNames: hasCustomMajors ? selectedMajors.map(m => m.value) : null,
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
 
-      // update localStorage
-      const updatedUser = {
-        ...currentUser,
-        otherInputStatus: "corrected",
-        ...(hasCustomUni && { university: selectedUniversity.uni }),
-        ...(hasCustomMajors && { majors: selectedMajors.map(m => m.value) }),
-      };
-      localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    const updatedUser = {
+      ...currentUser,
+      otherInputStatus: "corrected",
+      ...(hasCustomUni && { universityCode: selectedUniversity.value, universityName: selectedUniversity.label }),
+      ...(hasCustomMajors && { majors: selectedMajors.map(m => m.value) }),
+    };
+    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
 
-      alert("Information updated successfully!");
-      navigate("/dashboard");
-    } catch (err) {
-      alert(err.response?.data?.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    alert("Information updated successfully!");
+    navigate("/dashboard");
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  } finally {
+    setLoading(false);
+  }
+}; 
 
   return (
     <div style={{

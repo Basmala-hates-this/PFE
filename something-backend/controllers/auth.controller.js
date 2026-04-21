@@ -325,6 +325,13 @@ const register = async (req, res) => {
     ? `http://localhost:5000/uploads/${req.file.filename}`
     : null;
 
+    //u cant insert a uni that desnt exist huh....
+    await pool.query(
+  `INSERT INTO universities (code, name) VALUES ($1, $2)
+   ON CONFLICT (code) DO NOTHING`,
+  [university.code, university.name]
+);
+
   // create user
   const user = await userRepo.createUser({
     fullName,
@@ -340,19 +347,26 @@ const register = async (req, res) => {
   });
 
   // insert majors — look up major_id from name
-  for (const majorName of majors) {
-    const majorResult = await pool.query(
-      `SELECT id FROM majors WHERE name = $1`,
-      [majorName]
+// insert majors — create if doesn't exist yet (custom input)
+for (const majorName of majors) {
+  let majorId;
+  const majorResult = await pool.query(
+    `SELECT id FROM majors WHERE name = $1`, [majorName]
+  );
+  if (majorResult.rows.length > 0) {
+    majorId = majorResult.rows[0].id;
+  } else {
+    const newMajor = await pool.query(
+      `INSERT INTO majors (name) VALUES ($1) RETURNING id`, [majorName]
     );
-    if (majorResult.rows.length > 0) {
-      await pool.query(
-        `INSERT INTO user_majors (user_id, major_id) VALUES ($1,$2)
-         ON CONFLICT (user_id, major_id) DO NOTHING`,
-        [user.id, majorResult.rows[0].id]
-      );
-    }
+    majorId = newMajor.rows[0].id;
   }
+  await pool.query(
+    `INSERT INTO user_majors (user_id, major_id) VALUES ($1,$2)
+     ON CONFLICT (user_id, major_id) DO NOTHING`,
+    [user.id, majorId]
+  );
+}
 
   // add to public room
   const publicRoomResult = await pool.query(
@@ -398,8 +412,8 @@ const register = async (req, res) => {
 );
 
 const { passwordHash: _pw, ...userWithoutPassword } = user;
- majors = await getUserMajors(user.id);
-res.status(201).json({ message: 'User created', user: { ...userWithoutPassword, majors }, token });
+ let userMajors = await getUserMajors(user.id);
+res.status(201).json({ message: 'User created', user: { ...userWithoutPassword, majors: userMajors }, token });
 };
 
 const login = async (req, res) => {
