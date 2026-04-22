@@ -324,12 +324,14 @@ const register = async (req, res) => {
   const proofFileUrl = req.file
     ? `http://localhost:5000/uploads/${req.file.filename}`
     : null;
+const isDefaultUni = DEFAULT_UNIVERSITIES.some(u => u.code === university.code);
 
     //u cant insert a uni that desnt exist huh....
     await pool.query(
-  `INSERT INTO universities (code, name) VALUES ($1, $2)
+  `INSERT INTO universities (code, name, status)
+   VALUES ($1, $2, $3)
    ON CONFLICT (code) DO NOTHING`,
-  [university.code, university.name]
+  [university.code, university.name, university.status]
 );
 
   // create user
@@ -364,9 +366,14 @@ for (const majorName of majors) {
   if (majorResult.rows.length > 0) {
     majorId = majorResult.rows[0].id;
   } else {
-    const newMajor = await pool.query(
-      `INSERT INTO majors (name) VALUES ($1) RETURNING id`, [majorName]
-    );
+  const isDefaultMajor = DEFAULT_MAJORS.includes(majorName);
+
+const newMajor = await pool.query(
+  `INSERT INTO majors (name, status)
+   VALUES ($1, $2)
+   RETURNING id`,
+  [majorName, isDefaultMajor ? 'approved' : 'pending']
+);
     majorId = newMajor.rows[0].id;
   }
   await pool.query(
@@ -385,26 +392,62 @@ for (const majorName of majors) {
   }
 
   // add to university room
-  const uniRoomResult = await pool.query(
-    `SELECT id FROM rooms WHERE type = 'university' AND university_code = $1 LIMIT 1`,
+ let uniRoomResult = await pool.query(
+  `SELECT id FROM rooms 
+   WHERE type = 'university' AND university_code = $1`,
+  [university.code]
+);
+
+let roomId;
+
+if (uniRoomResult.rows.length > 0) {
+  roomId = uniRoomResult.rows[0].id;
+} else {
+  const newRoom = await pool.query(
+    `INSERT INTO rooms (type, university_code)
+     VALUES ('university', $1)
+     RETURNING id`,
     [university.code]
   );
-  if (uniRoomResult.rows.length > 0) {
-    await roomRepo.addMember(uniRoomResult.rows[0].id, user.id);
-  }
+  roomId = newRoom.rows[0].id;
+}
+
+// ALWAYS add user
+await roomRepo.addMember(roomId, user.id);
 
   // add to major room(s)
-  for (const majorName of majors) {
-    const majorRoomResult = await pool.query(
-      `SELECT r.id FROM rooms r
-       JOIN majors m ON m.id = r.major_id
-       WHERE r.type = 'major' AND m.name = $1 LIMIT 1`,
-      [majorName]
+ for (const majorName of majors) {
+  const majorRes = await pool.query(
+    `SELECT id FROM majors WHERE name = $1`,
+    [majorName]
+  );
+
+  if (majorRes.rows.length === 0) continue;
+
+  const majorId = majorRes.rows[0].id;
+
+  // check if room exists
+  let roomRes = await pool.query(
+    `SELECT id FROM rooms WHERE type = 'major' AND major_id = $1`,
+    [majorId]
+  );
+
+  let roomId;
+
+  if (roomRes.rows.length > 0) {
+    roomId = roomRes.rows[0].id;
+  } else {
+    const newRoom = await pool.query(
+      `INSERT INTO rooms (type, major_id)
+       VALUES ('major', $1)
+       RETURNING id`,
+      [majorId]
     );
-    if (majorRoomResult.rows.length > 0) {
-      await roomRepo.addMember(majorRoomResult.rows[0].id, user.id);
-    }
+    roomId = newRoom.rows[0].id;
   }
+
+  await roomRepo.addMember(roomId, user.id);
+}
 
  const token = jwt.sign(
   {
