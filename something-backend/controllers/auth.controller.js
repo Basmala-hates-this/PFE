@@ -345,7 +345,15 @@ const register = async (req, res) => {
     profilePicUrl: null,
     proofFileUrl,
   });
+const hasCustomUni = !DEFAULT_UNIVERSITIES.find(u => u.code === university.code);
+const hasCustomMajor = majors.some(m => !DEFAULT_MAJORS.includes(m));
 
+if (hasCustomUni || hasCustomMajor) {
+  await pool.query(
+    `UPDATE users SET other_input_status = 'pending' WHERE id = $1`,
+    [user.id]
+  );
+}
   // insert majors — look up major_id from name
 // insert majors — create if doesn't exist yet (custom input)
 for (const majorName of majors) {
