@@ -305,10 +305,29 @@ const getUserMajors = async (userId) => {
 };
 
 
+//man this will make the app slow as hell...
+const isDefaultUniversity = async (code) => {
+  const res = await pool.query(
+    `SELECT 1 FROM universities WHERE code = $1 AND status = 'approved'`,
+    [code]
+  );
+  return res.rows.length > 0;
+};
+
+const isDefaultMajor = async (name) => {
+  const res = await pool.query(
+    `SELECT 1 FROM majors WHERE name = $1 AND status = 'approved'`,
+    [name]
+  );
+  return res.rows.length > 0;
+};
+
+
 const register = async (req, res) => {
   const { fullName, birthDate, email, role, username, password } = req.body;
   const university = JSON.parse(req.body.university);
   const majors = JSON.parse(req.body.majors);
+  const uniIsDefault = await isDefaultUniversity(university.code);
 
   const existing = await userRepo.findByEmail(email);
   if (existing) return res.status(400).json({ message: 'Email already exists' });
@@ -324,14 +343,14 @@ const register = async (req, res) => {
   const proofFileUrl = req.file
     ? `http://localhost:5000/uploads/${req.file.filename}`
     : null;
-const isDefaultUni = DEFAULT_UNIVERSITIES.some(u => u.code === university.code);
+
 
     //u cant insert a uni that desnt exist huh....
-    await pool.query(
+   await pool.query(
   `INSERT INTO universities (code, name, status)
    VALUES ($1, $2, $3)
    ON CONFLICT (code) DO NOTHING`,
-  [university.code, university.name, university.status]
+  [university.code, university.name, uniIsDefault ? 'approved' : 'pending']
 );
 
   // create user
@@ -347,8 +366,8 @@ const isDefaultUni = DEFAULT_UNIVERSITIES.some(u => u.code === university.code);
     profilePicUrl: null,
     proofFileUrl,
   });
-const hasCustomUni = !DEFAULT_UNIVERSITIES.find(u => u.code === university.code);
-const hasCustomMajor = majors.some(m => !DEFAULT_MAJORS.includes(m));
+const hasCustomUni = !(await isDefaultUniversity(university.code));
+const hasCustomMajor = (await Promise.all(majors.map(isDefaultMajor))).some(v => !v);
 
 if (hasCustomUni || hasCustomMajor) {
   await pool.query(
@@ -366,14 +385,13 @@ for (const majorName of majors) {
   if (majorResult.rows.length > 0) {
     majorId = majorResult.rows[0].id;
   } else {
-  const isDefaultMajor = DEFAULT_MAJORS.includes(majorName);
-
+ const isDefault = await isDefaultMajor(majorName);
 const newMajor = await pool.query(
-  `INSERT INTO majors (name, status)
-   VALUES ($1, $2)
-   RETURNING id`,
-  [majorName, isDefaultMajor ? 'approved' : 'pending']
+  `INSERT INTO majors (name, status) VALUES ($1, $2) RETURNING id`,
+  [majorName, isDefault ? 'approved' : 'pending']
 );
+
+
     majorId = newMajor.rows[0].id;
   }
   await pool.query(
@@ -404,11 +422,11 @@ if (uniRoomResult.rows.length > 0) {
   roomId = uniRoomResult.rows[0].id;
 } else {
   const newRoom = await pool.query(
-    `INSERT INTO rooms (type, university_code)
-     VALUES ('university', $1)
-     RETURNING id`,
-    [university.code]
-  );
+  `INSERT INTO rooms (type, university_code, name)
+   VALUES ('university', $1, $2)
+   RETURNING id`,
+  [university.code, university.name]
+);
   roomId = newRoom.rows[0].id;
 }
 
@@ -437,12 +455,12 @@ await roomRepo.addMember(roomId, user.id);
   if (roomRes.rows.length > 0) {
     roomId = roomRes.rows[0].id;
   } else {
-    const newRoom = await pool.query(
-      `INSERT INTO rooms (type, major_id)
-       VALUES ('major', $1)
-       RETURNING id`,
-      [majorId]
-    );
+   const newRoom = await pool.query(
+  `INSERT INTO rooms (type, major_id, name)
+   VALUES ('major', $1, $2)
+   RETURNING id`,
+  [majorId, majorName]
+);
     roomId = newRoom.rows[0].id;
   }
 

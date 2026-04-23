@@ -352,26 +352,43 @@ const getOtherInputs = async (req, res) => {
   );
   if (!allowed) return res.status(403).json({ message: 'No permission' });
 
-  // pending universities
-  const universities = await pool.query(
-    `SELECT code, name, status, created_at
-     FROM universities
-     WHERE status = 'pending'
-     ORDER BY created_at DESC`
+  // get all users with pending custom inputs
+  const usersResult = await pool.query(
+    `SELECT u.id, u.username, u.email, u.role, u.other_input_status,
+            u.university_code,
+            uni.name AS university_name, uni.status AS university_status
+     FROM users u
+     LEFT JOIN universities uni ON uni.code = u.university_code
+     WHERE u.other_input_status = 'pending'
+     ORDER BY u.created_at DESC`
   );
 
-  // pending majors
-  const majors = await pool.query(
-    `SELECT id, name, status, created_at
-     FROM majors
-     WHERE status = 'pending'
-     ORDER BY created_at DESC`
-  );
+  const result = await Promise.all(usersResult.rows.map(async (user) => {
+    // check if their university is custom (pending)
+    const customUni = user.university_status === 'pending'
+      ? { code: user.university_code, name: user.university_name }
+      : null;
 
-  res.json({
-    universities: universities.rows,
-    majors: majors.rows
-  });
+    // get their pending majors
+    const majorsResult = await pool.query(
+      `SELECT m.id, m.name FROM majors m
+       JOIN user_majors um ON um.major_id = m.id
+       WHERE um.user_id = $1 AND m.status = 'pending'`,
+      [user.id]
+    );
+
+    return {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      otherInputStatus: user.other_input_status,
+      customUni,
+      customMajors: majorsResult.rows.map(m => m.name),
+    };
+  }));
+
+  res.json(result);
 };
 
 // const validateOtherInput = async (req, res) => {
@@ -437,125 +454,124 @@ const validateOtherInput = async (req, res) => {
   );
   if (!allowed) return res.status(403).json({ message: 'No permission' });
 
-  const { type, id, approved } = req.body;
+  const { userId, approved } = req.body;
 
-  if (type === 'university') {
-    const uni = await pool.query(
-      `SELECT * FROM universities WHERE code = $1`,
-      [id]
-    );
+  const userResult = await pool.query(
+    `SELECT u.*, uni.status AS university_status
+     FROM users u
+     LEFT JOIN universities uni ON uni.code = u.university_code
+     WHERE u.id = $1`,
+    [userId]
+  );
 
-    if (!uni.rows.length)
-      return res.status(404).json({ message: 'University not found' });
+  if (!userResult.rows.length)
+    return res.status(404).json({ message: 'User not found' });
 
+  const user = userResult.rows[0];
+
+  // fetch pending majors first — needed in both approved and rejected paths
+  const pendingMajors = await pool.query(
+    `SELECT m.id, m.name FROM majors m
+     JOIN user_majors um ON um.major_id = m.id
+     WHERE um.user_id = $1 AND m.status = 'pending'`,
+    [userId]
+  );
+
+  // handle university if pending
+  if (user.university_status === 'pending') {
     await pool.query(
       `UPDATE universities SET status = $1 WHERE code = $2`,
-      [approved ? 'approved' : 'rejected', id]
+      [approved ? 'approved' : 'rejected', user.university_code]
     );
+
     if (approved) {
-  // 1. ensure room exists
-  let roomRes = await pool.query(
-    `SELECT id FROM rooms 
-     WHERE type = 'university' AND university_code = $1`,
-    [id]
-  );
-
-  let roomId;
-
-  if (roomRes.rows.length > 0) {
-    roomId = roomRes.rows[0].id;
-  } else {
-    const newRoom = await pool.query(
-      `INSERT INTO rooms (type, university_code)
-       VALUES ('university', $1)
-       RETURNING id`,
-      [id]
-    );
-    roomId = newRoom.rows[0].id;
+      let roomRes = await pool.query(
+        `SELECT id FROM rooms WHERE type = 'university' AND university_code = $1`,
+        [user.university_code]
+      );
+      let roomId;
+      if (roomRes.rows.length > 0) {
+        roomId = roomRes.rows[0].id;
+      } else {
+        const newRoom = await pool.query(
+          `INSERT INTO rooms (type, university_code, name) VALUES ('university', $1, $2) RETURNING id`,
+          [user.university_code, user.university_name]
+        );
+        roomId = newRoom.rows[0].id;
+      }
+      const uniUsers = await pool.query(
+        `SELECT id FROM users WHERE university_code = $1`, [user.university_code]
+      );
+      for (const u of uniUsers.rows) {
+        await roomRepo.addMember(roomId, u.id);
+      }
+    } else {
+      // rejected — kick user out of the pending university room
+      await pool.query(
+        `DELETE FROM room_members
+         WHERE user_id = $1
+         AND room_id IN (
+           SELECT id FROM rooms WHERE type = 'university' AND university_code = $2
+         )`,
+        [userId, user.university_code]
+      );
+    }
   }
 
-  // 2. get all users with this university
-  const users = await pool.query(
-    `SELECT id FROM users WHERE university_code = $1`,
-    [id]
-  );
-
-  // 3. add them to the room
-  for (const user of users.rows) {
-    await roomRepo.addMember(roomId, user.id);
-  }
-}
-
-    await addLog(
-      req.user.id,
-      req.user.username,
-      approved ? 'approve_university' : 'reject_university',
-      id,
-      `University "${uni.rows[0].name}" ${approved ? 'approved' : 'rejected'}`
-    );
-
-  } else if (type === 'major') {
-    const major = await pool.query(
-      `SELECT * FROM majors WHERE id = $1`,
-      [id]
-    );
-
-    if (!major.rows.length)
-      return res.status(404).json({ message: 'Major not found' });
-
+  // handle pending majors
+  for (const major of pendingMajors.rows) {
     await pool.query(
       `UPDATE majors SET status = $1 WHERE id = $2`,
-      [approved ? 'approved' : 'rejected', id]
+      [approved ? 'approved' : 'rejected', major.id]
     );
+
     if (approved) {
-  // 1. ensure room exists
-  let roomRes = await pool.query(
-    `SELECT id FROM rooms 
-     WHERE type = 'major' AND major_id = $1`,
-    [id]
+      let roomRes = await pool.query(
+        `SELECT id FROM rooms WHERE type = 'major' AND major_id = $1`, [major.id]
+      );
+      let roomId;
+      if (roomRes.rows.length > 0) {
+        roomId = roomRes.rows[0].id;
+      } else {
+        const newRoom = await pool.query(
+          `INSERT INTO rooms (type, major_id, name) VALUES ('major', $1, $2) RETURNING id`,
+          [major.id, major.name]
+        );
+        roomId = newRoom.rows[0].id;
+      }
+      const majorUsers = await pool.query(
+        `SELECT user_id FROM user_majors WHERE major_id = $1`, [major.id]
+      );
+      for (const u of majorUsers.rows) {
+        await roomRepo.addMember(roomId, u.user_id);
+      }
+    } else {
+      // rejected — kick user out of the pending major room
+      await pool.query(
+        `DELETE FROM room_members
+         WHERE user_id = $1
+         AND room_id IN (
+           SELECT id FROM rooms WHERE type = 'major' AND major_id = $2
+         )`,
+        [userId, major.id]
+      );
+    }
+  }
+
+  await pool.query(
+    `UPDATE users SET other_input_status = $1 WHERE id = $2`,
+    [approved ? 'approved' : 'rejected', userId]
   );
 
-  let roomId;
-
-  if (roomRes.rows.length > 0) {
-    roomId = roomRes.rows[0].id;
-  } else {
-    const newRoom = await pool.query(
-      `INSERT INTO rooms (type, major_id)
-       VALUES ('major', $1)
-       RETURNING id`,
-      [id]
-    );
-    roomId = newRoom.rows[0].id;
-  }
-
-  // 2. get all users linked to this major
-  const users = await pool.query(
-    `SELECT user_id FROM user_majors WHERE major_id = $1`,
-    [id]
+  await addLog(
+    req.user.id,
+    req.user.username,
+    approved ? 'approve_other_input' : 'reject_other_input',
+    userId,
+    `Custom inputs for @${user.username} ${approved ? 'approved' : 'rejected'}`
   );
 
-  // 3. add them to the room
-  for (const user of users.rows) {
-    await roomRepo.addMember(roomId, user.user_id);
-  }
-}
-
-    await addLog(
-      req.user.id,
-      req.user.username,
-      approved ? 'approve_major' : 'reject_major',
-      id,
-      `Major "${major.rows[0].name}" ${approved ? 'approved' : 'rejected'}`
-    );
-
-  } else {
-    return res.status(400).json({ message: 'Invalid type' });
-  }
-
-  res.json({
-    message: `${type} ${approved ? 'approved' : 'rejected'}`
-  });
+  res.json({ message: `Inputs ${approved ? 'approved' : 'rejected'}` });
 };
 
 // --- superadmin ---

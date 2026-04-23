@@ -87,7 +87,7 @@ const handleSubmit = async () => {
 
   setLoading(true);
   try {
-    await axios.post(
+    const res = await axios.post(
       "http://localhost:5000/api/users/select-valid-inputs",
       {
         selectedUniversityCode: hasCustomUni ? selectedUniversity.value : null,
@@ -96,13 +96,8 @@ const handleSubmit = async () => {
       { headers: { Authorization: `Bearer ${token}` } }
     );
 
-    const updatedUser = {
-      ...currentUser,
-      otherInputStatus: "corrected",
-      ...(hasCustomUni && { universityCode: selectedUniversity.value, universityName: selectedUniversity.label }),
-      ...(hasCustomMajors && { majors: selectedMajors.map(m => m.value) }),
-    };
-    localStorage.setItem("currentUser", JSON.stringify(updatedUser));
+    // use fresh data from backend instead of building it manually
+    localStorage.setItem("currentUser", JSON.stringify(res.data.user));
 
     alert("Information updated successfully!");
     navigate("/dashboard");
@@ -111,7 +106,7 @@ const handleSubmit = async () => {
   } finally {
     setLoading(false);
   }
-}; 
+};            
 
   return (
     <div style={{

@@ -329,6 +329,7 @@ const fetchHiddenContent = async () => {
 const fetchOtherInputs = async () => {
   try {
     const res = await axios.get(`${API}/other-inputs`, { headers });
+     console.log("other inputs raw:", res.data);
     setOtherInputs(res.data);
   } catch (err) { console.error(err); }
 };

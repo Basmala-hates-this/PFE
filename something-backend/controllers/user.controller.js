@@ -319,8 +319,10 @@ const selectValidInputs = async (req, res) => {
   const { selectedUniversityCode, selectedMajorNames } = req.body;
 
   const user = await userRepo.findById(userId);
+ // console.log("user found:", user);           // add this
+ // console.log("status:", user?.other_input_status); 
   if (!user) return res.status(404).json({ message: 'User not found' });
-  if (user.other_input_status !== 'rejected') {
+  if (user.otherInputStatus !== 'rejected') {
     return res.status(400).json({ message: 'No input correction needed' });
   }
 
@@ -417,7 +419,13 @@ const selectValidInputs = async (req, res) => {
   }
 
   await userRepo.updateUser(userId, { otherInputStatus: 'corrected' });
-  res.json({ message: 'Inputs updated successfully' });
+  const updatedUser = await userRepo.findById(userId);
+const userMajors = await getUserMajors(userId);
+
+res.json({ 
+  message: 'Inputs updated successfully',
+  user: { ...updatedUser, majors: userMajors }
+});
 };
 
 const getMyMajors = async (req, res) => {
