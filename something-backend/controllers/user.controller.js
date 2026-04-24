@@ -344,7 +344,7 @@ const selectValidInputs = async (req, res) => {
        AND room_id IN (
          SELECT id FROM rooms WHERE type = 'university' AND university_code = $2
        )`,
-      [userId, user.university_code]
+      [userId, user.universityCode]
     );
 
     const newUniRoom = await pool.query(
@@ -362,61 +362,52 @@ const selectValidInputs = async (req, res) => {
   }
 
   // handle major correction
-  if (selectedMajorNames?.length) {
-    // look up ids from names
-    const majorResults = await pool.query(
-      `SELECT id, name FROM majors WHERE name = ANY($1::text[])`,
-      [selectedMajorNames]
+ if (selectedMajorNames?.length) {
+  const majorResults = await pool.query(
+    `SELECT id, name FROM majors WHERE name = ANY($1::text[])`,
+    [selectedMajorNames]
+  );
+  if (majorResults.rows.length !== selectedMajorNames.length) {
+    return res.status(400).json({ message: 'Invalid major selection' });
+  }
+  const selectedMajorIds = majorResults.rows.map(r => r.id);
+
+  // remove user from all pending major rooms
+  await pool.query(
+    `DELETE FROM room_members WHERE user_id = $1
+     AND room_id IN (
+       SELECT r.id FROM rooms r
+       JOIN majors m ON m.id = r.major_id
+       WHERE r.type = 'major' AND m.status = 'rejected'
+     )`,
+    [userId]
+  );
+
+  // remove pending majors from user_majors
+  await pool.query(
+    `DELETE FROM user_majors WHERE user_id = $1
+     AND major_id IN (
+       SELECT id FROM majors WHERE status = 'rejected'
+     )`,
+    [userId]
+  );
+
+  // add new valid majors
+  for (const majorId of selectedMajorIds) {
+    await pool.query(
+      `INSERT INTO user_majors (user_id, major_id) VALUES ($1,$2)
+       ON CONFLICT (user_id, major_id) DO NOTHING`,
+      [userId, majorId]
     );
-    if (majorResults.rows.length !== selectedMajorNames.length) {
-      return res.status(400).json({ message: 'Invalid major selection' });
-    }
-    const selectedMajorIds = majorResults.rows.map(r => r.id);
-
-    // get current invalid major ids
-    const currentMajors = await pool.query(
-      `SELECT major_id FROM user_majors WHERE user_id = $1`,
-      [userId]
+    const majorRoom = await pool.query(
+      `SELECT id FROM rooms WHERE type = 'major' AND major_id = $1`,
+      [majorId]
     );
-    const currentMajorIds = currentMajors.rows.map(r => r.major_id);
-
-    const validMajors = await pool.query(
-      `SELECT id FROM majors WHERE id = ANY($1::uuid[])`,
-      [currentMajorIds]
-    );
-    const validCurrentIds = validMajors.rows.map(r => r.id);
-    const invalidCurrentIds = currentMajorIds.filter(id => !validCurrentIds.includes(id));
-
-    if (invalidCurrentIds.length > 0) {
-      await pool.query(
-        `DELETE FROM room_members WHERE user_id = $1
-         AND room_id IN (
-           SELECT id FROM rooms WHERE type IN ('major','subject')
-           AND major_id = ANY($2::uuid[])
-         )`,
-        [userId, invalidCurrentIds]
-      );
-      await pool.query(
-        `DELETE FROM user_majors WHERE user_id = $1 AND major_id = ANY($2::uuid[])`,
-        [userId, invalidCurrentIds]
-      );
-    }
-
-    for (const majorId of selectedMajorIds) {
-      await pool.query(
-        `INSERT INTO user_majors (user_id, major_id) VALUES ($1,$2)
-         ON CONFLICT (user_id, major_id) DO NOTHING`,
-        [userId, majorId]
-      );
-      const majorRoom = await pool.query(
-        `SELECT id FROM rooms WHERE type = 'major' AND major_id = $1`,
-        [majorId]
-      );
-      if (majorRoom.rows.length > 0) {
-        await roomRepo.addMember(majorRoom.rows[0].id, userId);
-      }
+    if (majorRoom.rows.length > 0) {
+      await roomRepo.addMember(majorRoom.rows[0].id, userId);
     }
   }
+}
 
   await userRepo.updateUser(userId, { otherInputStatus: 'corrected' });
   const updatedUser = await userRepo.findById(userId);

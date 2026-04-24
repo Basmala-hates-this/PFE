@@ -572,7 +572,7 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
                   </div>
                 </div>
  
-                {prof.proofFile && (
+                {prof.proof_file_url && (
                   <a href={prof.proof_file_url} target="_blank" rel="noopener noreferrer"
                     style={{ display: "inline-block", marginBottom: "10px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px" }}>
                     📄 View Proof Document

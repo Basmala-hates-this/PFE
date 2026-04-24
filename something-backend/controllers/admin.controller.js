@@ -515,6 +515,12 @@ const validateOtherInput = async (req, res) => {
          )`,
         [userId, user.university_code]
       );
+        //delete the refused because of bugs
+         await pool.query(
+    `DELETE FROM universities WHERE code = $1 AND status = 'pending'`,
+    [user.university_code]
+  
+      );
     }
   }
 
@@ -547,14 +553,25 @@ const validateOtherInput = async (req, res) => {
       }
     } else {
       // rejected — kick user out of the pending major room
-      await pool.query(
-        `DELETE FROM room_members
-         WHERE user_id = $1
-         AND room_id IN (
-           SELECT id FROM rooms WHERE type = 'major' AND major_id = $2
-         )`,
-        [userId, major.id]
-      );
+    await pool.query(
+    `DELETE FROM room_members
+     WHERE user_id = $1
+     AND room_id IN (
+       SELECT id FROM rooms WHERE type = 'major' AND major_id = $2
+     )`,
+    [userId, major.id]
+  );
+ // remove the major from the user entirely
+  await pool.query(
+    `DELETE FROM user_majors WHERE user_id = $1 AND major_id = $2`,
+    [userId, major.id]
+  );
+  // delete the pending major from db (same as we do for universities)
+  await pool.query(
+    `DELETE FROM majors WHERE id = $1 AND status = 'pending'`,
+    [major.id]
+  );
+
     }
   }
 
