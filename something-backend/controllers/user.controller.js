@@ -5,6 +5,17 @@ const roomRepo = require('../repositories/room.repo');
 const pool = require('../db');
 const { sendFollowEmail } = require('../config/email');
 
+
+const fetchUserMajors = async (userId) => {
+  const result = await pool.query(
+    `SELECT m.name FROM user_majors um
+     JOIN majors m ON m.id = um.major_id
+     WHERE um.user_id = $1`,
+    [userId]
+  );
+  return result.rows.map(r => r.name);
+};
+
 const getMe = async (req, res) => {
   const user = await userRepo.findById(req.user.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
@@ -364,12 +375,19 @@ const selectValidInputs = async (req, res) => {
   // handle major correction
  if (selectedMajorNames?.length) {
   const majorResults = await pool.query(
-    `SELECT id, name FROM majors WHERE name = ANY($1::text[])`,
+`SELECT id, name FROM majors WHERE name = ANY($1::text[]) AND status = 'approved'`,
     [selectedMajorNames]
   );
-  if (majorResults.rows.length !== selectedMajorNames.length) {
-    return res.status(400).json({ message: 'Invalid major selection' });
+  const foundNames = majorResults.rows.map(r => r.name);
+for (const name of selectedMajorNames) {
+  if (!foundNames.includes(name)) {
+    const inserted = await pool.query(
+      `INSERT INTO majors (name, status) VALUES ($1, 'approved') RETURNING id, name`,
+      [name]
+    );
+    majorResults.rows.push(inserted.rows[0]);
   }
+}
   const selectedMajorIds = majorResults.rows.map(r => r.id);
 
   // remove user from all pending major rooms
@@ -408,10 +426,10 @@ const selectValidInputs = async (req, res) => {
     }
   }
 }
-
+ 
   await userRepo.updateUser(userId, { otherInputStatus: 'corrected' });
   const updatedUser = await userRepo.findById(userId);
-const userMajors = await getUserMajors(userId);
+const userMajors = await fetchUserMajors(userId);
 
 res.json({ 
   message: 'Inputs updated successfully',

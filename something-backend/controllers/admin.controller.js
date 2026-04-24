@@ -376,6 +376,7 @@ const getOtherInputs = async (req, res) => {
        WHERE um.user_id = $1 AND m.status = 'pending'`,
       [user.id]
     );
+   
 
     return {
       id: user.id,
@@ -454,6 +455,10 @@ const validateOtherInput = async (req, res) => {
   );
   if (!allowed) return res.status(403).json({ message: 'No permission' });
 
+let uniWasRejected = false;
+let majorsWereRejected = false;
+
+
   const { userId, approved } = req.body;
 
   const userResult = await pool.query(
@@ -475,7 +480,7 @@ const validateOtherInput = async (req, res) => {
      JOIN user_majors um ON um.major_id = m.id
      WHERE um.user_id = $1 AND m.status = 'pending'`,
     [userId]
-  );
+  ); console.log("pendingMajors:", pendingMajors.rows);
 
   // handle university if pending
   if (user.university_status === 'pending') {
@@ -521,6 +526,7 @@ const validateOtherInput = async (req, res) => {
     [user.university_code]
   
       );
+      uniWasRejected = true;
     }
   }
 
@@ -559,26 +565,38 @@ const validateOtherInput = async (req, res) => {
      AND room_id IN (
        SELECT id FROM rooms WHERE type = 'major' AND major_id = $2
      )`,
-    [userId, major.id]
+    [userId, major.id] 
   );
  // remove the major from the user entirely
   await pool.query(
-    `DELETE FROM user_majors WHERE user_id = $1 AND major_id = $2`,
-    [userId, major.id]
+    // `DELETE FROM user_majors WHERE user_id = $1 AND major_id = $2`,
+  `UPDATE majors SET status = 'rejected' WHERE id = $1`,
+  [major.id]
   );
   // delete the pending major from db (same as we do for universities)
   await pool.query(
-    `DELETE FROM majors WHERE id = $1 AND status = 'pending'`,
-    [major.id]
+    // `DELETE FROM majors WHERE id = $1 AND status = 'pending'`,
+    `DELETE FROM user_majors WHERE user_id = $1 AND major_id = $2`,
+  [userId, major.id]
   );
+   majorsWereRejected = true; 
+
 
     }
   }
-
-  await pool.query(
-    `UPDATE users SET other_input_status = $1 WHERE id = $2`,
-    [approved ? 'approved' : 'rejected', userId]
-  );
+console.log("uniWasRejected:", uniWasRejected, "majorsWereRejected:", majorsWereRejected);
+  // await pool.query(
+  //   `UPDATE users SET other_input_status = $1 WHERE id = $2`,
+  //   [approved ? 'approved' : 'rejected', userId]
+  // );
+await pool.query(
+  `UPDATE users SET 
+    other_input_status = $1,
+    needs_uni_correction = $2,
+    needs_major_correction = $3
+   WHERE id = $4`,
+  [approved ? 'approved' : 'rejected', uniWasRejected, majorsWereRejected, userId]
+);
 
   await addLog(
     req.user.id,

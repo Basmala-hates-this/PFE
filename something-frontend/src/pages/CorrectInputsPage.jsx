@@ -66,11 +66,11 @@ export default function CorrectInputsPage() {
   const [loading, setLoading] = useState(false);
 
   // figure out what needs correction
-  const hasCustomUni = currentUser?.universityCode &&
-  !DEFAULT_UNIVERSITIES.find(u => u.code === currentUser.universityCode);
+ const hasCustomUni = currentUser?.needsUniCorrection;
+const hasCustomMajors = currentUser?.needsMajorCorrection;
 
-const hasCustomMajors = currentUser?.majors?.some(m => !DEFAULT_MAJORS.includes(m));
-  const isProfessor = currentUser?.role === "professor";
+
+    const isProfessor = currentUser?.role === "professor";
 
   useEffect(() => {
     if (currentUser?.otherInputStatus !== "rejected") {
@@ -82,8 +82,15 @@ const hasCustomMajors = currentUser?.majors?.some(m => !DEFAULT_MAJORS.includes(
   const majorOptions = DEFAULT_MAJORS.map(m => ({ value: m, label: m }));
 
 const handleSubmit = async () => {
+    console.log("handleSubmit fired");
+  console.log("hasCustomUni:", hasCustomUni);
+  console.log("hasCustomMajors:", hasCustomMajors);
+  console.log("selectedUniversity:", selectedUniversity);
+  console.log("selectedMajors:", selectedMajors);
+  console.log("currentUser:", currentUser);
+
   if (hasCustomUni && !selectedUniversity) return alert("Please select a valid university.");
-  if (hasCustomMajors && selectedMajors.length === 0) return alert("Please select at least one valid major.");
+if (hasCustomMajors && selectedMajors.length === 0) return alert("Please select at least one valid major.");
 
   setLoading(true);
   try {
@@ -106,7 +113,7 @@ const handleSubmit = async () => {
   } finally {
     setLoading(false);
   }
-};            
+};             
 
   return (
     <div style={{
@@ -166,7 +173,7 @@ const handleSubmit = async () => {
             <Select
               options={majorOptions}
               value={selectedMajors}
-              onChange={setSelectedMajors}
+              onChange={isProfessor ? setSelectedMajors : (val) => setSelectedMajors(val ? [val] : [])}
               isMulti={isProfessor}
               placeholder="Select major(s)..."
               styles={customSelect}

@@ -477,7 +477,7 @@ await roomRepo.addMember(roomId, user.id);
     verificationStatus: user.verificationStatus,
   },
   process.env.JWT_SECRET,
-  { expiresIn: '24h' }
+  { expiresIn: '24h' } 
 );
 
 const { passwordHash: _pw, ...userWithoutPassword } = user;
