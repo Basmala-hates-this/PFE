@@ -58,7 +58,7 @@ const getAllUsers = async (req, res) => {
 
   let query = `SELECT id, full_name, username, email, role, authority_level,
                       verification_status, rating, violation_count,
-                      suspended_until, suspension_reason, created_at
+                      suspended_until, suspension_reason, created_at,profile_pic_url
                FROM users WHERE 1=1`;
   const params = [];
 

@@ -194,14 +194,24 @@ const [userPermissions, setUserPermissions] = useState([]);
     } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
   };
  
-  const handleHideContent = async (type, postId, commentId) => {
-    if (!window.confirm(`Hide this ${type}?`)) return;
-    try {
-      await axios.patch(`${API}/content/hide`, { type, postId, commentId }, { headers });
-      alert("Content hidden.");
-      fetchReports();
-    } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  };
+ const handleHideContent = async (type, postId, commentId) => {
+  if (!window.confirm(`Hide this ${type}?`)) return;
+  try {
+    await axios.patch(`${API}/content/hide`, { type, postId, commentId }, { headers });
+    alert("Content hidden.");
+    
+    setReports(prev => prev.map(item => {
+      if (type === "post" && item.type === "post" && item.id === postId) {
+        return { ...item, isHidden: true };
+      }
+      if (type === "comment" && item.type === "comment" && item.id === commentId) {
+        return { ...item, isHidden: true };
+      }
+      return item;
+    }));
+
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+};
  
   const handleCreateAnnouncement = async () => {
     if (!newAnnouncement.trim()) return;
@@ -631,7 +641,7 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
               <div key={item.id} style={card}>
                 <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
                   <span style={badge(item.type === "post" ? "#6476af" : "#4a3f6b")}>{item.type}</span>
-                  <strong>@{item.authorUsername}</strong>
+                  <strong>@{item.author_username}</strong>
                   <span style={{ marginLeft: "auto", opacity: 0.5, fontSize: "12px" }}>
                     {item.reports?.length} report(s)
                   </span>
