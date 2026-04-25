@@ -9,7 +9,7 @@ export default function AdminPanel() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
-  const [activeTab, setActiveTab] = useState("stats");
+  const [activeTab, setActiveTab] = useState("announcements");
  
 
   const [stats, setStats] = useState(null);
@@ -60,20 +60,35 @@ const [roomSuspendReason, setRoomSuspendReason] = useState("");
 //i want search in room tab...
 const [roomSearch, setRoomSearch] = useState("");
 const [roomTypeFilter, setRoomTypeFilter] = useState("");
+
+const [userPermissions, setUserPermissions] = useState([]);
  //////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////////////////////////////
-  
+ 
+ useEffect(() => {
+  const fetchPermissions = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/users/me/permissions", { headers });
+      setUserPermissions(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+  fetchPermissions();
+}, []);
+
   useEffect(() => {
     const level = currentUser?.authorityLevel;
     if (level !== "admin" && level !== "superadmin") {
+       alert("Your session is outdated. Please log out and log back in to access the admin panel.");
       navigate("/dashboard");
     }
   }, []);
  
   
  useEffect(() => {
-  if (activeTab === "stats") fetchStats();
+  //if (activeTab === "stats") fetchStats();
   if (activeTab === "users") fetchUsers();
   if (activeTab === "professors") fetchPendingProfessors();
   if (activeTab === "reports") fetchReports();
@@ -248,19 +263,19 @@ const handleValidateOtherInput = async (userId, approved) => {
 const tabs = [
   // { id: "stats", label: "📊 Stats" },
   { id: "announcements", label: "📢 Announcements" },
-  ...(isSuperAdmin || currentUser?.permissions?.includes("SUSPEND_USERS")
+  ...(isSuperAdmin || userPermissions.includes("SUSPEND_USERS")
     ? [{ id: "users", label: "👥 Users" }] : []),
-  ...(isSuperAdmin || currentUser?.permissions?.includes("VERIFY_PROFESSORS")
+  ...(isSuperAdmin || userPermissions.includes("VERIFY_PROFESSORS")
     ? [{ id: "professors", label: "🎓 Professors" }] : []),
-  ...(isSuperAdmin || currentUser?.permissions?.includes("HANDLE_REPORTS")
+  ...(isSuperAdmin || userPermissions.includes("HANDLE_REPORTS")
     ? [{ id: "reports", label: "🚩 Reports" }] : []),
-  ...(isSuperAdmin || currentUser?.permissions?.includes("APPROVE_RESOURCES")
+  ...(isSuperAdmin || userPermissions.includes("APPROVE_RESOURCES")
     ? [{ id: "resources", label: "📦 Resources" }] : []),
-  ...(isSuperAdmin || currentUser?.permissions?.includes("MODERATE_CONTENT")
+  ...(isSuperAdmin || userPermissions.includes("MODERATE_CONTENT")
     ? [{ id: "hidden", label: "🙈 Hidden" }] : []),
-  ...(isSuperAdmin || currentUser?.permissions?.includes("VALIDATE_OTHER")
+  ...(isSuperAdmin || userPermissions.includes("VALIDATE_OTHER")
     ? [{ id: "other", label: "🔤 Other Inputs" }] : []),
-  ...(isSuperAdmin || currentUser?.permissions?.includes("MANAGE_ROOMS")
+  ...(isSuperAdmin || userPermissions.includes("MANAGE_ROOMS")
   ? [
       { id: "room-requests", label: "📬 Room Requests" },
       { id: "rooms", label: "🏠 Room Moderation" }

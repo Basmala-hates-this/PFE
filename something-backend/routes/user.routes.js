@@ -24,6 +24,10 @@ router.get("/me/comments", protect, userController.getMyComments);
 
 router.get('/me/majors', protect, userController.getMyMajors);
 
+router.get('/me/application', protect, userController.getMyApplication);
+
+router.get('/me/permissions', protect, userController.getMyPermissions);
+
 // follow routes BEFORE /:userId
 router.post("/:userId/follow", protect, userController.followUser);
 router.delete("/:userId/unfollow", protect, userController.unfollowUser);

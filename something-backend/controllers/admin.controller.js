@@ -806,7 +806,7 @@ const getCurrentAdmins = async (req, res) => {
      WHERE u.authority_level = 'admin'
      GROUP BY u.id`
   );
-  res.json(result.rows);
+  res.json(toCamel(result.rows));
 };
 
 const editAdminPermissions = async (req, res) => {
@@ -855,7 +855,7 @@ const applyForAdmin = async (req, res) => {
     return res.status(403).json({ message: 'Rating too low to apply' });
   }
 
-  if (user.authority_level !== 'user') {
+  if (user.authorityLevel !== 'user') {
     return res.status(400).json({ message: 'Already an admin' });
   }
 

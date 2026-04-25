@@ -180,18 +180,17 @@ useEffect(() => {
 
 //aplicats
 useEffect(() => {
-  const fetchApplication = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/admin/applications", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const mine = res.data.find(a => a.userId === user?.id);
-      setApplication(mine || null);
-    } catch (err) {
-      // not an admin/superadmin, can't fetch — that's fine
-    }
-  };
+const fetchApplication = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.get("http://localhost:5000/api/users/me/application", {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setApplication(res.data || null);
+  } catch (err) {
+    console.error("Failed to fetch application:", err);
+  }
+};
   if (user) fetchApplication();
 }, [user]);
 
@@ -299,7 +298,9 @@ const handleApplyForAdmin = async () => {
     alert("Application submitted!");
     setApplication({ appliedAt: new Date().toISOString() });
   } catch (err) {
+    console.log("Apply error:", err.response?.data);
     alert(err.response?.data?.message || "Something went wrong.");
+
   }
 };
 

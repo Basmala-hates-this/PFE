@@ -31,7 +31,25 @@ const getRoomById = async (id) => {
     `SELECT * FROM rooms WHERE id = $1`,
     [id]
   );
- return toCamel(result.rows[0]) || null;
+  if (!result.rows[0]) return null;
+
+  const room = toCamel(result.rows[0]);
+
+  // fetch admins for this room
+  const adminsResult = await pool.query(
+    `SELECT user_id FROM room_members WHERE room_id = $1 AND role = 'admin'`,
+    [id]
+  );
+  room.admins = adminsResult.rows.map(r => r.user_id);
+
+  // fetch member count
+  const countResult = await pool.query(
+    `SELECT COUNT(*) FROM room_members WHERE room_id = $1`,
+    [id]
+  );
+  room.members = { length: parseInt(countResult.rows[0].count) };
+
+  return room;
 };
 
 const getAllRooms = async () => {

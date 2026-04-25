@@ -105,6 +105,7 @@ const [overrideReason, setOverrideReason] = useState("");
   };
 
   const handleUpgradeAdmin = async (userId) => {
+    console.log("upgrading userId:", userId);
     try {
       await axios.patch(
         `${API}/users/${userId}/upgrade-admin`,
@@ -519,10 +520,10 @@ const [overrideReason, setOverrideReason] = useState("");
             </p>
           ) : (
             applications.map((app) => {
-              const isRejecting = rejectingAppId === app.userId;
-              const isUpgrading = upgradingId === app.userId;
+              const isRejecting = rejectingAppId === app.user_id;
+              const isUpgrading = upgradingId === app.user_id;
               return (
-                <div key={app.userId} style={card}>
+                <div key={app.user_id} style={card}>
                   <div
                     style={{
                       display: "flex",
@@ -552,7 +553,7 @@ const [overrideReason, setOverrideReason] = useState("");
                     <div style={{ display: "flex", gap: "6px" }}>
                       <button
                         onClick={() => {
-                          setUpgradingId(app.userId);
+                          setUpgradingId(app.user_id);
                           setSelectedPermissions([]);
                           setSelectedRooms([]);
                           setEditingAdminId(null);
@@ -563,7 +564,7 @@ const [overrideReason, setOverrideReason] = useState("");
                       </button>
                       <button
                         onClick={() => {
-                          setRejectingAppId(app.userId);
+                          setRejectingAppId(app.user_id);
                           setRejectAppReason("");
                         }}
                         style={btn("#c0392b")}
@@ -691,7 +692,7 @@ const [overrideReason, setOverrideReason] = useState("");
                       )}
                       <div style={{ display: "flex", gap: "8px" }}>
                         <button
-                          onClick={() => handleUpgradeAdmin(app.userId)}
+                          onClick={() => handleUpgradeAdmin(app.user_id)}
                           style={btn("#27ae60")}
                         >
                           Confirm
@@ -736,7 +737,7 @@ const [overrideReason, setOverrideReason] = useState("");
                       />
                       <div style={{ display: "flex", gap: "8px" }}>
                         <button
-                          onClick={() => handleRejectApplication(app.userId)}
+                          onClick={() => handleRejectApplication(app.user_id)}
                           style={btn("#c0392b")}
                         >
                           Confirm Reject
@@ -845,7 +846,7 @@ const [overrideReason, setOverrideReason] = useState("");
                           }}
                         >
                           {admin.permissions?.length > 0 ? (
-                            admin.permissions.map((p) => (
+  (Array.isArray(admin.permissions) ? admin.permissions : []).map((p) => (
                               <span
                                 key={p}
                                 style={{
@@ -862,8 +863,8 @@ const [overrideReason, setOverrideReason] = useState("");
                             </small>
                           )}
                         </div>
-                        {admin.assignedRooms?.length > 0 && (
-                          <small
+{Array.isArray(admin.assignedRooms) && admin.assignedRooms.length > 0 && (
+                            <small
                             style={{
                               opacity: 0.4,
                               display: "block",
@@ -872,11 +873,7 @@ const [overrideReason, setOverrideReason] = useState("");
                           >
                             Rooms:{" "}
                             {admin.assignedRooms
-                              .map(
-                                (rid) =>
-                                  allRooms.find((r) => r.id === rid)?.name ||
-                                  rid,
-                              )
+                              .map((rid) => allRooms.find((r) => r.id === rid)?.name || rid)
                               .join(", ")}
                           </small>
                         )}
@@ -887,12 +884,10 @@ const [overrideReason, setOverrideReason] = useState("");
                         <button
                           onClick={() => {
                             setEditingAdminId(isEditing ? null : admin.id);
-                            setSelectedPermissions(
-                              isEditing ? [] : [...(admin.permissions || [])],
-                            );
-                            setSelectedRooms(
-                              isEditing ? [] : [...(admin.assignedRooms || [])],
-                            );
+                            setSelectedPermissions(isEditing ? [] : [...(Array.isArray(admin.permissions) ? admin.permissions : [])]);
+                            
+                            setSelectedRooms(isEditing ? [] : [...(Array.isArray(admin.assignedRooms) ? admin.assignedRooms : [])]);
+
                             setUpgradingId(null);
                           }}
                           style={btn(
@@ -1330,7 +1325,7 @@ const [overrideReason, setOverrideReason] = useState("");
                       style={{
                         margin: "0 0 4px",
                         opacity: 0.7,
-                        fontSize: "13px",
+                        fontSize: "13px", 
                       }}
                     >
                       {comment.content?.slice(0, 120)}

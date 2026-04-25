@@ -95,6 +95,9 @@ useEffect(() => {
 
 const handleSendMessage = async () => {
   if (!newMessage.trim() && !attachment) return;
+   if (attachment && attachment.size > 20 * 1024 * 1024) {
+    return alert("File too large. Maximum size is 20MB.");
+  }
   try {
     const formData = new FormData();
     if (newMessage.trim()) formData.append("content", newMessage);

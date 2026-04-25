@@ -457,6 +457,22 @@ const getUserMajors = async (req, res) => {
   res.json(result.rows.map(r => r.name));
 };
 
+const getMyApplication = async (req, res) => {
+  const result = await pool.query(
+    `SELECT * FROM admin_applications WHERE user_id = $1`,
+    [req.user.id]
+  );
+  res.json(result.rows[0] || null);
+};
+
+const getMyPermissions = async (req, res) => {
+  const result = await pool.query(
+    `SELECT permission FROM user_permissions WHERE user_id = $1`,
+    [req.user.id]
+  );
+  res.json(result.rows.map(r => r.permission));
+};
+
 module.exports = {
   getMe,
   updateMe,
@@ -478,4 +494,6 @@ module.exports = {
   selectValidInputs,
   getMyMajors,
   getUserMajors,
+  getMyApplication,
+  getMyPermissions,
 };
