@@ -4,7 +4,7 @@ import axios from "axios";
  import { useNavigate } from "react-router-dom";
 
 import confetti from "canvas-confetti";
- import { useEffect } from "react";
+ import { useEffect, useState } from "react";
 
 import { useRegistration } from "../assets/components/Context.jsx";
 import {
@@ -24,6 +24,7 @@ export default function Fin() {
     const { profile, credentials } = useRegistration();
     const newUser = { ...profile, ...credentials };
 
+    const [loading, setLoading] = useState(true);
 
     
   const handleConfetti = () => {
@@ -38,6 +39,7 @@ export default function Fin() {
   //AAAAAAAAAAAAAAAAAA
   //user efect will check the previosly mentiond...if one is false..rederect to he page needed...if not....well....CONTENT!!
  useEffect(() => {
+  handleConfetti();
   //no skipping to fin somehow..... YOUUUUUUUUUUUU SHALL NOOOOOOOOOOT PAASSSSSSSSS...said dembeldore quitly....this should cuase ragbait to whoever read it:)
   if (!profile || !credentials) {
     navigate("/info");
@@ -95,6 +97,7 @@ export default function Fin() {
     const data = response.data;
     localStorage.setItem("token", data.token);
     localStorage.setItem("currentUser", JSON.stringify(data.user));
+    setLoading(false);
     handleConfetti();
 
   } catch (err) {
@@ -139,13 +142,19 @@ const handleWelcome = () => {
     <h3 id="finH3">Thank You For Your Registration!</h3>
     <br/><br/>
     <div id="links">
-        <a href="#" className="fixing" onClick={handleDashboard}>🗂️Go To The Dashboard</a>
+        <a href="#" className="fixing" onClick={loading ? (e) => e.preventDefault() : handleDashboard}
+        style={{ opacity: loading ? 0.4 : 1, pointerEvents: loading ? "none" : "auto" }}
+          
+          >{loading ? "⏳ Setting up your account..." : "🗂️ Go To The Dashboard"}</a>
         
-        <a  href="#" className="fixing" onClick={handleWelcome}>🏠back to home Page</a>
+        <a  href="#" className="fixing" onClick={loading ? (e) => e.preventDefault() : handleWelcome}
+        style={{ opacity: loading ? 0.4 : 1, pointerEvents: loading ? "none" : "auto" }}>{loading ? "⏳ This Might Take A Moment..." : "🏠 Go To The Home Page"}</a>
 
             {/* <!-- <a href="register.html" className="fixing">🧾back to regestration Page</a> --> */}
              
-        <a href="#" className="fixing" onClick={handleLogin}>🔑back To Login Page</a>
+        <a href="#" className="fixing" onClick={loading ? (e) => e.preventDefault() : handleLogin}
+        style={{ opacity: loading ? 0.4 : 1, pointerEvents: loading ? "none" : "auto" }}>{loading ? "⏳ This Might Take A Moment..." : "🔑 Go To The Login Page"}</a>
+
         <button  id="con" className="fixing" onClick={handleConfetti}>🎉 Celebrate Again</button> 
         {/* <a href="javascript:void(0)" onClick={handleConfetti}> 🎉 Celebrate Again </a> */}
         
