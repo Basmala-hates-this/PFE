@@ -149,9 +149,9 @@ const getPendingProfessors = async (req, res) => {
   if (!allowed) return res.status(403).json({ message: 'No permission' });
 
   const result = await pool.query(
-    `SELECT id, full_name, username, email, role, verification_status, proof_file_url, created_at
-     FROM users WHERE verification_status = 'pending'`
-  );
+  `SELECT id, full_name, username, email, role, verification_status, proof_file_url, university_code, university_name, created_at
+   FROM users WHERE verification_status = 'pending'`
+);
   res.json(result.rows);
 };
 

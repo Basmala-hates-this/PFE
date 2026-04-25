@@ -12,18 +12,17 @@ const createUser = async (userData) => {
     universityCode,
     universityName,
     profilePicUrl = null,
+    proofFileUrl = null, 
   } = userData;
 
   const verificationStatus = role === 'professor' ? 'pending' : 'none';
-
-  const result = await pool.query(
-    `INSERT INTO users 
-      (full_name, birth_date, email, username, password_hash, role, university_code, university_name, verification_status, profile_pic_url)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-     RETURNING *`,
-    [fullName, birthDate, email, username, passwordHash, role, universityCode, universityName, verificationStatus, profilePicUrl]
-  );
-
+const result = await pool.query(
+  `INSERT INTO users 
+    (full_name, birth_date, email, username, password_hash, role, university_code, university_name, verification_status, profile_pic_url, proof_file_url)
+   VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+   RETURNING *`,
+  [fullName, birthDate, email, username, passwordHash, role, universityCode, universityName, verificationStatus, profilePicUrl, proofFileUrl]
+);
   return toCamel(result.rows[0]);
 };
 
