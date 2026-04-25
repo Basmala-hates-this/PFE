@@ -2,11 +2,11 @@ const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/post.controller');
 const protect = require('../middleware/authMiddleware');
-const { guestBlock } = require('../middleware/authMiddleware');
+const { guestBlock, optionalAuth } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
 router.post('/', protect, guestBlock, upload.single('attachment'), postController.createPost);
-router.get('/', postController.getPostsAll);
+router.get('/', optionalAuth, postController.getPostsAll);
 router.get('/search', postController.searchPosts);
 
 router.post('/:postId/save', protect, guestBlock, postController.savePost);

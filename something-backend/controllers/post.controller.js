@@ -44,50 +44,80 @@ const createPost = async (req, res) => {
 
 const getPostById = async (req, res) => {
   const { id } = req.params;
-  const post = await postRepo.getPostById(id);
+  const userId = req.user?.id || null; // handles guests
+  const post = await postRepo.getPostById(id, userId);
   if (!post) return res.status(404).json({ message: 'Post not found' });
   res.json(post);
 };
 
+// const getPostsAll = async (req, res) => {
+//   const { roomId, sort } = req.query;
+
+//   let posts;
+//   if (roomId) {
+//     if (sort === 'top') {
+//       const result = await pool.query(
+//         `SELECT p.*,
+//   COALESCE(v.useful, 0) as vote_useful,
+//   COALESCE(v.useless, 0) as vote_useless,
+//   COUNT(DISTINCT c.id) as comment_count,
+//   u.profile_pic_url as author_profile_pic
+//  FROM posts p
+//  LEFT JOIN post_vote_counts v ON v.post_id = p.id
+//  LEFT JOIN comments c ON c.post_id = p.id
+//  LEFT JOIN users u ON u.id = p.user_id
+//  WHERE p.room_id = $1
+//  GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
+//  ORDER BY vote_useful DESC`,
+//         [roomId]
+//       );
+//       posts = toCamel(result.rows);
+//     } else {
+//       posts = await postRepo.getPostsByRoom(roomId);
+//     }
+//   } else {
+//     const result = await pool.query(
+//   `SELECT p.*,
+//     COALESCE(v.useful, 0) as vote_useful,
+//     COALESCE(v.useless, 0) as vote_useless,
+//     COUNT(DISTINCT c.id) as comment_count,
+//     u.profile_pic_url as author_profile_pic
+//    FROM posts p
+//    LEFT JOIN post_vote_counts v ON v.post_id = p.id
+//    LEFT JOIN comments c ON c.post_id = p.id
+//    LEFT JOIN users u ON u.id = p.user_id
+//    GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
+//    ORDER BY p.created_at DESC`
+// );
+//     posts = toCamel(result.rows);
+//   }
+
+//   res.json(posts);
+// };
 const getPostsAll = async (req, res) => {
   const { roomId, sort } = req.query;
+  const userId = req.user?.id || null;
+ // console.log("getPostsAll userId:", userId);
 
   let posts;
   if (roomId) {
-    if (sort === 'top') {
-      const result = await pool.query(
-        `SELECT p.*,
-  COALESCE(v.useful, 0) as vote_useful,
-  COALESCE(v.useless, 0) as vote_useless,
-  COUNT(DISTINCT c.id) as comment_count,
-  u.profile_pic_url as author_profile_pic
- FROM posts p
- LEFT JOIN post_vote_counts v ON v.post_id = p.id
- LEFT JOIN comments c ON c.post_id = p.id
- LEFT JOIN users u ON u.id = p.user_id
- WHERE p.room_id = $1
- GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
- ORDER BY vote_useful DESC`,
-        [roomId]
-      );
-      posts = toCamel(result.rows);
-    } else {
-      posts = await postRepo.getPostsByRoom(roomId);
-    }
+    posts = await postRepo.getPostsByRoom(roomId, userId);
   } else {
     const result = await pool.query(
-  `SELECT p.*,
-    COALESCE(v.useful, 0) as vote_useful,
-    COALESCE(v.useless, 0) as vote_useless,
-    COUNT(DISTINCT c.id) as comment_count,
-    u.profile_pic_url as author_profile_pic
-   FROM posts p
-   LEFT JOIN post_vote_counts v ON v.post_id = p.id
-   LEFT JOIN comments c ON c.post_id = p.id
-   LEFT JOIN users u ON u.id = p.user_id
-   GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
-   ORDER BY p.created_at DESC`
-);
+      `SELECT p.*,
+        COALESCE(v.useful, 0) as vote_useful,
+        COALESCE(v.useless, 0) as vote_useless,
+        COUNT(DISTINCT c.id) as comment_count,
+        u.profile_pic_url as author_profile_pic,
+        (SELECT type FROM votes WHERE post_id = p.id AND user_id = $1) as user_vote
+       FROM posts p
+       LEFT JOIN post_vote_counts v ON v.post_id = p.id
+       LEFT JOIN comments c ON c.post_id = p.id
+       LEFT JOIN users u ON u.id = p.user_id
+       GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
+       ORDER BY p.created_at DESC`,
+      [userId]
+    );
     posts = toCamel(result.rows);
   }
 

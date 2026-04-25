@@ -23,37 +23,41 @@ const createPost = async (postData) => {
   return toCamel(result.rows[0]);
 };
 
-const getPostById = async (id) => {
+const getPostById = async (id, userId = null) => {
   const result = await pool.query(
     `SELECT p.*,
       COALESCE(v.useful, 0) as vote_useful,
       COALESCE(v.useless, 0) as vote_useless,
-      COUNT(DISTINCT c.id) as comment_count
+      COUNT(DISTINCT c.id) as comment_count,
+      u.profile_pic_url as author_profile_pic,
+(SELECT type FROM votes WHERE post_id = p.id AND user_id = $2) as user_vote
      FROM posts p
      LEFT JOIN post_vote_counts v ON v.post_id = p.id
      LEFT JOIN comments c ON c.post_id = p.id
+     LEFT JOIN users u ON u.id = p.user_id
      WHERE p.id = $1
-     GROUP BY p.id, v.useful, v.useless`,
-    [id]
+     GROUP BY p.id, v.useful, v.useless, u.profile_pic_url`,
+    [id, userId]
   );
   return toCamel(result.rows[0]) || null;
 };
 
-const getPostsByRoom = async (roomId) => {
+const getPostsByRoom = async (roomId, userId = null) => {
   const result = await pool.query(
-   `SELECT p.*,
-  COALESCE(v.useful, 0) as vote_useful,
-  COALESCE(v.useless, 0) as vote_useless,
-  COUNT(DISTINCT c.id) as comment_count,
-  u.profile_pic_url as author_profile_pic
- FROM posts p
- LEFT JOIN post_vote_counts v ON v.post_id = p.id
- LEFT JOIN comments c ON c.post_id = p.id
- LEFT JOIN users u ON u.id = p.user_id
- WHERE p.room_id = $1
- GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
- ORDER BY p.created_at DESC`,
-    [roomId]
+    `SELECT p.*,
+      COALESCE(v.useful, 0) as vote_useful,
+      COALESCE(v.useless, 0) as vote_useless,
+      COUNT(DISTINCT c.id) as comment_count,
+      u.profile_pic_url as author_profile_pic,
+(SELECT type FROM votes WHERE post_id = p.id AND user_id = $2) as user_vote
+     FROM posts p
+     LEFT JOIN post_vote_counts v ON v.post_id = p.id
+     LEFT JOIN comments c ON c.post_id = p.id
+     LEFT JOIN users u ON u.id = p.user_id
+     WHERE p.room_id = $1
+     GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
+     ORDER BY p.created_at DESC`,
+    [roomId, userId]
   );
   return toCamel(result.rows);
 };

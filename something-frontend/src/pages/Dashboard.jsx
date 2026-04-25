@@ -238,6 +238,8 @@ export default function Dashboard() {
         });
 
         setPosts(publicPosts);
+        console.log("post sample userVote:", publicPosts[0]?.userVote, publicPosts[0]);
+
       }
     } catch (err) {
       console.error("Failed to fetch:", err);
@@ -351,27 +353,70 @@ export default function Dashboard() {
   ].filter((group) => group.options.length > 0); // remove empty groups
 
   //ladies and gentemen.....the votes
+  // const handleVote = async (postId, voteType) => {
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     await axios.patch(
+  //       `http://localhost:5000/api/posts/${postId}/vote`,
+  //       { voteType },
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
+  //     const response = await axios.get(
+  //       `http://localhost:5000/api/posts/${postId}`,
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
+  //     setPosts((prev) =>
+  //       prev
+  //         .map((post) => (post.id === postId ? response.data : post))
+  //         .filter((post) => !post.isHidden),
+  //     );
+  //   } catch (err) {
+  //     console.error("Failed to vote:", err);
+  //   }
+  // };
+
   const handleVote = async (postId, voteType) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/vote`,
-        { voteType },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const response = await axios.get(
-        `http://localhost:5000/api/posts/${postId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      setPosts((prev) =>
-        prev
-          .map((post) => (post.id === postId ? response.data : post))
-          .filter((post) => !post.isHidden),
-      );
-    } catch (err) {
-      console.error("Failed to vote:", err);
-    }
-  };
+  const previousPosts = posts;
+
+  const currentVote = posts.find(p => p.id === postId)?.userVote;
+  const alreadyVoted = currentVote === voteType;
+
+  // instant UI update
+  setPosts(prev => prev.map(post => {
+    if (post.id !== postId) return post;
+    return {
+      ...post,
+      voteUseful: voteType === "useful"
+        ? Number(post.voteUseful) + (alreadyVoted ? -1 : 1)
+        : Number(post.voteUseful) - (currentVote === "useful" ? 1 : 0),
+      voteUseless: voteType === "useless"
+        ? Number(post.voteUseless) + (alreadyVoted ? -1 : 1)
+        : Number(post.voteUseless) - (currentVote === "useless" ? 1 : 0),
+      userVote: alreadyVoted ? null : voteType,
+    };
+  }));
+
+  try {
+    const token = localStorage.getItem("token");
+    await axios.patch(
+      `http://localhost:5000/api/posts/${postId}/vote`,
+      { voteType },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    // sync real counts from backend
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    setPosts(prev =>
+      prev.map(p => p.id === postId ? { ...response.data } : p)
+         .filter(p => !p.isHidden)
+    );
+  } catch (err) {
+    console.error("Failed to vote:", err);
+    setPosts(previousPosts); // roll back on failure
+  }
+};
 
   //room name instead of id(me was stupid again)
   const getRoomName = (roomId) => {
