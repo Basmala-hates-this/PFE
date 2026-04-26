@@ -1076,19 +1076,92 @@ const handleRoomRequest = async (req, res) => {
 
 // --- room moderation ---
 
+// const getRoomsForAdmin = async (req, res) => {
+//   let roomsResult;
+
+//   if (req.user.authorityLevel === 'superadmin') {
+//     roomsResult = await pool.query(`SELECT * FROM rooms ORDER BY created_at DESC`);
+//   } else {
+//     const allowed = await checkPermission(req.user.id, req.user.authorityLevel, PERMISSIONS.MANAGE_ROOMS);
+//     if (!allowed) return res.status(403).json({ message: 'No permission' });
+
+//     roomsResult = await pool.query(
+//       `SELECT r.* FROM rooms r
+//        JOIN admin_assigned_rooms aar ON aar.room_id = r.id
+//        WHERE aar.user_id = $1
+//        ORDER BY r.created_at DESC`,
+//       [req.user.id]
+//     );
+//   }
+
+//   const rooms = roomsResult.rows;
+
+//   // attach members and suspensions to each room
+//   const enriched = await Promise.all(rooms.map(async (room) => {
+//     const membersResult = await pool.query(
+//       `SELECT user_id FROM room_members WHERE room_id = $1`,
+//       [room.id]
+//     );
+//     const suspensionsResult = await pool.query(
+//      `SELECT user_id, suspended_until, reason FROM room_suspensions 
+//    WHERE room_id = $1 AND suspended_until > NOW()`,
+//       [room.id]
+//     );
+
+//     return {
+//       ...room,
+//       members: membersResult.rows.map(r => r.user_id),
+//       suspendedMembers: suspensionsResult.rows.map(r => ({
+//         userId: r.user_id,
+//          until: r.suspended_until,
+//         reason: r.reason
+//       }))
+//     };
+//   }));
+
+//   res.json(enriched);
+// };
+
+
 const getRoomsForAdmin = async (req, res) => {
   let roomsResult;
 
+  const baseQuery = `
+    SELECT r.* FROM rooms r
+    WHERE r.type != 'private'
+    AND (
+      -- public rooms have no university/major, always show
+      (r.university_code IS NULL AND r.major_id IS NULL)
+      OR
+      -- university rooms: only if university is approved
+      (r.university_code IS NOT NULL AND r.major_id IS NULL
+        AND EXISTS (
+          SELECT 1 FROM universities u 
+          WHERE u.code = r.university_code AND u.status = 'approved'
+        )
+      )
+      OR
+      -- major/subject rooms: only if major is approved
+      (r.major_id IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM majors m 
+          WHERE m.id = r.major_id AND m.status = 'approved'
+        )
+      )
+    )
+  `;
+
   if (req.user.authorityLevel === 'superadmin') {
-    roomsResult = await pool.query(`SELECT * FROM rooms ORDER BY created_at DESC`);
+    roomsResult = await pool.query(`${baseQuery} ORDER BY r.created_at DESC`);
   } else {
     const allowed = await checkPermission(req.user.id, req.user.authorityLevel, PERMISSIONS.MANAGE_ROOMS);
     if (!allowed) return res.status(403).json({ message: 'No permission' });
 
     roomsResult = await pool.query(
-      `SELECT r.* FROM rooms r
-       JOIN admin_assigned_rooms aar ON aar.room_id = r.id
-       WHERE aar.user_id = $1
+      `${baseQuery}
+       AND r.id IN (
+         SELECT room_id FROM admin_assigned_rooms WHERE user_id = $1
+       )
        ORDER BY r.created_at DESC`,
       [req.user.id]
     );
@@ -1096,15 +1169,14 @@ const getRoomsForAdmin = async (req, res) => {
 
   const rooms = roomsResult.rows;
 
-  // attach members and suspensions to each room
   const enriched = await Promise.all(rooms.map(async (room) => {
     const membersResult = await pool.query(
       `SELECT user_id FROM room_members WHERE room_id = $1`,
       [room.id]
     );
     const suspensionsResult = await pool.query(
-     `SELECT user_id, suspended_until, reason FROM room_suspensions 
-   WHERE room_id = $1 AND suspended_until > NOW()`,
+      `SELECT user_id, suspended_until, reason FROM room_suspensions 
+       WHERE room_id = $1 AND suspended_until > NOW()`,
       [room.id]
     );
 
@@ -1113,7 +1185,7 @@ const getRoomsForAdmin = async (req, res) => {
       members: membersResult.rows.map(r => r.user_id),
       suspendedMembers: suspensionsResult.rows.map(r => ({
         userId: r.user_id,
-         until: r.suspended_until,
+        until: r.suspended_until,
         reason: r.reason
       }))
     };

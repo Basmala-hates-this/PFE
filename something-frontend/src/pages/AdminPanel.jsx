@@ -207,6 +207,7 @@ const [actionLoading, setActionLoading] = useState(false);
  
  const handleHideContent = async (type, postId, commentId) => {
   if (!window.confirm(`Hide this ${type}?`)) return;
+  setActionLoading(true);
   try {
     await axios.patch(`${API}/content/hide`, { type, postId, commentId }, { headers });
     alert("Content hidden.");
@@ -222,6 +223,7 @@ const [actionLoading, setActionLoading] = useState(false);
     }));
 
   } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+  finally { setActionLoading(false); }
 };
  
   const handleCreateAnnouncement = async () => {
@@ -692,8 +694,9 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
                   <button
                     onClick={() => handleHideContent(item.type, item.type === "post" ? item.id : item.postId, item.type === "comment" ? item.id : null)}
                     style={btn("#c0392b")}
+                     disabled={actionLoading}
                   >
-                    🙈 Hide Content
+                    {actionLoading ? "Hiding..." : "Hide Content"}
                   </button>
                 )}
                 {item.isHidden && <span style={{ color: "#e74c3c", fontSize: "12px" }}>⚠️ Already hidden</span>}
@@ -1038,7 +1041,7 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
               <small style={{ opacity: 0.5 }}>{selectedRoom.type} • {selectedRoom.members?.length || 0} members</small>
             </div>
             <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              {isSuperAdmin && (
+              {isSuperAdmin && selectedRoom.type !== 'public' &&  (
                 <button onClick={() => handleDeleteRoom(selectedRoom.id)} style={btn("#7f0000")}>
                   🗑️ Delete Room
                 </button>
