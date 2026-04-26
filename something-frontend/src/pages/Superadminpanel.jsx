@@ -49,6 +49,8 @@ export default function SuperAdminPanel() {
   const [overridingLogId, setOverridingLogId] = useState(null);
 const [overrideReason, setOverrideReason] = useState("");
 
+
+const [actionLoading, setActionLoading] = useState(false);
   //////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -106,6 +108,7 @@ const [overrideReason, setOverrideReason] = useState("");
 
   const handleUpgradeAdmin = async (userId) => {
     console.log("upgrading userId:", userId);
+      setActionLoading(true);
     try {
       await axios.patch(
         `${API}/users/${userId}/upgrade-admin`,
@@ -121,6 +124,8 @@ const [overrideReason, setOverrideReason] = useState("");
       fetchAllRooms();
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -168,6 +173,7 @@ const [overrideReason, setOverrideReason] = useState("");
       await axios.delete(`${API}/users/${userId}`, { headers });
       alert("Account deleted.");
       fetchAllUsers();
+      fetchStats();
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
     }
@@ -240,6 +246,7 @@ const [overrideReason, setOverrideReason] = useState("");
   const handleRejectApplication = async (userId) => {
     if (!rejectAppReason.trim())
       return alert("Please enter a rejection reason.");
+      setActionLoading(true);
     try {
       await axios.post(
         `${API}/applications/reject`,
@@ -253,6 +260,7 @@ const [overrideReason, setOverrideReason] = useState("");
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
     }
+    finally {      setActionLoading(false); }
   };
 
   const fetchAllRooms = async () => {
@@ -276,6 +284,7 @@ const [overrideReason, setOverrideReason] = useState("");
   };
 
   const handleEditAdminPermissions = async (adminId) => {
+      setActionLoading(true);
     try {
       await axios.patch(
         `${API}/users/${adminId}/edit-permissions`,
@@ -290,6 +299,7 @@ const [overrideReason, setOverrideReason] = useState("");
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
     }
+    finally {      setActionLoading(false); }
   };
 
   const fetchDrillDown = async (type) => {
@@ -343,6 +353,7 @@ const [overrideReason, setOverrideReason] = useState("");
 
   const handleOverride = async (logId) => {
   if (!overrideReason.trim()) return alert("Please enter a reason for the override.");
+    setActionLoading(true);
   try {
     await axios.post(`${API}/logs/${logId}/override`, { reason: overrideReason }, { headers });
     alert("Action overridden successfully.");
@@ -352,6 +363,7 @@ const [overrideReason, setOverrideReason] = useState("");
   } catch (err) {
     alert(err.response?.data?.message || "Override failed.");
   }
+  finally { setActionLoading(false); }
 };
 
   //////////////////////////////////////////////////////////////////////////////////////////////
@@ -693,9 +705,10 @@ const [overrideReason, setOverrideReason] = useState("");
                       <div style={{ display: "flex", gap: "8px" }}>
                         <button
                           onClick={() => handleUpgradeAdmin(app.user_id)}
+                          disabled={actionLoading}
                           style={btn("#27ae60")}
                         >
-                          Confirm
+                          {actionLoading ? "Upgrading..." : "Confirm"}
                         </button>
                         <button
                           onClick={() => {
@@ -740,7 +753,7 @@ const [overrideReason, setOverrideReason] = useState("");
                           onClick={() => handleRejectApplication(app.user_id)}
                           style={btn("#c0392b")}
                         >
-                          Confirm Reject
+                          {actionLoading ? "Rejecting..." : "Confirm Reject"}
                         </button>
                         <button
                           onClick={() => {
@@ -1031,9 +1044,10 @@ const [overrideReason, setOverrideReason] = useState("");
                         )}
                         <button
                           onClick={() => handleEditAdminPermissions(admin.id)}
+                          disabled={actionLoading}
                           style={btn("#27ae60")}
                         >
-                          Save Changes
+                          {actionLoading ? "Saving..." : "Save Changes"}
                         </button>
                       </div>
                     )}
@@ -1126,8 +1140,8 @@ const [overrideReason, setOverrideReason] = useState("");
                     fontSize: "13px",
                   }}
                 />
-                <button onClick={() => handleOverride(log.id)} style={btn("#e74c3c")}>
-                  Confirm Override
+                <button onClick={() => handleOverride(log.id)} style={btn("#e74c3c")} disabled={actionLoading}>
+                  {actionLoading ? "Overriding..." : "Confirm Override"}
                 </button>
               </div>
             )}
@@ -1250,7 +1264,14 @@ const [overrideReason, setOverrideReason] = useState("");
                         >
                           📋 History
                         </button>
+                     
                       )}
+                          <button
+            onClick={() => handleDeleteAccount(u.id, u.username)}
+            style={btn("#7f0000")}
+          >
+           Delete
+          </button>
                     </div>
                   );
                 })}

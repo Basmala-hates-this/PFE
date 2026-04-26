@@ -426,7 +426,7 @@ const handleStatClick = async (type) => {
       return (
         <div>
           <p style={{ margin: "0 0 6px", fontSize: "14px", color: "#27ae60" }}>
-            ✅ Application submitted — pending superadmin review.
+             Application submitted — pending superadmin review.
           </p>
           {canWithdraw ? (
             <button onClick={handleWithdrawApplication} 
@@ -608,8 +608,8 @@ const handleStatClick = async (type) => {
       )}
 
       <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
-        <button onClick={() => setShowCreateRoom(false)}>Cancel</button>
-        <button onClick={handleCreateRoom} disabled={!roomName.trim() || roomLoading}>
+        <button onClick={() => setShowCreateRoom(false)} style={{padding:"6px",width:"60px",backgroundColor:"#fc0c0ce9",color:"white",borderRadius:"6px"}}>Cancel</button>
+        <button onClick={handleCreateRoom} disabled={!roomName.trim() || roomLoading} style={{padding:"6px",width:"60px",backgroundColor:"#6476af",color:"white",borderRadius:"6px"}}>
         {roomLoading ? "Creating..." : "Create"}
         </button>
       </div>
@@ -646,8 +646,8 @@ const handleStatClick = async (type) => {
       )}
 
       <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
-        <button onClick={() => setShowJoinRoom(false)}>Cancel</button>
-        <button onClick={handleJoinRoom} disabled={joinPassKey.length !== 8}>Join</button>
+        <button onClick={() => setShowJoinRoom(false)} style={{padding:"6px",width:"60px",backgroundColor:"#fc0c0ce9",color:"white",borderRadius:"6px"}}>Cancel</button>
+        <button onClick={handleJoinRoom} disabled={joinPassKey.length !== 8} style={{padding:"6px",width:"60px",backgroundColor:"#64fc0ce9",color:"black",borderRadius:"6px"}}>Join</button>
       </div>
 
     </div>

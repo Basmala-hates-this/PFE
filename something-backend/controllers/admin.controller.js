@@ -56,26 +56,44 @@ const checkPermission = async (userId, authorityLevel, permission) => {
 const getAllUsers = async (req, res) => {
   const { q, role, status } = req.query;
 
-  let query = `SELECT id, full_name, username, email, role, authority_level,
-                      verification_status, rating, violation_count,
-                      suspended_until, suspension_reason, created_at,profile_pic_url
-               FROM users WHERE 1=1`;
+  let query = `
+    SELECT u.id, u.full_name, u.username, u.email, u.role, u.authority_level,
+           u.verification_status, u.rating, u.violation_count,
+           u.suspended_until, u.suspension_reason, u.created_at, u.profile_pic_url,
+           COALESCE(
+             json_agg(
+               json_build_object(
+                 'action', ah.action,
+                 'by', performer.username,
+                 'reason', ah.reason,
+                 'date', ah.created_at
+               ) ORDER BY ah.created_at DESC
+             ) FILTER (WHERE ah.id IS NOT NULL),
+             '[]'
+           ) AS action_history
+    FROM users u
+    LEFT JOIN action_history ah ON ah.user_id = u.id
+    LEFT JOIN users performer ON performer.id = ah.performed_by
+    WHERE 1=1
+  `;
   const params = [];
 
   if (q) {
     params.push(`%${q}%`);
-    query += ` AND username ILIKE $${params.length}`;
+    query += ` AND u.username ILIKE $${params.length}`;
   }
   if (role) {
     params.push(role);
-    query += ` AND role = $${params.length}`;
+    query += ` AND u.role = $${params.length}`;
   }
   if (status === 'suspended') {
-    query += ` AND suspended_until IS NOT NULL AND suspended_until > NOW()`;
+    query += ` AND u.suspended_until IS NOT NULL AND u.suspended_until > NOW()`;
   }
   if (status === 'pending') {
-    query += ` AND verification_status = 'pending'`;
+    query += ` AND u.verification_status = 'pending'`;
   }
+
+  query += ` GROUP BY u.id ORDER BY u.created_at DESC`;
 
   const result = await pool.query(query, params);
   res.json(result.rows);
@@ -222,6 +240,7 @@ const getReportedContent = async (req, res) => {
     `SELECT p.*, COUNT(r.id) as report_count
      FROM posts p
      JOIN reports r ON r.post_id = p.id
+     WHERE p.is_hidden = false  
      GROUP BY p.id
      HAVING COUNT(r.id) > 0
      ORDER BY report_count DESC`
@@ -232,6 +251,7 @@ const getReportedContent = async (req, res) => {
      FROM comments c
      JOIN reports r ON r.comment_id = c.id
      JOIN posts p ON p.id = c.post_id
+     WHERE c.is_hidden = false  
      GROUP BY c.id, p.title, p.id
      HAVING COUNT(r.id) > 0
      ORDER BY report_count DESC`
