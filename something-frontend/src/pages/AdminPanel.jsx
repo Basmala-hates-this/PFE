@@ -62,6 +62,9 @@ const [roomSearch, setRoomSearch] = useState("");
 const [roomTypeFilter, setRoomTypeFilter] = useState("");
 
 const [userPermissions, setUserPermissions] = useState([]);
+
+
+const [actionLoading, setActionLoading] = useState(false);
  //////////////////////////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////////////////////////////
@@ -158,32 +161,39 @@ const [userPermissions, setUserPermissions] = useState([]);
     if (!days) return;
     const reason = prompt("Reason for suspension?");
     if (!reason) return;
+    setActionLoading(true);
     try {
       await axios.patch(`${API}/users/${userId}/suspend`, { days: Number(days), reason }, { headers });
       alert("User suspended.");
       fetchUsers();
     } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+     finally { setActionLoading(false); }
   };
  
   const handleUnsuspend = async (userId) => {
-    try {
-      await axios.patch(`${API}/users/${userId}/unsuspend`, {}, { headers });
-      alert("User unsuspended.");
-      fetchUsers();
-    } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  };
+  setActionLoading(true);
+  try {
+    await axios.patch(`${API}/users/${userId}/unsuspend`, {}, { headers });
+    alert("User unsuspended.");
+    fetchUsers();
+  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+  finally { setActionLoading(false); }
+};
  
   const handleVerifyProfessor = async (userId) => {
+    setActionLoading(true);
     try {
       await axios.patch(`${API}/professors/${userId}/verify`, {}, { headers });
       alert("Professor verified!");
       fetchPendingProfessors();
       fetchStats();
     } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+      finally { setActionLoading(false); }
   };
  
   const handleRejectProfessor = async (userId) => {
     if (!rejectReason.trim()) return alert("Please enter a rejection reason.");
+    setActionLoading(true);
     try {
       await axios.patch(`${API}/professors/${userId}/reject`, { reason: rejectReason }, { headers });
       alert("Professor rejected and demoted to student.");
@@ -192,6 +202,7 @@ const [userPermissions, setUserPermissions] = useState([]);
       fetchPendingProfessors();
       fetchStats();
     } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+      finally { setActionLoading(false); }
   };
  
  const handleHideContent = async (type, postId, commentId) => {
@@ -215,11 +226,13 @@ const [userPermissions, setUserPermissions] = useState([]);
  
   const handleCreateAnnouncement = async () => {
     if (!newAnnouncement.trim()) return;
+    setActionLoading(true);
     try {
       await axios.post(`${API}/announcements`, { message: newAnnouncement }, { headers });
       setNewAnnouncement("");
       fetchAnnouncements();
     } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+    finally { setActionLoading(false); }
   };
  
   const handleDeleteAnnouncement = async (id) => {
@@ -232,26 +245,32 @@ const [userPermissions, setUserPermissions] = useState([]);
 
 
   const handleApproveResource = async (postId, approved) => {
+    setActionLoading(true);
   try {
     await axios.patch(`${API}/content/resource`, { postId, approved }, { headers });
     fetchPendingResources();
     fetchStats();
   } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+  finally { setActionLoading(false); }
 };
 
 const handleRestoreContent = async (type, postId, commentId = null) => {
   if (!window.confirm(`Restore this ${type}?`)) return;
+  setActionLoading(true);
   try {
     await axios.patch(`${API}/content/restore`, { type, postId, commentId }, { headers });
     fetchHiddenContent();
   } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+  finally { setActionLoading(false); }
 };
 
 const handleValidateOtherInput = async (userId, approved) => {
+  setActionLoading(true);
   try {
     await axios.patch(`${API}/other-inputs/validate`, { userId, approved }, { headers });
     fetchOtherInputs();
   } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+  finally { setActionLoading(false); }
 };
  
  
@@ -391,6 +410,7 @@ const fetchModerationRooms = async () => {
       axios.get(`${API}/rooms-moderation`, { headers }),
       axios.get(`${API}/users`, { headers })
     ]);
+    console.log("room sample:", roomsRes.data[0]);
     setModerationRooms(roomsRes.data);
     setUsers(usersRes.data);
   } catch (err) { console.error(err); }
@@ -398,28 +418,39 @@ const fetchModerationRooms = async () => {
 
 const handleRoomSuspend = async (roomId, userId) => {
   if (!roomSuspendDays || !roomSuspendReason.trim()) return alert("Please fill in days and reason.");
+  setActionLoading(true);
   try {
-    await axios.patch(`${API}/rooms-moderation/suspend`, 
+    await axios.patch(`${API}/rooms-moderation/suspend`,
       { roomId, userId, days: Number(roomSuspendDays), reason: roomSuspendReason },
       { headers }
     );
     setRoomSuspendingId(null);
     setRoomSuspendDays("");
     setRoomSuspendReason("");
-    // refresh selected room members
-    const res = await axios.get(`${API}/rooms-moderation`, { headers });
-    setModerationRooms(res.data);
-    setSelectedRoom(res.data.find(r => r.id === roomId));
+    const [roomsRes, usersRes] = await Promise.all([  
+      axios.get(`${API}/rooms-moderation`, { headers }),
+      axios.get(`${API}/users`, { headers })
+    ]);
+    setModerationRooms(roomsRes.data);
+    setUsers(usersRes.data);  
+    setSelectedRoom(roomsRes.data.find(r => r.id === roomId));
   } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+  finally { setActionLoading(false); }
 };
 
 const handleRoomUnsuspend = async (roomId, userId) => {
+  setActionLoading(true);
   try {
     await axios.patch(`${API}/rooms-moderation/unsuspend`, { roomId, userId }, { headers });
-    const res = await axios.get(`${API}/rooms-moderation`, { headers });
-    setModerationRooms(res.data);
-    setSelectedRoom(res.data.find(r => r.id === roomId));
+    const [roomsRes, usersRes] = await Promise.all([ 
+      axios.get(`${API}/rooms-moderation`, { headers }),
+      axios.get(`${API}/users`, { headers })
+    ]);
+    setModerationRooms(roomsRes.data);
+    setUsers(usersRes.data);  
+    setSelectedRoom(roomsRes.data.find(r => r.id === roomId));
   } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+  finally { setActionLoading(false); }
 };
 
 const handleDeleteRoom = async (roomId) => {
@@ -549,10 +580,10 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
                   </div>
                   <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
                     {!isSuspended && user.authorityLevel === "user" && (
-                      <button onClick={() => handleSuspend(user.id)} style={btn("#c0392b")}>Suspend</button>
+<button onClick={() => handleSuspend(user.id)} disabled={actionLoading} style={btn("#c0392b")}>Suspend</button>
                     )}
                     {isSuspended && (
-                      <button onClick={() => handleUnsuspend(user.id)} style={btn("#27ae60")}>Unsuspend</button>
+<button onClick={() => handleUnsuspend(user.id)} disabled={actionLoading} style={btn("#27ae60")}>Unsuspend</button>
                     )}
                     {user.actionHistory?.length > 0 && (
                        <button
@@ -612,14 +643,17 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
                       style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }}
                     />
                     <div style={{ display: "flex", gap: "8px" }}>
-                      <button onClick={() => handleRejectProfessor(prof.id)} style={btn("#c0392b")}>Confirm Reject</button>
-                      <button onClick={() => { setRejectingId(null); setRejectReason(""); }} style={btn("rgba(255,255,255,0.1)")}>Cancel</button>
+<button onClick={() => handleRejectProfessor(prof.id)} disabled={actionLoading} style={btn("#c0392b")}>
+  {actionLoading ? "Rejecting..." : "Confirm Reject"}
+</button>                      <button onClick={() => { setRejectingId(null); setRejectReason(""); }} style={btn("rgba(255,255,255,0.1)")}>Cancel</button>
                     </div>
                   </div>
                 ) : (
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <button onClick={() => handleVerifyProfessor(prof.id)} style={btn("#27ae60")}>Verify</button>
-                    <button onClick={() => setRejectingId(prof.id)} style={btn("#c0392b")}>Reject</button>
+                    <button onClick={() => handleVerifyProfessor(prof.id)} disabled={actionLoading} style={btn("#27ae60")}>
+  {actionLoading ? "Verifying..." : "Verify"}
+</button>
+<button onClick={() => setRejectingId(prof.id)} disabled={actionLoading} style={btn("#c0392b")}>Reject</button>
                   </div>
                 )}
               </div>
@@ -705,8 +739,12 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
           )}
 
           <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
-            <button onClick={() => handleApproveResource(post.id, true)} style={btn("#27ae60")}>✅ Approve</button>
-            <button onClick={() => handleApproveResource(post.id, false)} style={btn("#c0392b")}>❌ Reject</button>
+            <button onClick={() => handleApproveResource(post.id, true)} disabled={actionLoading} style={btn("#27ae60")}>
+  {actionLoading ? "..." : " Approve"}
+</button>
+<button onClick={() => handleApproveResource(post.id, false)} disabled={actionLoading} style={btn("#c0392b")}>
+  {actionLoading ? "..." : " Reject"}
+</button>
           </div>
         </div>
       ))
@@ -725,7 +763,7 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
         <div key={item.id} style={card}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
             <span style={badge(item.type === "post" ? "#6476af" : "#4a3f6b")}>{item.type}</span>
-            <strong>@{item.authorUsername}</strong>
+            <strong>@{item.author_username}</strong>
             {item.autoHidden && <span style={badge("#e67e22")}>auto-hidden</span>}
             {!item.autoHidden && <span style={badge("#c0392b")}>manually hidden</span>}
             {item.type === "comment" && (
@@ -744,9 +782,10 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
               item.type === "post" ? item.id : item.postId,
               item.type === "comment" ? item.id : null
             )}
+            disabled={actionLoading}
             style={btn("#27ae60")}
           >
-            ♻️ Restore
+             {actionLoading ? "Restoring..." : " Restore"}
           </button>
         </div>
       ))
@@ -792,8 +831,12 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
 
           {u.otherInputStatus === "pending" && (
             <div style={{ display: "flex", gap: "8px" }}>
-              <button onClick={() => handleValidateOtherInput(u.id, true)} style={btn("#27ae60")}>✅ Approve</button>
-              <button onClick={() => handleValidateOtherInput(u.id, false)} style={btn("#c0392b")}>❌ Reject</button>
+              <button onClick={() => handleValidateOtherInput(u.id, true)} disabled={actionLoading} style={btn("#27ae60")}>
+  {actionLoading ? "..." : "Approve"}
+</button>
+<button onClick={() => handleValidateOtherInput(u.id, false)} disabled={actionLoading} style={btn("#c0392b")}>
+  {actionLoading ? "..." : "Reject"}
+</button>
             </div>
           )}
           {u.otherInputStatus !== "pending" && (
@@ -818,9 +861,9 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
                 placeholder="Write a platform-wide announcement..."
                 style={{ width: "100%", minHeight: "80px", padding: "10px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", resize: "vertical", marginBottom: "10px" }}
               />
-              <button onClick={handleCreateAnnouncement} disabled={!newAnnouncement.trim()} style={btn()}>
-                📢 Post Announcement
-              </button>
+              <button onClick={handleCreateAnnouncement} disabled={!newAnnouncement.trim() || actionLoading} style={btn()}>
+  {actionLoading ? "Posting..." : " Post Announcement"}
+</button>
             </div>
           )}
  
@@ -1009,7 +1052,7 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
             {selectedRoom.members?.length === 0 ? (
               <p style={{ opacity: 0.5 }}>No members.</p>
             ) : (
-              selectedRoom.members.map(memberId => {
+              selectedRoom.members?.map(memberId => {
                 const memberUser = users.find(u => u.id === memberId);
                 const suspension = selectedRoom.suspendedMembers?.find(
                   s => s.userId === memberId && new Date(s.until) > new Date()
@@ -1046,9 +1089,9 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
                             Suspend
                           </button>
                         ) : (
-                          <button onClick={() => handleRoomUnsuspend(selectedRoom.id, memberId)} style={btn("#27ae60")}>
-                            Unsuspend
-                          </button>
+                         <button onClick={() => handleRoomUnsuspend(selectedRoom.id, memberId)} disabled={actionLoading} style={btn("#27ae60")}>
+  {actionLoading ? "..." : "Unsuspend"}
+</button>
                         )}
                       </div>
                     </div>
@@ -1073,9 +1116,9 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
                           />
                         </div>
                         <div style={{ display: "flex", gap: "8px" }}>
-                          <button onClick={() => handleRoomSuspend(selectedRoom.id, memberId)} style={btn("#c0392b")}>
-                            Confirm
-                          </button>
+                          <button onClick={() => handleRoomSuspend(selectedRoom.id, memberId)} disabled={actionLoading} style={btn("#c0392b")}>
+  {actionLoading ? "Suspending..." : "Confirm"}
+</button>
                           <button onClick={() => { setRoomSuspendingId(null); setRoomSuspendDays(""); setRoomSuspendReason(""); }} style={btn("rgba(255,255,255,0.1)")}>
                             Cancel
                           </button>

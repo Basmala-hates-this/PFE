@@ -97,6 +97,8 @@ export default function Dashboard() {
   ///not proud of this...toggle sidebar
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
@@ -274,6 +276,7 @@ export default function Dashboard() {
   //THIS WILL EMITATE WHAT THE VISION MIGHT LOOK LIKE...
   const handleSubmitPost = async () => {
     if (!postContent.trim() || !selectedPostRoom) return;
+    setIsSubmitting(true);
     try {
       const token = localStorage.getItem("token");
 
@@ -308,7 +311,9 @@ export default function Dashboard() {
       setIsModalOpen(false);
     } catch (err) {
       console.error("Failed to create post:", err);
-    }
+    } finally {
+    setIsSubmitting(false); 
+  }
     console.log(posts[0].createdAt);
   };
 
@@ -500,30 +505,28 @@ export default function Dashboard() {
   };
 
   const handleEditPost = async (postId) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}`,
-        { title: editPostTitle, content: editPostContent },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      setPosts((prev) =>
-        prev.map((p) =>
-          p.id === postId
-            ? {
-                ...p,
-                title: editPostTitle,
-                content: editPostContent,
-                isUpdated: true,
-              }
-            : p,
-        ),
-      );
-      setEditingPost(null);
-    } catch (err) {
-      console.error("Failed to edit post:", err);
-    }
-  };
+  setIsSubmitting(true);
+  try {
+    const token = localStorage.getItem("token");
+    await axios.patch(
+      `http://localhost:5000/api/posts/${postId}`,
+      { title: editPostTitle, content: editPostContent },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? { ...p, title: editPostTitle, content: editPostContent, isUpdated: true }
+          : p,
+      ),
+    );
+    setEditingPost(null);
+  } catch (err) {
+    console.error("Failed to edit post:", err);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleDeleteComment = async (postId, commentId) => {
     const confirm = window.confirm("Delete this comment?");
@@ -549,26 +552,29 @@ export default function Dashboard() {
   };
 
   const handleEditComment = async (postId, commentId) => {
-    try {
-      const token = localStorage.getItem("token");
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
-        { content: editCommentContent },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const response = await axios.get(
-        `http://localhost:5000/api/posts/${postId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      setPosts((prev) =>
-        prev.map((p) => (p.id === postId ? response.data : p)),
-      );
-      setSelectedPost(response.data);
-      setEditingComment(null);
-    } catch (err) {
-      console.error("Failed to edit comment:", err);
-    }
-  };
+  setIsSubmitting(true);
+  try {
+    const token = localStorage.getItem("token");
+    await axios.patch(
+      `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+      { content: editCommentContent },
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    const response = await axios.get(
+      `http://localhost:5000/api/posts/${postId}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? response.data : p)),
+    );
+    setSelectedPost(response.data);
+    setEditingComment(null);
+  } catch (err) {
+    console.error("Failed to edit comment:", err);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   const handleSearch = async (query) => {
     setSearchQuery(query);
@@ -1718,9 +1724,9 @@ export default function Dashboard() {
                 <button onClick={() => setIsModalOpen(false)}>Cancel</button>
                 <button
                   onClick={handleSubmitPost}
-                  disabled={!postContent.trim() || !selectedPostRoom}
+                   disabled={!postContent.trim() || !selectedPostRoom || isSubmitting}
                 >
-                  Post
+                  {isSubmitting ? "Posting..." : "Post"}
                 </button>
               </div>
             </div>
@@ -1790,9 +1796,12 @@ export default function Dashboard() {
                   marginTop: "15px",
                 }}
               >
-                <button onClick={() => setEditingPost(null)}>Cancel</button>
-                <button onClick={() => handleEditPost(editingPost.id)}>
-                  Save
+                <button onClick={() => setEditingPost(null)} style={{padding:"4px", width:"60px", textAlign:"center", backgroundColor:"#da2828", color:"white", borderRadius:"8px",marginLeft:"20px"}}>Cancel</button>
+                <button onClick={() => handleEditPost(editingPost.id)} 
+                  disabled={isSubmitting}
+                  style={{padding:"4px", backgroundColor:"#3ada28", color:"black", borderRadius:"8px",marginLeft:"20px", width:"60px", textAlign:"center"}}
+                  >
+                    {isSubmitting ? "Saving..." : "Save"}
                 </button>
               </div>
             </div>

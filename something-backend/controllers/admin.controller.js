@@ -1077,22 +1077,49 @@ const handleRoomRequest = async (req, res) => {
 // --- room moderation ---
 
 const getRoomsForAdmin = async (req, res) => {
+  let roomsResult;
+
   if (req.user.authorityLevel === 'superadmin') {
-    const result = await pool.query(`SELECT * FROM rooms ORDER BY created_at DESC`);
-    return res.json(result.rows);
+    roomsResult = await pool.query(`SELECT * FROM rooms ORDER BY created_at DESC`);
+  } else {
+    const allowed = await checkPermission(req.user.id, req.user.authorityLevel, PERMISSIONS.MANAGE_ROOMS);
+    if (!allowed) return res.status(403).json({ message: 'No permission' });
+
+    roomsResult = await pool.query(
+      `SELECT r.* FROM rooms r
+       JOIN admin_assigned_rooms aar ON aar.room_id = r.id
+       WHERE aar.user_id = $1
+       ORDER BY r.created_at DESC`,
+      [req.user.id]
+    );
   }
 
-  const allowed = await checkPermission(req.user.id, req.user.authorityLevel, PERMISSIONS.MANAGE_ROOMS);
-  if (!allowed) return res.status(403).json({ message: 'No permission' });
+  const rooms = roomsResult.rows;
 
-  const result = await pool.query(
-    `SELECT r.* FROM rooms r
-     JOIN admin_assigned_rooms aar ON aar.room_id = r.id
-     WHERE aar.user_id = $1
-     ORDER BY r.created_at DESC`,
-    [req.user.id]
-  );
-  res.json(result.rows);
+  // attach members and suspensions to each room
+  const enriched = await Promise.all(rooms.map(async (room) => {
+    const membersResult = await pool.query(
+      `SELECT user_id FROM room_members WHERE room_id = $1`,
+      [room.id]
+    );
+    const suspensionsResult = await pool.query(
+     `SELECT user_id, suspended_until, reason FROM room_suspensions 
+   WHERE room_id = $1 AND suspended_until > NOW()`,
+      [room.id]
+    );
+
+    return {
+      ...room,
+      members: membersResult.rows.map(r => r.user_id),
+      suspendedMembers: suspensionsResult.rows.map(r => ({
+        userId: r.user_id,
+         until: r.suspended_until,
+        reason: r.reason
+      }))
+    };
+  }));
+
+  res.json(enriched);
 };
 
 const suspendFromRoom = async (req, res) => {
@@ -1163,6 +1190,11 @@ const deleteRoomAdmin = async (req, res) => {
   const { roomId } = req.params;
   const room = await roomRepo.getRoomById(roomId);
   if (!room) return res.status(404).json({ message: 'Room not found' });
+
+  // block deletion of public rooms
+  if (room.type === 'public') {
+    return res.status(403).json({ message: 'Public rooms cannot be deleted.' });
+  }
 
   await pool.query(`DELETE FROM rooms WHERE id = $1`, [roomId]);
   await addLog(req.user.id, req.user.username, 'delete_room', roomId,

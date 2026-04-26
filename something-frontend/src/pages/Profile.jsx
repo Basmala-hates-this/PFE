@@ -66,6 +66,9 @@ const [subjectRoomsByMajor, setSubjectRoomsByMajor] = useState([]);
 const [userMajors, setUserMajors] = useState([]);
 
 
+const [applicationLoading, setApplicationLoading] = useState(false);
+
+
 useEffect(() => {
   const token = localStorage.getItem("token");
   axios.get("http://localhost:5000/api/users/me", {
@@ -290,6 +293,7 @@ const fetchSavedPosts = async () => {
 };
 
 const handleApplyForAdmin = async () => {
+  setApplicationLoading(true);
   try {
     const token = localStorage.getItem("token");
     await axios.post("http://localhost:5000/api/admin/apply", {}, {
@@ -301,11 +305,14 @@ const handleApplyForAdmin = async () => {
     console.log("Apply error:", err.response?.data);
     alert(err.response?.data?.message || "Something went wrong.");
 
+  } finally {
+    setApplicationLoading(false);
   }
 };
 
 const handleWithdrawApplication = async () => {
   if (!window.confirm("Withdraw your admin application?")) return;
+  setApplicationLoading(true);
   try {
     const token = localStorage.getItem("token");
     await axios.delete("http://localhost:5000/api/admin/apply", {
@@ -315,6 +322,8 @@ const handleWithdrawApplication = async () => {
     setApplication(null);
   } catch (err) {
     alert(err.response?.data?.message || "Something went wrong.");
+  } finally {
+    setApplicationLoading(false);
   }
 };
 
@@ -402,11 +411,13 @@ const handleStatClick = async (type) => {
         <p style={{ margin: "0 0 10px", fontSize: "14px", opacity: 0.8 }}>
           🛡️ Your rating qualifies you to apply for an admin role.
         </p>
-        <button onClick={handleApplyForAdmin} style={{
+        <button onClick={handleApplyForAdmin} 
+        disabled={applicationLoading} 
+        style={{
           padding: "8px 18px", borderRadius: "8px", background: "#6476af",
           border: "none", color: "white", cursor: "pointer"
         }}>
-          Apply for Admin
+          {applicationLoading ? "Submitting..." : "Apply for Admin"}
         </button>
       </>
     ) : (() => {
@@ -418,12 +429,15 @@ const handleStatClick = async (type) => {
             ✅ Application submitted — pending superadmin review.
           </p>
           {canWithdraw ? (
-            <button onClick={handleWithdrawApplication} style={{
+            <button onClick={handleWithdrawApplication} 
+            disabled={applicationLoading} 
+            
+            style={{
               padding: "6px 14px", borderRadius: "8px", background: "#c0392b",
               border: "none", color: "white", cursor: "pointer", fontSize: "13px"
             }}>
-              Withdraw Application
-            </button>
+              {applicationLoading ? "Withdrawing..." : "Withdraw Application"}     
+                     </button>
           ) : (
             <small style={{ opacity: 0.5 }}>
               Withdrawal window passed. Contact a superadmin to remove your application.
