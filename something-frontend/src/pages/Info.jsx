@@ -316,8 +316,15 @@ if (isOtherUniversity && university.name.trim()) {
     alert(result.error);
     return;
   }
-
-
+// decided on otp verification now....
+try {
+    await axios.post("http://localhost:5000/api/auth/send-otp", { email });
+    setProfile(profile);
+    navigate("/register");
+  } catch (err) {
+    console.error("Failed to send verification to email:", err);
+    alert("Failed to send verification email. Please check your email and try again.");
+  }
 
 
   // Save to localStorage.....i need to abandon the local storage at some point....that is SAD....

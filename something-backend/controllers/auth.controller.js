@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 const userRepo = require('../repositories/user.repo');
 const roomRepo = require('../repositories/room.repo');
 const pool = require('../db');
-const { sendResetEmail } = require('../config/email');
+const { sendResetEmail, sendOtpEmail } = require('../config/email');
 const toCamel = require('../utils/toCamel');
 
 
@@ -337,6 +337,68 @@ const getApprovedMajors = async (req, res) => {
   res.json(result.rows.map(r => r.name));
 };
 
+
+//just to be clear...this is unnecessary and i am stupid 
+const sendOtp = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Email is required' });
+
+  // generate 6-digit OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+  // invalidate any previous unused OTPs for this email
+  await pool.query(
+    `UPDATE otp_verifications SET used = TRUE WHERE email = $1 AND used = FALSE`,
+    [email]
+  );
+
+  // save new OTP
+  await pool.query(
+    `INSERT INTO otp_verifications (email, otp, expires_at) VALUES ($1, $2, $3)`,
+    [email, otp, expiresAt]
+  );
+
+  // send email
+  try {
+    await sendOtpEmail(email, otp);
+    res.json({ message: 'OTP sent successfully' });
+  } catch (err) {
+    console.error('Failed to send OTP email:', err);
+    res.status(500).json({ message: 'Failed to send OTP email' });
+  }
+};
+
+const verifyOtp = async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp) return res.status(400).json({ message: 'Email and OTP are required' });
+
+  const result = await pool.query(
+    `SELECT * FROM otp_verifications 
+     WHERE email = $1 AND otp = $2 AND used = FALSE
+     ORDER BY created_at DESC LIMIT 1`,
+    [email, otp]
+  );
+
+  if (result.rows.length === 0) {
+    return res.status(400).json({ message: 'Invalid OTP' });
+  }
+
+  const record = result.rows[0];
+
+  if (new Date(record.expires_at) < new Date()) {
+    return res.status(400).json({ message: 'OTP has expired' });
+  }
+
+  // mark as used
+  await pool.query(
+    `UPDATE otp_verifications SET used = TRUE WHERE id = $1`,
+    [record.id]
+  );
+
+  res.json({ message: 'OTP verified successfully' });
+};
+
 module.exports = {
   register,
   login,
@@ -348,4 +410,6 @@ module.exports = {
   guestLogin,
   getApprovedUniversities,
   getApprovedMajors,
+  sendOtp,
+  verifyOtp,
 };

@@ -25,6 +25,25 @@ const sendResetEmail = async (toEmail, resetLink) => {
 };
 
 
+const sendOtpEmail = async (email, otp) => {
+  await transporter.sendMail({
+    from: process.env.EMAIL_USER,
+    to: email,
+    subject: 'Your StudyBuddy Verification Code',
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 400px; margin: auto; padding: 30px; border-radius: 12px; background-color: #f0f4ff;">
+        <h2 style="color: #3b5bdb;">Verify Your Email</h2>
+        <p>Use the code below to verify your email address. You have <strong>10 minutes</strong> in hand.</p>
+        <div style="font-size: 36px; font-weight: bold; letter-spacing: 10px; color: #3b5bdb; margin: 20px 0;">
+          ${otp}
+        </div>
+        <p style="color: #888;">If you didn't request this, just ignore this email.</p>
+      </div>
+    `
+  });
+};
+
+
 
 const sendFollowEmail = async (toEmail, followerUsername) => {
   await transporter.sendMail({
@@ -156,5 +175,6 @@ module.exports = {sendResetEmail,
   sendAdminApplicationRejectedEmail,
   sendRoomRequestApprovedEmail,
   sendRoomRequestRejectedEmail,
+  sendOtpEmail,
 
 }

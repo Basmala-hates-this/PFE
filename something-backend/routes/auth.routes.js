@@ -28,4 +28,7 @@ router.post("/guest", authController.guestLogin);
 router.get("/universities", authController.getApprovedUniversities);
 router.get("/majors", authController.getApprovedMajors); 
 
+router.post("/send-otp", authController.sendOtp);
+router.post("/verify-otp", authController.verifyOtp);
+
 module.exports = router;

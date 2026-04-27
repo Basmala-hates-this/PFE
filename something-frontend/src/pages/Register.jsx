@@ -31,12 +31,26 @@ export default function Register(){
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
 
 
+  //leaving a perfectly working page as it is?heck no...
+  // add extra shit because why not?heck yea
+  // otp shit
+  const [otp, setOtp] = useState("");
+const [otpVerified, setOtpVerified] = useState(false);
+const [otpFeedback, setOtpFeedback] = useState("");
+const [otpColor, setOtpColor] = useState("");
+const [resendTimer, setResendTimer] = useState(60);
+const [canResend, setCanResend] = useState(false);
+//const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
+
 //if someine ever was abale to skip info form....this will atke them back to it
 useEffect(() => {
   if (!profile) {
     navigate("/info");
   }
 }, [profile, navigate]);
+
+
 
 //upon me realizing the user name bug...apperantlly it was in my plans but i forgot...of course i did....we will atempt to fix it now....help
 const [error, setError] = useState("");
@@ -62,11 +76,23 @@ const handleUsernameBlur = async () => {
 };
 
 
-const handleSubmit = (e) => {
+const handleSubmit =async (e) => {
   e.preventDefault();
    if (error) return;
   if (!canSubmit) return;
-
+ try {
+    await axios.post("http://localhost:5000/api/auth/verify-otp", {
+      email: profile.email,
+      otp
+    });
+    setOtpFeedback("Email verified!");
+    setOtpColor("green");
+    setOtpVerified(true);
+  } catch (err) {
+    setOtpFeedback(err.response?.data?.message || "Invalid OTP");
+    setOtpColor("#fc0c0ce9");
+    return; 
+  }
 
 
 
@@ -116,14 +142,73 @@ const handlePasswordChange = (e) => {
   setPasswordStrength(result.message);
   setStrengthColor(result.color);
 };
+
+// otp
+useEffect(() => {
+  if (resendTimer === 0) {
+    setCanResend(true);
+    return;
+  }
+  const timer = setTimeout(() => setResendTimer(prev => prev - 1), 1000);
+  return () => clearTimeout(timer);
+}, [resendTimer]);
+
+
+// const handleVerifyOtp = async () => {
+//   if (!otp) return;
+//   // setIsVerifyingOtp(true);
+//   try {
+//     await axios.post("http://localhost:5000/api/auth/verify-otp", {
+//       email: profile.email,
+//       otp
+//     });
+//     setOtpVerified(true);
+//     setOtpFeedback("Email verified successfully!");
+//     setOtpColor("green");
+//   } catch (err) {
+//     setOtpVerified(false);
+//     setOtpFeedback(err.response?.data?.message || "Invalid OTP");
+//     setOtpColor("#fc0c0ce9");
+//   } finally {
+//     setIsVerifyingOtp(false);
+//   }
+// };
+
+
+// resend is nice to have ...right?
+const handleResendOtp = async () => {
+  if (!canResend) return;
+  try {
+    await axios.post("http://localhost:5000/api/auth/send-otp", {
+      email: profile.email
+    });
+    setCanResend(false);
+    setResendTimer(60);
+    setOtpFeedback("New OTP sent!");
+    setOtpColor("green");
+    setOtp("");
+    setOtpVerified(false);
+  } catch (err) {
+    setOtpFeedback("Failed to resend OTP");
+    setOtpColor("#fc0c0ce9");
+  }
+}; 
+
+
+
+
 // i wanted pretty button when everything is valid....why is this pain?
 useEffect(() => {
   const usernameValid = validateUsername(username).valid;
   const passwordsMatch = password && password === confirmPassword;
   const strongEnough = checkPasswordStrength(password).strength >= 4;
 
-  setCanSubmit(usernameValid && passwordsMatch && strongEnough && !error && !isCheckingUsername);
+  setCanSubmit(usernameValid && passwordsMatch && strongEnough && !error && !isCheckingUsername );
 }, [username, password, confirmPassword, error, isCheckingUsername]);
+
+////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 
 
   return (
@@ -132,6 +217,9 @@ useEffect(() => {
         <fieldset id="field4" >
             <legend  id="logReg">Create Your Account</legend>
             <div id="logcenter">
+
+
+
                 <label htmlFor="username" id="label"> Choose Your Username: </label>
                 <br />
                 <input type="text" required minLength="5" id="username" className="username" name="username"  
@@ -174,6 +262,53 @@ useEffect(() => {
                  <label id="label"> <input type="checkbox" id="togglePassword" onChange={() => setShowPassword(!showPassword)}/>
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
                 <br/><br/>
+
+{/* i'll add it here and see ...althu i think i'll add it after */}
+ <label id="label">Email Verification Code:</label>
+  <br />
+  <div >
+    <input
+      type="text"
+      maxLength="6"
+      placeholder="000000"
+      value={otp}
+      onChange={(e) => {
+        setOtp(e.target.value);
+        setOtpVerified(false);
+        setOtpFeedback("");
+      }}
+      style={{ width: "30%", letterSpacing: "5px", fontSize: "18px" ,marginLeft:"25px",borderRadius:"8px", padding:"8px 16px",maxHeight:"30px",height:"100%",marginRight:"3%"}}
+    /> <br /><br />
+    {/* <button
+      type="button"
+      onClick={handleVerifyOtp}
+      disabled={isVerifyingOtp || otp.length !== 6 || otpVerified}
+      style={{ borderRadius: "8px", padding: "8px 16px", cursor: "pointer" }}
+    >
+      {isVerifyingOtp ? "Checking..." : otpVerified ? " Verified" : "Verify"}
+    </button> */}
+  </div>
+
+  {otpFeedback && (
+    <p style={{ color: otpColor, marginTop: "8px", fontSize: "16px", backgroundColor: otpVerified ? "#d4edda" : "#f8d7da", padding: "10px", borderRadius: "8px", width: "fit-content"}}>
+      {otpFeedback}
+    </p>
+  )}
+
+  <p style={{ marginTop: "8px", fontSize: "14px", color: "#555" }}>
+    {canResend ? (
+      <span
+        onClick={handleResendOtp}
+        style={{ color: "#000000", cursor: "pointer", textDecoration: "underline" ,backgroundColor:"#e8e8e8f0", padding:"4px 8px", borderRadius:"8px",width:"30%"}}
+      >
+        Resend OTP
+      </span>
+    ) : (
+      `Resend available in ${resendTimer}s`
+    )}
+  </p>
+  <br /><br />
+
                 <input type="submit" value="finish" className="btn2" disabled={!canSubmit}  /> 
                 <br />
             
