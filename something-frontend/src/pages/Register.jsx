@@ -40,6 +40,9 @@ const [otpFeedback, setOtpFeedback] = useState("");
 const [otpColor, setOtpColor] = useState("");
 const [resendTimer, setResendTimer] = useState(60);
 const [canResend, setCanResend] = useState(false);
+
+
+const [isSubmitting, setIsSubmitting] = useState(false);
 //const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
 
@@ -80,6 +83,7 @@ const handleSubmit =async (e) => {
   e.preventDefault();
    if (error) return;
   if (!canSubmit) return;
+    setIsSubmitting(true);
  try {
     await axios.post("http://localhost:5000/api/auth/verify-otp", {
       email: profile.email,
@@ -92,6 +96,9 @@ const handleSubmit =async (e) => {
     setOtpFeedback(err.response?.data?.message || "Invalid OTP");
     setOtpColor("#fc0c0ce9");
     return; 
+  }
+  finally {
+    setIsSubmitting(false);
   }
 
 
@@ -290,7 +297,7 @@ useEffect(() => {
   </div>
 
   {otpFeedback && (
-    <p style={{ color: otpColor, marginTop: "8px", fontSize: "16px", backgroundColor: otpVerified ? "#d4edda" : "#f8d7da", padding: "10px", borderRadius: "8px", width: "fit-content"}}>
+    <p style={{ color: otpColor, marginTop: "8px", fontSize: "16px", backgroundColor: otpVerified ? "#d4edda" : "#f8d7da", padding: "10px", borderRadius: "8px", width: "30%", marginLeft: "35%" }}>
       {otpFeedback}
     </p>
   )}
@@ -309,7 +316,7 @@ useEffect(() => {
   </p>
   <br /><br />
 
-                <input type="submit" value="finish" className="btn2" disabled={!canSubmit}  /> 
+                <input type="submit" value={isSubmitting ? "Sending..." : "Finish"}  disabled={isSubmitting} className="btn2" disabled={!canSubmit}  /> 
                 <br />
             
                 <br/><br/>

@@ -28,6 +28,9 @@ const [university, setUniversity] = useState({ code: "", name: "" });
 const [role, setRole] = useState("");
 
 
+const [isSubmitting, setIsSubmitting] = useState(false);
+
+
 //prof proof
 let isProf;
 if (role === "professor") {
@@ -242,6 +245,7 @@ const handleSubmit = async (e) => {
   
   e.preventDefault();
  if (error) return;
+  setIsSubmitting(true);
 
 
 
@@ -324,6 +328,9 @@ try {
   } catch (err) {
     console.error("Failed to send verification to email:", err);
     alert("Failed to send verification email. Please check your email and try again.");
+  }
+  finally{
+    setIsSubmitting(false);
   }
 
 
@@ -505,8 +512,8 @@ const customSelect = {
                 <label htmlFor="major" id="major">Choose a Role to Select Your Main Major(s) </label>
                 <br/>
                 {/* ONE RING TO RULE THEM ALL .....select i mean one select to rule them all*/}
-                {/* so spending along time on perfecting the one select thing just to decide to do something similar to choice.js is biond self hate at this point
-                anyow...if i liked how react-select works..then the unis will get it tooooo...the autocomplete is back...i'll rutn it off for a while
+                {/* so spending along time on perfecting the one select thing just to decide to do something similar to choice.js is beyond self hate at this point
+                anyhow...if i liked how react-select works..then the unis will get it tooooo...the autocomplete is back...i'll rutn it off for a while
                  */}
              
 {role && (
@@ -562,7 +569,7 @@ const customSelect = {
             </fieldset>
         
            <br/><br/>
-            <input type="submit" value="Next" id="btn1"/>  {/* onClick={() => navigate("/register")} */}
+            <input type="submit" value={isSubmitting ? "Sending..." : "Next"}  disabled={isSubmitting} id="btn1"/>  {/* onClick={() => navigate("/register")} */}
            <br/><br/>
             <a href="#" id="InfoLink" onClick={() => navigate("/")} style={{marginRight:"30px"}}>
               Back to Home?
