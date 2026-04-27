@@ -25,8 +25,34 @@ import ReorientationPage from "./pages/ReorientationPage";
 import CorrectInputsPage from "./pages/CorrectInputsPage";
 
 import Guide from "./pages/Guide.jsx";
+import { useEffect } from "react";
+
+
 
 function App() {
+
+  useEffect(() => {
+  const interval = setInterval(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.exp * 1000 < Date.now()) {
+        localStorage.removeItem("token");
+        alert("Your session has expired. Please log in again.");
+        window.location.href = "/login";
+      }
+    } catch (err) {
+      // malformed token
+      localStorage.removeItem("token");
+      window.location.href = "/login";
+    }
+  }, 60000); // checks every 60 seconds
+
+  return () => clearInterval(interval);
+}, []);
+
   return (
     <Router>
             <RegistrationProvider>
