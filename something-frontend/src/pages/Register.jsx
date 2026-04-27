@@ -28,6 +28,9 @@ export default function Register(){
   const { profile, setCredentials } = useRegistration();
 
 
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
+
+
 //if someine ever was abale to skip info form....this will atke them back to it
 useEffect(() => {
   if (!profile) {
@@ -40,6 +43,7 @@ const [error, setError] = useState("");
 
 const handleUsernameBlur = async () => {
   if (!username) return;
+    setIsCheckingUsername(true);
   try {
     const response = await axios.get(
       `http://localhost:5000/api/auth/check-username?username=${username}`
@@ -51,6 +55,9 @@ const handleUsernameBlur = async () => {
     }
   } catch (err) {
     console.error("Username check failed", err);
+  }
+  finally {
+    setIsCheckingUsername(false);
   }
 };
 
@@ -115,8 +122,8 @@ useEffect(() => {
   const passwordsMatch = password && password === confirmPassword;
   const strongEnough = checkPasswordStrength(password).strength >= 4;
 
-  setCanSubmit(usernameValid && passwordsMatch && strongEnough && !error);
-}, [username, password, confirmPassword, error]);
+  setCanSubmit(usernameValid && passwordsMatch && strongEnough && !error && !isCheckingUsername);
+}, [username, password, confirmPassword, error, isCheckingUsername]);
 
 
   return (
