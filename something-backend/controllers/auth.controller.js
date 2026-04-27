@@ -323,6 +323,20 @@ const guestLogin = (req, res) => {
   res.json({ guestToken });
 };
 
+const getApprovedUniversities = async (req, res) => {
+  const result = await pool.query(
+    `SELECT code, name FROM universities WHERE status = 'approved' ORDER BY name ASC`
+  );
+  res.json(result.rows);
+};
+
+const getApprovedMajors = async (req, res) => {
+  const result = await pool.query(
+    `SELECT name FROM majors WHERE status = 'approved' ORDER BY name ASC`
+  );
+  res.json(result.rows.map(r => r.name));
+};
+
 module.exports = {
   register,
   login,
@@ -332,4 +346,6 @@ module.exports = {
   resetPassword,
   resetPasswordAuth,
   guestLogin,
+  getApprovedUniversities,
+  getApprovedMajors,
 };

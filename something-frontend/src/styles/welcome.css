@@ -118,3 +118,68 @@ color: antiquewhite;
   60% { transform: rotate(0deg); }
   100% { transform: rotate(0deg); }
 }
+
+
+
+
+
+/* the looks of the post overlay....try outs....shit... */
+.modal-overlay-welcome {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  max-height: 700px;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+  overflow: auto;
+}
+
+.modal-welcome {
+  background: #1e2a3a8f;
+  border-radius: 16px;
+  padding: 24px;
+  width: 500px;
+  max-height: 350px;
+  height: 100%;
+  max-width: 90vw;
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  color: white;
+  overflow: auto;
+}
+
+.modal-welcome h3 {
+  margin-top: 20px;
+  color: white;
+  font-size: 1.3rem;
+}
+
+
+.modal-actions button {
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.modal-actions button:first-child {
+  background: rgba(255,255,255,0.1);
+  color: white;
+}
+
+.modal-actions button:last-child {
+  background: #6476af;
+  color: white;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

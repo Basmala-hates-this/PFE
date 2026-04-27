@@ -3,6 +3,7 @@ import logo2 from "../photos/logo2.png"
  import { useNavigate } from "react-router-dom";
  import { useState } from "react";
 import Select from "react-select";
+import { useEffect } from "react";
 
 import axios from "axios";
 
@@ -12,47 +13,56 @@ export default function Welcome(){
 
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [selectedUniversities, setSelectedUniversities] = useState([]);
+const [universityOptions, setUniversityOptions] = useState([]);
+
+//    const universityOptions = [
+//   { "value": "UA1", "label": "University Of Algiers 1- Benyoucef Benkhedda" },
+//   { "value": "UA2", "label": "University Of Algiers 2- Abou El Kacem Saadallah" },
+//   { "value": "UA3", "label": "University Of Algiers 3- Dely Ibrahim" },
+//   { "value": "USTHB", "label": "University Of Science And Technology Houari Boumediene" },
+//   { "value": "ENP", "label": "National Polytechnic School Of Algiers" },
+//   { "value": "ESNA", "label": "National Higher School of Agronomy" },
+//   { "value": "NHV", "label": "National Higher Veterinary School" },
+//   { "value": "BMU", "label": "Badji Mokhtar University-Annaba" },
+//   { "value": "UB1", "label": "University Of Batna 1" },
+//   { "value": "UB2", "label": "University Of Batna 2" },
+//   { "value": "UBj", "label": "University Of Bejaia" },
+//   { "value": "UBs", "label": "University Of Biskra Mohamed Khider" },
+//   { "value": "UBl1", "label": "University Of Blida 1-Saad Dahlab" },
+//   { "value": "Ubl2", "label": "University Of Blida 2-Ali Lounici" },
+//   { "value": "UCh", "label": "University Of Chlef-Hassiba Benbouali" },
+//   { "value": "UC1", "label": "University Of Constantine 1-Mentouri Brothers" },
+//   { "value": "UC2", "label": "University Of Constantine 2-Abdelhamid Mehri" },
+//   { "value": "UC3", "label": "University Of Constantine 3-Salah Boubnider" },
+//   { "value": "UD", "label": "University of Djelfa - Ziane Achour" },
+//   { "value": "UG", "label": "University of Guelma - 8 May 1945" },
+//   { "value": "UJ", "label": "University of Jijel" },
+//   { "value": "UL", "label": "University of Laghouat - Amar Telidji" },
+//   { "value": "UM", "label": "University of Mostaganem - Abdelhamid Ibn Badis" },
+//   { "value": "UMs", "label": "University of M'Sila - Mohamed Boudiaf" },
+//   { "value": "UO1", "label": "University of Oran 1 - Ahmed Ben Bella" },
+//   { "value": "UO2", "label": "University of Oran 2 - Mohamed Ben Ahmed" },
+//   { "value": "USTO", "label": "University of Science and Technology of Oran - Mohamed Boudiaf" },
+//   { "value": "UOr", "label": "University of Ouargla - Kasdi Merbah" },
+//   { "value": "USa", "label": "University of Saida - Dr. Moulay Tahar" },
+//   { "value": "USBA", "label": "Djillali Liabes University of Sidi Bel Abbes" },
+//   { "value": "USk", "label": "University of Skikda - 20 August 1955" },
+//   { "value": "USA", "label": "University of Souk Ahras - Mohamed Cherif Messaadia" },
+//   { "value": "US1", "label": "University of Setif 1 - Ferhat Abbas" },
+//   { "value": "US2", "label": "University of Setif 2" },
+//   { "value": "UTi", "label": "University of Tiaret - Ibn Khaldoun" },
+//   { "value": "UTl", "label": "University of Tlemcen - Abou Bekr Belkaid" },
+//   { "value": "UTO", "label": "University of Tizi Ouzou - Mouloud Mammeri" }
+// ]
 
 
-   const universityOptions = [
-  { "value": "UA1", "label": "University Of Algiers 1- Benyoucef Benkhedda" },
-  { "value": "UA2", "label": "University Of Algiers 2- Abou El Kacem Saadallah" },
-  { "value": "UA3", "label": "University Of Algiers 3- Dely Ibrahim" },
-  { "value": "USTHB", "label": "University Of Science And Technology Houari Boumediene" },
-  { "value": "ENP", "label": "National Polytechnic School Of Algiers" },
-  { "value": "ESNA", "label": "National Higher School of Agronomy" },
-  { "value": "NHV", "label": "National Higher Veterinary School" },
-  { "value": "BMU", "label": "Badji Mokhtar University-Annaba" },
-  { "value": "UB1", "label": "University Of Batna 1" },
-  { "value": "UB2", "label": "University Of Batna 2" },
-  { "value": "UBj", "label": "University Of Bejaia" },
-  { "value": "UBs", "label": "University Of Biskra Mohamed Khider" },
-  { "value": "UBl1", "label": "University Of Blida 1-Saad Dahlab" },
-  { "value": "Ubl2", "label": "University Of Blida 2-Ali Lounici" },
-  { "value": "UCh", "label": "University Of Chlef-Hassiba Benbouali" },
-  { "value": "UC1", "label": "University Of Constantine 1-Mentouri Brothers" },
-  { "value": "UC2", "label": "University Of Constantine 2-Abdelhamid Mehri" },
-  { "value": "UC3", "label": "University Of Constantine 3-Salah Boubnider" },
-  { "value": "UD", "label": "University of Djelfa - Ziane Achour" },
-  { "value": "UG", "label": "University of Guelma - 8 May 1945" },
-  { "value": "UJ", "label": "University of Jijel" },
-  { "value": "UL", "label": "University of Laghouat - Amar Telidji" },
-  { "value": "UM", "label": "University of Mostaganem - Abdelhamid Ibn Badis" },
-  { "value": "UMs", "label": "University of M'Sila - Mohamed Boudiaf" },
-  { "value": "UO1", "label": "University of Oran 1 - Ahmed Ben Bella" },
-  { "value": "UO2", "label": "University of Oran 2 - Mohamed Ben Ahmed" },
-  { "value": "USTO", "label": "University of Science and Technology of Oran - Mohamed Boudiaf" },
-  { "value": "UOr", "label": "University of Ouargla - Kasdi Merbah" },
-  { "value": "USa", "label": "University of Saida - Dr. Moulay Tahar" },
-  { "value": "USBA", "label": "Djillali Liabes University of Sidi Bel Abbes" },
-  { "value": "USk", "label": "University of Skikda - 20 August 1955" },
-  { "value": "USA", "label": "University of Souk Ahras - Mohamed Cherif Messaadia" },
-  { "value": "US1", "label": "University of Setif 1 - Ferhat Abbas" },
-  { "value": "US2", "label": "University of Setif 2" },
-  { "value": "UTi", "label": "University of Tiaret - Ibn Khaldoun" },
-  { "value": "UTl", "label": "University of Tlemcen - Abou Bekr Belkaid" },
-  { "value": "UTO", "label": "University of Tizi Ouzou - Mouloud Mammeri" }
-]
+useEffect(() => {
+  axios.get("http://localhost:5000/api/auth/universities")
+    .then(res => {
+      setUniversityOptions(res.data.map(u => ({ value: u.code, label: u.name })));
+    })
+    .catch(err => console.error("Failed to fetch universities", err));
+}, []);
 
 const customSelect = {
   control: (provided, state) => ({
@@ -152,10 +162,10 @@ const customSelect = {
 
 {/* //guest shit */}
   {showGuestModal && (
-  <div style={{borderRadius:"9px",backgroundColor:"#537a87c5"}} className="modal-overlay" onClick={() => setShowGuestModal(false)}>
-    <div className="modal" onClick={(e) => e.stopPropagation()}>
+  <div style={{borderRadius:"9px",backgroundColor:"#537a87c5"}} className="modal-overlay-welcome" onClick={() => setShowGuestModal(false)}>
+    <div className="modal-welcome" onClick={(e) => e.stopPropagation()}>
       
-      <h3 style={{color:"black"}}>Select up to 5 universities to browse</h3>
+      <h3 >Select up to 5 universities to browse</h3>
       <br/>
       <Select
         isMulti
@@ -166,6 +176,7 @@ const customSelect = {
         }}
         placeholder="Select universities..."
         styles={customSelect}
+         maxMenuHeight={200}
       />
       <br/>
       <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>

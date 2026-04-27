@@ -74,47 +74,47 @@ const selectedMajorOptions = majors.map(m => ({
 }));
 
 //effect that gets stred data and allows update:
-useEffect(() => {
-  const defaultMajors = [
-    "Computer Science",
-    "Mathematics",
-    "Physics",
-    "Chemistry",
-    "Biology",
-    "Civil Engineering",
-    "Mechanical Engineering",
-    "Electrical Engineering",
-    "Process Engineering",
-    "Architecture",
-    "Natural and Life Science",
-    "Agronomy",
-    "Renewable Energies",
-    "Geology",
-    "Medicine",
-    "Pharmacy",
-    "Dental Medicine",
-    "Veterinary Medicine",
-    "Law",
-    "Political Science & International Relations",
-    "Economics & Commerce & Management Science",
-    "History",
-    "Psychology",
-    "Sociology",
-    "Philosophy",
-    "Literature & Languages",
-    "Information & Communucation Science",
-    "Sport Science & Physical Education",
-    "Art & Design"
-  ];
-  //hummm...i deleted the data when i added a new non existing major...fuck...fixing
-  // Get stored majors, if any
-  const stored = JSON.parse(localStorage.getItem("majors")) || [];
+// useEffect(() => {
+//   const defaultMajors = [
+//     "Computer Science",
+//     "Mathematics",
+//     "Physics",
+//     "Chemistry",
+//     "Biology",
+//     "Civil Engineering",
+//     "Mechanical Engineering",
+//     "Electrical Engineering",
+//     "Process Engineering",
+//     "Architecture",
+//     "Natural and Life Science",
+//     "Agronomy",
+//     "Renewable Energies",
+//     "Geology",
+//     "Medicine",
+//     "Pharmacy",
+//     "Dental Medicine",
+//     "Veterinary Medicine",
+//     "Law",
+//     "Political Science & International Relations",
+//     "Economics & Commerce & Management Science",
+//     "History",
+//     "Psychology",
+//     "Sociology",
+//     "Philosophy",
+//     "Literature & Languages",
+//     "Information & Communucation Science",
+//     "Sport Science & Physical Education",
+//     "Art & Design"
+//   ];
+//   //hummm...i deleted the data when i added a new non existing major...fuck...fixing
+//   // Get stored majors, if any
+//   const stored = JSON.parse(localStorage.getItem("majors")) || [];
 
-  // Merge without duplicates
-  const mergedMajors = [...new Set([...defaultMajors, ...stored])];
-  setAvailableMajors(mergedMajors);
-   localStorage.setItem("majors", JSON.stringify(mergedMajors));
-}, []);
+//   // Merge without duplicates
+//   const mergedMajors = [...new Set([...defaultMajors, ...stored])];
+//   setAvailableMajors(mergedMajors);
+//    localStorage.setItem("majors", JSON.stringify(mergedMajors));
+// }, []);
 
 //hum...lets try the major select thingy to the uni select thingy
 const [isOtherUniversity, setIsOtherUniversity] = useState(false);
@@ -133,64 +133,80 @@ const selectedUniversityOption = university.code
   : null;
 
 //the effect for universities/i feel like i wrote this wrong
-useEffect(() => {
-  const defaultUniversities = [
-  { code: "UA1", name: "University Of Algiers 1- Benyoucef Benkhedda" },
-  { code: "UA2", name: "University Of Algiers 2- Abou El Kacem Saadallah" },
-  { code: "UA3", name: "University Of Algiers 3- Dely Ibrahim" },
-  { code: "USTHB", name: "University Of Science And Technology Houari Boumediene" },
-  { code: "ENP", name: "National Polytechnic School Of Algiers" },
-  { code: "ESNA", name: "National Higher School of Agronomy" },
-  { code: "NHV", name: "National Higher Veterinary School" },
-  { code: "BMU", name: "Badji Mokhtar University-Annaba" },
-  { code: "UB1", name: "University Of Batna 1" },
-  { code: "UB2", name: "University Of Batna 2" },
-  { code: "UBj", name: "University Of Bejaia" },
-  { code: "UBs", name: "University Of Biskra Mohamed Khider" },
-  { code: "UBl1", name: "University Of Blida 1-Saad Dahlab" },
-  { code: "Ubl2", name: "University Of Blida 2-Ali Lounici" },
-  { code: "UCh", name: "University Of Chlef-Hassiba Benbouali" },
-  { code: "UC1", name: "University Of Constantine 1-Mentouri Brothers" },
-  { code: "UC2", name: "University Of Constantine 2-Abdelhamid Mehri" },
-  { code: "UC3", name: "University Of Constantine 3-Salah Boubnider" },
-  { code: "UD", name: "University of Djelfa - Ziane Achour" },
-  { code: "UG", name: "University of Guelma - 8 May 1945" },
-  { code: "UJ", name: "University of Jijel" },
-  { code: "UL", name: "University of Laghouat - Amar Telidji" },
-  { code: "UM", name: "University of Mostaganem - Abdelhamid Ibn Badis" },
-  { code: "UMs", name: "University of M'Sila - Mohamed Boudiaf" },
-  { code: "UO1", name: "University of Oran 1 - Ahmed Ben Bella" },
-  { code: "UO2", name: "University of Oran 2 - Mohamed Ben Ahmed" },
-  { code: "USTO", name: "University of Science and Technology of Oran - Mohamed Boudiaf" },
-  { code: "UOr", name: "University of Ouargla - Kasdi Merbah" },
-  { code: "USa", name: "University of Saida - Dr. Moulay Tahar" },
-  { code: "USBA", name: "Djillali Liabes University of Sidi Bel Abbes" },
-  { code: "USk", name: "University of Skikda - 20 August 1955" },
-  { code: "USA", name: "University of Souk Ahras - Mohamed Cherif Messaadia" },
-  { code: "US1", name: "University of Setif 1 - Ferhat Abbas" },
-  { code: "US2", name: "University of Setif 2" },
-  { code: "UTi", name: "University of Tiaret - Ibn Khaldoun" },
-  { code: "UTl", name: "University of Tlemcen - Abou Bekr Belkaid" },
-  { code: "UTO", name: "University of Tizi Ouzou - Mouloud Mammeri" },
+// useEffect(() => {
+//   const defaultUniversities = [
+//   { code: "UA1", name: "University Of Algiers 1- Benyoucef Benkhedda" },
+//   { code: "UA2", name: "University Of Algiers 2- Abou El Kacem Saadallah" },
+//   { code: "UA3", name: "University Of Algiers 3- Dely Ibrahim" },
+//   { code: "USTHB", name: "University Of Science And Technology Houari Boumediene" },
+//   { code: "ENP", name: "National Polytechnic School Of Algiers" },
+//   { code: "ESNA", name: "National Higher School of Agronomy" },
+//   { code: "NHV", name: "National Higher Veterinary School" },
+//   { code: "BMU", name: "Badji Mokhtar University-Annaba" },
+//   { code: "UB1", name: "University Of Batna 1" },
+//   { code: "UB2", name: "University Of Batna 2" },
+//   { code: "UBj", name: "University Of Bejaia" },
+//   { code: "UBs", name: "University Of Biskra Mohamed Khider" },
+//   { code: "UBl1", name: "University Of Blida 1-Saad Dahlab" },
+//   { code: "Ubl2", name: "University Of Blida 2-Ali Lounici" },
+//   { code: "UCh", name: "University Of Chlef-Hassiba Benbouali" },
+//   { code: "UC1", name: "University Of Constantine 1-Mentouri Brothers" },
+//   { code: "UC2", name: "University Of Constantine 2-Abdelhamid Mehri" },
+//   { code: "UC3", name: "University Of Constantine 3-Salah Boubnider" },
+//   { code: "UD", name: "University of Djelfa - Ziane Achour" },
+//   { code: "UG", name: "University of Guelma - 8 May 1945" },
+//   { code: "UJ", name: "University of Jijel" },
+//   { code: "UL", name: "University of Laghouat - Amar Telidji" },
+//   { code: "UM", name: "University of Mostaganem - Abdelhamid Ibn Badis" },
+//   { code: "UMs", name: "University of M'Sila - Mohamed Boudiaf" },
+//   { code: "UO1", name: "University of Oran 1 - Ahmed Ben Bella" },
+//   { code: "UO2", name: "University of Oran 2 - Mohamed Ben Ahmed" },
+//   { code: "USTO", name: "University of Science and Technology of Oran - Mohamed Boudiaf" },
+//   { code: "UOr", name: "University of Ouargla - Kasdi Merbah" },
+//   { code: "USa", name: "University of Saida - Dr. Moulay Tahar" },
+//   { code: "USBA", name: "Djillali Liabes University of Sidi Bel Abbes" },
+//   { code: "USk", name: "University of Skikda - 20 August 1955" },
+//   { code: "USA", name: "University of Souk Ahras - Mohamed Cherif Messaadia" },
+//   { code: "US1", name: "University of Setif 1 - Ferhat Abbas" },
+//   { code: "US2", name: "University of Setif 2" },
+//   { code: "UTi", name: "University of Tiaret - Ibn Khaldoun" },
+//   { code: "UTl", name: "University of Tlemcen - Abou Bekr Belkaid" },
+//   { code: "UTO", name: "University of Tizi Ouzou - Mouloud Mammeri" },
   
-]; 
+// ]; 
 
-  const storedUniversities = JSON.parse(localStorage.getItem("universities")) || [];
+//   const storedUniversities = JSON.parse(localStorage.getItem("universities")) || [];
 
-  const mergedUniversities = [...defaultUniversities];
+//   const mergedUniversities = [...defaultUniversities];
 
-  // add stored custom universities if they don't already exist//the code is....NUUUUUULLLLL
-  //am i stupid this should not be null...this will cause little to tooo much problems....fuck..i need to find it
-  storedUniversities.forEach(u => {
-    if (!mergedUniversities.some(d => d.name === u.name)) {
-      mergedUniversities.push(u);
+//   // add stored custom universities if they don't already exist//the code is....NUUUUUULLLLL
+//   //am i stupid this should not be null...this will cause little to tooo much problems....fuck..i need to find it
+//   storedUniversities.forEach(u => {
+//     if (!mergedUniversities.some(d => d.name === u.name)) {
+//       mergedUniversities.push(u);
+//     }
+//   });
+
+//   setAvailableUniversities(mergedUniversities);
+
+//   // persist merged list
+//   localStorage.setItem("universities", JSON.stringify(mergedUniversities));
+// }, []);
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const [uniRes, majorRes] = await Promise.all([
+        axios.get("http://localhost:5000/api/auth/universities"),
+        axios.get("http://localhost:5000/api/auth/majors")
+      ]);
+      setAvailableUniversities(uniRes.data);
+      setAvailableMajors(majorRes.data);
+    } catch (err) {
+      console.error("Failed to fetch universities/majors", err);
     }
-  });
-
-  setAvailableUniversities(mergedUniversities);
-
-  // persist merged list
-  localStorage.setItem("universities", JSON.stringify(mergedUniversities));
+  };
+  fetchData();
 }, []);
 
 
@@ -237,15 +253,15 @@ if (customMajor.trim()) {
     finalMajors.push(customMajor.trim());
 }
 
-if (customMajor.trim()) {
-  const storedMajors = JSON.parse(localStorage.getItem("majors")) || [];
+// if (customMajor.trim()) {
+//   const storedMajors = JSON.parse(localStorage.getItem("majors")) || [];
 
-  if (!storedMajors.includes(customMajor.trim())) {
-    const updatedMajors = [...storedMajors, customMajor.trim()];
-    localStorage.setItem("majors", JSON.stringify(updatedMajors));
-    setAvailableMajors(updatedMajors);
-  }
-}
+//   if (!storedMajors.includes(customMajor.trim())) {
+//     const updatedMajors = [...storedMajors, customMajor.trim()];
+//     localStorage.setItem("majors", JSON.stringify(updatedMajors));
+//     setAvailableMajors(updatedMajors);
+//   }
+// }
 //soooo....dev tool manupilation precaution ...am i paranoid at this point?
 if (role === "student" && finalMajors.length !== 1) {
   alert("Students must select exactly one major.");
@@ -269,14 +285,14 @@ if (isOtherUniversity && university.name.trim()) {
     name: uniName,
   };
 
-  const storedUniversities =
-    JSON.parse(localStorage.getItem("universities")) || [];
+  // const storedUniversities =
+  //   JSON.parse(localStorage.getItem("universities")) || [];
 
-  if (!storedUniversities.some(u => u.code === uniCode)) {
-    const updatedUniversities = [...storedUniversities, finalUniversity];
-    localStorage.setItem("universities", JSON.stringify(updatedUniversities));
-    setAvailableUniversities(prev => [...prev, finalUniversity]);
-  }
+  // if (!storedUniversities.some(u => u.code === uniCode)) {
+  //   const updatedUniversities = [...storedUniversities, finalUniversity];
+  //   localStorage.setItem("universities", JSON.stringify(updatedUniversities));
+  //   setAvailableUniversities(prev => [...prev, finalUniversity]);
+  // }
 }
 //u know...for times like when i decide to make the variable names make sense.....i'm gratful for vs code to suggest the names i need instead of typing the enrite shit...fuck
 

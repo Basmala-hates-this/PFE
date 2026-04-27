@@ -25,4 +25,7 @@ router.post("/reset-password-auth", protect, authController.resetPasswordAuth);
 
 router.post("/guest", authController.guestLogin);
 
+router.get("/universities", authController.getApprovedUniversities);
+router.get("/majors", authController.getApprovedMajors); 
+
 module.exports = router;
