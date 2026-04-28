@@ -71,10 +71,15 @@ const majorOptions = availableMajors.map(m => ({
   label: m
 }));
 
-const selectedMajorOptions = majors.map(m => ({
-  value: m,
-  label: m
-}));
+// const selectedMajorOptions = majors.map(m => ({
+//   value: m,
+//   label: m
+// }));
+
+const selectedMajorOptions = [
+  ...majors.map(m => ({ value: m, label: m })),
+  ...(isOtherMajor ? [{ value: "OTHER", label: "Other" }] : [])
+];
 
 //effect that gets stred data and allows update:
 // useEffect(() => {
@@ -128,12 +133,18 @@ const universityOptions = availableUniversities.map(u => ({
   label: u.name
 }));
 
-const selectedUniversityOption = university.code
-  ? {
-      value: university.code,
-      label: university.name
-    }
-  : null;
+// const selectedUniversityOption = university.code
+//   ? {
+//       value: university.code,
+//       label: university.name
+//     }
+//   : null;
+
+const selectedUniversityOption = isOtherUniversity
+  ? { value: "OTHER", label: "Other" }  // show "Other" as selected
+  : university.code
+    ? { value: university.code, label: university.name }
+    : null;
 
 //the effect for universities/i feel like i wrote this wrong
 // useEffect(() => {

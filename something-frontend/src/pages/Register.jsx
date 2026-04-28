@@ -302,11 +302,11 @@ useEffect(() => {
     </p>
   )}
 
-  <p style={{ marginTop: "8px", fontSize: "14px", color: "#555" }}>
+  <p  style={{ color: "#000000", cursor: "pointer", textDecoration: "underline" ,backgroundColor:"#e8e8e8f0", padding:"4px 8px", borderRadius:"8px",width:"30%",marginLeft:"35%"}}>
     {canResend ? (
       <span
         onClick={handleResendOtp}
-        style={{ color: "#000000", cursor: "pointer", textDecoration: "underline" ,backgroundColor:"#e8e8e8f0", padding:"4px 8px", borderRadius:"8px",width:"30%"}}
+       
       >
         Resend OTP
       </span>
