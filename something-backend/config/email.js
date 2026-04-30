@@ -18,7 +18,8 @@ const sendResetEmail = async (toEmail, resetLink) => {
       <p>You requested a password reset. Click the link below:</p>
       <a href="${resetLink}">Reset My Password</a>
       <p>This link expires in 15 minutes.</p>
-      <p>If you didn't request this, ignore this email.</p>
+      <p>If you didn't request this, just ignore this email.</p>
+      <p>Have a happy life :)</p>
     `
     
   });
@@ -38,6 +39,7 @@ const sendOtpEmail = async (email, otp) => {
           ${otp}
         </div>
         <p style="color: #888;">If you didn't request this, just ignore this email.</p>
+        <p>Have a happy life :)</p>
       </div>
     `
   });
@@ -54,6 +56,7 @@ const sendFollowEmail = async (toEmail, followerUsername) => {
       <h2>New Follower 🎉</h2>
       <p><strong>@${followerUsername}</strong> started following you on StudyBuddy!</p>
       <p>Log in to check out their profile and follow them back.</p>
+      <p>Might as well check some other things here....</p>
     `
     //maybe add link to platform later
   });
@@ -70,6 +73,7 @@ const sendRoomInviteEmail = async (toEmail, username, roomName, inviterUsername)
       <p>Hey <strong>@${username}</strong>!</p>
       <p><strong>@${inviterUsername}</strong> has added you to their private room: <strong>${roomName}</strong>.</p>
       <p>Log in to StudyBuddy to access it from your profile.</p>
+      <p>Have a happy life :)</p>
     `
     //add lonk to platform ...
   });
@@ -88,6 +92,7 @@ const sendProfessorRejectionEmail = async (toEmail, username, reason) => {
       <p>Your account has been set to <strong>student</strong> status.</p>
       <p>If you registered with multiple majors, you will be asked to select one major to continue with on your next login.</p>
       <p>If you believe this is a mistake, please contact the platform administrators.</p>
+      <p>Better luck next time mate....</p>
     `
   });
 };
@@ -103,6 +108,7 @@ const sendProfessorVerificationEmail = async (toEmail, username) => {
       <p>Great news! Your professor status has been <strong>verified</strong> by our team.</p>
       <p>You now have full access to professor features on StudyBuddy.</p>
       <p>Log in to get started!</p>
+      <p>Have a happy life :)</p>
     `
   });
 };
@@ -116,6 +122,7 @@ const sendAdminApplicationAcceptedEmail = async (to, username) => {
       <h2>Congratulations @${username}!</h2>
       <p>Your application to become an admin on StudyBuddy has been accepted.</p>
       <p>You now have access to the admin panel. Use your new role responsibly!</p>
+      <p>Have a happy life :)</p>
     `
   });
 };
@@ -130,6 +137,8 @@ const sendAdminApplicationRejectedEmail = async (to, username, reason) => {
       <p>Thank you for applying. Unfortunately your application has not been accepted at this time.</p>
       <p><strong>Reason:</strong> ${reason}</p>
       <p>You're welcome to reapply in the future.</p>
+      <p>Better luck next time mate....</p>
+      <p>Have a happy life :)</p>
     `
   });
 };
@@ -145,6 +154,7 @@ const sendRoomRequestApprovedEmail = async (to, username, subject, major) => {
       <p><strong>Subject:</strong> ${subject}<br/>
       <strong>Major:</strong> ${major}</p>
       <p>You've been added to the room. Head to Browse Rooms to find it!</p>
+      <p>Have a happy life :)</p>
     `
   });
 };
