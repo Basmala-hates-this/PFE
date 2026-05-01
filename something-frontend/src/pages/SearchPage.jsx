@@ -63,7 +63,7 @@ const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) 
         console.log("guest allowed rooms sample:", allowedRooms[0]);
         console.log("post sample:", filteredPosts[0]);
         const allowedRoomIds = allowedRooms.map(r => r.id);
-        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.room_id));
+        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
       } else {
         // filter by user's own rooms
         const roomsRes = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
@@ -78,7 +78,7 @@ console.log("posts sample:", results[0].data[0]);
           .filter(r => r.type !== "private")
           .map(r => r.id);
 
-        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.room_id));
+        filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
         
       }
       
@@ -146,12 +146,12 @@ setUsers(isGuest ? [] : results[1].data.filter(u => u.id !== currentUser.id));
                        onMouseLeave={e => e.currentTarget.style.background="#252b45"}
                     >
                     <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"8px"}}>
-                      <strong>@{post.author_username}</strong>
-                      <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.author_role || "user"}</small>
+                      <strong>@{post.authorUsername}</strong>
+                      <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
                     </div>
                     {post.title && <h3 style={{margin:"0 0 6px", fontSize:"15px"}}>{post.title}</h3>}
                     <p style={{margin:"0 0 8px", opacity:0.8, fontSize:"14px"}}>{post.content}</p>
-                    <small style={{opacity:0.5}}>{new Date(post.created_at).toLocaleString()}</small>
+                    <small style={{opacity:0.5}}>{new Date(post.createdAt).toLocaleString()}</small>
                   </div>
                 ))
               )}

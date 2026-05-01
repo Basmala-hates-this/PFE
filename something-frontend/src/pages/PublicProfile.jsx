@@ -149,7 +149,7 @@ const handleFollow = async () => {
 /////////////////////////////////////////////////////////////////
 
   return (
-    <div style={{minHeight:"100vh", background:"var(--blue-dark)", color:"white", padding:"20px"}}>
+    <div style={{minHeight:"100vh", background:"#071039", color:"white", padding:"20px"}}>
       
       {/* back button */}
       <button onClick={() => navigate(-1)} style={{background:"none", border:"none", color:"white", fontSize:"20px", cursor:"pointer", marginBottom:"20px"}}>←</button>
