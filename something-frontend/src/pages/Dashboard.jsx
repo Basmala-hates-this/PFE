@@ -735,7 +735,8 @@ export default function Dashboard() {
       const token = localStorage.getItem("token");
       const res = await axios.post(
         "http://localhost:5000/api/rooms/subject-rooms/request",
-        { major: requestMajor, subject: requestSubject.trim() },
+        // { major: requestMajor, subject: requestSubject.trim() },
+        { majorId: requestMajor, subject: requestSubject.trim() },
         { headers: { Authorization: `Bearer ${token}` } },
       );
       setRequestFeedback(res.data.message);
@@ -1975,8 +1976,8 @@ export default function Dashboard() {
                   }}
                 >
                   <option value="">Select the major...</option>
-                  {subjectRoomsData.map(({ major }) => (
-                    <option key={major} value={major}>
+                  {subjectRoomsData.map(({ major , majorId }) => (
+                    <option key={major} value={majorId}>
                       {major}
                     </option>
                   ))}

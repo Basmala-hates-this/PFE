@@ -900,7 +900,7 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
     {roomRequests.length === 0 ? (
       <p style={{ opacity: 0.5 }}>No pending room requests.</p>
     ) : (
-      roomRequests.map(req => (
+      (roomRequests ?? []).map(req => (
         <div key={req.id} style={card}>
           <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
             <strong>@{req.username}</strong>
@@ -914,7 +914,7 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
             Subject: <strong>{req.subject}</strong>
           </p>
           <small style={{ opacity: 0.5, display: "block", marginBottom: "10px" }}>
-            {req.notifyUsers.length} user(s) waiting on this room
+            {req.notifyUsers?.length ?? 0} user(s) waiting on this room
           </small>
 
           {rejectingRoomId === req.id ? (

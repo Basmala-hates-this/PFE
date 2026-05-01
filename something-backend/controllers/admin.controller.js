@@ -1017,8 +1017,17 @@ const getRoomRequests = async (req, res) => {
   if (!allowed) return res.status(403).json({ message: 'No permission' });
 
   const result = await pool.query(
-    `SELECT * FROM room_requests WHERE status = 'pending' ORDER BY requested_at DESC`
-  );
+`SELECT 
+      rr.*,
+      COALESCE(
+        JSON_AGG(rrn.user_id) FILTER (WHERE rrn.user_id IS NOT NULL),
+        '[]'
+      ) AS "notifyUsers"
+     FROM room_requests rr
+     LEFT JOIN room_request_notify rrn ON rrn.request_id = rr.id
+     WHERE rr.status = 'pending'
+     GROUP BY rr.id
+     ORDER BY rr.requested_at DESC`  );
   res.json(result.rows);
 };
 
