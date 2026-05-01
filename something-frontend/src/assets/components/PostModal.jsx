@@ -116,6 +116,8 @@ const [replyingTo, setReplyingTo] = useState(null);
 
 const [comments, setComments] = useState([]);
 
+const [commentFilter, setCommentFilter] = useState("all");
+
 
 
 //////////////////////////////////////////////////////////////////////////////////
@@ -275,7 +277,6 @@ const buildCommentTree = (comments) => {
 };
 
 
-  
 
   ////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////
@@ -360,29 +361,66 @@ const buildCommentTree = (comments) => {
           </div>
         </div>
 {/* //////////////////////////////////////////////////////// */}
+<div style={{ display: "flex", gap: "8px", marginBottom: "10px", paddingBottom: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+  {[
+    { key: "all", label: " All" },
+{ key: "popular", label: "Most Popular" },
+{ key: "recent", label: "Most Recent" },
+{ key: "specialized", label: "Specialized" },
+  ].map(({ key, label }) => (
+    <button
+      key={key}
+      onClick={() => setCommentFilter(key)}
+      style={{
+        padding: "4px 14px",
+        borderRadius: "20px",
+        border: "1px solid rgba(100,118,175,0.4)",
+        background: commentFilter === key ? "#6476af" : "transparent",
+        color: "white",
+        cursor: "pointer",
+        fontSize: "12px",
+        transition: "all 0.2s",
+      }}
+    >
+      {label}
+    </button>
+  ))}
+</div>
+
         {/* comments list */}
        <div style={{ flex: 1, overflowY: "auto", marginBottom: "15px" }}>
   {comments.length === 0 ? (
     <p style={{ opacity: 0.5, textAlign: "center" }}>No comments yet. Be the first!</p>
-  ) : (
-    buildCommentTree(comments).map(comment => (
-      <CommentNode
-        key={comment.id}
-        comment={comment}
-        postId={postId}
-        currentUser={currentUser}
-        isGuest={isGuest}
-        onVote={handleCommentVote}
-        onDelete={handleDeleteComment}
-        onReply={(c) => setReplyingTo({ id: c.id, username: c.authorUsername })}
-        editingComment={editingComment}
-        editCommentContent={editCommentContent}
-        setEditCommentContent={setEditCommentContent}
-        handleEditComment={handleEditComment}
-        setEditingComment={setEditingComment}
-      />
-    ))
-  )}
+  ) : (() => {
+      // Sort roots only, replies stay nested under parent
+      const sortRoots = (roots) => {
+  if (commentFilter === "popular")
+    return [...roots].sort((a, b) => (b.voteUseful ?? 0) - (a.voteUseful ?? 0));
+  if (commentFilter === "recent")
+    return [...roots].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if (commentFilter === "specialized")
+    return [...roots].sort((a, b) => (b.voteSpecialized ?? 0) - (a.voteSpecialized ?? 0));
+  return roots; // "all" = original server order
+};
+
+      return sortRoots(buildCommentTree(comments)).map(comment => (
+        <CommentNode
+          key={comment.id}
+          comment={comment}
+          postId={postId}
+          currentUser={currentUser}
+          isGuest={isGuest}
+          onVote={handleCommentVote}
+          onDelete={handleDeleteComment}
+          onReply={(c) => setReplyingTo({ id: c.id, username: c.authorUsername })}
+          editingComment={editingComment}
+          editCommentContent={editCommentContent}
+          setEditCommentContent={setEditCommentContent}
+          handleEditComment={handleEditComment}
+          setEditingComment={setEditingComment}
+        />
+      ));
+  })()}
 </div>
 
         {/* add comment */}
