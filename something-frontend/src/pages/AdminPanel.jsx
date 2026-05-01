@@ -906,7 +906,7 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
             <strong>@{req.username}</strong>
             <span style={badge("#6476af")}>{req.major}</span>
             <small style={{ marginLeft: "auto", opacity: 0.5 }}>
-              {new Date(req.requestedAt).toLocaleDateString()}
+              {new Date(req.requested_at).toLocaleDateString()}
             </small>
           </div>
 
