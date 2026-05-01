@@ -145,9 +145,9 @@ export default function Guide() {
         <section ref={sections.interaction}>
           <h1>User Interaction</h1>
           <p>Users interact through discussions and actions.</p>
-          <p>Engage in discussions, make decisions, and track outcomes.
+          <p>Engage in discussions, make decisions, and track outcomes.</p>
             <p>try posting,commenting,voting,searching</p>
-          </p>
+          
         </section>
 
         {/* Account */}
@@ -187,8 +187,8 @@ export default function Guide() {
         </section> */}
         <section ref={sections.contact}> <h1>Contact Us</h1>
           <p><strong>Study Buddy mail:</strong><a className="mail" href="mailto:studdybuddy1403@gmail.com">studdybuddy1403@gmail.com</a></p>
-          <p><strong>SupperAdmin 1:</strong>   <a className="mail" href="mailto:laoaribasmala75@gmail.com">laoaribasmala75@gmail.com</a></p>
-          <p><strong>SupperAdmin 2:</strong>   <a className="mail" href="mailto:sarahbennoura87@gmail.com">sarahbennoura87@gmail.com</a></p>
+          <p><strong>SuperAdmin 1:</strong>   <a className="mail" href="mailto:laoaribasmala75@gmail.com">laoaribasmala75@gmail.com</a></p>
+          <p><strong>SuperAdmin 2:</strong>   <a className="mail" href="mailto:sarahbennoura87@gmail.com">sarahbennoura87@gmail.com</a></p>
 
         </section>
 
