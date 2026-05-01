@@ -66,7 +66,8 @@ const handleSubmit =async (e) => {
   // }
 
   try {
-  const response = await axios.post("http://localhost:5000/api/auth/login", {
+  // const response = await axios.post("http://localhost:5000/api/auth/login", {
+  const response = await axios.post("/api/auth/login", {
    identifier: username,
   password
   });
