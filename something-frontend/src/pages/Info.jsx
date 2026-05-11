@@ -256,6 +256,8 @@ const handleSubmit = async (e) => {
   
   e.preventDefault();
  if (error) return;
+
+
   setIsSubmitting(true);
 
 
@@ -329,6 +331,7 @@ if (isOtherUniversity && university.name.trim()) {
 
   if (!result.valid) {
     alert(result.error);
+    setIsSubmitting(false);
     return;
   }
 // decided on otp verification now....
@@ -339,6 +342,7 @@ try {
   } catch (err) {
     console.error("Failed to send verification to email:", err);
     alert("Failed to send verification email. Please check your email and try again.");
+    setIsSubmitting(false);
   }
   finally{
     setIsSubmitting(false);

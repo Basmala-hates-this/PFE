@@ -1,5 +1,6 @@
 //this file will have a typical validation functions for forms
 //for example, email validation, password strength validation, etc.
+//ended up only having those....shame on who ever wrote this code.....wait....not gonna comment....
 
 
 
@@ -23,6 +24,7 @@ export function isValidFullName(name) {
 // AGE VALIDATION
 
 // Rule: minimum age (default = 17)
+//never did the max....
 export function isOldEnough(dateStr, minAge = 17) {
   if (!dateStr) return false;
 
