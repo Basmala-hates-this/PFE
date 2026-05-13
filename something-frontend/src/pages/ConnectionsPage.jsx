@@ -42,7 +42,7 @@ export default function ConnectionsPage() {
       onMouseEnter={e => e.currentTarget.style.background="rgba(255,255,255,0.08)"}
       onMouseLeave={e => e.currentTarget.style.background="#252b45"}
     >
-      <img src={user.profilePicUrl || Cat} alt="pfp" style={{width:"45px", height:"45px", borderRadius:"50%", objectFit:"cover"}}/>
+      <img src={user.profile_pic_url || Cat} alt="pfp" style={{width:"45px", height:"45px", borderRadius:"50%", objectFit:"cover"}}/>
       <div>
         <strong>@{user.username}</strong>
         <small style={{display:"block", opacity:0.5, marginTop:"2px"}}>{user.role} • rating: {user.rating ?? 1} / 5</small>
