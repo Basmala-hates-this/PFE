@@ -121,5 +121,28 @@
   "success": "Login Successful!!!!",
   "password_placeholder": "Password1*"
   
+},
+"rrp": {
+  "title": "Request To Reset Your Password ",
+  "email_label": "Enter Your Registered Email:",
+  "email_placeholder": "something@something.something",
+  "submit": "Send Reset Link",
+  "back_login": "Back To Login",
+  "back_home": "Back To Home",
+  "email_invalid": "Email Not Valid",
+  "success": "If that email exists, a reset link has been sent. Check your inbox!",
+  "error": "Something went wrong. Try again."
+},
+"reset": {
+  "title": "Reset Your Password ",
+  "new_password_label": "Choose Your New Password:",
+  "confirm_password_label": "Confirm Password:",
+  "submit": "Change Password",
+  "passwords_no_match": "Passwords do NOT match",
+  "password_weak": "Password is not strong enough",
+  "success_recovery": "Password reset successfully! Try not to forget this one :)",
+  "success_update": "Password updated successfully!",
+  "error": "Something went wrong.",
+   "password_placeholder": "Password1*"
 }
 }

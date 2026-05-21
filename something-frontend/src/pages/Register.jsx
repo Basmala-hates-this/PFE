@@ -268,7 +268,7 @@ useEffect(() => {
                 <br/><br/>
                 <label htmlFor="Cpassword" id="label"> {t("register.confirm_password_label")} </label>
                 <br/>
-                <input type={showPassword ? "text" : "password"}  id="Cpassword"  minLength="8" maxLength="15" name="Cpassword" placeholder={t("register.confirm_password_placeholder")} required  value={confirmPassword}
+                <input type={showPassword ? "text" : "password"}  id="Cpassword"  minLength="8"  name="Cpassword" placeholder={t("register.confirm_password_placeholder")} required  value={confirmPassword}
   onChange={(e) => setConfirmPassword(e.target.value)}/><br/>
                  <label id="label"> <input type="checkbox" id="togglePassword" onChange={() => setShowPassword(!showPassword)}/>
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>

@@ -121,6 +121,29 @@
   "back_home": "Retour à l'accueil",
   "success": "Connexion réussie !!!!",
   "password_placeholder": "MotDePasse1*"
+},
+"rrp": {
+  "title": "Demande de réinitialisation du mot de passe ",
+  "email_label": "Entrez votre email enregistré :",
+  "email_placeholder": "quelquechose@quelquechose.quelquechose",
+  "submit": "Envoyer le lien",
+  "back_login": "Retour à la connexion",
+  "back_home": "Retour à l'accueil",
+  "email_invalid": "Email invalide",
+  "success": "Si cet email existe, un lien de réinitialisation a été envoyé. Vérifiez votre boîte mail !",
+  "error": "Quelque chose s'est mal passé. Réessayez."
+},
+"reset": {
+  "title": "Réinitialiser votre mot de passe ",
+  "new_password_label": "Choisissez votre nouveau mot de passe :",
+  "confirm_password_label": "Confirmez le mot de passe :",
+  "submit": "Changer le mot de passe",
+  "passwords_no_match": "Les mots de passe ne correspondent pas",
+  "password_weak": "Le mot de passe n'est pas assez fort",
+  "success_recovery": "Mot de passe réinitialisé ! Essayez de ne pas l'oublier cette fois :)",
+  "success_update": "Mot de passe mis à jour avec succès !",
+  "error": "Quelque chose s'est mal passé.",
+  "password_placeholder": "MotDePasse1*"
 }
 
 }

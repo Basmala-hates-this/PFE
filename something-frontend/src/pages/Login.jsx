@@ -122,7 +122,7 @@ const currentLang = i18n.language;
 const changeLanguage = (lang) => {
   i18n.changeLanguage(lang);
   localStorage.setItem('language', lang);
-  //document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   document.documentElement.lang = lang;
 };
 const handleSelectChange = (event) => {
@@ -136,7 +136,7 @@ const handleSelectChange = (event) => {
     
 
   return (
-    <div id="body2">
+    <div id="body2" >
         <div className="language-switcher">
       <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
       <select 

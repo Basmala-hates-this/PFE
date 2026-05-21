@@ -12,10 +12,12 @@ import { useNavigate, useSearchParams } from "react-router-dom"; import { useSta
  import { useRegistration } from "../assets/components/Context.jsx";
 
  import axios from "axios";
-
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/index.js';
 
 export default function Reset() {
       const navigate = useNavigate();
+      const { t } = useTranslation();
 
       const [searchParams] = useSearchParams();
       const token = searchParams.get("token");
@@ -60,7 +62,7 @@ const handlePasswordChange = (e) => {
     return;
   }
 
-  const result = checkPasswordStrength(value);
+  const result = checkPasswordStrength(value,t);
   setPasswordStrength(result.message);
   setStrengthColor(result.color);
 };
@@ -68,7 +70,7 @@ const handlePasswordChange = (e) => {
 useEffect(() => {
   
   const passwordsMatch = password && password === confirmPassword;
-  const strongEnough = checkPasswordStrength(password).strength >= 4;
+  const strongEnough = checkPasswordStrength(password,t).strength >= 4;
 
  
 
@@ -83,12 +85,12 @@ const handleSubmit = async (e) => {
   const strongEnough = checkPasswordStrength(password).strength >= 4;
 
   if (!passwordsMatch) {
-    alert("Passwords do NOT match");
+    alert(t("reset.passwords_no_match"));
     return;
   }
 
   if (!strongEnough) {
-    alert("Password is not strong enough");
+    alert(t("reset.password_weak"));
     return;
   }
 
@@ -112,10 +114,10 @@ if (token) {
             token,
             newPassword: password,
         });
-        alert("Password reset successfully! Try not to forget this one :)");
+        alert(t("reset.success_recovery"));
         navigate("/login");
     } catch (err) {
-        const msg = err.response?.data?.message || "Something went wrong.";
+        const msg = err.response?.data?.message || t("reset.error");
         alert(msg);
     }
 } else {
@@ -127,26 +129,50 @@ if (token) {
             { newPassword: password },
             { headers: { Authorization: `Bearer ${authToken}` } }
         );
-        alert("Password updated successfully!");
+        alert(t("reset.success_update"));
         navigate("/profile");
     } catch (err) {
-        const msg = err.response?.data?.message || "Something went wrong.";
+       const msg = err.response?.data?.message || t("reset.error");
         alert(msg);
     }
 }
 };
+const currentLang = i18n.language;
+const changeLanguage = (lang) => {
+  i18n.changeLanguage(lang);
+  localStorage.setItem('language', lang);
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+};
+const handleSelectChange = (event) => {
+    // Grabs the value ('en', 'fr', or 'ar') from the chosen option
+    changeLanguage(event.target.value);
+  };
 
 
 
     return (
         <div id="body6">
+            <div className="language-switcher">
+      <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
+      <select 
+        id="lang-select"
+        value={currentLang} // Keeps the dropdown synced with your active language
+        onChange={handleSelectChange}
+        className="lang-dropdown"
+      >
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+      </select>
+    </div>
               <form  onSubmit={handleSubmit}>
         <fieldset id="field6">
-            <h2 id="rpTitle">Reset Your Password 🔒</h2>
+            <h2 id="rpTitle">{t("reset.title")} 🔒</h2>
             
-                <label htmlFor="password" className="rpLabel" >Choose Your New Password:</label>
+                <label htmlFor="password" className="rpLabel" >{t("reset.new_password_label")}</label>
                 <br/>
-                <input type={showPassword ? "text" : "password"} value={password} onChange={handlePasswordChange} id="RPpassword" className="password"  placeholder="Password1*" minLength="8" maxLength="15" name="password" required/>
+                <input type={showPassword ? "text" : "password"} value={password} onChange={handlePasswordChange} id="RPpassword" className="password"  placeholder={t("reset.password_placeholder")} minLength="8"  name="password" required/>
                 <br />
                 <p
   id="strength"
@@ -158,14 +184,14 @@ if (token) {
   {passwordStrength}
 </p>
                 <br/><br/>
-                <label htmlFor="Cpassword" className="rpLabel">Confirm Password:</label>
+                <label htmlFor="Cpassword" className="rpLabel">{t("reset.confirm_password_label")}</label>
                 <br/>
-                <input type={showPassword ? "text" : "password"}  value={confirmPassword}  onChange={(e) => setConfirmPassword(e.target.value)} id="RPCpassword" placeholder="Password1*" className="Cpassword" minLength="8" maxLength="15" name="Cpassword" required/>
+                <input type={showPassword ? "text" : "password"}  value={confirmPassword}  onChange={(e) => setConfirmPassword(e.target.value)} id="RPCpassword" placeholder={t("reset.password_placeholder")} className="Cpassword" minLength="8" maxLength="15" name="Cpassword" required/>
                 <br/>
                  <label id="label" className="rpLabel"> <input type="checkbox" onChange={() => setShowPassword(!showPassword)} className="rpCheck" id="togglePassword"/>
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
                 <br/><br/>
-                <input type="submit" value="Change Password" className="btn6" disabled={!canSubmit} /> {/*<!-- after changing password redirect to login page --> */}
+                <input type="submit" value={t("reset.submit")} className="btn6" disabled={!canSubmit} /> {/*<!-- after changing password redirect to login page --> */}
                 <br/><br/>
                 
 
