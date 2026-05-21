@@ -110,6 +110,17 @@
   "link_home": "🏠 Aller à la page d'accueil",
   "link_login": "🔑 Aller à la page de connexion",
   "celebrate_btn": "Célébrer encore"
+},
+"login": {
+  "legend": "Connectez-vous à votre compte",
+  "username_label": "Votre nom d'utilisateur ou email enregistré :",
+  "username_placeholder": "EX: bruh~$&-_",
+  "password_label": "Votre mot de passe :",
+  "submit": "Se connecter",
+  "forgot_password": "Mot de passe oublié ?",
+  "back_home": "Retour à l'accueil",
+  "success": "Connexion réussie !!!!",
+  "password_placeholder": "MotDePasse1*"
 }
 
 }

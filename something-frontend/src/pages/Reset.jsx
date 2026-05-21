@@ -46,7 +46,7 @@ const targetEmail = resetEmail || currentUser?.email;
   if (!token && !authToken) {
     navigate("/login");
   }
-}, []);
+}, []); 
 
 
 const handlePasswordChange = (e) => {

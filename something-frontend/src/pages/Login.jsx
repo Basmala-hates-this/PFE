@@ -6,7 +6,8 @@ import "../styles/register-login.css"
  import { isValidEmail } from "../assets/components/Validations.js";
  import { Eye, EyeOff } from 'lucide-react';
  import axios from "axios";
-
+ import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/index.js';
 
 
 export default function Login(){
@@ -26,6 +27,8 @@ const [error, setError] = useState("");
 
 
   const navigate = useNavigate();
+
+  const { t } = useTranslation();
 
 //huumm...the browser is playing with me and adding data i didint input ....i want it crispy clean soooo.....didnt work....
 useEffect(() => {
@@ -91,7 +94,7 @@ if (data.user.pendingReorientation) {
 } else {
  
   //le legin est successful...i'll add a star emoji to this comment later...
-  alert("Login Successful!!!!");
+  alert(t("login.success"));
   navigate("/dashboard");
 }
   
@@ -112,9 +115,20 @@ if (data.user.pendingReorientation) {
 };
 
 
+const currentLang = i18n.language;
 
 
 
+const changeLanguage = (lang) => {
+  i18n.changeLanguage(lang);
+  localStorage.setItem('language', lang);
+  //document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+};
+const handleSelectChange = (event) => {
+    // Grabs the value ('en', 'fr', or 'ar') from the chosen option
+    changeLanguage(event.target.value);
+  };
 
 
 
@@ -123,13 +137,26 @@ if (data.user.pendingReorientation) {
 
   return (
     <div id="body2">
+        <div className="language-switcher">
+      <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
+      <select 
+        id="lang-select"
+        value={currentLang} // Keeps the dropdown synced with your active language
+        onChange={handleSelectChange}
+        className="lang-dropdown"
+      >
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+      </select>
+    </div>
       <form  onSubmit={handleSubmit} id="loginForm" autoComplete="off"> {/*<!--action="dashboard2.1.html"rederect the user to the dashboard after confirming with the database?? --> */}
         <fieldset id="field4">
-            <legend id="logReg">Log In To Your Account</legend>
+            <legend id="logReg">{t("login.legend")}</legend>
             <div id="logcenter">
-            <label htmlFor="username" id="label" >Your Username or Registered Email: </label>
+            <label htmlFor="username" id="label" >{t("login.username_label")} </label>
             <br/><br/>
-            <input type="text" required id="username" minLength="5" className="username" name="username"  placeholder=" EX: bruh~$&-_" value={username} onChange={handleUsernameChange}/>
+            <input type="text" required id="username" minLength="5" className="username" name="username"  placeholder={t("login.username_placeholder")} value={username} onChange={handleUsernameChange}/>
    {/* <p
   id="feedback"
   style={{
@@ -140,9 +167,9 @@ if (data.user.pendingReorientation) {
   {usernameFeedback}
 </p>     i figured since this passed the register rigex ten no need for live feedback...    */}   
 <br/><br/> 
-            <label htmlFor="password" id="label"> Your Password:</label>
+            <label htmlFor="password" id="label"> {t("login.password_label")}</label>
             <br/><br/>
-            <input type={showPassword ? "text" : "password"} id="password" placeholder="Password1*"  minLength="8" maxLength="15" name="password" required value={password} onChange={handlePasswordChange}/><br/>
+            <input type={showPassword ? "text" : "password"} id="password" placeholder={t("login.password_placeholder")}  minLength="8" maxLength="15" name="password" required value={password} onChange={handlePasswordChange}/><br/>
             <label id="label"> <input type="checkbox" id="togglePassword" onClick={() => setShowPassword(!showPassword)} />
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
                 {/* <span id="ohhh"> {showPassword ? <EyeOff size={24} /> : <Eye size={24} />}</span></label> */}
@@ -153,12 +180,12 @@ if (data.user.pendingReorientation) {
     {error}
   </p>
 )} <br />
-                <input type="submit" value="login" className="btn2" /> 
+                <input type="submit" value={t("login.submit")} className="btn2" /> 
                 <br/><br/>
-                <a href="#" id="rrpLink" onClick={() => navigate("/rrp")}>Forgot Your Password?</a>
+                <a href="#" id="rrpLink" onClick={() => navigate("/rrp")}>{t("login.forgot_password")}</a>
                 <br/><br/>
                 
-                 <a href="#" id="backLink" onClick={() => navigate("/")} >Back to Home</a>
+                 <a href="#" id="backLink" onClick={() => navigate("/")} >{t("login.back_home")}</a>
             </div>
 
 

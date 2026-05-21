@@ -109,5 +109,17 @@
   "link_home": "🏠 Go To The Home Page",
   "link_login": "🔑 Go To The Login Page",
   "celebrate_btn": "Celebrate Again"
+},
+"login": {
+  "legend": "Log In To Your Account",
+  "username_label": "Your Username or Registered Email:",
+  "username_placeholder": "EX: bruh~$&-_",
+  "password_label": "Your Password:",
+  "submit": "Login",
+  "forgot_password": "Forgot Your Password?",
+  "back_home": "Back to Home",
+  "success": "Login Successful!!!!",
+  "password_placeholder": "Password1*"
+  
 }
 }

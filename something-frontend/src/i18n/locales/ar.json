@@ -109,5 +109,16 @@
   "link_home": " الذهاب إلى الصفحة الرئيسية",
   "link_login": " الذهاب إلى صفحة تسجيل الدخول",
   "celebrate_btn": "احتفل مجدداً"
+},
+"login": {
+  "legend": "تسجيل الدخول إلى حسابك",
+  "username_label": ":اسم المستخدم أو البريد الإلكتروني المسجل",
+  "username_placeholder": "مثال: bruh~$&-_",
+  "password_label": ":كلمة المرور",
+  "submit": "تسجيل الدخول",
+  "forgot_password": "نسيت كلمة المرور؟",
+  "back_home": "العودة إلى الرئيسية",
+  "success": "!!!!تم تسجيل الدخول بنجاح",
+  "password_placeholder": "كلمةالمرور1*"
 }
 }
