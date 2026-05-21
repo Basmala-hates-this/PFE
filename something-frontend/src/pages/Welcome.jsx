@@ -6,6 +6,8 @@ import Select from "react-select";
 import { useEffect } from "react";
 
 import axios from "axios";
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/index.js';
 
 
 export default function Welcome(){
@@ -14,6 +16,9 @@ export default function Welcome(){
   const [showGuestModal, setShowGuestModal] = useState(false);
   const [selectedUniversities, setSelectedUniversities] = useState([]);
 const [universityOptions, setUniversityOptions] = useState([]);
+
+const { t } = useTranslation();
+const currentLang = i18n.language;
 
 //    const universityOptions = [
 //   { "value": "UA1", "label": "University Of Algiers 1- Benyoucef Benkhedda" },
@@ -145,17 +150,44 @@ const customSelect = {
   })
 };
 
+
+
+const changeLanguage = (lang) => {
+  i18n.changeLanguage(lang);
+  localStorage.setItem('language', lang);
+  //document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+};
+const handleSelectChange = (event) => {
+    // Grabs the value ('en', 'fr', or 'ar') from the chosen option
+    changeLanguage(event.target.value);
+  };
+
   return (
     <div id="body0">
+{/* i need style for this later */}
+     <div className="language-switcher">
+      <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
+      <select 
+        id="lang-select"
+        value={currentLang} // Keeps the dropdown synced with your active language
+        onChange={handleSelectChange}
+        className="lang-dropdown"
+      >
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+      </select>
+    </div>
   <div className="home-container">
     <img src={logo2} alt="Logo" className="logo"/>
 
-    <h1 className="welcome">Welcome <span className="wave">👋</span></h1>
-    <p className="quote">Perfection is overrated. Persistence builds better stories.Join us and we can Learn, Teach and Build — Together....</p> 
+    <h1 className="welcome"><span className="wave">👋</span>{t('welcome.title')}</h1>
+    <p className="quote">{t('welcome.quote')}</p> 
     <div className="buttons">
-      <button id="guestBtn"  onClick={() => setShowGuestModal(true)}>Continue as Guest</button>
-      <button id="createBtn" onClick={() => navigate("/info")}>Create Account</button>
-      <button id="loginBtn"  onClick={() => navigate("/login")}>Login</button>
+      <button id="guestBtn"  onClick={() => setShowGuestModal(true)}>{t('welcome.guest_btn')}</button>
+      <button id="createBtn" onClick={() => navigate("/info")}>{t('welcome.create_btn')}</button>
+      <button id="loginBtn"  onClick={() => navigate("/login")}>{t('welcome.login_btn')}</button>
     </div>
   </div>
 
@@ -165,7 +197,7 @@ const customSelect = {
   <div style={{borderRadius:"9px",backgroundColor:"#537a87c5"}} className="modal-overlay-welcome" onClick={() => setShowGuestModal(false)}>
     <div className="modal-welcome" onClick={(e) => e.stopPropagation()}>
       
-      <h3 >Select up to 5 universities to browse</h3>
+      <h3 >{t('welcome.modal_title')}</h3>
       <br/>
       <Select
         isMulti
@@ -174,13 +206,13 @@ const customSelect = {
         onChange={(selected) => {
           if (selected.length <= 5) setSelectedUniversities(selected);
         }}
-        placeholder="Select universities..."
+         placeholder={t('welcome.modal_placeholder')}
         styles={customSelect}
          maxMenuHeight={200}
       />
       <br/>
       <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
-        <button onClick={() => setShowGuestModal(false)} style={{backgroundColor:"crimson", width:"250px",marginRight:"10px",height:"40px" ,color:"white",borderRadius:"8px"}}>Cancel</button>
+        <button onClick={() => setShowGuestModal(false)} style={{backgroundColor:"crimson", width:"250px",marginRight:"10px",height:"40px" ,color:"white",borderRadius:"8px"}}>{t('welcome.modal_cancel')}</button>
         {/* is it stupid to write the entire function derectly into the element?not illegall....just stupid... */}
         <button 
 style={{backgroundColor:"green", width:"250px",marginRight:"10px",height:"40px" ,color:"white",borderRadius:"8px"}}
@@ -198,7 +230,7 @@ style={{backgroundColor:"green", width:"250px",marginRight:"10px",height:"40px" 
   } catch (err) {
     console.error("Failed to create guest session:", err);
   }
-}}>Browse as Guest</button>
+}}>{t('welcome.modal_browse')}</button>
       </div>
 
     </div>

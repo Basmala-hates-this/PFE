@@ -5,6 +5,8 @@ import "../styles/register-login.css"
  import { useEffect } from "react";
  import { useRegistration } from "../assets/components/Context.jsx";
  import axios from "axios";
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/index.js';
 
 //////THE DAMN USERNAME CANNOT BELONG TO ANOTHER USER...IF IT EXISTS ALREADY IT CANNOT BE CHOSEN....fuck...
 
@@ -45,6 +47,8 @@ const [canResend, setCanResend] = useState(false);
 const [isSubmitting, setIsSubmitting] = useState(false);
 //const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
 
+const { t, i18n } = useTranslation();
+const isRTL = i18n.language === "ar";
 
 //if someine ever was abale to skip info form....this will atke them back to it
 useEffect(() => {
@@ -66,7 +70,7 @@ const handleUsernameBlur = async () => {
       `http://localhost:5000/api/auth/check-username?username=${username}`
     );
     if (response.data.exists) {
-      setError("Username already taken...be more creative?");
+      setError(t("validation.username_already_taken"));
     } else {
       setError("");
     }
@@ -89,11 +93,11 @@ const handleSubmit =async (e) => {
       email: profile.email,
       otp
     });
-    setOtpFeedback("Email verified!");
+setOtpFeedback(t("validation.otp_verified"));
     setOtpColor("green");
     setOtpVerified(true);
   } catch (err) {
-    setOtpFeedback(err.response?.data?.message || "Invalid OTP");
+setOtpFeedback(err.response?.data?.message || t("validation.otp_invalid"));
     setOtpColor("#fc0c0ce9");
     return; 
   }
@@ -129,7 +133,7 @@ const handleSubmit =async (e) => {
     return;
   }
 
-  const result = validateUsername(value);
+  const result = validateUsername(value,t);
   setUsernameFeedback(result.message);
   setUsernameColor(result.color);
 };
@@ -145,7 +149,7 @@ const handlePasswordChange = (e) => {
     return;
   }
 
-  const result = checkPasswordStrength(value);
+  const result = checkPasswordStrength(value,t);
   setPasswordStrength(result.message);
   setStrengthColor(result.color);
 };
@@ -191,12 +195,12 @@ const handleResendOtp = async () => {
     });
     setCanResend(false);
     setResendTimer(60);
-    setOtpFeedback("New OTP sent!");
+setOtpFeedback(t("validation.otp_resent"));
     setOtpColor("green");
     setOtp("");
     setOtpVerified(false);
   } catch (err) {
-    setOtpFeedback("Failed to resend OTP");
+setOtpFeedback(t("validation.otp_resent_failed"));
     setOtpColor("#fc0c0ce9");
   }
 }; 
@@ -204,11 +208,11 @@ const handleResendOtp = async () => {
 
 
 
-// i wanted pretty button when everything is valid....why is this pain?
+// i wanted pretty button when everything is valid....why is this pain?`
 useEffect(() => {
-  const usernameValid = validateUsername(username).valid;
+  const usernameValid = validateUsername(username,t).valid;
   const passwordsMatch = password && password === confirmPassword;
-  const strongEnough = checkPasswordStrength(password).strength >= 4;
+  const strongEnough = checkPasswordStrength(password,t).strength >= 4;
 
   setCanSubmit(usernameValid && passwordsMatch && strongEnough && !error && !isCheckingUsername );
 }, [username, password, confirmPassword, error, isCheckingUsername]);
@@ -217,20 +221,20 @@ useEffect(() => {
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 
-
+ 
   return (
     <div id="body2">
       <form  id="registerForm" onSubmit={handleSubmit} >
         <fieldset id="field4" >
-            <legend  id="logReg">Create Your Account</legend>
+            <legend  id="logReg">{t("register.legend_main")}</legend>
             <div id="logcenter">
 
 
 
-                <label htmlFor="username" id="label"> Choose Your Username: </label>
+                <label htmlFor="username" id="label"> {t("register.username_label")} </label>
                 <br />
                 <input type="text" required minLength="5" id="username" className="username" name="username"  
-                value={username} placeholder="bruh~$&-_" onChange={handleUsernameChange}
+                value={username} placeholder={t("register.username_placeholder")} onChange={handleUsernameChange}
                 onBlur={handleUsernameBlur}/>
                <p
   id="feedback"
@@ -249,9 +253,9 @@ useEffect(() => {
 
 
                 <br/><br/>
-                <label htmlFor="password" id="label">Choose Your Password:</label>
+                <label htmlFor="password" id="label"> {t("register.password_label")} </label>
                 <br/>
-                <input  type={showPassword ? "text" : "password"} id="password"  minLength="8"  name="password" required value={password} placeholder="Password1*" onChange={handlePasswordChange}/>
+                <input  type={showPassword ? "text" : "password"} id="password"  minLength="8"  name="password" required value={password} placeholder={t("register.password_placeholder")} onChange={handlePasswordChange}/>
                <p
   id="strength"
   style={{
@@ -262,22 +266,22 @@ useEffect(() => {
   {passwordStrength}
 </p>
                 <br/><br/>
-                <label htmlFor="Cpassword" id="label">Confirm Password:</label>
+                <label htmlFor="Cpassword" id="label"> {t("register.confirm_password_label")} </label>
                 <br/>
-                <input type={showPassword ? "text" : "password"}  id="Cpassword"  minLength="8" maxLength="15" name="Cpassword" placeholder="Password1*" required  value={confirmPassword}
+                <input type={showPassword ? "text" : "password"}  id="Cpassword"  minLength="8" maxLength="15" name="Cpassword" placeholder={t("register.confirm_password_placeholder")} required  value={confirmPassword}
   onChange={(e) => setConfirmPassword(e.target.value)}/><br/>
                  <label id="label"> <input type="checkbox" id="togglePassword" onChange={() => setShowPassword(!showPassword)}/>
                 <span id="ohhh"> {showPassword ? " 🙈" : " 👀"}</span></label>
                 <br/><br/>
 
 {/* i'll add it here and see ...althu i think i'll add it after */}
- <label id="label">Email Verification Code:</label>
+ <label id="label"> {t("register.otp_label")} </label>
   <br />
   <div >
     <input
       type="text"
       maxLength="6"
-      placeholder="000000"
+      placeholder={t("register.otp_placeholder")}
       value={otp}
       onChange={(e) => {
         setOtp(e.target.value);
@@ -308,19 +312,19 @@ useEffect(() => {
         onClick={handleResendOtp}
        
       >
-        Resend OTP
+        {t("register.otp_resend_btn")}
       </span>
     ) : (
-      `Resend available in ${resendTimer}s`
+      `${t("register.otp_resend_timer", { seconds: resendTimer })}`
     )}
   </p>
   <br /><br />
 
-                <input type="submit" value={isSubmitting ? "Sending..." : "Finish"}  disabled={isSubmitting} className="btn2" disabled={!canSubmit}  /> 
+                <input type="submit" value={isSubmitting ? t("register.btn_sending") : t("register.btn_finish")}  disabled={isSubmitting} className="btn2" disabled={!canSubmit}  /> 
                 <br />
             
                 <br/><br/>
-                <a href="#" id="backLink" onClick={() => navigate("/")}>Back to Home</a>
+                <a href="#" id="backLink" onClick={() => navigate("/")}> {t("register.link_back_home")} </a>
 
 
             </div>

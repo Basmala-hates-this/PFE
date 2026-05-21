@@ -13,7 +13,7 @@ import {
   checkPasswordStrength
 } from "../assets/components/Validations.js";
 
-
+import { useTranslation } from 'react-i18next';
 //just noting that my brain thinks this page should have and be able to read the profile for somereason....maybe the username display for dashboard later?
 //meh, i'll see later..if not, no big deal.....i hope...
 //also....abut the validations of existing profile...i cant see how anyone would reach here without filling the previos 2 forms
@@ -35,6 +35,8 @@ export default function Fin() {
     });
   };
 
+  const { t } = useTranslation();
+
 
   //AAAAAAAAAAAAAAAAAA
   //user efect will check the previosly mentiond...if one is false..rederect to he page needed...if not....well....CONTENT!!
@@ -46,15 +48,15 @@ export default function Fin() {
     return;
   }
 
-  const profileCheck = validateProfile(profile);
+  const profileCheck = validateProfile(profile,t);
   if (!profileCheck.valid) {
     navigate("/info");
     return;
   }
 //if somehow passed with not so valid data.....am i paranoid ?
   if (
-    !validateUsername(credentials.username).valid ||
-    checkPasswordStrength(credentials.password).strength < 4
+    !validateUsername(credentials.username,t).valid ||
+    checkPasswordStrength(credentials.password,t).strength < 4
   ) {
     navigate("/register");
     return;
@@ -137,25 +139,25 @@ const handleWelcome = () => {
 
   return (
     <div className="fin-page" id="body3">
-     <h1 id="finH1">You Have Successfully Created An Account!!✔️</h1>
+     <h1 id="finH1">{t("fin.success_title")}✔️</h1>
     <br/><br/>
-    <h3 id="finH3">Thank You For Your Registration!</h3>
+    <h3 id="finH3">{t("fin.thank_you")}</h3>
     <br/><br/>
     <div id="links">
         <a href="#" className="fixing" onClick={loading ? (e) => e.preventDefault() : handleDashboard}
         style={{ opacity: loading ? 0.4 : 1, pointerEvents: loading ? "none" : "auto" }}
           
-          >{loading ? "⏳ Setting up your account..." : "🗂️ Go To The Dashboard"}</a>
+          >{loading ? t("fin.loading_setup") : t("fin.link_dashboard")}</a>
         
         <a  href="#" className="fixing" onClick={loading ? (e) => e.preventDefault() : handleWelcome}
-        style={{ opacity: loading ? 0.4 : 1, pointerEvents: loading ? "none" : "auto" }}>{loading ? "⏳ This Might Take A Moment..." : "🏠 Go To The Home Page"}</a>
+        style={{ opacity: loading ? 0.4 : 1, pointerEvents: loading ? "none" : "auto" }}>{loading ? t("fin.loading_moment") : t("fin.link_home")}</a>
 
             {/* <!-- <a href="register.html" className="fixing">🧾back to regestration Page</a> --> */}
              
         <a href="#" className="fixing" onClick={loading ? (e) => e.preventDefault() : handleLogin}
-        style={{ opacity: loading ? 0.4 : 1, pointerEvents: loading ? "none" : "auto" }}>{loading ? "⏳ This Might Take A Moment..." : "🔑 Go To The Login Page"}</a>
+        style={{ opacity: loading ? 0.4 : 1, pointerEvents: loading ? "none" : "auto" }}>{loading ? t("fin.loading_moment") : t("fin.link_login")}</a>
 
-        <button  id="con" className="fixing" onClick={handleConfetti}>🎉 Celebrate Again</button> 
+        <button  id="con" className="fixing" onClick={handleConfetti}>🎉 {t("fin.celebrate_btn")}</button> 
         {/* <a href="javascript:void(0)" onClick={handleConfetti}> 🎉 Celebrate Again </a> */}
         
     

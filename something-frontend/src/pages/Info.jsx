@@ -12,12 +12,17 @@ import Select from "react-select";
 
 ////////////////////
 //pd: CLEAN THE DAMN COMMENTED PARTS U DONT NEED THEM ANYMORE.....i'll do later....donezo...i left my commenst though...
-
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/index.js';
 
 
 
 
 export default function Info() {
+
+
+  const { t, i18n } = useTranslation();
+const isRTL = i18n.language === "ar";
   
 
   // handllers to be updated while user fills the form*/
@@ -29,6 +34,8 @@ const [role, setRole] = useState("");
 
 
 const [isSubmitting, setIsSubmitting] = useState(false);
+
+
 
 
 //prof proof
@@ -242,7 +249,7 @@ const handleEmailBlur = async () => {
       `http://localhost:5000/api/auth/check-email?email=${email}`
     );
     if (response.data.exists) {
-      setError("Email already exists...Login instead?");
+      setError(t("validation.email_already_exists"));
     } else {
       setError("");
     }
@@ -281,12 +288,12 @@ if (customMajor.trim()) {
 // }
 //soooo....dev tool manupilation precaution ...am i paranoid at this point?
 if (role === "student" && finalMajors.length !== 1) {
-  alert("Students must select exactly one major.");
+  alert(t("validation.student_one_major"));
   return;
 }
 
 if (role === "professor" && finalMajors.length < 1) {
-  alert("Professors must select at least one major.");
+  alert(t("validation.professor_min_major"));
   return;
 }
 let finalUniversity = university;
@@ -327,7 +334,7 @@ if (isOtherUniversity && university.name.trim()) {
     profProof
   };
 
-  const result = validateProfile(profile);
+  const result = validateProfile(profile, t);
 
   if (!result.valid) {
     alert(result.error);
@@ -344,9 +351,9 @@ try {
     alert("Failed to send verification email. Please check your email and try again.");
     setIsSubmitting(false);
   }
-  finally{
-    setIsSubmitting(false);
-  }
+  // finally{
+  //   setIsSubmitting(false);
+  // }
 
 
   // Save to localStorage.....i need to abandon the local storage at some point....that is SAD....
@@ -442,29 +449,52 @@ const customSelect = {
   })
 };
       
-
+const currentLang = i18n.language;
+const changeLanguage = (lang) => {
+  i18n.changeLanguage(lang);
+  localStorage.setItem('language', lang);
+  //document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+};
+const handleSelectChange = (event) => {
+    // Grabs the value ('en', 'fr', or 'ar') from the chosen option
+    changeLanguage(event.target.value);
+  };
     return (
         <div id="body1">
+          <div className="language-switcher">
+      <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
+      <select 
+        id="lang-select"
+        value={currentLang} // Keeps the dropdown synced with your active language
+        onChange={handleSelectChange}
+        className="lang-dropdown"
+      >
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+      </select>
+    </div>
              <form  onSubmit={handleSubmit} id="indexForm">{/*<!--action="register.html"   i think this is useless since i added the js redirection--> */}
         <fieldset id="field1" className="fieldInfo" >
            
-             <legend id="legend1">Create Your Account</legend>
-             <h3 id="h3">All Information Is Required</h3>
+             <legend id="legend1">{t("info.legend_main")}</legend>
+             <h3 id="h3">{t("info.required_notice")}</h3>
 
              <fieldset id="field2">
   
-              <legend id="legend2">Personal Info</legend>
-              <label htmlFor="name" >Full Name:</label>
+              <legend id="legend2">{t("info.personal_info")}</legend>
+              <label htmlFor="name" >{t("info.full_name_label")}</label>
               <br/>
-              <input type="text" className="name" id="name" required  name="fullName" placeholder="Ex:Hannibal Lecter"  onChange={(e) => setFullName(e.target.value)}/>
+              <input type="text" className="name" id="name" required  name="fullName" placeholder={t("info.full_name_placeholder")}  onChange={(e) => setFullName(e.target.value)}/>
               <br/><br/>
-              <label htmlFor="birth" >Your Date Of Birth:</label>
+              <label htmlFor="birth" >{t("info.birth_label")}</label>
               <br/>
               <input type="date" id="birth"  className="birth" name="dateOfBirth" required onChange={(e) => setBirthDate(e.target.value)}/>
               <br/><br/>
-              <label htmlFor="email" id="PEmail" >Your Professional Email:</label>
+              <label htmlFor="email" id="PEmail" >{t("info.email_label")}</label>
               <br/>
-             <input type="email" className="PEmail" id="email" name="email" placeholder="something@something.something" required onChange={(e) => setEmail(e.target.value)}
+             <input type="email" className="PEmail" id="email" name="email" placeholder={t("info.email_placeholder")} required onChange={(e) => setEmail(e.target.value)}
              onBlur={handleEmailBlur}/>
              <br />
              {/* in hopes this works to fix the email uniqueness...is that a word?...couldnt care less...yeah it workes....for now */}
@@ -475,7 +505,7 @@ const customSelect = {
   {/* that works....works completly fine but for the sake of my testing...i should nake it an alert..atleast for now */}
              
               <br/><br/>
-              <label htmlFor="university" >Your University :</label>
+              <label htmlFor="university" >{t("info.university_label")}</label>
               <br/>
              
               <Select styles={customSelect}
@@ -496,14 +526,14 @@ const customSelect = {
       setIsOtherUniversity(false);
     }
   }}
-  placeholder="Select University..."
+  placeholder={t("info.university_placeholder")}
 />
               <br/><br/>
             {isOtherUniversity && (
   <input
     type="text"
     className="other"
-    placeholder="the full correct name please"
+    placeholder={t("info.university_other_placeholder")}
     value={university.name}
     onChange={(e) =>
       // /////////////////////////////////////////////////////
@@ -518,13 +548,13 @@ const customSelect = {
             </fieldset>
              <fieldset id="field3">
                 
-               <legend  id="legend2">Practical Info</legend>
+               <legend  id="legend2">{t("info.practical_info")}</legend>
                 
-               <label>Are You A:</label> 
-               <input type="radio" id="student" name="role" value="student" className="student" required  checked={role === "student"} onChange={(e) => setRole(e.target.value)}/> <label htmlFor="student">Student</label>
-               <input type="radio" id="professor" name="role" value="professor" className="professor" required  checked={role === "professor"} onChange={(e) => setRole(e.target.value)}/> <label htmlFor="professor">Professor</label>
+               <label>{t("info.role_label")}</label> 
+               <input type="radio" id="student" name="role" value="student" className="student" required  checked={role === "student"} onChange={(e) => setRole(e.target.value)}/> <label htmlFor="student">{t("info.role_student")}</label>
+               <input type="radio" id="professor" name="role" value="professor" className="professor" required  checked={role === "professor"} onChange={(e) => setRole(e.target.value)}/> <label htmlFor="professor">{t("info.role_professor")}</label>
                 <br/><br/>
-                <label htmlFor="major" id="major">Choose a Role to Select Your Main Major(s) </label>
+                <label htmlFor="major" id="major">{t("info.major_label")}</label>
                 <br/>
                 {/* ONE RING TO RULE THEM ALL .....select i mean one select to rule them all*/}
                 {/* so spending along time on perfecting the one select thing just to decide to do something similar to choice.js is beyond self hate at this point
@@ -555,7 +585,7 @@ const customSelect = {
           setCustomMajor("");
         }
       }}
-      placeholder="Select Major(s)..."   id="professorselect"
+      placeholder={t("info.major_placeholder")}   id="professorselect"
  
     />
   </>
@@ -564,7 +594,7 @@ const customSelect = {
 {isProf && (<input type="file" id="IsProf" className="IsProf" onChange={(e) => setProfProof(e.target.files[0])} />
 )}
 <br />
-{isProf && (<small style={{color:"black", fontSize:"1.2rem"}}>Proof Documentation please,work contract or a degree</small> )}
+{isProf && (<small style={{color:"black", fontSize:"1.2rem"}}>{t("info.prof_proof_hint")}</small> )}
 
 
 <br /><br />
@@ -572,7 +602,7 @@ const customSelect = {
   <input
     type="text"
     className="other"
-    placeholder="Enter Major"
+    placeholder={t("info.major_other_placeholder")}
     value={customMajor}
     onChange={(e) => setCustomMajor(e.target.value)}
   />
@@ -584,13 +614,13 @@ const customSelect = {
             </fieldset>
         
            <br/><br/>
-            <input type="submit" value={isSubmitting ? "Sending..." : "Next"}  disabled={isSubmitting} id="btn1"/>  {/* onClick={() => navigate("/register")} */}
+            <input type="submit" value={isSubmitting ? t("info.submitting") : t("info.submit")}  disabled={isSubmitting} id="btn1"/>  {/* onClick={() => navigate("/register")} */}
            <br/><br/>
             <a href="#" id="InfoLink" onClick={() => navigate("/")} style={{marginRight:"30px"}}>
-              Back to Home?
+              {t("info.link_back_home")}
             </a>
            <a href="#" id="InfoLink" onClick={() => navigate("/login")}>
-              Already Have An Account?
+              {t("info.link_login")}
             </a>
         </fieldset>
     

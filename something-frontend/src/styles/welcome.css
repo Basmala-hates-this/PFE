@@ -32,7 +32,7 @@
 }
 
 .welcome {
-  font-size: 3em;   /*notice how i'm trying em and rem instead of px? yeah i hate it....*/
+  font-size: 3.6rem;   /*notice how i'm trying em and rem instead of px? yeah i hate it....*/
   margin-bottom: 0.6em;
   margin-left: 0.4em;
 }
@@ -40,7 +40,7 @@
 .quote {
   font-style: italic;
   opacity: 0.9;
-  margin-bottom: 2em;
+  margin-bottom: 2rem;
 }
 
 .buttons {
@@ -53,7 +53,7 @@
   padding: 0.7rem 1.5em;
   border: none;
   border-radius: 10px;
-  font-size: 1rem;
+  font-size: 1.1rem;
   cursor: pointer;
   font-weight: 600;
   width: 50%;
@@ -183,3 +183,28 @@ color: antiquewhite;
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+
+.lang-dropdown {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: none;
+  font-size: 14px;
+  background: rgba(5, 5, 5, 0.394);
+  color: white;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+

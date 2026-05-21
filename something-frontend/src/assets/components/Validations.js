@@ -5,7 +5,6 @@
 
 
 
-
 // NAME VALIDATION
 
 export function isValidFullName(name) {
@@ -103,7 +102,8 @@ export function isValidMajors(majors, role) {
 
 
 //username validation
-export const validateUsername = (value) => {
+export const validateUsername = (value, t) => {
+    
   const minLength = 5;
   const maxLength = 20;
   const allowedPattern = /^[a-zA-Z0-9_$&\-~]+$/;
@@ -119,7 +119,9 @@ export const validateUsername = (value) => {
   if (value.length < minLength) {
     return {
       valid: false,
-      message: `Username must be at least ${minLength} characters.`,
+       message: t
+        ? t("validation.username_too_short", { min: minLength })
+        : `Username must be at least ${minLength} characters.`,
       color: "#fc0c0ce9"
     };
   }
@@ -127,7 +129,9 @@ export const validateUsername = (value) => {
   if (value.length > maxLength) {
     return {
       valid: false,
-      message: `Username must be no more than ${maxLength} characters.`,
+      message: t
+        ? t("validation.username_too_long", { max: maxLength })
+        : `Username must be no more than ${maxLength} characters.`,
       color: "#fc0c0ce9"
     };
   }
@@ -135,7 +139,9 @@ export const validateUsername = (value) => {
   if (!allowedPattern.test(value)) {
     return {
       valid: false,
-      message: "Only letters, numbers, and $&-~ are allowed.",
+      message: t
+        ? t("validation.username_invalid_chars")
+        : "Only letters, numbers, and $&-~ are allowed.",
       color: "#fc0c0ce9"
     };
   }
@@ -152,16 +158,18 @@ export const validateUsername = (value) => {
 
 
 //password strength validation
-export const checkPasswordStrength = (value) => {
+export const checkPasswordStrength = (value, t) => {
   let strength = 0;
-
+ 
   if (value.length >= 8) strength++;
   if (/[a-z]/.test(value)) strength++;
   if (/[A-Z]/.test(value)) strength++;
   if (/[0-9]/.test(value)) strength++;
   if (/[@$&\-~!#%^*+=]/.test(value)) strength++;
-
-  const messages = [
+ 
+  const messageKey = `validation.password_strength_${strength}`;
+ 
+  const fallbackMessages = [
     "",
     "Very weak, try harder",
     "Still weak, you can do better",
@@ -169,7 +177,7 @@ export const checkPasswordStrength = (value) => {
     "Strong, good job",
     "Very strong, proud of you! :)"
   ];
-
+ 
   const colors = [
     "",
     "#fc0c0ce9",
@@ -178,13 +186,14 @@ export const checkPasswordStrength = (value) => {
     "#03a794ff",
     "#249733ff"
   ];
-
+ 
   return {
     strength,
-    message: messages[strength],
+    message: t ? t(messageKey) : fallbackMessages[strength],
     color: colors[strength]
   };
 };
+ 
 
 // export { validateUsername, checkPasswordStrength };
 
@@ -199,62 +208,44 @@ export const checkPasswordStrength = (value) => {
 // PROFILE VALIDATION (AGGREGATE)
 // Rule: all profile fields must be valid
 //
-
-export function validateProfile(profile) {
-  if (!profile) return { valid: false, error: "Missing profile" };
-
-  const {
-    fullName,
-    birthDate,
-    email,
-    university,
-    role,
-    majors,
-    profProof
-  } = profile;
-
-  if (!isValidFullName(fullName)) {
-    return { valid: false, error: "Invalid full name" };
-  }
-
-  if (!isOldEnough(birthDate)) {
-    return { valid: false, error: "User must be at least 17" };
-  }
-
-  if (!isValidEmail(email)) {
-    return { valid: false, error: "Invalid email" };
-  }
-
-  if (!isValidUniversity(university)) {
-    return { valid: false, error: "Invalid university selection" };
-  }
-
-  if (!isValidRole(role)) {
-    return { valid: false, error: "Invalid role" };
-  }
-
-  if (!isValidMajors(majors, role)) {
-    return { valid: false, error: "Invalid majors selection" };
-  }
-  //the extra proof of prof with extra steps of course.....
+export function validateProfile(profile, t) {
+  const _ = (key) => (t ? t(key) : key); // helper: translate or return key as fallback
+ 
+  if (!profile) return { valid: false, error: _("validation.profile_missing") };
+ 
+  const { fullName, birthDate, email, university, role, majors, profProof } = profile;
+ 
+  if (!isValidFullName(fullName))
+    return { valid: false, error: _("validation.profile_invalid_name") };
+ 
+  if (!isOldEnough(birthDate))
+    return { valid: false, error: _("validation.profile_underage") };
+ 
+  if (!isValidEmail(email))
+    return { valid: false, error: _("validation.profile_invalid_email") };
+ 
+  if (!isValidUniversity(university))
+    return { valid: false, error: _("validation.profile_invalid_university") };
+ 
+  if (!isValidRole(role))
+    return { valid: false, error: _("validation.profile_invalid_role") };
+ 
+  if (!isValidMajors(majors, role))
+    return { valid: false, error: _("validation.profile_invalid_majors") };
+ 
   if (role === "professor") {
-  if (!profProof) {
-    return { valid: false, error: "Proof documentation is required" };
+    if (!profProof)
+      return { valid: false, error: _("validation.profile_proof_required") };
+ 
+    const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
+    if (!allowedTypes.includes(profProof.type))
+      return { valid: false, error: _("validation.profile_proof_invalid_type") };
+ 
+    if (profProof.size > 7 * 1024 * 1024)
+      return { valid: false, error: _("validation.profile_proof_too_large") };
   }
-
-  const allowedTypes = ["application/pdf", "image/jpeg", "image/png"];
-
-  if (!allowedTypes.includes(profProof.type)) {
-    return { valid: false, error: "Only PDF or image files allowed" };
-  }
-
-  if (profProof.size > 5 * 1024 * 1024) {
-    return { valid: false, error: "File must be under 5MB" };
-  }
-}
-
+ 
   return { valid: true };
 }
-
 
 
