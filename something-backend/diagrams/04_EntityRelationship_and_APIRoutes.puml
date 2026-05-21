@@ -1,0 +1,264 @@
+@startuml ER_Diagram
+title Backend System - Entity Relationship Diagram
+
+'' ============================================
+'' ENTITIES & RELATIONSHIPS
+'' ============================================
+
+entity "USERS" as users {
+  *id : int <<PK>>
+  --
+  full_name : varchar
+  birth_date : date
+  email : varchar <<UK>>
+  username : varchar <<UK>>
+  password_hash : varchar
+  role : enum (student|professor|admin|guest)
+  verification_status : varchar
+  university_code : varchar
+  university_name : varchar
+  profile_pic_url : text
+  proof_file_url : text (for professor verification)
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "UNIVERSITIES" as universities {
+  *id : int <<PK>>
+  --
+  code : varchar <<UK>>
+  name : varchar
+  status : enum (pending|approved|rejected)
+  created_at : timestamp
+}
+
+entity "MAJORS" as majors {
+  *id : int <<PK>>
+  --
+  name : varchar <<UK>>
+  status : enum (pending|approved|rejected)
+  created_at : timestamp
+}
+
+entity "USER_MAJORS" as user_majors {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  major_id : int <<FK>>
+}
+
+entity "ROOMS" as rooms {
+  *id : int <<PK>>
+  --
+  name : varchar
+  description : text
+  type : enum (public|university|private)
+  is_private : boolean
+  pass_key : varchar (for private rooms)
+  created_by : int <<FK>>
+  subject : varchar
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "ROOM_MEMBERS" as room_members {
+  *id : int <<PK>>
+  --
+  room_id : int <<FK>>
+  user_id : int <<FK>>
+  role : enum (admin|moderator|member)
+  joined_at : timestamp
+}
+
+entity "ROOM_SUSPENSIONS" as room_suspensions {
+  *id : int <<PK>>
+  --
+  room_id : int <<FK>>
+  user_id : int <<FK>>
+  suspended_until : timestamp
+  reason : text
+}
+
+entity "POSTS" as posts {
+  *id : int <<PK>>
+  --
+  room_id : int <<FK>>
+  user_id : int <<FK>>
+  author_username : varchar
+  author_role : varchar
+  title : varchar
+  content : text
+  image_url : text
+  pdf_url : text
+  resource_link : text
+  resource_label : varchar
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "POST_VOTE_COUNTS" as post_votes {
+  *id : int <<PK>>
+  --
+  post_id : int <<FK>>
+  user_id : int <<FK>>
+  type : enum (useful|useless)
+  created_at : timestamp
+}
+
+entity "VOTES" as votes {
+  *id : int <<PK>>
+  --
+  post_id : int <<FK>>
+  user_id : int <<FK>>
+  type : enum (useful|useless)
+  created_at : timestamp
+}
+
+entity "COMMENTS" as comments {
+  *id : int <<PK>>
+  --
+  post_id : int <<FK>>
+  user_id : int <<FK>>
+  author_username : varchar
+  content : text
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "MESSAGES" as messages {
+  *id : int <<PK>>
+  --
+  room_id : int <<FK>>
+  user_id : int <<FK>>
+  author_username : varchar
+  content : text
+  created_at : timestamp
+  updated_at : timestamp
+}
+
+entity "FOLLOWERS" as followers {
+  *id : int <<PK>>
+  --
+  follower_id : int <<FK>>
+  following_id : int <<FK>>
+  created_at : timestamp
+}
+
+entity "ADMIN_APPLICATIONS" as admin_apps {
+  *id : int <<PK>>
+  --
+  type : enum (university|major|professor)
+  applicant_id : int <<FK>>
+  name : varchar
+  status : enum (pending|approved|rejected)
+  reason : text
+  created_at : timestamp
+  reviewed_at : timestamp
+}
+
+entity "LOGS" as logs {
+  *id : int <<PK>>
+  --
+  user_id : int <<FK>>
+  action : varchar
+  resource_type : varchar
+  resource_id : int
+  details : text
+  created_at : timestamp
+}
+
+entity "ANNOUNCEMENTS" as announcements {
+  *id : int <<PK>>
+  --
+  title : varchar
+  content : text
+  created_by : int <<FK>>
+  created_at : timestamp
+}
+
+'' ============================================
+'' RELATIONSHIPS
+'' ============================================
+
+users ||--o{ user_majors : "has"
+majors ||--o{ user_majors : "grouped_by"
+users ||--o{ rooms : "creates"
+users ||--o{ room_members : "joins"
+rooms ||--o{ room_members : "contains"
+rooms ||--o{ room_suspensions : "has"
+users ||--o{ room_suspensions : "subject_of"
+rooms ||--o{ posts : "contains"
+users ||--o{ posts : "writes"
+posts ||--o{ votes : "receives"
+users ||--o{ votes : "gives"
+posts ||--o{ comments : "has"
+users ||--o{ comments : "creates"
+rooms ||--o{ messages : "contains"
+users ||--o{ messages : "sends"
+users ||--o{ followers : "follows"
+users ||--o{ followers : "followed_by"
+users ||--o{ admin_apps : "submits"
+users ||--o{ logs : "performs"
+users ||--o{ announcements : "creates"
+
+@enduml
+
+@startuml API_Routes
+title Backend System - API Routes & Endpoints
+
+package "Authentication Routes" {
+  (POST /api/auth/register) as auth_register
+  (POST /api/auth/login) as auth_login
+  (POST /api/auth/logout) as auth_logout
+  (POST /api/auth/reset-password) as auth_reset
+  (POST /api/auth/verify-otp) as auth_otp
+}
+
+package "User Routes" {
+  (GET /api/users/me) as user_me
+  (PUT /api/users/me) as user_update
+  (GET /api/users/:id) as user_profile
+  (POST /api/users/:id/follow) as user_follow
+  (DELETE /api/users/:id/follow) as user_unfollow
+  (GET /api/users/:id/followers) as user_followers
+}
+
+package "Post Routes" {
+  (POST /api/posts) as post_create
+  (GET /api/posts/:id) as post_get
+  (PUT /api/posts/:id) as post_update
+  (DELETE /api/posts/:id) as post_delete
+  (GET /api/posts) as post_list
+  (POST /api/posts/:id/votes) as post_vote
+  (POST /api/posts/:id/comments) as post_comment
+  (GET /api/posts/:id/comments) as post_comments_list
+}
+
+package "Room Routes" {
+  (GET /api/rooms) as room_my
+  (GET /api/rooms/public-rooms) as room_public
+  (POST /api/rooms) as room_create
+  (GET /api/rooms/:id) as room_get
+  (POST /api/rooms/:id/join) as room_join
+  (DELETE /api/rooms/:id/leave) as room_leave
+  (POST /api/rooms/:id/invite) as room_invite
+  (POST /api/rooms/:id/suspend) as room_suspend
+}
+
+package "Message Routes" {
+  (POST /api/rooms/:roomId/messages) as msg_send
+  (GET /api/rooms/:roomId/messages) as msg_get
+  (DELETE /api/rooms/:roomId/messages/:msgId) as msg_delete
+  (PUT /api/rooms/:roomId/messages/:msgId) as msg_update
+}
+
+package "Admin Routes" {
+  (GET /api/admin/applications) as admin_apps
+  (POST /api/admin/university/approve) as admin_uni
+  (POST /api/admin/major/approve) as admin_major
+  (POST /api/admin/professor/verify) as admin_prof
+  (POST /api/admin/suspend) as admin_suspend
+  (GET /api/admin/logs) as admin_logs
+}
+
+@enduml

@@ -1,0 +1,361 @@
+''========================================
+'' CLASS DIAGRAM - ARCHITECTURE OVERVIEW
+''========================================
+@startuml ClassDiagram
+title Backend System - Class Diagram
+
+package "Controllers" {
+  class AuthController {
+    register(req, res)
+    login(req, res)
+    logout(req, res)
+    resetPassword(req, res)
+    verifyOTP(req, res)
+  }
+
+  class UserController {
+    getMe(req, res)
+    updateMe(req, res)
+    getPublicProfile(req, res)
+    followUser(req, res)
+    unfollowUser(req, res)
+  }
+
+  class PostController {
+    createPost(req, res)
+    getPostById(req, res)
+    updatePost(req, res)
+    deletePost(req, res)
+    voteOnPost(req, res)
+    createComment(req, res)
+  }
+
+  class RoomController {
+    getMyRooms(req, res)
+    getPublicRooms(req, res)
+    createPrivateRoom(req, res)
+    joinRoom(req, res)
+    leaveRoom(req, res)
+    suspendUser(req, res)
+  }
+
+  class MessageController {
+    sendMessage(req, res)
+    getMessages(req, res)
+    deleteMessage(req, res)
+  }
+
+  class AdminController {
+    getAdminApplications(req, res)
+    approveUniversity(req, res)
+    approveMajor(req, res)
+    approveProfessor(req, res)
+    suspendUser(req, res)
+  }
+}
+
+package "Repositories" {
+  class UserRepository {
+    createUser(userData)
+    findById(id)
+    findByEmail(email)
+    findByUsername(username)
+    updateUser(id, data)
+    deleteUser(id)
+  }
+
+  class PostRepository {
+    createPost(postData)
+    getPostById(id, userId)
+    getPostsByRoom(roomId, userId)
+    updatePost(id, data)
+    deletePost(id)
+  }
+
+  class CommentRepository {
+    createComment(commentData)
+    getCommentsByPost(postId)
+    deleteComment(id)
+  }
+
+  class VoteRepository {
+    voteOnPost(postId, userId, type)
+    getVoteCount(postId)
+    removeVote(postId, userId)
+  }
+
+  class RoomRepository {
+    createRoom(roomData)
+    findRoomById(id)
+    getUserRooms(userId)
+    getAllRooms()
+    addMember(roomId, userId, role)
+    removeMember(roomId, userId)
+    getRoomSuspension(roomId, userId)
+  }
+
+  class MessageRepository {
+    createMessage(messageData)
+    getMessages(roomId, limit, offset)
+    deleteMessage(id)
+  }
+}
+
+package "Middleware" {
+  class AuthMiddleware {
+    protect(req, res, next)
+    guestBlock(req, res, next)
+    optionalAuth(req, res, next)
+  }
+
+  class PermissionMiddleware {
+    requirePermission(permission)
+    requireRole(role)
+  }
+
+  class UploadMiddleware {
+    handleFileUpload(req, res, next)
+    validateFile(req, res, next)
+  }
+}
+
+package "Services" {
+  class AuthService {
+    hashPassword(password)
+    verifyPassword(password, hash)
+    generateToken(user)
+    sendResetEmail(email)
+    sendOtpEmail(email)
+  }
+
+  class UserService {
+    getUserMajors(userId)
+    isDefaultUniversity(code)
+    isDefaultMajor(name)
+  }
+
+  class EmailService {
+    sendFollowEmail(email, username)
+    sendRoomInviteEmail(email, username, room, inviter)
+    sendResetEmail(email, link)
+    sendOtpEmail(email, otp)
+  }
+}
+
+package "Database" {
+  class DatabasePool {
+    query(sql, params)
+    connect()
+    disconnect()
+  }
+}
+
+AuthController --> UserRepository : uses
+AuthController --> AuthService : uses
+UserController --> UserRepository : uses
+UserController --> PostRepository : uses
+PostController --> PostRepository : uses
+PostController --> CommentRepository : uses
+PostController --> VoteRepository : uses
+PostController --> UserRepository : uses
+RoomController --> RoomRepository : uses
+RoomController --> UserRepository : uses
+RoomController --> EmailService : uses
+MessageController --> MessageRepository : uses
+MessageController --> RoomRepository : uses
+AdminController --> UserRepository : uses
+
+UserRepository --> DatabasePool : uses
+PostRepository --> DatabasePool : uses
+CommentRepository --> DatabasePool : uses
+VoteRepository --> DatabasePool : uses
+RoomRepository --> DatabasePool : uses
+MessageRepository --> DatabasePool : uses
+
+AuthService --> UserRepository : uses
+AuthService --> EmailService : uses
+UserService --> DatabasePool : uses
+
+@enduml
+
+''========================================
+'' USE CASE DIAGRAM - SYSTEM INTERACTIONS
+''========================================
+@startuml UseCaseDiagram
+title Backend System - Use Case Diagram
+
+left to right direction
+actor Student
+actor Professor
+actor Admin
+actor Guest
+
+Student --|> User
+Professor --|> User
+Admin --|> User
+
+(Register) : New user creation
+(Login) : User authentication
+(Reset Password) : Password recovery
+(Create Post) : Write content
+(Vote on Post) : Like/Dislike
+(Comment) : Reply to posts
+(View Profile) : See user info
+(Follow User) : Subscribe to user
+(Create Room) : Start discussion
+(Join Room) : Enter space
+(Send Message) : Room chat
+(Browse Posts) : Read content
+
+Guest --> (Browse Posts)
+Guest --> (View Profile)
+
+User --> (Login)
+User --> (Logout)
+User --> (View Profile)
+User --> (Create Post)
+User --> (Vote on Post)
+User --> (Comment)
+User --> (Follow User)
+User --> (Create Room)
+User --> (Join Room)
+User --> (Send Message)
+User --> (Reset Password)
+
+Student --> (Register)
+
+Professor --> (Register)
+Professor --> (Verify Account)
+
+Admin --> (Approve University)
+Admin --> (Approve Major)
+Admin --> (Approve Professor)
+Admin --> (Suspend User)
+Admin --> (View Applications)
+
+@enduml
+
+''========================================
+'' SEQUENCE DIAGRAM - USER REGISTRATION
+''========================================
+@startuml SequenceDiagram1
+title Sequence Diagram - User Registration Flow
+
+actor User
+participant "Express App" as App
+participant "Auth Controller" as AuthCtrl
+participant "User Repository" as UserRepo
+participant "Auth Service" as AuthSvc
+participant "Database" as DB
+participant "Email Service" as Email
+
+User -> App: POST /api/auth/register
+App -> AuthCtrl: register(req, res)
+AuthCtrl -> UserRepo: findByEmail(email)
+UserRepo -> DB: SELECT * FROM users WHERE email
+DB --> UserRepo: User data or null
+UserRepo --> AuthCtrl: Existing user or null
+
+alt User Already Exists
+    AuthCtrl --> App: 400 Email already exists
+    App --> User: Error Response
+else New User
+    AuthCtrl -> AuthSvc: hashPassword(password)
+    AuthSvc --> AuthCtrl: Hashed password
+    AuthCtrl -> UserRepo: createUser(userData)
+    UserRepo -> DB: INSERT INTO users
+    DB --> UserRepo: Created user
+    UserRepo --> AuthCtrl: User object
+    AuthCtrl -> AuthSvc: generateToken(user)
+    AuthSvc --> AuthCtrl: JWT Token
+    AuthCtrl -> Email: sendWelcomeEmail(email)
+    Email --> AuthCtrl: Email sent
+    AuthCtrl --> App: 201 User created with token
+    App --> User: JWT Token + User Data
+end
+
+@enduml
+
+''========================================
+'' SEQUENCE DIAGRAM - POST CREATION
+''========================================
+@startuml SequenceDiagram2
+title Sequence Diagram - Create Post in Room
+
+actor User
+participant "Express App" as App
+participant "Auth Middleware" as AuthMW
+participant "Post Controller" as PostCtrl
+participant "Post Repository" as PostRepo
+participant "Room Repository" as RoomRepo
+participant "Database" as DB
+
+User -> App: POST /api/posts (with JWT token)
+App -> AuthMW: protect(req, res, next)
+AuthMW -> AuthMW: verify JWT token
+AuthMW --> App: next() - User authenticated
+
+App -> PostCtrl: createPost(req, res)
+PostCtrl -> RoomRepo: getRoomSuspension(roomId, userId)
+RoomRepo -> DB: SELECT suspension WHERE room_id AND user_id
+DB --> RoomRepo: Suspension data or null
+
+alt User Suspended
+    PostCtrl --> App: 403 User suspended
+    App --> User: Error: Cannot post
+else User Not Suspended
+    PostCtrl -> PostRepo: createPost(postData)
+    PostRepo -> DB: INSERT INTO posts
+    DB --> PostRepo: Created post with ID
+    PostRepo --> PostCtrl: Post object
+    PostCtrl -> PostRepo: getPostById(postId, userId)
+    PostRepo -> DB: SELECT posts with votes and comments
+    DB --> PostRepo: Full post data
+    PostRepo --> PostCtrl: Enriched post object
+    PostCtrl --> App: 201 Post created
+    App --> User: Post object with ID
+end
+
+@enduml
+
+''========================================
+'' SEQUENCE DIAGRAM - ROOM JOINING
+''========================================
+@startuml SequenceDiagram3
+title Sequence Diagram - Join Room Flow
+
+actor User
+participant "Express App" as App
+participant "Auth Middleware" as AuthMW
+participant "Room Controller" as RoomCtrl
+participant "Room Repository" as RoomRepo
+participant "User Repository" as UserRepo
+participant "Database" as DB
+
+User -> App: POST /api/rooms/:roomId/join
+App -> AuthMW: protect(req, res, next)
+AuthMW -> AuthMW: verify JWT token
+AuthMW --> App: User authenticated
+
+App -> RoomCtrl: joinRoom(req, res)
+RoomCtrl -> RoomRepo: findRoomById(roomId)
+RoomRepo -> DB: SELECT * FROM rooms WHERE id
+DB --> RoomRepo: Room data
+
+alt Room Not Found
+    RoomCtrl --> App: 404 Room not found
+    App --> User: Error Response
+else Room Exists
+    RoomCtrl -> RoomRepo: addMember(roomId, userId, 'member')
+    RoomRepo -> DB: INSERT INTO room_members
+    DB --> RoomRepo: Member added
+    RoomRepo --> RoomCtrl: Success
+    RoomCtrl -> UserRepo: findById(userId)
+    UserRepo -> DB: SELECT user data
+    DB --> UserRepo: User object
+    UserRepo --> RoomCtrl: User data
+    RoomCtrl --> App: 200 Member added
+    App --> User: Room membership confirmed
+end
+
+@enduml

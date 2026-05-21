@@ -1241,12 +1241,11 @@ export default function Dashboard() {
               ))}
             </div>
             <div className="fyp-feed" id="fyp-feed">
-              <p>
+              {/* <p>
                 ehh...the mock are just for funsies....this will not be at all
                 the way this will be..i hope
-              </p>
-              <br />
-              <br />
+                how the tables have turned......damn u ihm prof u ruined my happines of my work
+              </p> */}
               {loading ? (
                 <p>Loading posts...</p>
               ) : posts.length === 0 ? (

@@ -1,0 +1,269 @@
+@startuml SequenceDiagrams
+title Backend System - Sequence Diagrams
+
+'' ============================================
+'' DIAGRAM 1: USER REGISTRATION FLOW
+'' ============================================
+autonumber
+
+box "User Registration Flow" #LightBlue
+participant User as "🧑 User"
+participant Express as "⚙️ Express App"
+participant AuthCtrl as "🎛️ Auth Controller"
+participant AuthSvc as "🔐 Auth Service"
+participant UserRepo as "💾 User Repository"
+participant Database as "🗄️ Database"
+participant EmailSvc as "📧 Email Service"
+end box
+
+User -> Express: 1. POST /api/auth/register
+Express -> AuthCtrl: 2. register(req, res)
+AuthCtrl -> UserRepo: 3. findByEmail(email)
+UserRepo -> Database: 4. SELECT * FROM users WHERE email
+Database --> UserRepo: 5. null (not found)
+UserRepo --> AuthCtrl: 6. null
+
+alt User Already Exists
+    Database --> UserRepo: 5. User found
+    UserRepo --> AuthCtrl: 6. User object
+    AuthCtrl --> Express: 7. {status: 400}
+    Express --> User: 8. Error: Email exists
+else New User Registration
+    AuthCtrl -> AuthSvc: 9. hashPassword(password)
+    AuthSvc --> AuthCtrl: 10. hashed_pwd
+    AuthCtrl -> UserRepo: 11. createUser(userData)
+    UserRepo -> Database: 12. INSERT INTO users
+    Database --> UserRepo: 13. New user with ID
+    UserRepo --> AuthCtrl: 14. User object
+    AuthCtrl -> AuthSvc: 15. generateToken(user)
+    AuthSvc --> AuthCtrl: 16. JWT token
+    AuthCtrl -> EmailSvc: 17. sendWelcomeEmail(email)
+    EmailSvc --> AuthCtrl: 18. Email sent
+    AuthCtrl --> Express: 19. {status: 201, token, user}
+    Express --> User: 20. Success + Token
+end
+
+note over User
+  User can now use JWT token
+  for authenticated requests
+end note
+
+'' ============================================
+'' DIAGRAM 2: POST CREATION WITH VALIDATION
+'' ============================================
+autonumber
+
+box "Create Post in Room" #LightGreen
+participant User as "🧑 User"
+participant Express as "⚙️ Express App"
+participant AuthMW as "🔒 Auth Middleware"
+participant Upload as "📁 Upload Middleware"
+participant PostCtrl as "🎛️ Post Controller"
+participant RoomRepo as "💾 Room Repository"
+participant PostRepo as "💾 Post Repository"
+participant Database as "🗄️ Database"
+end box
+
+User -> Express: 1. POST /api/posts (JWT + file)
+Express -> AuthMW: 2. protect(req, res, next)
+AuthMW -> AuthMW: 3. Verify JWT token
+AuthMW --> Express: 4. Token valid, next()
+
+Express -> Upload: 5. handleFileUpload(req, res, next)
+Upload -> Upload: 6. Validate file (size, type)
+Upload --> Express: 7. File uploaded, next()
+
+Express -> PostCtrl: 8. createPost(req, res)
+PostCtrl -> RoomRepo: 9. getRoomSuspension(roomId, userId)
+RoomRepo -> Database: 10. SELECT suspension_until
+Database --> RoomRepo: 11. suspension data or null
+
+alt User is Suspended
+    RoomRepo --> PostCtrl: 12. Suspension found (active)
+    PostCtrl --> Express: 13. {status: 403, message}
+    Express --> User: 14. Error: Cannot post
+else User Not Suspended
+    RoomRepo --> PostCtrl: 12. null or inactive
+    PostCtrl -> PostRepo: 13. createPost(postData)
+    PostRepo -> Database: 14. INSERT INTO posts
+    Database --> PostRepo: 15. Post created with ID
+    PostRepo --> PostCtrl: 16. Post object
+    PostCtrl -> PostRepo: 17. getPostById(postId, userId)
+    PostRepo -> Database: 18. SELECT posts with votes
+    Database --> PostRepo: 19. Post with metrics
+    PostRepo --> PostCtrl: 20. Enriched post object
+    PostCtrl --> Express: 21. {status: 201, post}
+    Express --> User: 22. Post created successfully
+end
+
+note over User
+  Post now visible in room
+  with voting capabilities
+end note
+
+'' ============================================
+'' DIAGRAM 3: ROOM JOINING FLOW
+'' ============================================
+autonumber
+
+box "User Joins Room" #LightYellow
+participant User as "🧑 User"
+participant Express as "⚙️ Express App"
+participant Auth as "🔒 Auth Middleware"
+participant RoomCtrl as "🎛️ Room Controller"
+participant RoomRepo as "💾 Room Repository"
+participant UserRepo as "💾 User Repository"
+participant Database as "🗄️ Database"
+end box
+
+User -> Express: 1. POST /api/rooms/:roomId/join
+Express -> Auth: 2. protect(req, res, next)
+Auth -> Auth: 3. Verify JWT
+Auth --> Express: 4. Authenticated, next()
+
+Express -> RoomCtrl: 5. joinRoom(req, res)
+RoomCtrl -> RoomRepo: 6. findRoomById(roomId)
+RoomRepo -> Database: 7. SELECT * FROM rooms WHERE id
+Database --> RoomRepo: 8. Room record
+
+alt Room Not Found
+    Database --> RoomRepo: 8. null
+    RoomRepo --> RoomCtrl: 9. null
+    RoomCtrl --> Express: 10. {status: 404}
+    Express --> User: 11. Error: Room not found
+else Room Exists
+    Database --> RoomRepo: 8. Room object
+    RoomRepo --> RoomCtrl: 9. Room object
+    
+    alt User Already Member
+        RoomCtrl --> Express: 10. {status: 400}
+        Express --> User: 11. Error: Already member
+    else New Member
+        RoomCtrl -> RoomRepo: 12. addMember(roomId, userId, 'member')
+        RoomRepo -> Database: 13. INSERT INTO room_members
+        Database --> RoomRepo: 14. Member added
+        RoomRepo --> RoomCtrl: 15. Success
+        
+        RoomCtrl -> UserRepo: 16. findById(userId)
+        UserRepo -> Database: 17. SELECT * FROM users
+        Database --> UserRepo: 18. User data
+        UserRepo --> RoomCtrl: 19. User object
+        
+        RoomCtrl --> Express: 20. {status: 200, room, members}
+        Express --> User: 21. Successfully joined room
+    end
+end
+
+note over User
+  User now has access to:
+  - Room posts
+  - Room messages
+  - Room members
+end note
+
+'' ============================================
+'' DIAGRAM 4: VOTE & COMMENT FLOW
+'' ============================================
+autonumber
+
+box "Vote and Comment on Post" #LightCyan
+participant User as "🧑 User"
+participant Express as "⚙️ Express App"
+participant Auth as "🔒 Auth Middleware"
+participant PostCtrl as "🎛️ Post Controller"
+participant VoteRepo as "💾 Vote Repository"
+participant CommentRepo as "💾 Comment Repository"
+participant Database as "🗄️ Database"
+end box
+
+par Vote on Post
+    User -> Express: 1a. POST /api/posts/:id/vote
+    Express -> Auth: 2a. protect(req, res, next)
+    Auth --> Express: 3a. Authenticated
+    Express -> PostCtrl: 4a. voteOnPost(req, res)
+    PostCtrl -> VoteRepo: 5a. voteOnPost(postId, userId, type)
+    VoteRepo -> Database: 6a. UPSERT INTO votes
+    Database --> VoteRepo: 7a. Vote recorded/updated
+    VoteRepo --> PostCtrl: 8a. Success
+    PostCtrl -> VoteRepo: 9a. getVoteCount(postId)
+    VoteRepo -> Database: 10a. SELECT COUNT votes
+    Database --> VoteRepo: 11a. {useful: 5, useless: 2}
+    VoteRepo --> PostCtrl: 12a. Vote counts
+    PostCtrl --> Express: 13a. {status: 200, votes}
+    Express --> User: 14a. Vote recorded
+and Add Comment
+    User -> Express: 1b. POST /api/posts/:id/comments
+    Express -> Auth: 2b. protect(req, res, next)
+    Auth --> Express: 3b. Authenticated
+    Express -> PostCtrl: 4b. createComment(req, res)
+    PostCtrl -> CommentRepo: 5b. createComment(commentData)
+    CommentRepo -> Database: 6b. INSERT INTO comments
+    Database --> CommentRepo: 7b. Comment created with ID
+    CommentRepo --> PostCtrl: 8b. Comment object
+    PostCtrl --> Express: 9b. {status: 201, comment}
+    Express --> User: 10b. Comment added
+end
+
+note over User
+  Post metrics updated:
+  - Vote counts displayed
+  - New comments visible
+end note
+
+'' ============================================
+'' DIAGRAM 5: SEND MESSAGE IN ROOM
+'' ============================================
+autonumber
+
+box "Send Message in Room" #LightPink
+participant User as "🧑 User"
+participant Express as "⚙️ Express App"
+participant Auth as "🔒 Auth Middleware"
+participant MsgCtrl as "🎛️ Message Controller"
+participant RoomRepo as "💾 Room Repository"
+participant MsgRepo as "💾 Message Repository"
+participant Database as "🗄️ Database"
+end box
+
+User -> Express: 1. POST /api/rooms/:roomId/messages
+Express -> Auth: 2. protect(req, res, next)
+Auth -> Auth: 3. Verify JWT token
+Auth --> Express: 4. User authenticated, next()
+
+Express -> MsgCtrl: 5. sendMessage(req, res)
+MsgCtrl -> RoomRepo: 6. checkUserInRoom(roomId, userId)
+RoomRepo -> Database: 7. SELECT * FROM room_members
+Database --> RoomRepo: 8. Member record
+
+alt User Not in Room
+    RoomRepo --> MsgCtrl: 9. null
+    MsgCtrl --> Express: 10. {status: 403}
+    Express --> User: 11. Error: Not room member
+else User in Room
+    RoomRepo --> MsgCtrl: 9. Member object
+    
+    MsgCtrl -> RoomRepo: 10. checkSuspension(roomId, userId)
+    RoomRepo -> Database: 11. SELECT suspension_until
+    Database --> RoomRepo: 12. Suspension or null
+    
+    alt User Suspended
+        RoomRepo --> MsgCtrl: 13. Active suspension
+        MsgCtrl --> Express: 14. {status: 403}
+        Express --> User: 15. Error: Suspended in room
+    else Not Suspended
+        RoomRepo --> MsgCtrl: 13. null
+        MsgCtrl -> MsgRepo: 14. createMessage(messageData)
+        MsgRepo -> Database: 15. INSERT INTO messages
+        Database --> MsgRepo: 16. Message created
+        MsgRepo --> MsgCtrl: 17. Message object
+        MsgCtrl --> Express: 18. {status: 201, message}
+        Express --> User: 19. Message sent
+    end
+end
+
+note over User
+  Message visible to all
+  room members instantly
+end note
+
+@enduml

@@ -1,0 +1,207 @@
+@startuml ClassDiagram
+title Backend System - Class Diagram (Architecture Overview)
+
+package "Controllers" {
+  class AuthController {
+    + register(req, res)
+    + login(req, res)
+    + logout(req, res)
+    + resetPassword(req, res)
+    + verifyOTP(req, res)
+  }
+
+  class UserController {
+    + getMe(req, res)
+    + updateMe(req, res)
+    + getPublicProfile(req, res)
+    + followUser(req, res)
+    + unfollowUser(req, res)
+    + getUserMajors(userId)
+  }
+
+  class PostController {
+    + createPost(req, res)
+    + getPostById(req, res)
+    + updatePost(req, res)
+    + deletePost(req, res)
+    + voteOnPost(req, res)
+    + createComment(req, res)
+    - isUserSuspendedInRoom()
+  }
+
+  class RoomController {
+    + getMyRooms(req, res)
+    + getPublicRooms(req, res)
+    + createPrivateRoom(req, res)
+    + joinRoom(req, res)
+    + leaveRoom(req, res)
+    + suspendUser(req, res)
+    + inviteUsers(req, res)
+  }
+
+  class MessageController {
+    + sendMessage(req, res)
+    + getMessages(req, res)
+    + deleteMessage(req, res)
+    + editMessage(req, res)
+  }
+
+  class AdminController {
+    + getAdminApplications(req, res)
+    + approveUniversity(req, res)
+    + approveMajor(req, res)
+    + approveProfessor(req, res)
+    + suspendUser(req, res)
+    + viewLogs(req, res)
+  }
+}
+
+package "Repositories" {
+  class UserRepository {
+    + createUser(userData)
+    + findById(id)
+    + findByEmail(email)
+    + findByUsername(username)
+    + updateUser(id, data)
+    + deleteUser(id)
+    + findFollowersCount(userId)
+  }
+
+  class PostRepository {
+    + createPost(postData)
+    + getPostById(id, userId)
+    + getPostsByRoom(roomId, userId)
+    + updatePost(id, data)
+    + deletePost(id)
+    + getPostsByUser(userId)
+  }
+
+  class CommentRepository {
+    + createComment(commentData)
+    + getCommentsByPost(postId)
+    + deleteComment(id)
+    + updateComment(id, content)
+  }
+
+  class VoteRepository {
+    + voteOnPost(postId, userId, type)
+    + getVoteCount(postId)
+    + removeVote(postId, userId)
+    + getUserVote(postId, userId)
+  }
+
+  class RoomRepository {
+    + createRoom(roomData)
+    + findRoomById(id)
+    + getUserRooms(userId)
+    + getAllRooms()
+    + addMember(roomId, userId, role)
+    + removeMember(roomId, userId)
+    + getRoomSuspension(roomId, userId)
+    + generatePassKey()
+  }
+
+  class MessageRepository {
+    + createMessage(messageData)
+    + getMessages(roomId, limit, offset)
+    + deleteMessage(id)
+    + editMessage(id, content)
+  }
+}
+
+package "Middleware" {
+  class AuthMiddleware {
+    + protect(req, res, next)
+    + guestBlock(req, res, next)
+    + optionalAuth(req, res, next)
+  }
+
+  class PermissionMiddleware {
+    + requirePermission(permission)
+    + requireRole(role)
+  }
+
+  class UploadMiddleware {
+    + handleFileUpload(req, res, next)
+    + validateFile(req, res, next)
+    + validateFileSize()
+  }
+}
+
+package "Services" {
+  class AuthService {
+    + hashPassword(password)
+    + verifyPassword(password, hash)
+    + generateToken(user)
+    + sendResetEmail(email)
+    + sendOtpEmail(email)
+  }
+
+  class UserService {
+    + getUserMajors(userId)
+    + isDefaultUniversity(code)
+    + isDefaultMajor(name)
+    + validateUserData()
+  }
+
+  class EmailService {
+    + sendFollowEmail(email, username)
+    + sendRoomInviteEmail(email, username, room, inviter)
+    + sendResetEmail(email, link)
+    + sendOtpEmail(email, otp)
+    + sendWelcomeEmail(email)
+  }
+}
+
+package "Database" {
+  class DatabasePool {
+    - connectionString: String
+    - ssl: Object
+    + query(sql, params): Promise
+    + connect(): Promise
+    + disconnect(): Promise
+  }
+}
+
+package "Utils" {
+  class ToCamel {
+    + convert(snakeCase): camelCase
+  }
+
+  class HasPermission {
+    + checkPermission(user, resource): Boolean
+  }
+}
+
+'' Relationships
+AuthController --> UserRepository : uses
+AuthController --> AuthService : uses
+UserController --> UserRepository : uses
+UserController --> PostRepository : uses
+PostController --> PostRepository : uses
+PostController --> CommentRepository : uses
+PostController --> VoteRepository : uses
+PostController --> UserRepository : uses
+RoomController --> RoomRepository : uses
+RoomController --> UserRepository : uses
+RoomController --> EmailService : uses
+MessageController --> MessageRepository : uses
+MessageController --> RoomRepository : uses
+AdminController --> UserRepository : uses
+
+UserRepository --> DatabasePool : uses
+PostRepository --> DatabasePool : uses
+CommentRepository --> DatabasePool : uses
+VoteRepository --> DatabasePool : uses
+RoomRepository --> DatabasePool : uses
+MessageRepository --> DatabasePool : uses
+
+AuthService --> UserRepository : uses
+AuthService --> EmailService : uses
+UserService --> DatabasePool : uses
+
+PostRepository --> ToCamel : uses
+UserRepository --> ToCamel : uses
+RoomRepository --> ToCamel : uses
+
+@enduml

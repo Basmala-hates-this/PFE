@@ -1,0 +1,145 @@
+@startuml UseCaseDiagram
+title Backend System - Use Case Diagram
+
+left to right direction
+
+'' Actors
+actor "Student User" as Student
+actor "Professor User" as Professor
+actor "Admin User" as Admin
+actor "Guest User" as Guest
+actor "System" as System
+
+'' User inheritance
+Student --|> BaseUser
+Professor --|> BaseUser
+Admin --|> BaseUser
+note right of BaseUser
+  Authenticated User
+end note
+
+'' Authentication Use Cases
+usecase "UC1: Register" as Register
+usecase "UC2: Login" as Login
+usecase "UC3: Logout" as Logout
+usecase "UC4: Reset Password" as ResetPwd
+usecase "UC5: Verify OTP" as VerifyOTP
+
+'' User Profile Use Cases
+usecase "UC6: View My Profile" as ViewProfile
+usecase "UC7: Edit Profile" as EditProfile
+usecase "UC8: Upload Profile Picture" as UploadPic
+usecase "UC9: View Public Profile" as ViewPubProfile
+usecase "UC10: Follow/Unfollow User" as FollowUser
+
+'' Post Use Cases
+usecase "UC11: Create Post" as CreatePost
+usecase "UC12: View Posts" as ViewPosts
+usecase "UC13: Edit Post" as EditPost
+usecase "UC14: Delete Post" as DeletePost
+usecase "UC15: Vote (Useful/Useless)" as Vote
+usecase "UC16: Add Comment" as Comment
+usecase "UC17: Search Posts" as SearchPosts
+
+'' Room Use Cases
+usecase "UC18: Browse Public Rooms" as BrowseRooms
+usecase "UC19: Create Room" as CreateRoom
+usecase "UC20: Join Room" as JoinRoom
+usecase "UC21: Leave Room" as LeaveRoom
+usecase "UC22: Send Room Message" as SendMsg
+usecase "UC23: Invite Users to Room" as InviteRoom
+
+'' Admin Use Cases
+usecase "UC24: View Applications" as ViewApps
+usecase "UC25: Approve University" as ApproveUni
+usecase "UC26: Approve Major" as ApproveMajor
+usecase "UC27: Verify Professor" as VerifyProf
+usecase "UC28: Suspend User" as SuspendUser
+usecase "UC29: View Logs" as ViewLogs
+
+'' Guest Use Cases
+Guest --> ViewPosts
+Guest --> ViewPubProfile
+Guest --> BrowseRooms
+Guest --> SearchPosts
+
+'' Student Use Cases
+Student --> Register
+Student --> Login
+Student --> Logout
+Student --> ViewProfile
+Student --> EditProfile
+Student --> UploadPic
+Student --> ViewPubProfile
+Student --> FollowUser
+Student --> CreatePost
+Student --> ViewPosts
+Student --> EditPost
+Student --> DeletePost
+Student --> Vote
+Student --> Comment
+Student --> SearchPosts
+Student --> BrowseRooms
+Student --> CreateRoom
+Student --> JoinRoom
+Student --> LeaveRoom
+Student --> SendMsg
+Student --> InviteRoom
+Student --> ResetPwd
+
+'' Professor Use Cases
+Professor --> Register
+Professor --> Login
+Professor --> Logout
+Professor --> ViewProfile
+Professor --> EditProfile
+Professor --> UploadPic
+Professor --> ViewPubProfile
+Professor --> FollowUser
+Professor --> CreatePost
+Professor --> ViewPosts
+Professor --> EditPost
+Professor --> DeletePost
+Professor --> Vote
+Professor --> Comment
+Professor --> SearchPosts
+Professor --> BrowseRooms
+Professor --> CreateRoom
+Professor --> JoinRoom
+Professor --> LeaveRoom
+Professor --> SendMsg
+Professor --> InviteRoom
+Professor --> VerifyOTP
+Professor --> ResetPwd
+
+'' Admin Use Cases
+Admin --> ViewProfile
+Admin --> EditProfile
+Admin --> UploadPic
+Admin --> ViewApps
+Admin --> ApproveUni
+Admin --> ApproveMajor
+Admin --> VerifyProf
+Admin --> SuspendUser
+Admin --> ViewLogs
+Admin --> Login
+Admin --> Logout
+
+'' System interactions
+System --> SendMsg : notifies
+System --> InviteRoom : sends email
+System --> Register : validates
+System --> VerifyOTP : generates
+
+'' Use case relationships
+FollowUser .> ViewPubProfile : <<extends>>
+EditPost .> ViewPosts : <<includes>>
+DeletePost .> ViewPosts : <<includes>>
+Vote .> ViewPosts : <<includes>>
+Comment .> ViewPosts : <<includes>>
+JoinRoom .> BrowseRooms : <<extends>>
+SendMsg .> JoinRoom : <<includes>>
+VerifyProf .> ViewApps : <<includes>>
+Register .> VerifyOTP : <<includes>> for Professor
+
+@enduml

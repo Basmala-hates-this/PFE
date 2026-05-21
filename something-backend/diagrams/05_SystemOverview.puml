@@ -1,0 +1,194 @@
+@startuml SystemOverview
+title Backend System - Quick Reference Architecture
+
+!define TECH(x) <<technology>>x
+!define ACTOR(x) <<actor>>x
+!define SERVICE(x) <<service>>x
+
+actor User ACTOR(Client)
+
+package "Frontend" {
+  component "React App" as Frontend
+}
+
+package "Backend - Express.js" {
+  component "HTTP Server" as Server
+  
+  package "Routing" {
+    component "Auth Routes"
+    component "User Routes"
+    component "Post Routes"
+    component "Room Routes"
+    component "Message Routes"
+    component "Admin Routes"
+  }
+
+  package "Middleware Layer" {
+    component "Auth Middleware"
+    component "Upload Middleware"
+    component "Error Handler"
+  }
+
+  package "Controller Layer" {
+    component "AuthController"
+    component "UserController"
+    component "PostController"
+    component "RoomController"
+    component "MessageController"
+    component "AdminController"
+  }
+
+  package "Service Layer" {
+    component "AuthService" SERVICE(Hashing, Tokens)
+    component "UserService" SERVICE(Validation)
+    component "EmailService" SERVICE(Notifications)
+  }
+
+  package "Repository Layer" {
+    component "UserRepository"
+    component "PostRepository"
+    component "RoomRepository"
+    component "CommentRepository"
+    component "VoteRepository"
+    component "MessageRepository"
+  }
+}
+
+package "Database" {
+  database "PostgreSQL" {
+    folder "Tables" {
+      entity "users"
+      entity "posts"
+      entity "rooms"
+      entity "comments"
+      entity "messages"
+      entity "votes"
+      entity "followers"
+      entity "room_members"
+      entity "room_suspensions"
+    }
+  }
+}
+
+package "External Services" {
+  component "Email Service" SERVICE(SMTP)
+  component "JWT Provider" SERVICE(Token Management)
+  component "bcrypt" SERVICE(Password Hashing)
+}
+
+User --> Frontend : Uses
+Frontend --> Server : HTTP/REST
+Server --> "Auth Routes" : Routes requests
+"Auth Routes" --> AuthMiddleware : Validates auth
+AuthMiddleware --> "Routing" : Next middleware
+"Auth Routes" --> AuthController : Handles request
+AuthController --> AuthService : Uses business logic
+AuthService --> "UserRepository" : Data access
+"UserRepository" --> PostgreSQL : SQL queries
+AuthService --> EmailService : Sends emails
+EmailService --> "Email Service" : SMTP connection
+AuthService --> "JWT Provider" : Token ops
+AuthService --> bcrypt : Hash operations
+
+"User Routes" --> AuthMiddleware
+"User Routes" --> UserController --> UserService
+UserService --> "UserRepository"
+
+"Post Routes" --> AuthMiddleware
+"Post Routes" --> PostController --> "PostRepository"
+PostController --> "CommentRepository"
+PostController --> "VoteRepository"
+
+"Room Routes" --> AuthMiddleware
+"Room Routes" --> RoomController --> "RoomRepository"
+
+"Message Routes" --> AuthMiddleware
+"Message Routes" --> MessageController --> "MessageRepository"
+
+"Admin Routes" --> AuthMiddleware
+"Admin Routes" --> AdminController --> "UserRepository"
+
+@enduml
+
+@startuml ComponentDependencies
+title Component Dependency Graph
+
+component "Request Handler" as request
+component "Auth Middleware" as auth
+component "Upload Middleware" as upload
+component "Controller" as ctrl
+component "Service" as svc
+component "Repository" as repo
+component "Database" as db
+component "Email" as email
+
+request --> auth
+request --> upload
+request --> ctrl
+ctrl --> svc
+ctrl --> repo
+svc --> repo
+svc --> email
+repo --> db
+
+@enduml
+
+@startuml AuthenticationFlow
+title Authentication Flow Diagram
+
+state "User Makes Request" as req
+state "Express Receives" as receive
+state "Auth Middleware" as mw {
+  state "Extract Token" as extract
+  state "Verify JWT" as verify
+  state "Add User to req" as adduser
+}
+state "Route Handler" as route
+state "Protected Resource" as resource
+state "Return Response" as response
+state "Error: No Token" as error1
+state "Error: Invalid Token" as error2
+
+req --> receive
+receive --> mw
+receive --> error1: No token
+extract --> verify
+verify --> error2: Invalid token
+verify --> adduser
+adduser --> route
+route --> resource
+resource --> response
+
+@enduml
+
+@startuml DataFlowDiagram
+title Complete Data Flow - Post Creation
+
+' Levels
+node "Presentation" as p #LightBlue
+node "API Layer" as api #LightGreen
+node "Business Logic" as logic #LightYellow
+node "Data Access" as data #LightCoral
+node "Persistence" as persist #LightGray
+
+' Components
+p --> api : HTTP POST /api/posts
+api --> logic : PostController.create()
+logic --> data : PostRepository.create()
+data --> persist : INSERT INTO posts
+persist --> data : post_id returned
+data --> logic : Post object
+logic --> api : {status: 201, post}
+api --> p : JSON response
+
+' Parallel validation
+api ..> logic : Check suspension
+logic ..> data : getRoomSuspension()
+data ..> persist : SELECT from room_suspensions
+
+' File handling
+api --> logic : Process upload
+logic --> logic : Validate file
+logic --> persist : Save to disk + DB
+
+@enduml
