@@ -265,6 +265,102 @@
   "guestCommentAlert": "Créez un compte pour contribuer....",
   "guestVoteAlert": "Créez un compte pour voter ! 👋",
   "deleteCommentConfirm": "Supprimer ce commentaire ?"
-}
+},
+ "profile": {
+    "title": "Profil",
+    "sidebar": {
+      "dashboard": "retourner",
+      "myRooms": "Mes Salles",
+      "createRoom": "Créer une Salle Privée",
+      "joinRoom": "Rejoindre une Salle Privée",
+      "savedPosts": "Mes Publications Sauvegardées",
+      "connections": "Connexions",
+      "edit": "Modifier",
+      "adminPanel": "Panneau Admin",
+      "logout": "Déconnexion",
+      "deleteAccount": "Supprimer le Compte"
+    },
+    "card": {
+      "email": "Email",
+      "majors": "Spécialité(s)",
+      "tag": "Rôle",
+      "rating": "Note"
+    },
+    "admin": {
+      "qualifies": "🛡️ Votre note vous qualifie pour postuler au rôle d'administrateur.",
+      "apply": "Postuler comme Admin",
+      "submitting": "Envoi en cours...",
+      "pending": "Candidature soumise — en attente de l'examen du super-admin.",
+      "withdraw": "Retirer la Candidature",
+      "withdrawing": "Retrait en cours...",
+      "windowPassed": "La fenêtre de retrait est passée. Contactez un super-admin pour supprimer votre candidature."
+    },
+    "stats": {
+      "posts": "Publications 📝",
+      "comments": "Commentaires 🗨️",
+      "useful": "Votes Utiles 👍",
+      "useless": "Votes Inutiles ❌",
+      "specialized": "Spécialisé ✨",
+      "rooms": "Salles Rejointes 🏠"
+    },
+    "specialtyMajors": "Spécialités",
+    "noSubjectRooms": "Aucune salle de matière rejointe pour l'instant",
+    "createRoomModal": {
+      "title": "Créer une Salle Privée",
+      "roomNameLabel": "Nom de la Salle",
+      "roomNamePlaceholder": "Entrez le nom de la salle...",
+      "generateKey": "Générer la clé automatiquement",
+      "passKeyPlaceholder": "Entrez votre propre clé...",
+      "inviteLabel": "Inviter depuis vos abonnements :",
+      "cancel": "Annuler",
+      "create": "Créer",
+      "creating": "Création..."
+    },
+    "joinRoomModal": {
+      "title": "Rejoindre une Salle Privée",
+      "passkeyLabel": "Entrer la Clé",
+      "passkeyPlaceholder": "Entrez la clé de 8 caractères...",
+      "cancel": "Annuler",
+      "join": "Rejoindre"
+    },
+    "myRoomsModal": {
+      "title": "Mes Salles",
+      "noRooms": "Aucune salle pour l'instant.",
+      "openChat": "Ouvrir le Chat"
+    },
+    "savedPostsModal": {
+      "title": "🔖 Publications Sauvegardées",
+      "searchPlaceholder": "Rechercher des publications...",
+      "tabs": {
+        "all": "📚 Tout",
+        "posts": "📝 Publications",
+        "images": "🖼️ Images",
+        "files": "📄 Fichiers",
+        "links": "🔗 Liens"
+      },
+      "loading": "Chargement...",
+      "nothingHere": "Rien ici pour l'instant."
+    },
+    "drilldown": {
+      "posts": "📝 Mes Publications",
+      "comments": "🗨️ Mes Commentaires",
+      "useful": "👍 Publications/Commentaires avec votes Utiles",
+      "useless": "❌ Publications avec votes Inutiles",
+      "specialized": "✨ Commentaires avec votes Spécialisés",
+      "rooms": "🏠 Mes Salles",
+      "loading": "Chargement...",
+      "nothingHere": "Rien ici pour l'instant.",
+      "openChat": "Ouvrir le Chat",
+      "comment": "commentaire",
+      "post": "publication"
+    },
+    "deleteConfirm": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
+    "deleteUsernamePrompt": "Entrez votre nom d'utilisateur pour confirmer la suppression :",
+    "deleteUsernameError": "Nom d'utilisateur incorrect.",
+    "deleteSuccess": "Compte supprimé avec succès.",
+    "genericError": "Une erreur s'est produite.",
+    "applySuccess": "Candidature soumise !",
+    "withdrawConfirm": "Retirer votre candidature admin ?"
+  }
 
 }

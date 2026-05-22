@@ -265,5 +265,101 @@
   "guestCommentAlert": "Create an account to contribute....",
   "guestVoteAlert": "Create an account to vote! 👋",
   "deleteCommentConfirm": "Delete this comment?"
-}
+},
+ "profile": {
+    "title": "Profile",
+    "sidebar": {
+      "dashboard": "Back",
+      "myRooms": "My Rooms",
+      "createRoom": "Create Private Room",
+      "joinRoom": "Join Private Room",
+      "savedPosts": "My Saved Posts",
+      "connections": "Connections",
+      "edit": "Edit",
+      "adminPanel": "Admin Panel",
+      "logout": "Logout",
+      "deleteAccount": "Delete Account"
+    },
+    "card": {
+      "email": "Email",
+      "majors": "Major(s)",
+      "tag": "Tag",
+      "rating": "Rating"
+    },
+    "admin": {
+      "qualifies": "🛡️ Your rating qualifies you to apply for an admin role.",
+      "apply": "Apply for Admin",
+      "submitting": "Submitting...",
+      "pending": "Application submitted — pending superadmin review.",
+      "withdraw": "Withdraw Application",
+      "withdrawing": "Withdrawing...",
+      "windowPassed": "Withdrawal window passed. Contact a superadmin to remove your application."
+    },
+    "stats": {
+      "posts": "Posts 📝",
+      "comments": "Comments 🗨️",
+      "useful": "Useful Count 👍",
+      "useless": "Useless Count ❌",
+      "specialized": "Specialized ✨",
+      "rooms": "Rooms Joined 🏠"
+    },
+    "specialtyMajors": "Specialty Majors",
+    "noSubjectRooms": "No subject rooms joined yet",
+    "createRoomModal": {
+      "title": "Create Private Room",
+      "roomNameLabel": "Room Name",
+      "roomNamePlaceholder": "Enter room name...",
+      "generateKey": "Generate passkey automatically",
+      "passKeyPlaceholder": "Enter your own passkey...",
+      "inviteLabel": "Invite from your following:",
+      "cancel": "Cancel",
+      "create": "Create",
+      "creating": "Creating..."
+    },
+    "joinRoomModal": {
+      "title": "Join Private Room",
+      "passkeyLabel": "Enter Passkey",
+      "passkeyPlaceholder": "Enter 8 character passkey...",
+      "cancel": "Cancel",
+      "join": "Join"
+    },
+    "myRoomsModal": {
+      "title": "My Rooms",
+      "noRooms": "No rooms yet.",
+      "openChat": "Open Chat"
+    },
+    "savedPostsModal": {
+      "title": "🔖 Saved Posts",
+      "searchPlaceholder": "Search saved posts...",
+      "tabs": {
+        "all": "📚 All",
+        "posts": "📝 Posts",
+        "images": "🖼️ Images",
+        "files": "📄 Files",
+        "links": "🔗 Links"
+      },
+      "loading": "Loading...",
+      "nothingHere": "Nothing here yet."
+    },
+    "drilldown": {
+      "posts": "📝 My Posts",
+      "comments": "🗨️ My Comments",
+      "useful": "👍 Posts/Comments that got Useful votes",
+      "useless": "❌ Posts that got Useless votes",
+      "specialized": "✨ Comments that got Specialized votes",
+      "rooms": "🏠 My Rooms",
+      "loading": "Loading...",
+      "nothingHere": "Nothing here yet.",
+      "openChat": "Open Chat",
+      "comment": "comment",
+      "post": "post"
+    },
+    "deleteConfirm": "Are you sure you want to delete your account? This action is irreversible.",
+    "deleteUsernamePrompt": "Enter your username to confirm deletion:",
+    "deleteUsernameError": "Incorrect username.",
+    "deleteSuccess": "Account deleted successfully.",
+    "genericError": "Something went wrong.",
+    "applySuccess": "Application submitted!",
+    "withdrawConfirm": "Withdraw your admin application?"
+  }
 }

@@ -148,13 +148,13 @@
  "dashboard": {
     "sidebar": {
       "title": "لوحة التحكم",
-      "refreshFeed": "تحديث الخلاصة",
+      "refreshFeed": "تحديث المنشورات ",
       "browseRooms": "تصفح الغرف",
       "profile": "الملف الشخصي",
       "leaveGuest": "مغادرة وضع الزائر",
       "createAccount": "إنشاء حساب",
       "lightMode": "☀️ الوضع الفاتح",
-      "darkMode": "🌙 الوضع الداكن",
+      "darkMode": "🌙 الوضع المظلم",
       "announcements": "📢 الإعلانات",
       "guide": "الدليل"
     },
@@ -264,5 +264,101 @@
   "guestCommentAlert": "أنشئ حساباً للمساهمة....",
   "guestVoteAlert": "أنشئ حساباً للتصويت! 👋",
   "deleteCommentConfirm": "حذف هذا التعليق؟"
-}
+},
+"profile": {
+    "title": "الملف الشخصي",
+    "sidebar": {
+      "dashboard": "العودة",
+      "myRooms": "غرفي",
+      "createRoom": "إنشاء غرفة خاصة",
+      "joinRoom": "الانضمام لغرفة خاصة",
+      "savedPosts": "منشوراتي المحفوظة",
+      "connections": "متابعات",
+      "edit": "تعديل",
+      "adminPanel": "لوحة الإدارة",
+      "logout": "تسجيل الخروج",
+      "deleteAccount": "حذف الحساب"
+    },
+    "card": {
+      "email": "البريد الإلكتروني",
+      "majors": "التخصص(ات)",
+      "tag": "الدور",
+      "rating": "التقييم"
+    },
+    "admin": {
+      "qualifies": "🛡️ تقييمك يؤهلك للتقديم على دور المشرف.",
+      "apply": "التقديم كمشرف",
+      "submitting": "جارٍ الإرسال...",
+      "pending": "تم تقديم الطلب — في انتظار مراجعة المشرف الأعلى.",
+      "withdraw": "سحب الطلب",
+      "withdrawing": "جارٍ السحب...",
+      "windowPassed": "انتهت فترة السحب. تواصل مع مشرف أعلى لإزالة طلبك."
+    },
+    "stats": {
+      "posts": "المنشورات 📝",
+      "comments": "التعليقات 🗨️",
+      "useful": "أصوات مفيد 👍",
+      "useless": "أصوات غير مفيد ❌",
+      "specialized": "متخصص ✨",
+      "rooms": "الغرف المنضم إليها 🏠"
+    },
+    "specialtyMajors": "التخصصات",
+    "noSubjectRooms": "لم تنضم لأي غرفة مادة بعد",
+    "createRoomModal": {
+      "title": "إنشاء غرفة خاصة",
+      "roomNameLabel": "اسم الغرفة",
+      "roomNamePlaceholder": "أدخل اسم الغرفة...",
+      "generateKey": "توليد رمز السري تلقائياً",
+      "passKeyPlaceholder": "أدخل رمز السري الخاص بك...",
+      "inviteLabel": "دعوة من قائمة متابعيك:",
+      "cancel": "إلغاء",
+      "create": "إنشاء",
+      "creating": "جارٍ الإنشاء..."
+    },
+    "joinRoomModal": {
+      "title": "الانضمام لغرفة خاصة",
+      "passkeyLabel": "أدخل رمز السري",
+      "passkeyPlaceholder": "أدخل رمز السري (8 أحرف)...",
+      "cancel": "إلغاء",
+      "join": "انضمام"
+    },
+    "myRoomsModal": {
+      "title": "غرفي",
+      "noRooms": "لا توجد غرف بعد.",
+      "openChat": "فتح المحادثة"
+    },
+    "savedPostsModal": {
+      "title": "🔖 المنشورات المحفوظة",
+      "searchPlaceholder": "ابحث في المنشورات المحفوظة...",
+      "tabs": {
+        "all": "📚 الكل",
+        "posts": "📝 المنشورات",
+        "images": "🖼️ الصور",
+        "files": "📄 الملفات",
+        "links": "🔗 الروابط"
+      },
+      "loading": "جارٍ التحميل...",
+      "nothingHere": "لا يوجد شيء هنا بعد."
+    },
+    "drilldown": {
+      "posts": "📝 منشوراتي",
+      "comments": "🗨️ تعليقاتي",
+      "useful": "👍 منشورات/تعليقات حصلت على أصوات مفيد",
+      "useless": "❌ منشورات حصلت على أصوات غير مفيد",
+      "specialized": "✨ تعليقات حصلت على أصوات متخصص",
+      "rooms": "🏠 غرفي",
+      "loading": "جارٍ التحميل...",
+      "nothingHere": "لا يوجد شيء هنا بعد.",
+      "openChat": "فتح المحادثة",
+      "comment": "تعليق",
+      "post": "منشور"
+    },
+    "deleteConfirm": "هل أنت متأكد من حذف حسابك؟ هذا الإجراء لا يمكن التراجع عنه.",
+    "deleteUsernamePrompt": "أدخل اسم المستخدم لتأكيد الحذف:",
+    "deleteUsernameError": "اسم المستخدم غير صحيح.",
+    "deleteSuccess": "تم حذف الحساب بنجاح.",
+    "genericError": "حدث خطأ ما.",
+    "applySuccess": "تم تقديم الطلب!",
+    "withdrawConfirm": "هل تريد سحب طلب ؟"
+  }
 }
