@@ -2,16 +2,20 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Cat from "../../photos/Cat.jpg";
 import ReportModal from "./ReportModal.jsx";
-
+ import { useTranslation } from 'react-i18next';
+// import i18n from '../i18n/index.js';
 //threaded comments are more complicated then i thought
 
 function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, onEdit, onReply, editingComment, editCommentContent, setEditCommentContent, handleEditComment, setEditingComment, depth = 0 }) {
+  const { t } = useTranslation();
+  
   if (comment.isHidden) return (
     <div style={{ marginLeft: depth > 0 ? "20px" : "0", padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)", opacity: 0.4, fontStyle: "italic", fontSize: "13px" }}>
-      🙈 This comment has been hidden.
+      {t('postModal.hiddenComment')}
     </div>
   );
  
+  
   return (
     <div style={{ marginLeft: depth > 0 ? "20px" : "0", borderLeft: depth > 0 ? "2px solid rgba(100,118,175,0.3)" : "none", paddingLeft: depth > 0 ? "10px" : "0" }}>
       <div style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
@@ -34,12 +38,12 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
         )}
         {comment.pdfUrl && (
           <a href={comment.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "6px" }}>
-            📄 View PDF
+           {t('postModal.viewPdf')}
           </a>
         )}
         {comment.resourceLink && (
           <a href={comment.resourceLink} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "6px" }}>
-            🔗 {comment.resourceLabel || "Open Resource"}
+            🔗 {comment.resourceLabel || t('postModal.openResource')}
           </a>
         )}
 
@@ -48,8 +52,8 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
           <div>
             <input value={editCommentContent} onChange={e => setEditCommentContent(e.target.value)}
               style={{ width: "100%", padding: "4px", borderRadius: "4px", marginBottom: "6px" }} />
-            <button onClick={() => handleEditComment(comment.id)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "4px", marginRight: "6px" }}>Save</button>
-            <button onClick={() => setEditingComment(null)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "4px" }}>Cancel</button>
+            <button onClick={() => handleEditComment(comment.id)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "4px", marginRight: "6px" }}>{t('postModal.saveComment')}</button>
+            <button onClick={() => setEditingComment(null)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "4px" }}>{t('postModal.cancelComment')}</button>
           </div>
         ) : (
           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
@@ -66,8 +70,8 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
             )}
             {!isGuest && (
               <button onClick={() => onReply(comment)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", background: "rgba(100,118,175,0.3)", border: "none", color: "white" }}>
-                ↩ Reply
-              </button>
+                  {t('postModal.reply')}    
+            </button>
             )}
             {currentUser?.id === comment.userId && (
               <>
@@ -118,7 +122,7 @@ const [comments, setComments] = useState([]);
 
 const [commentFilter, setCommentFilter] = useState("all");
 
-
+const { t } = useTranslation();
 
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -178,7 +182,7 @@ useEffect(() => {
 };
 
 const handleAddComment = async () => {
-  if (isGuest) return alert("Create an account to contribute....");
+  if (isGuest) return alert(t('postModal.guestCommentAlert'));
   if (!commentInput.trim() && !commentAttachment) return;
   try {
     const formData = new FormData();
@@ -206,7 +210,7 @@ const handleAddComment = async () => {
 };
 
   const handleCommentVote = async (commentId, voteType) => {
-    if (isGuest) return alert("Create an account to vote! 👋");
+    if (isGuest) return alert(t('postModal.guestCommentAlert'));
     try {
       await axios.patch(
         `http://localhost:5000/api/posts/${postId}/comments/${commentId}/vote`,
@@ -220,7 +224,7 @@ const handleAddComment = async () => {
   };
 
   const handleDeleteComment = async (commentId) => {
-    if (!window.confirm("Delete this comment?")) return;
+    if (!window.confirm(t('postModal.deleteCommentConfirm'))) return;
     try {
       await axios.delete(
         `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
@@ -253,9 +257,9 @@ const handleAddComment = async () => {
   <div className="modal-overlay" onClick={onClose}>
     <div className="modal" onClick={e => e.stopPropagation()} style={{padding:"30px", textAlign:"center"}}>
       <p style={{fontSize:"24px"}}>🙈</p>
-      <p>This post has been hidden by the moderation team.</p>
+      <p>{t('postModal.hiddenPost')}</p>
       <button onClick={onClose} style={{marginTop:"10px", padding:"8px 20px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}>
-        Close
+        {t('postModal.close')}
       </button>
     </div>
   </div>
@@ -315,7 +319,7 @@ const buildCommentTree = (comments) => {
       download
       style={{display:"inline-block", marginTop:"4px", fontSize:"11px", color:"#8ca4c6"}}
     >
-      ⬇️ Download Image
+      {t('postModal.downloadImage')}
     </a>
   </div>
 )}
@@ -328,7 +332,7 @@ const buildCommentTree = (comments) => {
     rel="noopener noreferrer"
     style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(255,255,255,0.1)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
   >
-    📄 View PDF
+    {t('postModal.viewPdf')}
   </a>
 )}
 
@@ -340,22 +344,22 @@ const buildCommentTree = (comments) => {
     rel="noopener noreferrer"
     style={{display:"inline-flex", alignItems:"center", gap:"6px", padding:"6px 12px", background:"rgba(100,118,175,0.3)", borderRadius:"6px", color:"white", textDecoration:"none", fontSize:"13px", marginBottom:"8px"}}
   >
-    🔗 {post.resourceLabel || "Open Resource"}
+    🔗 {post.resourceLabel || (t('postModal.openResource'))}
   </a>
 )}
           <div style={{display:"flex", gap:"8px"}}>
             <button onClick={() => handleVote("useful")} style={{fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer" , color: "#27ae60", background: "none", border: "1px solid #27ae60b3"}}>
-              👍 Useful {post.votesUseful}
+              {t('postModal.useful')} {post.votesUseful}
             </button>
             <button onClick={() => handleVote("useless")} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"6px", cursor:"pointer",color:"#c0392b", background:"none", border:"1px solid #c0392bb3"}}>
-              👎 Useless {post.votesUseless}
+              {t('postModal.useless')} {post.votesUseless}
             </button>
             {!isGuest && currentUser?.id !== post.userId && (
               <button
                  onClick={() => setReportTarget({ type: "post", postId: post.id })}
                  style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px",
                  cursor: "pointer", color: "#c0392b", background: "none", border: "none" }}>
-                 🚩 Report
+                 {t('postModal.report')}
                  </button>
                 )}
           </div>
@@ -363,10 +367,10 @@ const buildCommentTree = (comments) => {
 {/* //////////////////////////////////////////////////////// */}
 <div style={{ display: "flex", gap: "8px", marginBottom: "10px", paddingBottom: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
   {[
-    { key: "all", label: " All" },
-{ key: "popular", label: "Most Popular" },
-{ key: "recent", label: "Most Recent" },
-{ key: "specialized", label: "Specialized" },
+    { key: "all", label:(t('postModal.commentFilters.all')) },
+    { key: "popular", label: t('postModal.commentFilters.popular') },
+    { key: "recent", label: t('postModal.commentFilters.recent') },
+    { key: "specialized", label: t('postModal.commentFilters.specialized') },
   ].map(({ key, label }) => (
     <button
       key={key}
@@ -390,7 +394,7 @@ const buildCommentTree = (comments) => {
         {/* comments list */}
        <div style={{ flex: 1, overflowY: "auto", marginBottom: "15px" }}>
   {comments.length === 0 ? (
-    <p style={{ opacity: 0.5, textAlign: "center" }}>No comments yet. Be the first!</p>
+    <p style={{ opacity: 0.5, textAlign: "center" }}>{t('postModal.noComments')}</p>
   ) : (() => {
       // Sort roots only, replies stay nested under parent
       const sortRoots = (roots) => {
@@ -427,8 +431,8 @@ const buildCommentTree = (comments) => {
 <div style={{borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:"10px"}}>
   {replyingTo && (
   <div style={{ marginBottom: "6px", fontSize: "12px", display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px", background: "rgba(100,118,175,0.2)", borderRadius: "6px" }}>
-    ↩ Replying to <strong>@{replyingTo.username}</strong>
-    <button onClick={() => setReplyingTo(null)} style={{ background: "none", border: "none", color: "#fc0c0c", cursor: "pointer", fontSize: "11px", marginLeft: "auto" }}>✕ Cancel</button>
+    {t('postModal.replyingTo')} <strong>@{replyingTo.username}</strong>
+    <button onClick={() => setReplyingTo(null)} style={{ background: "none", border: "none", color: "#fc0c0c", cursor: "pointer", fontSize: "11px", marginLeft: "auto" }}>✕ {t('postModal.cancelReply')}</button>
   </div>
 )}
   {/* attachment preview */}
@@ -443,14 +447,14 @@ const buildCommentTree = (comments) => {
   <div style={{display:"flex", gap:"6px", marginBottom:"6px"}}>
     <input
       type="url"
-      placeholder="🔗 Resource link (optional)"
+      placeholder={t('postModal.resourceLinkPlaceholder')}
       value={commentResourceLink}
       onChange={(e) => setCommentResourceLink(e.target.value)}
       style={{flex:1, padding:"6px", borderRadius:"6px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white", fontSize:"12px"}}
     />
     <input
       type="text"
-      placeholder="Label (optional)"
+      placeholder={t('postModal.resourceLabelPlaceholder')}
       value={commentResourceLabel}
       onChange={(e) => setCommentResourceLabel(e.target.value)}
       style={{flex:1, padding:"6px", borderRadius:"6px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white", fontSize:"12px"}}
@@ -478,11 +482,11 @@ const buildCommentTree = (comments) => {
       value={commentInput}
       onChange={(e) => setCommentInput(e.target.value)}
       onKeyDown={(e) => e.key === "Enter" && handleAddComment()}
-      placeholder="Write a comment..."
+      placeholder={t('postModal.commentPlaceholder')}
       style={{flex:1, padding:"8px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white"}}
     />
     <button onClick={handleAddComment} style={{padding:"8px 16px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}>
-      Send
+     {t('postModal.send')}
     </button>
   </div>
 

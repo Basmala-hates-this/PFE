@@ -120,7 +120,8 @@
   "forgot_password": "Mot de passe oublié ?",
   "back_home": "Retour à l'accueil",
   "success": "Connexion réussie !!!!",
-  "password_placeholder": "MotDePasse1*"
+  "password_placeholder": "MotDePasse1*",
+  "error_msg": "Identifiants invalides"
 },
 "rrp": {
   "title": "Demande de réinitialisation du mot de passe ",
@@ -144,6 +145,126 @@
   "success_update": "Mot de passe mis à jour avec succès !",
   "error": "Quelque chose s'est mal passé.",
   "password_placeholder": "MotDePasse1*"
+},
+ "dashboard": {
+    "sidebar": {
+      "title": "TABLEAU DE BORD",
+      "refreshFeed": "Actualiser le fil",
+      "browseRooms": "Parcourir les salles",
+      "profile": "Profil",
+      "leaveGuest": "Quitter le mode invité",
+      "createAccount": "Créer un compte",
+      "lightMode": "☀️ Mode clair",
+      "darkMode": "🌙 Mode sombre",
+      "announcements": "📢 Annonces",
+      "guide": "Guide"
+    },
+    "header": {
+      "welcome": "Bienvenue",
+      "guest": "Invité",
+      "guestTag": "invité"
+    },
+    "feed": {
+      "title": "Publications",
+      "sortAll": "Tout",
+      "sortRecent": "Plus récent",
+      "sortPopular": "Plus populaire",
+      "loading": "Chargement des publications...",
+      "empty": "Aucune publication. Essayez d'en écrire une ✨",
+      "writePost": "Écrire un post 📝",
+      "selectRooms": "Sélectionner des salles...",
+      "searchPlaceholder": "🔍 Vous cherchez quelque chose ?"
+    },
+    "search": {
+      "posts": "PUBLICATIONS",
+      "users": "UTILISATEURS",
+      "noPostsFound": "Aucune publication trouvée",
+      "noUsersFound": "Aucun utilisateur trouvé",
+      "seeAll": "Voir tous les résultats pour \"{{query}}\" →"
+    },
+    "post": {
+      "useful": "👍 Utile",
+      "useless": "👎 Inutile",
+      "comments": "Commentaires",
+      "save": "🔖 Enregistrer",
+      "saved": "🔖 Enregistré",
+      "report": "🚩 Signaler",
+      "delete": "🗑️ Supprimer",
+      "edit": "Modifier",
+      "downloadImage": "⬇️ Télécharger l'image",
+      "viewPdf": "📄 Voir le PDF",
+      "guestVoteAlert": "Créez un compte pour voter ! 👋",
+      "guestPostAlert": "Connectez-vous pour poster ?",
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce post ?"
+    },
+    "postModal": {
+      "title": "Écrire un post",
+      "editTitle": "Modifier le post",
+      "titlePlaceholder": "Titre (optionnel)",
+      "selectRoom": "Sélectionner une salle...",
+      "contentPlaceholder": "Décrivez votre idée...",
+      "attachLabel": "📎 Joindre une image ou un PDF",
+      "resourceLinkLabel": "🔗 Lien de ressource (Google Drive, GitHub, etc.)",
+      "resourceLinkPlaceholder": "https://...",
+      "resourceLabelPlaceholder": "Étiquette (optionnel, ex. 'Notes chapitre 3')",
+      "cancel": "Annuler",
+      "post": "Publier",
+      "posting": "Publication...",
+      "save": "Enregistrer",
+      "saving": "Enregistrement..."
+    },
+    "browseRooms": {
+      "title": "Parcourir les salles",
+      "noRooms": "Aucune salle disponible.",
+      "leave": "Quitter",
+      "join": "Rejoindre",
+      "leaveConfirm": "Êtes-vous sûr de vouloir quitter cette salle ?",
+      "joinConfirm": "Rejoindre \"{{subject}}\" sous {{major}} ?",
+      "requestTitle": "Vous ne trouvez pas votre matière ? Demandez-la :",
+      "selectMajor": "Sélectionner la filière...",
+      "subjectPlaceholder": "Nom de la matière...",
+      "sendRequest": "Envoyer la demande",
+      "sending": "Envoi..."
+    },
+    "announcements": {
+      "title": "📢 Annonces",
+      "empty": "Aucune annonce pour l'instant.",
+      "by": "Par @{{username}} —"
+    },
+    "comments": {
+      "deleteConfirm": "Supprimer ce commentaire ?"
+    }
+  },
+  "postModal": {
+  "hiddenPost": "Ce post a été masqué par l'équipe de modération.",
+  "close": "Fermer",
+  "commentFilters": {
+    "all": "Tout",
+    "popular": "Plus populaire",
+    "recent": "Plus récent",
+    "specialized": "Spécialisé"
+  },
+  "noComments": "Aucun commentaire. Soyez le premier !",
+  "hiddenComment": "🙈 Ce commentaire a été masqué.",
+  "reply": "↩ Répondre",
+  "replyingTo": "↩ Répondre à",
+  "cancelReply": "✕ Annuler",
+  "commentPlaceholder": "Écrire un commentaire...",
+  "resourceLinkPlaceholder": "🔗 Lien de ressource (optionnel)",
+  "resourceLabelPlaceholder": "Étiquette (optionnel)",
+  "send": "Envoyer",
+  "saveComment": "Enregistrer",
+  "cancelComment": "Annuler",
+  "viewPdf": "📄 Voir le PDF",
+  "downloadImage": "⬇️ Télécharger l'image",
+  "openResource": "Ouvrir la ressource",
+  "useful": "👍 Utile",
+  "useless": "👎 Inutile",
+  "specialized": "✨",
+  "report": "🚩 Signaler",
+  "guestCommentAlert": "Créez un compte pour contribuer....",
+  "guestVoteAlert": "Créez un compte pour voter ! 👋",
+  "deleteCommentConfirm": "Supprimer ce commentaire ?"
 }
 
 }

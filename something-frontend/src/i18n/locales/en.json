@@ -119,7 +119,8 @@
   "forgot_password": "Forgot Your Password?",
   "back_home": "Back to Home",
   "success": "Login Successful!!!!",
-  "password_placeholder": "Password1*"
+  "password_placeholder": "Password1*",
+  "error_msg": "Invalid credentials"
   
 },
 "rrp": {
@@ -144,5 +145,125 @@
   "success_update": "Password updated successfully!",
   "error": "Something went wrong.",
    "password_placeholder": "Password1*"
+},
+"dashboard": {
+    "sidebar": {
+      "title": "DASHBOARD",
+      "refreshFeed": "Refresh Feed",
+      "browseRooms": "Browse Rooms",
+      "profile": "Profile",
+      "leaveGuest": "Leave Guest Mode",
+      "createAccount": "Create Account",
+      "lightMode": "☀️ Light Mode",
+      "darkMode": "🌙 Dark Mode",
+      "announcements": "📢 Announcements",
+      "guide": "Guide"
+    },
+    "header": {
+      "welcome": "Welcome",
+      "guest": "Guest",
+      "guestTag": "guest"
+    },
+    "feed": {
+      "title": "Feed",
+      "sortAll": "All",
+      "sortRecent": "Most Recent",
+      "sortPopular": "Most Popular",
+      "loading": "Loading posts...",
+      "empty": "No posts yet. Try writing one ✨",
+      "writePost": "Write A Post 📝",
+      "selectRooms": "Select rooms to view...",
+      "searchPlaceholder": "🔍 searching for something?"
+    },
+    "search": {
+      "posts": "POSTS",
+      "users": "USERS",
+      "noPostsFound": "No posts found",
+      "noUsersFound": "No users found",
+      "seeAll": "See all results for \"{{query}}\" →"
+    },
+    "post": {
+      "useful": "👍 Useful",
+      "useless": "👎 Useless",
+      "comments": "Comments",
+      "save": "🔖 Save",
+      "saved": "🔖 Saved",
+      "report": "🚩 Report",
+      "delete": "🗑️ Delete",
+      "edit": "Edit",
+      "downloadImage": "⬇️ Download Image",
+      "viewPdf": "📄 View PDF",
+      "guestVoteAlert": "Create an account to vote! 👋",
+      "guestPostAlert": "Login to post?",
+      "deleteConfirm": "Are you sure you want to delete this post?"
+    },
+    "postModal": {
+      "title": "Write a Post",
+      "editTitle": "Edit Post",
+      "titlePlaceholder": "Title (optional)",
+      "selectRoom": "Select a room to post in...",
+      "contentPlaceholder": "Describe your flow...",
+      "attachLabel": "📎 Attach Image or PDF",
+      "resourceLinkLabel": "🔗 Resource Link (Google Drive, GitHub, etc.)",
+      "resourceLinkPlaceholder": "https://...",
+      "resourceLabelPlaceholder": "Label (optional, e.g. 'Chapter 3 Notes')",
+      "cancel": "Cancel",
+      "post": "Post",
+      "posting": "Posting...",
+      "save": "Save",
+      "saving": "Saving..."
+    },
+    "browseRooms": {
+      "title": "Browse Rooms",
+      "noRooms": "No rooms available.",
+      "leave": "Leave",
+      "join": "Join",
+      "leaveConfirm": "Are you sure you want to leave this room?",
+      "joinConfirm": "Join \"{{subject}}\" under {{major}}?",
+      "requestTitle": "Can't find your subject? Request it:",
+      "selectMajor": "Select the major...",
+      "subjectPlaceholder": "Subject name...",
+      "sendRequest": "Send Request",
+      "sending": "Sending..."
+    },
+    "announcements": {
+      "title": "📢 Announcements",
+      "empty": "No announcements yet.",
+      "by": "By @{{username}} —"
+    },
+    "comments": {
+      "deleteConfirm": "Delete this comment?"
+    }
+  },
+  "postModal": {
+  "hiddenPost": "This post has been hidden by the moderation team.",
+  "close": "Close",
+  "commentFilters": {
+    "all": "All",
+    "popular": "Most Popular",
+    "recent": "Most Recent",
+    "specialized": "Specialized"
+  },
+  "noComments": "No comments yet. Be the first!",
+  "hiddenComment": "🙈 This comment has been hidden.",
+  "reply": "↩ Reply",
+  "replyingTo": "↩ Replying to",
+  "cancelReply": "✕ Cancel",
+  "commentPlaceholder": "Write a comment...",
+  "resourceLinkPlaceholder": "🔗 Resource link (optional)",
+  "resourceLabelPlaceholder": "Label (optional)",
+  "send": "Send",
+  "saveComment": "Save",
+  "cancelComment": "Cancel",
+  "viewPdf": "📄 View PDF",
+  "downloadImage": "⬇️ Download Image",
+  "openResource": "Open Resource",
+  "useful": "👍 Useful",
+  "useless": "👎 Useless",
+  "specialized": "✨",
+  "report": "🚩 Report",
+  "guestCommentAlert": "Create an account to contribute....",
+  "guestVoteAlert": "Create an account to vote! 👋",
+  "deleteCommentConfirm": "Delete this comment?"
 }
 }

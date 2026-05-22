@@ -119,7 +119,8 @@
   "forgot_password": "نسيت كلمة المرور؟",
   "back_home": "العودة إلى الرئيسية",
   "success": "!!!!تم تسجيل الدخول بنجاح",
-  "password_placeholder": "كلمةالمرور1*"
+  "password_placeholder": "كلمةالمرور1*",
+  "error_msg": "بيانات الدخول غير صالحة"
 },
 "rrp": {
   "title": "طلب إعادة تعيين كلمة المرور ",
@@ -143,5 +144,125 @@
   "success_update": "!تم تحديث كلمة المرور بنجاح",
   "error": "حدث خطأ ما.",
   "password_placeholder": "كلمةالمرور1*"
+},
+ "dashboard": {
+    "sidebar": {
+      "title": "لوحة التحكم",
+      "refreshFeed": "تحديث الخلاصة",
+      "browseRooms": "تصفح الغرف",
+      "profile": "الملف الشخصي",
+      "leaveGuest": "مغادرة وضع الزائر",
+      "createAccount": "إنشاء حساب",
+      "lightMode": "☀️ الوضع الفاتح",
+      "darkMode": "🌙 الوضع الداكن",
+      "announcements": "📢 الإعلانات",
+      "guide": "الدليل"
+    },
+    "header": {
+      "welcome": "مرحباً",
+      "guest": "زائر",
+      "guestTag": "زائر"
+    },
+    "feed": {
+      "title": "المنشورات",
+      "sortAll": "الكل",
+      "sortRecent": "الأحدث",
+      "sortPopular": "الأكثر شعبية",
+      "loading": "جارٍ تحميل المنشورات...",
+      "empty": "لا توجد منشورات بعد. حاول كتابة واحدة ✨",
+      "writePost": "اكتب منشوراً 📝",
+      "selectRooms": "اختر الغرف للعرض...",
+      "searchPlaceholder": "🔍 تبحث عن شيء؟"
+    },
+    "search": {
+      "posts": "المنشورات",
+      "users": "المستخدمون",
+      "noPostsFound": "لم يتم العثور على منشورات",
+      "noUsersFound": "لم يتم العثور على مستخدمين",
+      "seeAll": "عرض كل النتائج لـ \"{{query}}\" ←"
+    },
+    "post": {
+      "useful": "👍 مفيد",
+      "useless": "👎 غير مفيد",
+      "comments": "التعليقات",
+      "save": "🔖 حفظ",
+      "saved": "🔖 محفوظ",
+      "report": "🚩 إبلاغ",
+      "delete": "🗑️ حذف",
+      "edit": "تعديل",
+      "downloadImage": "⬇️ تحميل الصورة",
+      "viewPdf": "📄 عرض PDF",
+      "guestVoteAlert": "أنشئ حساباً للتصويت! 👋",
+      "guestPostAlert": "سجّل دخولك للنشر؟",
+      "deleteConfirm": "هل أنت متأكد من حذف هذا المنشور؟"
+    },
+    "postModal": {
+      "title": "اكتب منشوراً",
+      "editTitle": "تعديل المنشور",
+      "titlePlaceholder": "العنوان (اختياري)",
+      "selectRoom": "اختر غرفة للنشر...",
+      "contentPlaceholder": "صف فكرتك...",
+      "attachLabel": "📎 إرفاق صورة أو PDF",
+      "resourceLinkLabel": "🔗 رابط المصدر (Google Drive، GitHub، إلخ)",
+      "resourceLinkPlaceholder": "https://...",
+      "resourceLabelPlaceholder": "تسمية (اختياري، مثلاً 'ملاحظات الفصل 3')",
+      "cancel": "إلغاء",
+      "post": "نشر",
+      "posting": "جارٍ النشر...",
+      "save": "حفظ",
+      "saving": "جارٍ الحفظ..."
+    },
+    "browseRooms": {
+      "title": "تصفح الغرف",
+      "noRooms": "لا توجد غرف متاحة.",
+      "leave": "مغادرة",
+      "join": "انضمام",
+      "leaveConfirm": "هل أنت متأكد من مغادرة هذه الغرفة؟",
+      "joinConfirm": "الانضمام إلى \"{{subject}}\" تحت {{major}}؟",
+      "requestTitle": "لم تجد مادتك؟ اطلبها:",
+      "selectMajor": "اختر التخصص...",
+      "subjectPlaceholder": "اسم المادة...",
+      "sendRequest": "إرسال الطلب",
+      "sending": "جارٍ الإرسال..."
+    },
+    "announcements": {
+      "title": "📢 الإعلانات",
+      "empty": "لا توجد إعلانات بعد.",
+      "by": "بواسطة @{{username}} —"
+    },
+    "comments": {
+      "deleteConfirm": "حذف هذا التعليق؟"
+    }
+  },
+  "postModal": {
+  "hiddenPost": "تم إخفاء هذا المنشور من قبل فريق الإشراف.",
+  "close": "إغلاق",
+  "commentFilters": {
+    "all": "الكل",
+    "popular": "الأكثر شعبية",
+    "recent": "الأحدث",
+    "specialized": "متخصص"
+  },
+  "noComments": "لا توجد تعليقات بعد. كن أول من يعلق!",
+  "hiddenComment": "🙈 تم إخفاء هذا التعليق.",
+  "reply": "↪ رد",
+  "replyingTo": "↪ رداً على",
+  "cancelReply": "✕ إلغاء",
+  "commentPlaceholder": "اكتب تعليقاً...",
+  "resourceLinkPlaceholder": "🔗 رابط المصدر (اختياري)",
+  "resourceLabelPlaceholder": "تسمية (اختياري)",
+  "send": "إرسال",
+  "saveComment": "حفظ",
+  "cancelComment": "إلغاء",
+  "viewPdf": "📄 عرض PDF",
+  "downloadImage": "⬇️ تحميل الصورة",
+  "openResource": "فتح المصدر",
+  "useful": "👍 مفيد",
+  "useless": "👎 غير مفيد",
+  "specialized": "✨",
+  "report": "🚩 إبلاغ",
+  "guestCommentAlert": "أنشئ حساباً للمساهمة....",
+  "guestVoteAlert": "أنشئ حساباً للتصويت! 👋",
+  "deleteCommentConfirm": "حذف هذا التعليق؟"
 }
 }

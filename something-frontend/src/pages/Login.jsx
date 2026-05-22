@@ -105,7 +105,8 @@ if (data.user.pendingReorientation) {
  
 
 } catch (err) {
-   const msg = err.response?.data?.message || "Invalid credentials";
+  //  const msg = err.response?.data?.message || (t("login.error_msg"));
+  const msg = (t("login.error_msg"));//eehhh....how do i say this....backend msgs are in english and they have preiroty ,so i am diactivating the login one just for display
   setError(msg);
 }
  
@@ -116,13 +117,13 @@ if (data.user.pendingReorientation) {
 
 
 const currentLang = i18n.language;
-
+ 
 
 
 const changeLanguage = (lang) => {
   i18n.changeLanguage(lang);
   localStorage.setItem('language', lang);
-  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  // document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
   document.documentElement.lang = lang;
 };
 const handleSelectChange = (event) => {

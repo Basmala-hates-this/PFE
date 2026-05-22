@@ -16,6 +16,8 @@ import PostModal from "../assets/components/PostModal.jsx";
 
 import ReportModal from "../assets/components/ReportModal.jsx";
 
+import { useTranslation } from 'react-i18next';
+
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
 //sooo why not work with both,context and localstorge?
@@ -99,6 +101,24 @@ export default function Dashboard() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const { t, i18n } = useTranslation();
+const isRTL = i18n.language === 'ar';
+
+const currentLang = i18n.language;
+ 
+
+const changeLanguage = (lang) => {
+  i18n.changeLanguage(lang);
+  localStorage.setItem('language', lang);
+  // document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.documentElement.lang = lang;
+};
+const handleSelectChange = (event) => {
+    // Grabs the value ('en', 'fr', or 'ar') from the chosen option
+    changeLanguage(event.target.value);
+  };
+
+
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
@@ -138,16 +158,16 @@ export default function Dashboard() {
 
     if (savedTheme === "light") {
       body.classList.add("light-mode");
-      lgm.textContent = "🌙Dark Mode ";
+      lgm.textContent = t('dashboard.sidebar.darkMode');
     } else {
-      lgm.textContent = "☀️Light Mode ";
+      lgm.textContent = t('dashboard.sidebar.lightMode');
     }
 
     const toggleTheme = () => {
       body.classList.toggle("light-mode");
       const mode = body.classList.contains("light-mode") ? "light" : "dark";
       localStorage.setItem("theme", mode);
-      lgm.textContent = mode === "light" ? "🌙Dark Mode " : "☀️Light Mode ";
+      lgm.textContent = mode === "light" ? t('dashboard.sidebar.darkMode') : t('dashboard.sidebar.lightMode');
     };
 
     lgm.addEventListener("click", toggleTheme);
@@ -488,9 +508,8 @@ export default function Dashboard() {
   };
 
   const handleDeletePost = async (postId) => {
-    const confirm = window.confirm(
-      "Are you sure you want to delete this post?",
-    );
+    const confirm = window.confirm(t('dashboard.post.deleteConfirm'));
+
     if (!confirm) return;
 
     try {
@@ -529,7 +548,7 @@ export default function Dashboard() {
 };
 
   const handleDeleteComment = async (postId, commentId) => {
-    const confirm = window.confirm("Delete this comment?");
+    const confirm = window.confirm(t('dashboard.comments.deleteConfirm'))
     if (!confirm) return;
 
     try {
@@ -655,7 +674,7 @@ export default function Dashboard() {
 
   const handleCreateAndJoinSubjectRoom = async (major, majorId, subject) => {
     console.log("handleCreateAndJoinSubjectRoom called", major, subject);
-    const confirm = window.confirm(`Join "${subject}" under ${major}?`);
+    const confirm =window.confirm(t('dashboard.browseRooms.joinConfirm', { subject, major }))
     if (!confirm) return;
     try {
       const token = localStorage.getItem("token");
@@ -674,7 +693,7 @@ export default function Dashboard() {
 
   const handleLeaveSubjectRoom = async (roomId) => {
     console.log("handleJoinSubjectRoom called", roomId);
-    const confirm = window.confirm("Are you sure you want to leave this room?");
+    const confirm =window.confirm(t('dashboard.browseRooms.leaveConfirm'))
     if (!confirm) return;
     try {
       const token = localStorage.getItem("token");
@@ -842,6 +861,19 @@ export default function Dashboard() {
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   return (
     <div id="body5">
+       <div className="language-switcher">
+      <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
+      <select 
+        id="lang-select"
+        value={currentLang} // Keeps the dropdown synced with your active language
+        onChange={handleSelectChange}
+        className="lang-dropdown"
+      >
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+      </select>
+    </div>
       <div className={`dashboard ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
         <button
           onClick={() => setSidebarOpen((prev) => !prev)}
@@ -871,10 +903,10 @@ export default function Dashboard() {
 
         {/* <!-- Sidebar --> */}
         <aside className="sidebar">
-          <h2>DASHBOARD</h2>
+          <h2>{t('dashboard.sidebar.title')}</h2>
           <ul>
             <li id="home-link" onClick={() => fetchRoomsAndPosts()}>
-              Refresh Feed
+{t('dashboard.sidebar.refreshFeed')}
             </li>
             {!isGuest && (
               <>
@@ -887,9 +919,9 @@ export default function Dashboard() {
                   }}
                 >
                   {" "}
-                  Browse Rooms
+                  {t('dashboard.sidebar.browseRooms')}
                 </li>
-                <li onClick={() => navigate("/profile")}>Profile</li>
+                <li onClick={() => navigate("/profile")}>{t('dashboard.sidebar.profile')}</li>
               </>
             )}
             {isGuest && (
@@ -901,7 +933,7 @@ export default function Dashboard() {
                     navigate("/");
                   }}
                 >
-                  Leave Guest Mode
+                  {t('dashboard.sidebar.leaveGuest')}
                 </li>
                 <li
                   onClick={() => {
@@ -910,13 +942,13 @@ export default function Dashboard() {
                     navigate("/info");
                   }}
                 >
-                  Create Account
+                  {t('dashboard.sidebar.createAccount')}
                 </li>
               </>
             )}
             {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
             right now, lets just keep it in the profile....should it have a confirmation? */}
-            <li id="lgm">☀️Light Mode </li>
+            <li id="lgm">{t('dashboard.sidebar.lightMode')} </li>
             {/* the theme button is the only now to cause issues with clicking anywhere that is not the middle */}
             <li
               onClick={(e) => {
@@ -925,9 +957,9 @@ export default function Dashboard() {
                 setShowAnnouncements(true);
               }}
             >
-              📢 Announcements
+              {t('dashboard.sidebar.announcements')}
             </li>
-            <li onClick={() => navigate("/guide")}>Guide</li>
+            <li onClick={() => navigate("/guide")}>{t('dashboard.sidebar.guide')}</li>
           </ul>
         </aside>
 
@@ -936,11 +968,11 @@ export default function Dashboard() {
           {/* <!-- Header --> */}
           <header className="header">
             <h1 className="welH1">
-              Welcome{" "}
+              {t('dashboard.header.welcome')}{" "}
               <span className="usernameDisplay">
-                @{isGuest ? "Guest" : user?.username || "User"}
+                @{isGuest ? (t('dashboard.header.guest')) : user?.username || "User"}
                 <small className="tag" style={{ marginLeft: "5px" }}>
-                  {isGuest ? "guest" : user?.role}
+                  {isGuest ? (t('dashboard.header.guestTag')) : user?.role}
                 </small>
               </span>
             </h1>
@@ -964,7 +996,7 @@ export default function Dashboard() {
                 options={groupedRoomOptions}
                 value={selectedRooms}
                 onChange={(selected) => setSelectedRooms(selected || [])}
-                placeholder="Select rooms to view..."
+                placeholder={t('dashboard.feed.selectRooms')}
                 styles={cSelect}
               />
             </div>
@@ -974,7 +1006,7 @@ export default function Dashboard() {
                 type="text"
                 id="dashSearch"
                 className="dashSearch"
-                placeholder="🔍 searching for something?"
+                placeholder={t('dashboard.feed.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
                 onBlur={() =>
@@ -1022,7 +1054,7 @@ export default function Dashboard() {
                           borderBottom: "1px solid rgba(255,255,255,0.1)",
                         }}
                       >
-                        POSTS
+                        {t('dashboard.search.posts')}
                       </p>
                       {searchResults.posts.length === 0 ? (
                         <p
@@ -1033,7 +1065,7 @@ export default function Dashboard() {
                             textAlign: "center",
                           }}
                         >
-                          No posts found
+                          {t('dashboard.search.noPostsFound')}
                         </p>
                       ) : (
                         searchResults.posts.slice(0, 2).map((post) => (
@@ -1094,7 +1126,7 @@ export default function Dashboard() {
                             borderBottom: "1px solid rgba(255,255,255,0.1)",
                           }}
                         >
-                          USERS
+                          {t('dashboard.search.users')}
                         </p>
                         {searchResults.users.length === 0 ? (
                           <p
@@ -1105,7 +1137,7 @@ export default function Dashboard() {
                               textAlign: "center",
                             }}
                           >
-                            No users found
+                            {t('dashboard.search.noUsersFound')}
                           </p>
                         ) : (
                           searchResults.users.slice(0, 2).map((u) => (
@@ -1189,7 +1221,7 @@ export default function Dashboard() {
                       (e.currentTarget.style.background = "transparent")
                     }
                   >
-                    See all results for "{searchQuery}" →
+                    {t('dashboard.search.seeAll', { query: searchQuery })} →
                   </div>
                 </div>
               )}
@@ -1206,21 +1238,21 @@ export default function Dashboard() {
                 whiteSpace: "nowrap",
               }}
               onClick={() =>
-                isGuest ? alert("Login to post? ") : setIsModalOpen(true)
+                isGuest ? alert(t('dashboard.post.guestVoteAlert')) : setIsModalOpen(true)
               }
             >
-              Write A Post📝
+              {t('dashboard.feed.writePost')}
             </button>
           </section>
 
           {/* <!-- Feed --> */}
           <section className="fyp-container">
-            <h2 className="H2feed">Feed</h2>
+            <h2 className="H2feed">{t('dashboard.feed.title')}</h2>
             <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
               {[
-                { key: "random", label: "All" },
-                { key: "recent", label: "Most Recent" },
-                { key: "popular", label: "Most Popular" },
+                { key: "random", label: (t('dashboard.feed.sortAll')) },
+                { key: "recent", label: (t('dashboard.feed.sortRecent')) },
+                { key: "popular", label: (t('dashboard.feed.sortPopular')) },
               ].map(({ key, label }) => (
                 <button
                   key={key}
@@ -1238,7 +1270,7 @@ export default function Dashboard() {
                 >
                   {label}
                 </button>
-              ))}
+              ))} 
             </div>
             <div className="fyp-feed" id="fyp-feed">
               {/* <p>
@@ -1247,9 +1279,9 @@ export default function Dashboard() {
                 how the tables have turned......damn u ihm prof u ruined my happines of my work
               </p> */}
               {loading ? (
-                <p>Loading posts...</p>
+                <p>{t('dashboard.feed.loading')}...</p>
               ) : posts.length === 0 ? (
-                <p>No posts yet. Try writing one ✨</p>
+                <p>{t('dashboard.feed.empty')}✨</p>
               ) : (
                 sortedPosts.map((post) => {
                   if (post.isHidden) return null;
@@ -1354,7 +1386,7 @@ export default function Dashboard() {
                               borderRadius: "6px",
                             }}
                           >
-                            ⬇️ Download Image
+                            {t('dashboard.post.downloadImage')}
                           </a>
                         </div>
                       )}
@@ -1378,7 +1410,7 @@ export default function Dashboard() {
                             marginBottom: "8px",
                           }}
                         >
-                          📄 View PDF
+                          {t('dashboard.post.viewPdf')}
                         </a>
                       )}
 
@@ -1414,7 +1446,7 @@ export default function Dashboard() {
                         <button
                           onClick={() =>
                             isGuest
-                              ? alert("Create an account to vote! 👋")
+                              ? alert(t('dashboard.post.guestVoteAlert'))
                               : handleVote(post.id, "useful")
                           }
                           style={{
@@ -1428,12 +1460,12 @@ export default function Dashboard() {
                             height: "30px",
                           }}
                         >
-                          {post.voteUseful}👍 Useful{" "}
+                          {post.voteUseful}{t('dashboard.post.useful')}{" "}
                         </button>
                         <button
                           onClick={() =>
                             isGuest
-                              ? alert("Create an account to vote! 👋")
+                              ? alert(t('dashboard.post.guestVoteAlert'))
                               : handleVote(post.id, "useless")
                           }
                           style={{
@@ -1448,7 +1480,7 @@ export default function Dashboard() {
                             height: "30px",
                           }}
                         >
-                          {post.voteUseless}👎 Useless{" "}
+                          {post.voteUseless}{t('dashboard.post.useless')}{" "}
                         </button>
                         <button
                           onClick={() => setSelectedPost(post)}
@@ -1464,7 +1496,7 @@ export default function Dashboard() {
                             height: "30px",
                           }}
                         >
-                          Comments {post.commentCount}
+                          {t('dashboard.post.comments')} {post.commentCount}
                         </button>
                         {!isGuest && (
                           <button
@@ -1485,9 +1517,7 @@ export default function Dashboard() {
                                 : "2px solid rgba(10, 10, 10, 0.5)",
                             }}
                           >
-                            {savedPostIds.includes(post.id)
-                              ? "🔖 Saved"
-                              : "🔖 Save"}
+                           {savedPostIds.includes(post.id) ? t('dashboard.post.saved') : t('dashboard.post.save')}
                           </button>
                         )}
 
@@ -1508,7 +1538,7 @@ export default function Dashboard() {
                               borderRadius: "8px",
                             }}
                           >
-                            🚩 Report
+                            {t('dashboard.post.report')}
                           </button>
                         )}
 
@@ -1527,7 +1557,7 @@ export default function Dashboard() {
                               borderRadius: "8px",
                             }}
                           >
-                            🗑️ Delete
+                            {t('dashboard.post.delete')}
                           </button>
                         )}
                         {currentUser?.id === post.userId && (
@@ -1551,7 +1581,7 @@ export default function Dashboard() {
                               textAlign: "center",
                             }}
                           >
-                            Edit
+                            {t('dashboard.post.edit')}
                           </button>
                         )}
                       </div>
@@ -1574,7 +1604,7 @@ export default function Dashboard() {
                   marginBottom: "15px",
                 }}
               >
-                <h3 style={{ margin: 0 }}>Write a Post</h3>
+                <h3 style={{ margin: 0 }}>{t('dashboard.postModal.title')}</h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
                   style={{
@@ -1590,7 +1620,7 @@ export default function Dashboard() {
 
               <input
                 type="text"
-                placeholder="Title (optional)"
+                placeholder={t('dashboard.postModal.titlePlaceholder')}
                 value={postTitle}
                 onChange={(e) => setPostTitle(e.target.value)}
                 style={{
@@ -1607,7 +1637,7 @@ export default function Dashboard() {
                 options={groupedRoomOptions}
                 value={selectedPostRoom}
                 onChange={(selected) => setSelectedPostRoom(selected)}
-                placeholder="Select a room to post in..."
+                placeholder={t('dashboard.postModal.selectRoom')}
                 styles={customSelect}
                 // isMulti
               />
@@ -1616,7 +1646,7 @@ export default function Dashboard() {
               <textarea
                 value={postContent}
                 onChange={(e) => setPostContent(e.target.value)}
-                placeholder="Describe your flow..."
+                placeholder={t('dashboard.postModal.contentPlaceholder')}
                 style={{
                   width: "100%",
                   minHeight: "120px",
@@ -1639,7 +1669,7 @@ export default function Dashboard() {
                     fontSize: "13px",
                   }}
                 >
-                  📎 Attach Image or PDF
+                  {t('dashboard.postModal.attachLabel')}
                 </label>
                 <input
                   type="file"
@@ -1679,11 +1709,11 @@ export default function Dashboard() {
                     fontSize: "13px",
                   }}
                 >
-                  🔗 Resource Link (Google Drive, GitHub, etc.)
+                  {t('dashboard.postModal.resourceLinkLabel')} (Google Drive, GitHub, etc.)
                 </label>
                 <input
                   type="url"
-                  placeholder="https://..."
+                  placeholder={t('dashboard.postModal.resourceLinkPlaceholder')}
                   value={postResourceLink}
                   onChange={(e) => setPostResourceLink(e.target.value)}
                   style={{
@@ -1697,7 +1727,7 @@ export default function Dashboard() {
                 />
                 <input
                   type="text"
-                  placeholder="Label (optional, e.g. 'Chapter 3 Notes')"
+                  placeholder={t('dashboard.postModal.resourceLabelPlaceholder')}
                   value={postResourceLabel}
                   onChange={(e) => setPostResourceLabel(e.target.value)}
                   style={{
@@ -1721,12 +1751,12 @@ export default function Dashboard() {
                   gap: "10px",
                 }}
               >
-                <button onClick={() => setIsModalOpen(false)}>Cancel</button>
+                <button onClick={() => setIsModalOpen(false)}>{t('dashboard.postModal.cancel')}</button>
                 <button
                   onClick={handleSubmitPost}
                    disabled={!postContent.trim() || !selectedPostRoom || isSubmitting}
                 >
-                  {isSubmitting ? "Posting..." : "Post"}
+                  {isSubmitting ? t('dashboard.postModal.posting') : t('dashboard.postModal.post')}
                 </button>
               </div>
             </div>
@@ -1744,7 +1774,7 @@ export default function Dashboard() {
                   marginBottom: "15px",
                 }}
               >
-                <h3 style={{ margin: 0 }}>Edit Post</h3>
+                <h3 style={{ margin: 0 }}>{t('dashboard.postModal.editTitle')}</h3>
                 <button
                   onClick={() => setEditingPost(null)}
                   style={{
@@ -1796,12 +1826,12 @@ export default function Dashboard() {
                   marginTop: "15px",
                 }}
               >
-                <button onClick={() => setEditingPost(null)} style={{padding:"4px", width:"60px", textAlign:"center", backgroundColor:"#da2828", color:"white", borderRadius:"8px",marginLeft:"20px"}}>Cancel</button>
+                <button onClick={() => setEditingPost(null)} style={{padding:"4px", width:"60px", textAlign:"center", backgroundColor:"#da2828", color:"white", borderRadius:"8px",marginLeft:"20px"}}>{t('dashboard.postModal.cancel')}</button>
                 <button onClick={() => handleEditPost(editingPost.id)} 
                   disabled={isSubmitting}
                   style={{padding:"4px", backgroundColor:"#3ada28", color:"black", borderRadius:"8px",marginLeft:"20px", width:"60px", textAlign:"center"}}
                   >
-                    {isSubmitting ? "Saving..." : "Save"}
+                    {isSubmitting ? t('dashboard.postModal.saving') : t('dashboard.postModal.save')}
                 </button>
               </div>
             </div>
@@ -1836,7 +1866,7 @@ export default function Dashboard() {
                   marginBottom: "15px",
                 }}
               >
-                <h3 style={{ margin: 0 }}>Browse Rooms</h3>
+                <h3 style={{ margin: 0 }}>{t('dashboard.browseRooms.title')}</h3>
                 <button
                   onClick={() => setShowBrowseRooms(false)}
                   style={{
@@ -1854,7 +1884,7 @@ export default function Dashboard() {
                 <p style={{ opacity: 0.5, textAlign: "center" }}>Loading...</p>
               ) : subjectRoomsData.length === 0 ? (
                 <p style={{ opacity: 0.5, textAlign: "center" }}>
-                  No rooms available.
+                  {t('dashboard.browseRooms.noRooms')}
                 </p>
               ) : (
                 subjectRoomsData.map(({ major, majorId, rooms, available }) => (
@@ -1897,7 +1927,7 @@ export default function Dashboard() {
                             cursor: "pointer",
                           }}
                         >
-                          Leave
+                          {t('dashboard.browseRooms.leave')}
                         </button>
                       </div>
                     ))}
@@ -1935,7 +1965,7 @@ export default function Dashboard() {
                             cursor: "pointer",
                           }}
                         >
-                          Join
+                          {t('dashboard.browseRooms.join')}
                         </button>
                       </div>
                     ))}
@@ -1954,7 +1984,7 @@ export default function Dashboard() {
                 <h4
                   style={{ margin: "0 0 12px", opacity: 0.7, fontSize: "13px" }}
                 >
-                  Can't find your subject? Request it:
+                  {t('dashboard.browseRooms.requestTitle')}
                 </h4>
 
                 {/* major dropdown — only user's own majors */}
@@ -1974,7 +2004,7 @@ export default function Dashboard() {
                     marginBottom: "8px",
                   }}
                 >
-                  <option value="">Select the major...</option>
+                  <option value="">{t('dashboard.browseRooms.selectMajor')}</option>
                   {subjectRoomsData.map(({ major , majorId }) => (
                     <option key={major} value={majorId}>
                       {major}
@@ -1984,7 +2014,7 @@ export default function Dashboard() {
 
                 <input
                   type="text"
-                  placeholder="Subject name..."
+                  placeholder={t('dashboard.browseRooms.subjectPlaceholder')}
                   value={requestSubject}
                   onChange={(e) => {
                     setRequestSubject(e.target.value);
@@ -2034,7 +2064,7 @@ export default function Dashboard() {
                     opacity: !requestMajor || !requestSubject.trim() ? 0.5 : 1,
                   }}
                 >
-                  {requestLoading ? "Sending..." : "Send Request"}
+                 {requestLoading ? t('dashboard.browseRooms.sending') : t('dashboard.browseRooms.sendRequest')}
                 </button>
               </div>
             </div>
@@ -2071,7 +2101,7 @@ export default function Dashboard() {
                   marginBottom: "16px",
                 }}
               >
-                <h3 style={{ margin: 0 }}>📢 Announcements</h3>
+                <h3 style={{ margin: 0 }}>{t('dashboard.announcements.title')}</h3>
                 <button
                   onClick={() => setShowAnnouncements(false)}
                   style={{
@@ -2088,7 +2118,7 @@ export default function Dashboard() {
               <div style={{ overflowY: "auto", flex: 1 }}>
                 {announcements.length === 0 ? (
                   <p style={{ opacity: 0.5, textAlign: "center" }}>
-                    No announcements yet.
+                    {t('dashboard.announcements.empty')}
                   </p>
                 ) : (
                   announcements.map((a) => (
