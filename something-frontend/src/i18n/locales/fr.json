@@ -558,5 +558,39 @@
         "superAdmin2Email": "sarahbennoura87@gmail.com"
       }
     }
+  },
+  "reportModal": {
+  "title": "🚩 Signaler",
+  "selectReason": "Sélectionnez une raison pour signaler ce",
+  "detailsPlaceholder": "Détails supplémentaires (facultatif)",
+  "noReasonError": "Veuillez sélectionner une raison.",
+  "submitted": "Signalement soumis. Notre équipe va l'examiner.",
+  "close": "Fermer",
+  "cancel": "Annuler",
+  "submit": "Soumettre le signalement",
+  "reasons": {
+    "spam": "Spam",
+    "harassment": "Harcèlement",
+    "misinformation": "Désinformation",
+    "inappropriate": "Contenu inapproprié",
+    "other": "Autre"
   }
+},
+"correction": {
+  "title": "Mettre à jour vos informations ✏️",
+  "subtitle": "Certaines informations fournies lors de l'inscription n'ont pas été reconnues. Veuillez sélectionner des options valides dans les listes ci-dessous pour continuer.",
+  "rejectedUni": "❌ Université rejetée :",
+  "selectUniLabel": "Sélectionnez votre université :",
+  "selectUniPlaceholder": "Sélectionnez une université...",
+  "rejectedMajors": "❌ Spécialité(s) rejetée(s) :",
+  "rejectedMajorsNote": "Vos spécialités précédemment soumises n'ont pas été reconnues.",
+  "selectMajorLabelProf": "Sélectionnez votre/vos spécialité(s) :",
+  "selectMajorLabelStudent": "Sélectionnez votre spécialité (une seule) :",
+  "selectMajorPlaceholder": "Sélectionnez une spécialité...",
+  "saving": "Enregistrement...",
+  "confirm": "Confirmer et continuer",
+  "noUniError": "Veuillez sélectionner une université valide.",
+  "noMajorError": "Veuillez sélectionner au moins une spécialité valide.",
+  "successMessage": "Informations mises à jour avec succès !"
+}
 }

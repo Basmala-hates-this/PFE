@@ -558,5 +558,39 @@
         "superAdmin2Email": "sarahbennoura87@gmail.com"
       }
     }
+  },
+  "reportModal": {
+  "title": "🚩 Report",
+  "selectReason": "Select a reason for reporting this",
+  "detailsPlaceholder": "Additional details (optional)",
+  "noReasonError": "Please select a reason.",
+  "submitted": "Report submitted. Our team will review it.",
+  "close": "Close",
+  "cancel": "Cancel",
+  "submit": "Submit Report",
+  "reasons": {
+    "spam": "Spam",
+    "harassment": "Harassment",
+    "misinformation": "Misinformation",
+    "inappropriate": "Inappropriate content",
+    "other": "Other"
   }
+},
+"correction": {
+  "title": "Update Your Information ✏️",
+  "subtitle": "Some of the information you provided during registration was not recognized. Please select valid options from the lists below to continue.",
+  "rejectedUni": "❌ Rejected university:",
+  "selectUniLabel": "Select your university:",
+  "selectUniPlaceholder": "Select a university...",
+  "rejectedMajors": "❌ Rejected major(s):",
+  "rejectedMajorsNote": "Your previously submitted major(s) were not recognized.",
+  "selectMajorLabelProf": "Select your major(s):",
+  "selectMajorLabelStudent": "Select your major (one only):",
+  "selectMajorPlaceholder": "Select major(s)...",
+  "saving": "Saving...",
+  "confirm": "Confirm & Continue",
+  "noUniError": "Please select a valid university.",
+  "noMajorError": "Please select at least one valid major.",
+  "successMessage": "Information updated successfully!"
+}
 }

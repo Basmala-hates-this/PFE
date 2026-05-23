@@ -557,5 +557,39 @@
         "superAdmin2Email": "sarahbennoura87@gmail.com"
       }
     }
+  },
+  "reportModal": {
+  "title": "🚩 إبلاغ",
+  "selectReason": "اختر سبب الإبلاغ عن هذا",
+  "detailsPlaceholder": "تفاصيل إضافية (اختياري)",
+  "noReasonError": "يرجى اختيار سبب.",
+  "submitted": "تم إرسال البلاغ. سيقوم فريقنا بمراجعته.",
+  "close": "إغلاق",
+  "cancel": "إلغاء",
+  "submit": "إرسال البلاغ",
+  "reasons": {
+    "spam": "سبام",
+    "harassment": "تحرش",
+    "misinformation": "معلومات مضللة",
+    "inappropriate": "محتوى غير لائق",
+    "other": "أخرى"
   }
+},
+"correction": {
+  "title": "تحديث معلوماتك ✏️",
+  "subtitle": "بعض المعلومات التي قدمتها أثناء التسجيل لم يتم التعرف عليها. يرجى اختيار خيارات صحيحة من القوائم أدناه للمتابعة.",
+  "rejectedUni": "❌ الجامعة المرفوضة:",
+  "selectUniLabel": "اختر جامعتك:",
+  "selectUniPlaceholder": "اختر جامعة...",
+  "rejectedMajors": "❌ التخصص(ات) المرفوضة:",
+  "rejectedMajorsNote": "التخصصات التي أرسلتها سابقاً لم يتم التعرف عليها.",
+  "selectMajorLabelProf": "اختر تخصصك/تخصصاتك:",
+  "selectMajorLabelStudent": "اختر تخصصك (واحد فقط):",
+  "selectMajorPlaceholder": "اختر تخصصاً...",
+  "saving": "جارٍ الحفظ...",
+  "confirm": "تأكيد والمتابعة",
+  "noUniError": "يرجى اختيار جامعة صحيحة.",
+  "noMajorError": "يرجى اختيار تخصص واحد على الأقل.",
+  "successMessage": "تم تحديث المعلومات بنجاح!"
+}
 }
