@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
+ import { useTranslation } from 'react-i18next';
 
 export default function ConnectionsPage() {
   const { userId } = useParams();
@@ -12,6 +13,7 @@ export default function ConnectionsPage() {
   const [following, setFollowing] = useState([]);
   const [activeTab, setActiveTab] = useState("followers");
   const [loading, setLoading] = useState(true);
+   const { t } = useTranslation();
 
   useEffect(() => {
     const fetchConnections = async () => {
@@ -45,7 +47,7 @@ export default function ConnectionsPage() {
       <img src={user.profile_pic_url || Cat} alt="pfp" style={{width:"45px", height:"45px", borderRadius:"50%", objectFit:"cover"}}/>
       <div>
         <strong>@{user.username}</strong>
-        <small style={{display:"block", opacity:0.5, marginTop:"2px"}}>{user.role} • rating: {user.rating ?? 1} / 5</small>
+        <small style={{display:"block", opacity:0.5, marginTop:"2px"}}>{user.role} • {`${t("connections.rating")}: ${user.rating ?? 1} / 5`}</small>
       </div>
     </div>
   );
@@ -55,7 +57,7 @@ export default function ConnectionsPage() {
       
       <div style={{display:"flex", alignItems:"center", gap:"15px", marginBottom:"20px"}}>
         <button onClick={() => navigate(-1)} style={{background:"none", border:"none", color:"white", fontSize:"20px", cursor:"pointer"}}>←</button>
-        <h2 style={{margin:0}}>Connections</h2>
+        <h2 style={{margin:0}}>{t("connections.title")}</h2>
       </div>
 
       {/* tabs */}
@@ -64,24 +66,24 @@ export default function ConnectionsPage() {
           onClick={() => setActiveTab("followers")}
           style={{background:"none", border:"none", color: activeTab === "followers" ? "white" : "rgba(255,255,255,0.4)", fontSize:"14px", cursor:"pointer", paddingBottom:"8px", borderBottom: activeTab === "followers" ? "2px solid #6476af" : "none"}}
         >
-          Followers ({followers.length})
+          {`${t("connections.followers")} (${followers.length})`}
         </button>
         <button
           onClick={() => setActiveTab("following")}
           style={{background:"none", border:"none", color: activeTab === "following" ? "white" : "rgba(255,255,255,0.4)", fontSize:"14px", cursor:"pointer", paddingBottom:"8px", borderBottom: activeTab === "following" ? "2px solid #6476af" : "none"}}
         >
-          Following ({following.length})
+          {`${t("connections.following")} (${following.length})`}
         </button>
       </div>
 
       {loading ? (
-        <p style={{opacity:0.5}}>Loading...</p>
+        <p style={{opacity:0.5}}>{t("connections.loading")}</p>
       ) : (
         <>
           {activeTab === "followers" && (
             <div>
               {followers.length === 0 ? (
-                <p style={{opacity:0.5}}>No followers yet.</p>
+                <p style={{opacity:0.5}}>{t("connections.noFollowers")}</p>
               ) : (
                 followers.map(renderUser)
               )}
@@ -90,7 +92,7 @@ export default function ConnectionsPage() {
           {activeTab === "following" && (
             <div>
               {following.length === 0 ? (
-                <p style={{opacity:0.5}}>Not following anyone yet.</p>
+                <p style={{opacity:0.5}}>{t("connections.noFollowing")}</p>
               ) : (
                 following.map(renderUser)
               )}

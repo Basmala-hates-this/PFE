@@ -21,7 +21,18 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
       <div style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         
         <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-          <strong style={{ fontSize: "13px" }}>@{comment.authorUsername}</strong>
+         <img
+    src={comment.authorProfilePic || Cat } 
+    alt="pfp"
+    style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover", cursor: "pointer" }}
+    onClick={() => window.location.href = `/users/${comment.userId}`}
+  />
+          <strong
+  style={{ fontSize: "13px", cursor: "pointer" }}
+  onClick={() => window.location.href = `/users/${comment.userId}`}
+>
+  @{comment.authorUsername}
+</strong>
           {depth > 0 && <small style={{ opacity: 0.4, fontSize: "11px" }}>↩ reply</small>}
           <small style={{ opacity: 0.5, fontSize: "11px" }}>{new Date(comment.createdAt).toLocaleString()}</small>
         </div>
@@ -299,8 +310,18 @@ const buildCommentTree = (comments) => {
         {/* original post */}
         <div style={{padding:"12px", background:"rgba(255,255,255,0.05)", borderRadius:"8px", marginBottom:"10px"}}>
           <div style={{display:"flex", alignItems:"center", gap:"8px", marginBottom:"6px"}}>
-            <img src={post.authorProfilePic || Cat} alt="pfp" style={{width:"28px", height:"28px", borderRadius:"50%"}}/>
-            <strong>@{post.authorUsername}</strong>
+            <img
+  src={post.authorProfilePic || Cat}
+  alt="pfp"
+  style={{ width:"28px", height:"28px", borderRadius:"50%", cursor:"pointer" }}
+  onClick={() => window.location.href = `/users/${post.userId}`}
+/>
+<strong
+  style={{ cursor:"pointer" }}
+  onClick={() => window.location.href = `/users/${post.userId}`}
+>
+  @{post.authorUsername}
+</strong>
             <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
           </div>
           <p style={{margin:"0 0 8px"}}>{post.content}</p>

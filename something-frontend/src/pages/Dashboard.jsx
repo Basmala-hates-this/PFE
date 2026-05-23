@@ -18,6 +18,8 @@ import ReportModal from "../assets/components/ReportModal.jsx";
 
 import { useTranslation } from 'react-i18next';
 
+import { useRef } from "react";
+
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
 //sooo why not work with both,context and localstorge?
@@ -118,7 +120,9 @@ const handleSelectChange = (event) => {
     changeLanguage(event.target.value);
   };
 
-
+const [isLight, setIsLight] = useState(
+  () => localStorage.getItem("theme") === "light"
+);
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
@@ -139,41 +143,41 @@ const handleSelectChange = (event) => {
     if (storedUser) setUser(storedUser);
   }, [navigate]);
 
-  useEffect(() => {
-    //maybe if this caused problems...change with useRef of react...only if necessary...which for now..it isnt..
-    const lgm = document.getElementById("lgm");
-    const body = document.body;
+  // useEffect(() => {
+  //   //maybe if this caused problems...change with useRef of react...only if necessary...which for now..it isnt..
+  //   const lgm = document.getElementById("lgm");
+  //   const body = document.body;
 
-    if (!lgm) return;
+  //   if (!lgm) return;
 
-    let savedTheme = localStorage.getItem("theme");
+  //   let savedTheme = localStorage.getItem("theme");
 
-    if (!savedTheme) {
-      const prefersLight = window.matchMedia(
-        "(prefers-color-scheme: light)",
-      ).matches;
-      savedTheme = prefersLight ? "light" : "dark";
-      localStorage.setItem("theme", savedTheme);
-    }
+  //   if (!savedTheme) {
+  //     const prefersLight = window.matchMedia(
+  //       "(prefers-color-scheme: light)",
+  //     ).matches;
+  //     savedTheme = prefersLight ? "light" : "dark";
+  //     localStorage.setItem("theme", savedTheme);
+  //   }
 
-    if (savedTheme === "light") {
-      body.classList.add("light-mode");
-      lgm.textContent = t('dashboard.sidebar.darkMode');
-    } else {
-      lgm.textContent = t('dashboard.sidebar.lightMode');
-    }
+  //   if (savedTheme === "light") {
+  //     body.classList.add("light-mode");
+  //     lgm.textContent = t('dashboard.sidebar.darkMode');
+  //   } else {
+  //     lgm.textContent = t('dashboard.sidebar.lightMode');
+  //   }
 
-    const toggleTheme = () => {
-      body.classList.toggle("light-mode");
-      const mode = body.classList.contains("light-mode") ? "light" : "dark";
-      localStorage.setItem("theme", mode);
-      lgm.textContent = mode === "light" ? t('dashboard.sidebar.darkMode') : t('dashboard.sidebar.lightMode');
-    };
+  //   const toggleTheme = () => {
+  //     body.classList.toggle("light-mode");
+  //     const mode = body.classList.contains("light-mode") ? "light" : "dark";
+  //     localStorage.setItem("theme", mode);
+  //     lgm.textContent = mode === "light" ? t('dashboard.sidebar.darkMode') : t('dashboard.sidebar.lightMode');
+  //   };
 
-    lgm.addEventListener("click", toggleTheme);
+  //   lgm.addEventListener("click", toggleTheme);
 
-    return () => lgm.removeEventListener("click", toggleTheme);
-  }, []);
+  //   return () => lgm.removeEventListener("click", toggleTheme);
+  // }, []);
 
   //listener to the update from editprofile page
   useEffect(() => {
@@ -856,12 +860,30 @@ const handleSelectChange = (event) => {
     }),
   };
 
+  //changes for dashboard....
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+const dropdownRef = useRef(null);
+
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+      setDropdownOpen(false);
+    }
+  };
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
+
+
+
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   return (
     <div id="body5">
-       <div className="language-switcher">
+       {/* <div className="language-switcher">
       <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
       <select 
         id="lang-select"
@@ -873,8 +895,9 @@ const handleSelectChange = (event) => {
         <option value="fr">Français</option>
         <option value="ar">العربية</option>
       </select>
-    </div>
-      <div className={`dashboard ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
+    </div> */}
+    
+      {/* <div className={`dashboard ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
         <button
           onClick={() => setSidebarOpen((prev) => !prev)}
           style={{
@@ -899,10 +922,10 @@ const handleSelectChange = (event) => {
           }}
         >
           {sidebarOpen ? "✖" : "☰"}
-        </button>
+        </button> */}
 
         {/* <!-- Sidebar --> */}
-        <aside className="sidebar">
+        {/* <aside className="sidebar">
           <h2>{t('dashboard.sidebar.title')}</h2>
           <ul>
             <li id="home-link" onClick={() => fetchRoomsAndPosts()}>
@@ -948,9 +971,9 @@ const handleSelectChange = (event) => {
             )}
             {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
             right now, lets just keep it in the profile....should it have a confirmation? */}
-            <li id="lgm">{t('dashboard.sidebar.lightMode')} </li>
-            {/* the theme button is the only now to cause issues with clicking anywhere that is not the middle */}
-            <li
+            {/*<li id="lgm">{t('dashboard.sidebar.lightMode')} </li>
+             the theme button is the only now to cause issues with clicking anywhere that is not the middle */}
+            {/* <li
               onClick={(e) => {
                 e.preventDefault();
                 fetchAnnouncements();
@@ -961,24 +984,127 @@ const handleSelectChange = (event) => {
             </li>
             <li onClick={() => navigate("/guide")}>{t('dashboard.sidebar.guide')}</li>
           </ul>
-        </aside>
+        </aside> */}
 
         {/* <!-- Main content --> */}
         <main className="dashMain">
           {/* <!-- Header --> */}
-          <header className="header">
-            <h1 className="welH1">
-              {t('dashboard.header.welcome')}{" "}
-              <span className="usernameDisplay">
-                @{isGuest ? (t('dashboard.header.guest')) : user?.username || "User"}
-                <small className="tag" style={{ marginLeft: "5px" }}>
-                  {isGuest ? (t('dashboard.header.guestTag')) : user?.role}
-                </small>
-              </span>
-            </h1>
+       
+<header className="header" dir={isRTL ? "rtl" : "ltr"}>
+  <h1 className="welH1">
+    {t('dashboard.header.welcome')}{" "}
+    <span
+      className="usernameDisplay"
+      style={{ cursor: isGuest ? "default" : "pointer" }}
+      onClick={() => !isGuest && navigate("/profile")}
+    >
+      @{isGuest ? t('dashboard.header.guest') : user?.username || "User"}
+      <small className="tag" style={{ marginLeft: "5px" }}>
+        {isGuest ? t('dashboard.header.guestTag') : user?.role}
+      </small>
+    </span>
+  </h1>
 
-            <img src={user?.profilePicUrl || Cat} alt="pfp" className="pfp" />
-          </header>
+  <div className="pfp-wrapper" ref={dropdownRef}>
+    <img
+      src={user?.profilePicUrl || Cat}
+      alt="pfp"
+      className="pfp"
+      onClick={() => setDropdownOpen(prev => !prev)}
+      style={{ cursor: "pointer" }}
+    />
+
+    {dropdownOpen && (
+      <div className="pfp-dropdown">
+        {/* Refresh feed */}
+        <div className="dd-item" onClick={() => { fetchRoomsAndPosts(); setDropdownOpen(false); }}>
+           {t('dashboard.sidebar.refreshFeed')}
+        </div>
+
+        {!isGuest && (
+          <>
+            <div className="dd-item" onClick={() => { navigate("/profile"); setDropdownOpen(false); }}>
+               {t('dashboard.sidebar.profile')}
+            </div>
+            <div className="dd-item" onClick={() => {
+              setShowBrowseRooms(true);
+              fetchSubjectRooms();
+              setDropdownOpen(false);
+            }}>
+               {t('dashboard.sidebar.browseRooms')}
+            </div>
+          </>
+        )}
+
+        <div className="dd-item" onClick={() => {
+          fetchAnnouncements();
+          setShowAnnouncements(true);
+          setDropdownOpen(false);
+        }}>
+          {t('dashboard.sidebar.announcements')}
+        </div>
+
+        <div className="dd-item" onClick={() => { navigate("/guide"); setDropdownOpen(false); }}>
+          {t('dashboard.sidebar.guide')}
+        </div>
+
+        {/* Language selector */}
+        <div className="dd-item dd-lang">
+          🌐
+          <select
+            value={currentLang}
+            onChange={(e) => { changeLanguage(e.target.value); }}
+            className="dd-lang-select"
+            onClick={e => e.stopPropagation()}
+          >
+            <option value="en">English</option>
+            <option value="fr">Français</option>
+            <option value="ar">العربية</option>
+          </select>
+        </div>
+
+        {/* Dark/light toggle */}
+        <div className="dd-item dd-theme-toggle">
+          <span>{isLight ? t('dashboard.sidebar.darkMode') : t('dashboard.sidebar.lightMode')}</span>
+          <label className="toggle-switch">
+            <input
+              type="checkbox"
+              checked={isLight}
+             onChange={() => {
+  document.body.classList.toggle("light-mode");
+  const mode = document.body.classList.contains("light-mode") ? "light" : "dark";
+  localStorage.setItem("theme", mode);
+  setIsLight(mode === "light");
+}}
+            />
+            <span className="toggle-slider" />
+          </label>
+        </div>
+
+        {isGuest && (
+          <>
+            <div className="dd-divider" />
+           
+            <div className="dd-item" onClick={() => {
+              localStorage.removeItem("guestToken");
+              localStorage.removeItem("guestUniversities");
+              navigate("/info");
+            }}>
+               {t('dashboard.sidebar.createAccount')}
+            </div>
+             <div className="dd-item dd-danger" onClick={() => {
+              localStorage.removeItem("guestToken");
+              localStorage.removeItem("guestUniversities");
+              navigate("/");
+            }}>
+               {t('dashboard.sidebar.leaveGuest')}
+            </div>
+          </>
+        )}
+      </div>
+    )}
+  </div>
+</header>
 
           {/* why is simple css so damn hell?....was using css framwork going to make this worst or better?..guess we never gonna know */}
           <section
@@ -1271,7 +1397,23 @@ const handleSelectChange = (event) => {
                   {label}
                 </button>
               ))} 
-            </div>
+               <button
+    onClick={() => fetchRoomsAndPosts()}
+    style={{
+      width: "140px",
+      padding: "4px 12px",
+      borderRadius: "20px",
+      border: "none",
+      cursor: "pointer",
+      fontSize: "14px",
+      background: "rgba(255,255,255,0.1)",
+      marginLeft: "auto",  /* pushes it to the far right of the row */
+    }}
+  >
+     {t('dashboard.sidebar.refreshFeed')}
+  </button>
+</div>
+            
             <div className="fyp-feed" id="fyp-feed">
               {/* <p>
                 ehh...the mock are just for funsies....this will not be at all
@@ -1314,9 +1456,14 @@ const handleSelectChange = (event) => {
                             objectFit: "cover",
                             border: "1px solid var(--dark)",
                             padding: "2px",
+                            cursor: "pointer"
                           }}
+                          onClick={() =>!isGuest && navigate(`/users/${post.userId}`)}
                         />
-                        <strong>@{post.authorUsername}</strong>
+                        <strong
+                        style={{ cursor: "pointer" }}
+                        onClick={() => !isGuest && navigate(`/users/${post.userId}`)}
+                        >@{post.authorUsername}</strong>
                         <small
                           style={{
                             background: "#6476af",
@@ -2143,7 +2290,7 @@ const handleSelectChange = (event) => {
             </div>
           </div>
         )}
-      </div>
+      {/* </div> */}
     </div>
   );
 }

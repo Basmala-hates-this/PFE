@@ -4,6 +4,7 @@ import axios from "axios";
 import Cat from "../photos/Cat.jpg";
 import ReportModal from "../assets/components/ReportModal.jsx";
 import  "../styles/pallette.css"
+ import { useTranslation } from 'react-i18next';
 
 export default function PublicProfile() {
   const { userId } = useParams();
@@ -15,6 +16,9 @@ export default function PublicProfile() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
+
+  const { t, i18n } = useTranslation();
+const isRTL = i18n.language === 'ar';
 
 
   const [isFollowing, setIsFollowing] = useState(false);
@@ -157,13 +161,13 @@ const handleFollow = async () => {
       {/* profile card */}
       <div style={{background:"#252b45", borderRadius:"12px", padding:"20px", display:"flex", alignItems:"center", gap:"20px", marginBottom:"20px"}}>
         <img src={user?.profilePicUrl || Cat} alt="pfp" style={{width:"80px", height:"80px", borderRadius:"50%", objectFit:"cover"}}/>
-        <div>
+        <div dir={isRTL ? "rtl" : "ltr"}>
           <h2 style={{margin:"0 0 6px"}}>@{user?.username}</h2>
           <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"12px"}}>{user?.role}</small>
-          <p style={{margin:"8px 0 4px", opacity:0.7}}>Major(s): {majors.join(", ")}</p>
-          <p style={{margin:0, opacity:0.7}}>Rating: {user?.rating ?? 1} / 5</p>
+          <p style={{margin:"8px 0 4px", opacity:0.7}}>{`${t("publicProfile.major")}: ${majors.join(", ")}`}</p>
+          <p style={{margin:0, opacity:0.7}}>{`${t("publicProfile.rating")}: ${user?.rating ?? 1} / 5`}</p>
         </div>
-        <button 
+        <button   dir={isRTL ? "rtl" : "ltr"}
               onClick={handleFollow}
               disabled={followLoading}
              style={{
@@ -176,13 +180,13 @@ const handleFollow = async () => {
                   fontSize:"14px"
                }}
                >
-              {followLoading ? "..." : isFollowing ? "Following ✓" : "Follow"}
+              {followLoading ? "..." : isFollowing ? t("publicProfile.following") : t("publicProfile.follow")}
             </button>
             <button
               onClick={() => navigate(`/connections/${userId}`)}
               style={{padding:"8px 20px", borderRadius:"8px", background:"transparent", border:"1px solid #6476af", color:"white", cursor:"pointer", fontSize:"14px"}}
             >
-                View Connections
+                {t("publicProfile.viewConnections")}
             </button>
             {currentUser?.id !== userId && (
                <button
@@ -190,7 +194,7 @@ const handleFollow = async () => {
              style={{padding:"8px 20px", borderRadius:"8px", background:"transparent",
               border:"1px solid #c0392b", color:"#c0392b", cursor:"pointer", fontSize:"14px"}}
               >
-            🚩 Report
+            {t("publicProfile.report")}
           </button>
           )}
       </div>
@@ -199,27 +203,27 @@ const handleFollow = async () => {
       <div style={{display:"grid", gridTemplateColumns:"repeat(3, 1fr)", gap:"10px", marginBottom:"20px"}}>
   <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
     <strong style={{fontSize:"22px"}}>{stats?.postsCount || 0}</strong>
-    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Posts 📝</p>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>{t("publicProfile.posts")}</p>
   </div>
   <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
     <strong style={{fontSize:"22px"}}>{stats?.commentsCount || 0}</strong>
-    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Comments 🗨️</p>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>{t("publicProfile.comments")}</p>
   </div>
   <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
     <strong style={{fontSize:"22px"}}>{stats?.usefulReceived || 0}</strong>
-    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Useful Votes 👍</p>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>{t("publicProfile.usefulVotes")}</p>
   </div>
   <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
     <strong style={{fontSize:"22px"}}>{stats?.uselessReceived || 0}</strong>
-    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Useless Count ❌</p>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>{t("publicProfile.uselessCount")}</p>
   </div>
   <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
     <strong style={{fontSize:"22px"}}>{stats?.specializedReceived || 0}</strong>
-    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Specialized ✨</p>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>{t("publicProfile.specialized")}</p>
   </div>
   <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", textAlign:"center"}}>
     <strong style={{fontSize:"22px"}}>{user?.rooms?.length || 0}</strong>
-    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>Rooms Joined 🏠</p>
+    <p style={{margin:"4px 0 0", opacity:0.5, fontSize:"12px"}}>{t("publicProfile.roomsJoined")}</p>
   </div>
 </div>
 
@@ -227,7 +231,7 @@ const handleFollow = async () => {
 {/* the major thinggis for profs....the ammount of shit i'm doing is insane.. */}
 {user?.role === "professor" && majors?.length > 0 && (
   <div style={{background:"#252b45", borderRadius:"8px", padding:"15px", marginBottom:"20px"}}>
-    <h3 style={{margin:"0 0 15px", color:"#5DADE2"}}>Specialty Majors</h3>
+    <h3 style={{margin:"0 0 15px", color:"#5DADE2"}}>{t("publicProfile.specialtyMajors")}</h3>
     
   {majors.map((major, index) => (
       <div key={index} style={{padding:"8px 0", borderBottom:"1px solid rgba(255,255,255,0.1)"}}>
@@ -238,9 +242,9 @@ const handleFollow = async () => {
 )} 
 
       {/* recent posts */}
-      <h3 style={{marginBottom:"15px"}}>Recent Posts</h3>
+      <h3 style={{marginBottom:"15px"}}>{t("publicProfile.recentPosts")}</h3>
       {posts.length === 0 ? (
-        <p style={{opacity:0.5}}>No posts yet.</p>
+        <p style={{opacity:0.5}}>{t("publicProfile.noPosts")}</p>
       ) : (
         posts.slice(0, 5).map(post => (
           <div key={post.id} style={{background:"#252b45", borderRadius:"8px", padding:"15px", marginBottom:"10px"}}>
@@ -262,4 +266,4 @@ const handleFollow = async () => {
 
     </div>
   );
-}
+} 

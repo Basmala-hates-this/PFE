@@ -2,6 +2,8 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
+ import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/index.js';
 
 export default function RoomChat() {
   const { roomId } = useParams();
@@ -27,6 +29,8 @@ export default function RoomChat() {
   const isImage = (fileUrl) => {
   return /\.(jpg|jpeg|png|gif|webp)$/i.test(fileUrl);
 };
+
+const { t } = useTranslation();
 
   ////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
@@ -96,7 +100,7 @@ useEffect(() => {
 const handleSendMessage = async () => {
   if (!newMessage.trim() && !attachment) return;
    if (attachment && attachment.size > 20 * 1024 * 1024) {
-    return alert("File too large. Maximum size is 20MB.");
+    return alert(t("roomChat.fileTooLarge"));
   }
   try {
     const formData = new FormData();
@@ -145,7 +149,7 @@ const handleEditMessage = async (messageId) => {
 
 
 const handleLeaveRoom = async () => {
-  const confirm = window.confirm("Are you sure you want to leave this room?");
+  const confirm = window.confirm(t("roomChat.leaveConfirm"));
   if (!confirm) return;
 
   try {
@@ -173,37 +177,37 @@ const handleLeaveRoom = async () => {
       <button onClick={() => navigate("/profile")} style={{background:"none", border:"none", color:"white", fontSize:"20px", cursor:"pointer"}}>←</button>
       <div>
         <h2 style={{margin:0, color:"white"}}>#{room?.name}</h2>
-        <small style={{color:"rgba(255,255,255,0.5)"}}>{room?.members?.length} members</small>
+        <small style={{color:"rgba(255,255,255,0.5)"}}>{`${room?.members?.length} ${t("roomChat.members")}`}</small>
       </div>
       <button
     onClick={handleLeaveRoom}
     style={{padding:"6px 12px", borderRadius:"6px", cursor:"pointer",marginLeft:"55%", color:"red"}}>
-    🚪 Leave Room
+    {t("roomChat.leaveRoom")}
   </button>
       {isAdmin && (
         <div style={{marginLeft:"auto", display:"flex", gap:"10px"}}>
              <button 
                  onClick={() => setShowMembers(true)}
                  style={{padding:"6px 12px", borderRadius:"6px", cursor:"pointer"}}>
-                 👥 Members
+                 {t("roomChat.membersBtn")}
              </button>
           <button onClick={() => {
-            const newName = prompt("Enter new room name:");
+            const newName = prompt(t("roomChat.renamePrompt"));
             if (newName) {
               axios.patch(`http://localhost:5000/api/rooms/private/${roomId}/rename`,
                 { name: newName },
                 { headers: { Authorization: `Bearer ${token}` } }
               ).then(() => setRoom(prev => ({...prev, name: newName})));
             }
-          }} style={{padding:"6px 12px", borderRadius:"6px", cursor:"pointer"}}>Rename</button>
+          }} style={{padding:"6px 12px", borderRadius:"6px", cursor:"pointer"}}>{t("roomChat.rename")}</button>
           <button onClick={() => 
           {
-            if (window.confirm("Delete this room?")) {
+            if (window.confirm(t("roomChat.deleteRoomConfirm"))) {
               axios.delete(`http://localhost:5000/api/rooms/private/${roomId}`,
                 { headers: { Authorization: `Bearer ${token}` } }
               ).then(() => navigate("/profile"));
             }
-          }} style={{padding:"6px 12px", borderRadius:"6px", cursor:"pointer", color:"red"}}>Delete Room</button>
+          }} style={{padding:"6px 12px", borderRadius:"6px", cursor:"pointer", color:"red"}}>{t("roomChat.deleteRoom")}</button>
         </div>
       )}
     </div>
@@ -211,7 +215,7 @@ const handleLeaveRoom = async () => {
     {/* messages */}
     <div style={{flex:1, overflowY:"auto", padding:"20px", display:"flex", flexDirection:"column", gap:"10px"}}>
       {messages.length === 0 ? (
-        <p style={{color:"rgba(255,255,255,0.4)", textAlign:"center"}}>No messages yet. Say something! 👋</p>
+        <p style={{color:"rgba(255,255,255,0.4)", textAlign:"center"}}>{t("roomChat.noMessages")}</p>
       ) : (
         messages.map(msg => (
           <div key={msg.id} style={{display:"flex", flexDirection:"column", alignItems: msg.senderId === currentUser?.id ? "flex-end" : "flex-start"}}>
@@ -222,7 +226,7 @@ const handleLeaveRoom = async () => {
                 <div style={{fontSize:"11px", color:"rgba(255,255,255,0.4)", marginBottom:"4px", padding:"4px 8px", background:"rgba(255,255,255,0.05)", borderRadius:"6px", maxWidth:"60%"}}>
                      ↩ {messages.find(m => m.id === msg.replyTo)?.authorUsername 
                      ? `@${messages.find(m => m.id === msg.replyTo).authorUsername}: ${messages.find(m => m.id === msg.replyTo).content?.slice(0, 50)}...`
-                     : "replying to a deleted message"}
+                     : t("roomChat.replyingToDeleted")}
                 </div>
             )}
 
@@ -237,8 +241,8 @@ const handleLeaveRoom = async () => {
                     style={{width:"100%", padding:"4px", borderRadius:"4px", marginTop:"4px"}}
                   />
                   <div style={{display:"flex", gap:"6px", marginTop:"6px"}}>
-                    <button onClick={() => handleEditMessage(msg.id)} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"4px"}}>Save</button>
-                    <button onClick={() => setEditingMessage(null)} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"4px"}}>Cancel</button>
+                    <button onClick={() => handleEditMessage(msg.id)} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"4px"}}>{t("roomChat.save")}</button>
+                    <button onClick={() => setEditingMessage(null)} style={{fontSize:"11px", padding:"2px 8px", borderRadius:"4px"}}>{t("roomChat.cancel")}</button>
                   </div>
                 </div>
               ) : (
@@ -271,22 +275,22 @@ const handleLeaveRoom = async () => {
         fontSize: "12px"
       }}
     >
-      📄 Open File
+      {t("roomChat.openFile")}
     </a>
   )
 )}
 
               <small style={{opacity:0.5, fontSize:"10px"}}>{new Date(msg.createdAt).toLocaleTimeString()}</small>
-              {msg.isEdited && <small style={{opacity:0.4, fontSize:"10px"}}> (edited)</small>}
+              {msg.isEdited && <small style={{opacity:0.4, fontSize:"10px"}}> {t("roomChat.edited")}</small>}
             </div>
 
             {/* message actions */}
             <div style={{display:"flex", gap:"6px", marginTop:"4px"}}>
-              <button onClick={() => setReplyTo(msg)} style={{fontSize:"10px", background:"none", border:"none", color:"rgba(255,255,255,0.4)", cursor:"pointer"}}>↩ Reply</button>
+              <button onClick={() => setReplyTo(msg)} style={{fontSize:"10px", background:"none", border:"none", color:"rgba(255,255,255,0.4)", cursor:"pointer"}}>{t("roomChat.reply")}</button>
               {msg.senderId=== currentUser?.id && (
                 <>
-                  <button onClick={() => { setEditingMessage(msg); setEditContent(msg.content); }} style={{fontSize:"10px", background:"none", border:"none", color:"rgba(255,255,255,0.4)", cursor:"pointer"}}>✏️ Edit</button>
-                  <button onClick={() => handleDeleteMessage(msg.id)} style={{fontSize:"10px", background:"none", border:"none", color:"#fc0c0c", cursor:"pointer"}}>🗑️ Delete</button>
+                  <button onClick={() => { setEditingMessage(msg); setEditContent(msg.content); }} style={{fontSize:"10px", background:"none", border:"none", color:"rgba(255,255,255,0.4)", cursor:"pointer"}}>{t("roomChat.edit")}</button>
+                  <button onClick={() => handleDeleteMessage(msg.id)} style={{fontSize:"10px", background:"none", border:"none", color:"#fc0c0c", cursor:"pointer"}}> {t("roomChat.delete")}</button>
                  
                 </>
               )}
@@ -301,7 +305,7 @@ const handleLeaveRoom = async () => {
     {/* reply preview */}
     {replyTo && (
       <div style={{padding:"8px 20px", background:"rgba(255,255,255,0.05)", display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-        <small style={{color:"rgba(255,255,255,0.6)"}}>↩ Replying to @{replyTo.authorUsername}: {replyTo.content?.slice(0, 50)}...</small>
+        <small style={{color:"rgba(255,255,255,0.6)"}}>{t("roomChat.replyingTo")} @{replyTo.authorUsername}: {replyTo.content?.slice(0, 50)}...</small>
         <button onClick={() => setReplyTo(null)} style={{background:"none", border:"none", color:"white", cursor:"pointer"}}>✕</button>
       </div>
     )}
@@ -323,10 +327,10 @@ const handleLeaveRoom = async () => {
         value={newMessage}
         onChange={(e) => setNewMessage(e.target.value)}
         onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
-        placeholder="Type a message..."
+        placeholder={t("roomChat.placeholder")}
         style={{flex:1, padding:"10px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white"}}
       />
-      <button onClick={handleSendMessage} style={{padding:"10px 20px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}>Send</button>
+      <button onClick={handleSendMessage} style={{padding:"10px 20px", borderRadius:"8px", background:"#6476af", border:"none", color:"white", cursor:"pointer"}}>{t("roomChat.send")}</button>
     </div>
 
   </div>
@@ -337,7 +341,7 @@ const handleLeaveRoom = async () => {
     <div className="modal" onClick={(e) => e.stopPropagation()}>
       
       <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
-        <h3 style={{margin:0}}>Members ({room?.members?.length})</h3>
+        <h3 style={{margin:0}}>{`${t("roomChat.membersTitle")} (${room?.members?.length})`}</h3>
         <button onClick={() => setShowMembers(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
       </div>
 
@@ -346,13 +350,13 @@ const handleLeaveRoom = async () => {
     <div style={{display:"flex", alignItems:"center", gap:"8px"}}>
       <span>👤 @{member.username}</span>
       {room?.admins?.includes(member.id) && (
-        <small style={{background:"gold", color:"black", padding:"2px 6px", borderRadius:"6px", fontSize:"11px"}}>admin</small>
+        <small style={{background:"gold", color:"black", padding:"2px 6px", borderRadius:"6px", fontSize:"11px"}}>{t("roomChat.admin")}</small>
       )}
     </div>
     {!room?.admins?.includes(member.id) && member.id !== currentUser?.id && (
       <button
         onClick={() => {
-          if (window.confirm(`Upgrade @${member.username} to admin?`)) {
+          if (window.confirm(t("roomChat.makeAdminConfirm", { username: member.username }))) {
             axios.patch(
               `http://localhost:5000/api/rooms/private/${roomId}/admin/${member.id}`,
               {},
@@ -364,13 +368,13 @@ const handleLeaveRoom = async () => {
                      axios.get(`http://localhost:5000/api/rooms/${roomId}/members`, {
                       headers: { Authorization: `Bearer ${token}` }
                      }).then(r => setMemberDetails(r.data));
-                   alert(`@${member.username} is now an admin!`);
+                   alert(t("roomChat.makeAdminSuccess", { username: member.username }));
                 }).catch(err => alert(err.response?.data?.message || "Something went wrong."));
                }
         }}
         style={{padding:"4px 10px", borderRadius:"6px", background:"gold", border:"none", color:"black", cursor:"pointer", fontSize:"12px"}}
       >
-        ⭐ Make Admin
+        {t("roomChat.makeAdmin")}
       </button>
     )}
   </div>

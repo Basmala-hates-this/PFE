@@ -4,6 +4,7 @@ import cat from "../photos/Cat.jpg"
  import { useEffect } from "react";
  import { useState } from "react";
   import axios from "axios";
+  import { useTranslation } from 'react-i18next';
 
   import {validateUsername, isValidEmail} from "../assets/components/Validations.js";
 //the amount of steeling aand fixer upper from other pages is concerning concidering i'm a "programmer"
@@ -11,6 +12,7 @@ import cat from "../photos/Cat.jpg"
 
 export default function EditProfile(){
  const navigate = useNavigate();
+ const { t } = useTranslation();
 
   const [username, setUsername] = useState("");
    const [usernameFeedback, setUsernameFeedback] = useState("");
@@ -71,7 +73,7 @@ const handleFileChange = (e) => {
   const file = e.target.files[0];
   if (!file) return;
   if (file.size > 2 * 1024 * 1024) {
-    alert("Image must be under 2MB");
+    alert(t("editProfile.imageTooLarge"));
     return;
   }
   setSelectedFile(file); // store actual file object
@@ -118,7 +120,7 @@ const handleSubmit = async (e) => {
   const isChangingPfp = selectedFile !== null;
 
   if (!isChangingUsername && !isChangingEmail && !isChangingPfp) {
-    alert("Nothing to update....u discovering?");
+    alert(t("editProfile.nothingToUpdate"));
     return;
   }
 
@@ -145,12 +147,12 @@ const handleSubmit = async (e) => {
     localStorage.setItem("currentUser", JSON.stringify(response.data));
     window.dispatchEvent(new Event("storage"));
 
-    alert("Profile updated successfully!");
+    alert(t("editProfile.updateSuccess"));
     navigate("/profile");
 
   } catch (err) {
     if (err.response?.data?.message) {
-      alert(err.response.data.message);
+      alert(t("editProfile.updateError"));
     } else {
       console.error("Failed to update profile:", err);
     }
@@ -168,7 +170,7 @@ const PasswordResetLink = () => {
 //   return;
 // }
 //
-  const confirm = window.confirm("You will be redirected to reset your password. Continue?");
+  const confirm = window.confirm(t("editProfile.passwordRedirect"));
   if (confirm) navigate("/reset");
 };
 
@@ -179,7 +181,7 @@ const PasswordResetLink = () => {
 <div className="edit-profile-card">
         <div className="page-title">
          
-         <h2 className="Edit-h2">Edit Profile</h2>
+         <h2 className="Edit-h2">{t("editProfile.pageTitle")}</h2>
         </div>
    
  <div className="email-display">
@@ -193,8 +195,8 @@ const PasswordResetLink = () => {
         </div>
 
     <div className="form-group">
-      <label htmlFor="username" className="EditLabel">New Username</label>
-     <input type="text" id="editUsername"  className="edit-username" placeholder="Enter your new username"  value={username}  onChange={handleUsernameChange}/>
+      <label htmlFor="username" className="EditLabel">{t("editProfile.usernameLabel")}</label>
+     <input type="text" id="editUsername"  className="edit-username" placeholder={t("editProfile.usernamePlaceholder")}  value={username}  onChange={handleUsernameChange}/>
      {usernameFeedback && <p
   id="feedback"
   style={{
@@ -209,12 +211,12 @@ const PasswordResetLink = () => {
               <p style={{ color: "#fc0c0ce9", marginTop: "10px",fontSize:"20px",backgroundColor:"#f7f4f4a7", borderRadius: "12px", width:"70%", marginLeft:"15%", height:" 30px" }}>
     {error}
   </p> )}*/}
-      <label htmlFor="EditedEmail" className="EditLabel">New Email</label>
-     <input type="email" id="EditedEmail"  className="edit-Email" placeholder="Enter your new email"  value={editEmail}  onChange={(e) => setEditEmail(e.target.value)} />
+      <label htmlFor="EditedEmail" className="EditLabel">{t("editProfile.emailLabel")}</label>
+     <input type="email" id="EditedEmail"  className="edit-Email" placeholder={t("editProfile.emailPlaceholder")}  value={editEmail}  onChange={(e) => setEditEmail(e.target.value)} />
     
  </div>
  
- <label  htmlFor="profilePic" className="EditLabel">Profile Picture</label>
+ <label  htmlFor="profilePic" className="EditLabel">{t("editProfile.profilePicLabel")}</label>
    
   
      <input type="file" id="profilePic" className="editPfp" accept="image/*"  onChange={handleFileChange} />
@@ -222,13 +224,13 @@ const PasswordResetLink = () => {
          
     
     <div className="password-link">
-      <a href="#"  className="editPassword" onClick={PasswordResetLink}>Change Password </a>
+      <a href="#"  className="editPassword" onClick={PasswordResetLink}>{t("editProfile.changePassword")}</a>
     </div>
            <div className="action-buttons">
-             <button type="button"  className="main-btn cancel-btn" onClick={() => navigate("/profile")}>Cancel</button>
+             <button type="button"  className="main-btn cancel-btn" onClick={() => navigate("/profile")}>{t("editProfile.cancel")}</button>
 
                 <button type="submit" className="main-btn save-btn" id="saveBtn">
-                    Save Changes
+                    {t("editProfile.saveChanges")}
                 </button>
             </div>
        

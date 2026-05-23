@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
 import PostModal from "../assets/components/PostModal.jsx";
+ import { useTranslation } from 'react-i18next';
+import i18n from '../i18n/index.js';
 
 export default function SearchPage() {
   const navigate = useNavigate();
@@ -23,7 +25,7 @@ const isGuest = !!guestToken;
 const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
 
 
-
+const { t } = useTranslation();
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +109,7 @@ setUsers(isGuest ? [] : results[1].data.filter(u => u.id !== currentUser.id));
       {/* header */}
       <div style={{display:"flex", alignItems:"center", gap:"15px", marginBottom:"20px"}}>
         <button onClick={() => navigate("/dashboard")} style={{background:"none", border:"none", color:"white", fontSize:"20px", cursor:"pointer"}}>←</button>
-        <h2 style={{margin:0}}>Results for "{query}"</h2>
+        <h2 style={{margin:0}}>{`${t("searchPage.resultsFor")} "${query}"`}</h2>
       </div>
 
       {/* tabs */}
@@ -116,27 +118,27 @@ setUsers(isGuest ? [] : results[1].data.filter(u => u.id !== currentUser.id));
           onClick={() => setActiveTab("posts")}
           style={{background:"none", border:"none", color: activeTab === "posts" ? "white" : "rgba(255,255,255,0.4)", fontSize:"14px", cursor:"pointer", paddingBottom:"8px", borderBottom: activeTab === "posts" ? "2px solid #6476af" : "none"}}
         >
-          Posts ({posts.length})
+          {`${t("searchPage.postsTab")} (${posts.length})`}
         </button>
          {!isGuest && (
         <button
           onClick={() => setActiveTab("users")}
           style={{background:"none", border:"none", color: activeTab === "users" ? "white" : "rgba(255,255,255,0.4)", fontSize:"14px", cursor:"pointer", paddingBottom:"8px", borderBottom: activeTab === "users" ? "2px solid #6476af" : "none"}}
         >
-          Users ({users.length})
+         {`${t("searchPage.usersTab")} (${users.length})`}
         </button>
          )}
       </div>
 
       {loading ? (
-        <p style={{opacity:0.5}}>Searching...</p>
+        <p style={{opacity:0.5}}>{t("searchPage.searching")}</p>
       ) : (
         <>
           {/* posts tab */}
           {activeTab === "posts" && (
             <div>
               {posts.length === 0 ? (
-                <p style={{opacity:0.5}}>No posts found for "{query}"</p>
+                <p style={{opacity:0.5}}>{`${t("searchPage.noPostsFound")} "${query}"`}</p>
               ) : (
                 posts.map(post => (
                  <div key={post.id} 
@@ -163,7 +165,7 @@ setUsers(isGuest ? [] : results[1].data.filter(u => u.id !== currentUser.id));
           {activeTab === "users" && (
             <div>
               {users.length === 0 ? (
-                <p style={{opacity:0.5}}>No users found for "{query}"</p>
+                <p style={{opacity:0.5}}>{`${t("searchPage.noUsersFound")} "${query}"`}</p>
               ) : (
                 users.map(user => (
                   <div key={user.id} 
@@ -175,7 +177,7 @@ setUsers(isGuest ? [] : results[1].data.filter(u => u.id !== currentUser.id));
                     <img src={user.profile_pic_url || Cat} alt="pfp" style={{width:"45px", height:"45px", borderRadius:"50%", objectFit:"cover"}}/>
                     <div>
                       <strong>@{user.username}</strong>
-                      <small style={{display:"block", opacity:0.5, marginTop:"2px"}}>{user.role} • rating: {user.rating ?? 1} / 5</small>
+                      <small style={{display:"block", opacity:0.5, marginTop:"2px"}}>{user.role} • {`${t("searchPage.rating")}: ${user.rating ?? 1} / 5`}</small>
                     </div>
                   </div>
                 ))

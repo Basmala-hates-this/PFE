@@ -10,14 +10,18 @@
   font-family: Arial, sans-serif;
   overflow-y: auto;   /* enable scrolling */
   overflow-x: hidden;
+   width: 100%;
+  min-height: 100vh;
 }
 
 /* === Dashboard Layout === */
 .dashboard {
-  display: flex;
+  
+ padding: 10px;
   height: 100vh;
-  gap: 2%;
-  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
 }
 
 
@@ -32,36 +36,38 @@
 /* === Main Content === */
 .dashMain {
 
-  flex: 1;
-  background: linear-gradient(180deg,var(--bg-soft), var(--dark), var(--blue-dark));
+ background: linear-gradient(180deg, var(--bg-soft), var(--dark2), var(--blue-dark));
   border-radius: 15px;
-  padding: 20px;
+  padding: 20px 20px 0 20px;
   overflow: auto;
-  margin-bottom: 10px;
-  width: 70%;
-    box-shadow: 0 15px 35px #367e969b;
-    margin-right: 5px;
-    height: 98vh;
-    
+  box-shadow: 0 15px 35px #367e969b;
+  height: 98vh;
+  width: calc(100% - 20px);
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 /* === Header === */
 .header {
   background: var(--bg-header);
   color: #fff;
-  padding: 15px;
+  
   border-radius: 8px;
-  height: 100px;
+ 
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
+   height: 90px;        
+  padding: 10px 15px;
 } 
 
 
 .usernameDisplay {
   font-weight: 700;
   color: var(--accent);
+  padding: 5px 15px;
 }
 
 .header .welH1 {
@@ -71,10 +77,10 @@
 /* === For You Page === */
 .fyp-container {
   background: var(--bg-soft);
-  padding: 15px;
+  padding: 15px 15px 0 15px;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(72, 76, 99, 0.5);
-  height: calc(100% - 140px);
+  height:calc(100% - 110px);
   display: flex;
   flex-direction: column;
   
@@ -86,11 +92,11 @@
 }
 
 .fyp-feed {
-  margin-top: 7px;
+  margin-top: 0;
   flex-grow: 1;
   border: 1px solid var(--accent);
   border-radius: 5px;
-  padding: 10px;
+  padding: 4px 10px 0 10px;
   overflow-y: auto;
   background-color: var(--bg-panel);
   color: var(--text-main);
@@ -103,10 +109,11 @@
   to { opacity: 1; transform: translateY(0); }
 }
 .pfp {
-  width: 50px;
-  height: 50px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   border: 2px solid whitesmoke;
+  margin: 0 20px;
 }
 
 #sub,#can{
@@ -122,7 +129,7 @@
 }
 
 
-#body5, .sidebar, .main, .header, .fyp-container, .fyp-feed {
+#body5,  .main, .header, .fyp-container, .fyp-feed {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
@@ -244,5 +251,130 @@ font-size: 0.8rem;
 .modal-actions button:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+
+
+
+/* Remove old sidebar toggle button styles if any */
+
+.pfp-wrapper {
+  position: relative;
+}
+
+.pfp-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #1a2235;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 14px;
+  padding: 8px 0;
+  min-width: 220px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  z-index: 999;
+  animation: fadeIn 0.15s ease;
+}
+[dir="rtl"] .pfp-dropdown {
+  right: auto;
+  left: 0;           
+}
+
+.dd-item {
+  padding: 10px 18px;
+  cursor: pointer;
+  font-size: 14px;
+  color: rgba(255,255,255,0.85);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s ease;
+  border-radius: 8px;
+  margin: 2px 6px;
+}
+
+.dd-item:hover {
+  background: rgba(100, 118, 175, 0.25);
+  color: white;
+}
+
+.dd-danger {
+  color: #ff6b6b !important;
+}
+
+.dd-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+  margin: 6px 12px;
+}
+
+/* Language select inside dropdown */
+.dd-lang {
+  gap: 8px;
+}
+
+.dd-lang-select {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 6px;
+  color: white;
+  padding: 3px 6px;
+  font-size: 13px;
+  cursor: pointer;
+  flex: 1;
+}
+
+.dd-lang-select option {
+  background: #1a2235;
+  color: white;
+}
+
+/* Theme toggle row */
+.dd-theme-toggle {
+  justify-content: space-between;
+}
+
+/* Toggle switch */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 38px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.15);
+  border-radius: 20px;
+  transition: background 0.2s;
+  cursor: pointer;
+}
+
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  left: 3px;
+  top: 3px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.2s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: #6476af;
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(18px);
 }
 

@@ -2,7 +2,7 @@
   "welcome": {
     "title": "Bienvenue",
     "quote": "La perfection est surestimée. La persévérance construit de meilleures histoires. Rejoignez-nous et nous pouvons Apprendre, Enseigner et Construire — Ensemble....",
-    "guest_btn": "Continuer en tant qu'invité",
+    "guest_btn": "Continuer sans compte",
     "create_btn": "Créer un compte",
     "login_btn": "Connexion",
     "modal_title": "Sélectionnez jusqu'à 5 universités à parcourir",
@@ -271,10 +271,10 @@
     "sidebar": {
       "dashboard": "retourner",
       "myRooms": "Mes Salles",
-      "createRoom": "Créer une Salle Privée",
-      "joinRoom": "Rejoindre une Salle Privée",
+      "createRoom": "Créer une discussion Privée",
+      "joinRoom": "Rejoindre une discussion Privée",
       "savedPosts": "Mes Publications Sauvegardées",
-      "connections": "Connexions",
+      "connections": "Abonnements",
       "edit": "Modifier",
       "adminPanel": "Panneau Admin",
       "logout": "Déconnexion",
@@ -306,9 +306,9 @@
     "specialtyMajors": "Spécialités",
     "noSubjectRooms": "Aucune salle de matière rejointe pour l'instant",
     "createRoomModal": {
-      "title": "Créer une Salle Privée",
-      "roomNameLabel": "Nom de la Salle",
-      "roomNamePlaceholder": "Entrez le nom de la salle...",
+      "title": "Créer une discussion Privée",
+      "roomNameLabel": "Nom de la discussion",
+      "roomNamePlaceholder": "Entrez le nom de la discussion...",
       "generateKey": "Générer la clé automatiquement",
       "passKeyPlaceholder": "Entrez votre propre clé...",
       "inviteLabel": "Inviter depuis vos abonnements :",
@@ -317,7 +317,7 @@
       "creating": "Création..."
     },
     "joinRoomModal": {
-      "title": "Rejoindre une Salle Privée",
+      "title": "Rejoindre une discussion Privée",
       "passkeyLabel": "Entrer la Clé",
       "passkeyPlaceholder": "Entrez la clé de 8 caractères...",
       "cancel": "Annuler",
@@ -361,6 +361,202 @@
     "genericError": "Une erreur s'est produite.",
     "applySuccess": "Candidature soumise !",
     "withdrawConfirm": "Retirer votre candidature admin ?"
+  },
+  "editProfile": {
+  "pageTitle": "Modifier le profil",
+  "usernameLabel": "Nouveau nom d'utilisateur",
+  "usernamePlaceholder": "Entrez votre nouveau nom d'utilisateur",
+  "emailLabel": "Nouvel e-mail",
+  "emailPlaceholder": "Entrez votre nouvel e-mail",
+  "profilePicLabel": "Photo de profil",
+  "removePhoto": "Supprimer",
+  "changePassword": "Changer le mot de passe",
+  "cancel": "Annuler",
+  "saveChanges": "Enregistrer les modifications",
+  "imageTooLarge": "L'image doit faire moins de 2 Mo",
+  "nothingToUpdate": "Rien à mettre à jour... vous explorez ?",
+  "updateSuccess": "Profil mis à jour avec succès !",
+  "passwordRedirect": "Vous allez être redirigé pour réinitialiser votre mot de passe. Continuer ?"
+},
+"connections": {
+  "title": "Abonnements/Abonnés",
+  "followers": "Abonnés",
+  "following": "Abonnements",
+  "loading": "Chargement...",
+  "noFollowers": "Pas encore d'abonnés.",
+  "noFollowing": "Vous ne suivez personne encore.",
+  "rating": "note"
+},
+"publicProfile": {
+  "major": "Spécialité(s)",
+  "rating": "Note",
+  "following": "Abonné ✓",
+  "follow": "Suivre",
+  "viewConnections": "Voir les connexions",
+  "report": "🚩 Signaler",
+  "specialtyMajors": "Spécialités",
+  "recentPosts": "Publications récentes",
+  "noPosts": "Aucune publication pour l'instant.",
+  "posts": "Publications 📝",
+  "comments": "Commentaires 🗨️",
+  "usefulVotes": "Votes utiles 👍",
+  "uselessCount": "Votes inutiles ❌",
+  "specialized": "Spécialisé ✨",
+  "roomsJoined": "Salles rejointes 🏠"
+},
+"searchPage": {
+  "resultsFor": "Résultats pour",
+  "postsTab": "Publications",
+  "usersTab": "Utilisateurs",
+  "searching": "Recherche en cours...",
+  "noPostsFound": "Aucune publication trouvée pour",
+  "noUsersFound": "Aucun utilisateur trouvé pour",
+  "rating": "note"
+},
+"roomChat": {
+  "members": "membres",
+  "leaveRoom": "🚪 Quitter le salon",
+  "membersBtn": "👥 Membres",
+  "rename": "Renommer",
+  "deleteRoom": "Supprimer le salon",
+  "noMessages": "Aucun message pour l'instant. Dites quelque chose ! 👋",
+  "replyingToDeleted": "en réponse à un message supprimé",
+  "edited": "(modifié)",
+  "reply": "↩ Répondre",
+  "edit": "✏️ Modifier",
+  "delete": "🗑️ Supprimer",
+  "save": "Enregistrer",
+  "cancel": "Annuler",
+  "openFile": "📄 Ouvrir le fichier",
+  "replyingTo": "↩ En réponse à",
+  "placeholder": "Écrivez un message...",
+  "send": "Envoyer",
+  "membersTitle": "Membres",
+  "admin": "admin",
+  "makeAdmin": "⭐ Rendre admin",
+  "leaveConfirm": "Êtes-vous sûr de vouloir quitter ce salon ?",
+  "deleteRoomConfirm": "Supprimer ce salon ?",
+  "fileTooLarge": "Fichier trop volumineux. La taille maximale est de 20 Mo.",
+  "renamePrompt": "Entrez le nouveau nom du salon :",
+  "makeAdminConfirm": "Promouvoir @{{username}} en admin ?",
+  "makeAdminSuccess": "@{{username}} est maintenant admin !"
+  },
+  "guide": {
+    "title": "Guide StudyBuddy",
+    "quote": "La perfection est surestimée. La persévérance construit de meilleures histoires. Rejoignez-nous et nous pouvons Apprendre, Enseigner et Construire — Ensemble....",
+    "logoAlt": "Logo StudyBuddy",
+    "back": "← Retour au tableau de bord",
+    "sidebar": {
+      "title": "Guide StudyBuddy"
+    },
+    "nav": {
+      "overview": "Aperçu",
+      "dashboard": "Tableau de bord",
+      "rooms": "Salles",
+      "actions": "Actions",
+      "roles": "Rôles",
+      "interaction": "Interaction",
+      "account": "Compte",
+      "navigation": "Navigation",
+      "quickstart": "Démarrage rapide",
+      "contact": "Contact"
+    },
+    "sections": {
+      "overview": {
+        "title": "Aperçu",
+        "text1": "StudyBuddy est une plateforme conçue pour organiser des discussions, suivre des actions et gérer des interactions structurées dans des salles dédiées.",
+        "bullets": [
+          "Créer ou rejoindre des salles",
+          "Participer aux discussions",
+          "Suivre les actions et décisions",
+          "Interagir avec les utilisateurs"
+        ]
+      },
+      "dashboard": {
+        "title": "Tableau de bord",
+        "text1": "Votre centre de contrôle principal. Utilisez-le pour naviguer dans StudyBuddy.",
+        "steps": [
+          "Utilisez la barre latérale pour naviguer et accéder rapidement aux actions",
+          "Sélectionnez une fonctionnalité",
+          "Interagissez avec le contenu"
+        ],
+        "imageAlt": "Vue d'ensemble du tableau de bord"
+      },
+      "actions": {
+        "title": "Cartes de statistiques",
+        "text1": "Les cartes de statistiques suivent les événements et décisions dans la plateforme. Elles vous aident à suivre la progression des discussions et les résultats.",
+        "bullets": [
+          "Voir l'historique",
+          "Suivre l'activité des utilisateurs",
+          "Comprendre les changements"
+        ],
+        "text2": "Cliquer sur les cartes de statistiques affiche les détails de l'action et la discussion liée.",
+        "text3": "Un autre élément utile est la barre latérale d'actions.",
+        "profileAlt": "Cartes de profil et statistiques",
+        "sidebarAlt": "Barre latérale d'actions"
+      },
+      "rooms": {
+        "title": "Salles",
+        "text1": "Les salles sont des espaces où les discussions ont lieu.",
+        "bullets": [
+          "Rejoindre ou quitter des salles",
+          "Demander certaines salles",
+          "Démarrer ou participer aux discussions",
+          "Voir les actions liées"
+        ],
+        "joinAlt": "Capture d'écran de rejoindre une salle",
+        "requestAlt": "Capture d'écran de demande de salle",
+        "chatAlt": "Capture d'écran du chat de salle",
+        "subjectAlt": "Capture d'écran de la salle de sujet"
+      },
+      "roles": {
+        "title": "Rôles et permissions",
+        "text1": "Les rôles définissent ce que les utilisateurs peuvent faire.",
+        "bullets": [
+          "Utilisateur",
+          "Admin",
+          "SuperAdmin"
+        ]
+      },
+      "interaction": {
+        "title": "Interaction utilisateur",
+        "lines": [
+          "Les utilisateurs interagissent par le biais de discussions et d'actions.",
+          "Participez aux discussions, prenez des décisions et suivez les résultats.",
+          "Essayez de publier, commenter, voter et rechercher."
+        ]
+      },
+      "account": {
+        "title": "Modifier le compte",
+        "text1": "Modifiez votre profil et personnalisez votre identité sur cette plateforme.",
+        "imageAlt": "Capture d'écran de modification du profil"
+      },
+      "navigation": {
+        "title": "Conseils de navigation",
+        "bullets": [
+          "Utilisez la navigation de la barre latérale",
+          "Retournez au tableau de bord en cas de perte",
+          "Utilisez ce guide à tout moment"
+        ]
+      },
+      "quickstart": {
+        "title": "Démarrage rapide",
+        "steps": [
+          "Ouvrez le tableau de bord",
+          "Allez aux salles",
+          "Rejoignez une salle",
+          "Commencez à interagir"
+        ]
+      },
+      "contact": {
+        "title": "Contact",
+        "studyBuddyLabel": "Mail Study Buddy :",
+        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "superAdmin1Label": "SuperAdmin 1 :",
+        "superAdmin1Email": "laoaribasmala75@gmail.com",
+        "superAdmin2Label": "SuperAdmin 2 :",
+        "superAdmin2Email": "sarahbennoura87@gmail.com"
+      }
+    }
   }
-
 }

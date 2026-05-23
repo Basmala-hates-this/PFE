@@ -17,7 +17,6 @@ export default function Profile() {
 
   const { t, i18n } = useTranslation();
 const isRTL = i18n.language === 'ar';
-
 const currentLang = i18n.language;
 
     const isProfessor=user?.role === "professor";
@@ -392,7 +391,7 @@ const handleStatClick = async (type) => {
   <section className="main">
 
     {/* <!-- PROFILE --> */}
-    <div className="profile-card">
+    <div className="profile-card" dir={isRTL ? "rtl" : "ltr"}>
       <img src={user?.profilePicUrl || cat} alt="Profile Picture" className="profile-pic" />
       <div className="profile-info">
         {/* yay dynamic updates in profile */}

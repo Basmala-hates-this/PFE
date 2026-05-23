@@ -361,5 +361,202 @@
     "genericError": "Something went wrong.",
     "applySuccess": "Application submitted!",
     "withdrawConfirm": "Withdraw your admin application?"
+  },
+  "editProfile": {
+  "pageTitle": "Edit Profile",
+  "usernameLabel": "New Username",
+  "usernamePlaceholder": "Enter your new username",
+  "emailLabel": "New Email",
+  "emailPlaceholder": "Enter your new email",
+  "profilePicLabel": "Profile Picture",
+  "removePhoto": "Remove",
+  "changePassword": "Change Password",
+  "cancel": "Cancel",
+  "saveChanges": "Save Changes",
+  "imageTooLarge": "Image must be under 2MB",
+  "nothingToUpdate": "Nothing to update....u discovering?",
+  "updateSuccess": "Profile updated successfully!",
+  "passwordRedirect": "You will be redirected to reset your password. Continue?"
+},
+"connections": {
+  "title": "Connections",
+  "followers": "Followers",
+  "following": "Following",
+  "loading": "Loading...",
+  "noFollowers": "No followers yet.",
+  "noFollowing": "Not following anyone yet.",
+  "rating": "rating"
+},
+"publicProfile": {
+  "major": "Major(s)",
+  "rating": "Rating",
+  "following": "Following ✓",
+  "follow": "Follow",
+  "viewConnections": "View Connections",
+  "report": "🚩 Report",
+  "specialtyMajors": "Specialty Majors",
+  "recentPosts": "Recent Posts",
+  "noPosts": "No posts yet.",
+  "posts": "Posts 📝",
+  "comments": "Comments 🗨️",
+  "usefulVotes": "Useful Votes 👍",
+  "uselessCount": "Useless Count ❌",
+  "specialized": "Specialized ✨",
+  "roomsJoined": "Rooms Joined 🏠"
+},
+"searchPage": {
+  "resultsFor": "Results for",
+  "postsTab": "Posts",
+  "usersTab": "Users",
+  "searching": "Searching...",
+  "noPostsFound": "No posts found for",
+  "noUsersFound": "No users found for",
+  "rating": "rating"
+},
+"roomChat": {
+  "members": "members",
+  "leaveRoom": "🚪 Leave Room",
+  "membersBtn": "👥 Members",
+  "rename": "Rename",
+  "deleteRoom": "Delete Room",
+  "noMessages": "No messages yet. Say something! 👋",
+  "replyingToDeleted": "replying to a deleted message",
+  "edited": "(edited)",
+  "reply": "↩ Reply",
+  "edit": "✏️ Edit",
+  "delete": "🗑️ Delete",
+  "save": "Save",
+  "cancel": "Cancel",
+  "openFile": "📄 Open File",
+  "replyingTo": "↩ Replying to",
+  "placeholder": "Type a message...",
+  "send": "Send",
+  "membersTitle": "Members",
+  "admin": "admin",
+  "makeAdmin": "⭐ Make Admin",
+  "leaveConfirm": "Are you sure you want to leave this room?",
+  "deleteRoomConfirm": "Delete this room?",
+  "fileTooLarge": "File too large. Maximum size is 20MB.",
+  "renamePrompt": "Enter new room name:",
+  "makeAdminConfirm": "Upgrade @{{username}} to admin?",
+  "makeAdminSuccess": "@{{username}} is now an admin!"
+  },
+  "guide": {
+    "title": "StudyBuddy Guide",
+    "quote": "Perfection is overrated. Persistence builds better stories. Join us and we can Learn, Teach and Build — Together....",
+    "logoAlt": "StudyBuddy logo",
+    "back": "← Back To Dashboard",
+    "sidebar": {
+      "title": "StudyBuddy Guide"
+    },
+    "nav": {
+      "overview": "Overview",
+      "dashboard": "Dashboard",
+      "rooms": "Rooms",
+      "actions": "Actions",
+      "roles": "Roles",
+      "interaction": "Interaction",
+      "account": "Account",
+      "navigation": "Navigation",
+      "quickstart": "Quick Start",
+      "contact": "Contact Us"
+    },
+    "sections": {
+      "overview": {
+        "title": "Overview",
+        "text1": "StudyBuddy is a platform designed to organize discussions, track actions, and manage structured interactions inside purpose specific rooms.",
+        "bullets": [
+          "Create or join rooms",
+          "Participate in discussions",
+          "Track actions and decisions",
+          "Interact with users"
+        ]
+      },
+      "dashboard": {
+        "title": "Dashboard",
+        "text1": "Your main control center. Use it to navigate across StudyBuddy.",
+        "steps": [
+          "Use sidebar for navigation and quick actions",
+          "Select a feature",
+          "Interact with content"
+        ],
+        "imageAlt": "Dashboard overview"
+      },
+      "actions": {
+        "title": "Stat Cards",
+        "text1": "Stat cards track events and decisions inside the platform. They help you follow discussion progress and outcomes.",
+        "bullets": [
+          "View history",
+          "Track user activity",
+          "Understand changes"
+        ],
+        "text2": "Clicking on the stat cards will show you the details of the action and the related discussion.",
+        "text3": "Another useful thing is the action sidebar.",
+        "profileAlt": "Profile stat cards",
+        "sidebarAlt": "Action sidebar"
+      },
+      "rooms": {
+        "title": "Rooms",
+        "text1": "Rooms are spaces where discussions happen.",
+        "bullets": [
+          "Join or leave rooms",
+          "Request some rooms",
+          "Start or participate in discussions",
+          "View related actions"
+        ],
+        "joinAlt": "Join room screenshot",
+        "requestAlt": "Request room screenshot",
+        "chatAlt": "Room chat screenshot",
+        "subjectAlt": "Subject room screenshot"
+      },
+      "roles": {
+        "title": "Roles & Permissions",
+        "text1": "Roles define what users can do.",
+        "bullets": [
+          "User",
+          "Admin",
+          "SuperAdmin"
+        ]
+      },
+      "interaction": {
+        "title": "User Interaction",
+        "lines": [
+          "Users interact through discussions and actions.",
+          "Engage in discussions, make decisions, and track outcomes.",
+          "Try posting, commenting, voting, and searching."
+        ]
+      },
+      "account": {
+        "title": "Edit Account",
+        "text1": "Edit your profile and personalize your identity in this platform.",
+        "imageAlt": "Edit profile screenshot"
+      },
+      "navigation": {
+        "title": "Navigation Tips",
+        "bullets": [
+          "Use sidebar navigation",
+          "Return to dashboard if lost",
+          "Use this guide anytime"
+        ]
+      },
+      "quickstart": {
+        "title": "Quick Start",
+        "steps": [
+          "Open Dashboard",
+          "Go to Rooms",
+          "Join a Room",
+          "Start interacting"
+        ]
+      },
+      "contact": {
+        "title": "Contact Us",
+        "studyBuddyLabel": "Study Buddy mail:",
+        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "superAdmin1Label": "SuperAdmin 1:",
+        "superAdmin1Email": "laoaribasmala75@gmail.com",
+        "superAdmin2Label": "SuperAdmin 2:",
+        "superAdmin2Email": "sarahbennoura87@gmail.com"
+      }
+    }
   }
 }
