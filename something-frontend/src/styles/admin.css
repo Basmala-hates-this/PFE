@@ -1,0 +1,640 @@
+AdminPanel.css
+
+/* Main Container */
+.adminpanel-container {
+  min-height: 100vh;
+  background: #1a1f35;
+  color: white;
+  padding: 20px;
+}
+
+/* Header Section */
+.adminpanel-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 24px;
+}
+
+.adminpanel-back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.adminpanel-title {
+  margin: 0;
+}
+
+.adminpanel-subtitle {
+  opacity: 0.5;
+  font-size: small;
+}
+
+.adminpanel-superadmin-btn {
+  margin-left: auto;
+  padding: 6px 14px;
+  border-radius: 6px;
+  background: #4a3f6b;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+/* Tabs Section */
+.adminpanel-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.adminpanel-tab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 400;
+  transition: all 0.2s ease;
+}
+
+.adminpanel-tab-active {
+  background: #6476af;
+  font-weight: 600;
+}
+
+/* Cards */
+.adminpanel-card {
+  background: #252b45;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: background 0.2s ease;
+}
+
+.adminpanel-card-clickable {
+  cursor: pointer;
+  text-align: center;
+}
+
+.adminpanel-card-clickable:hover {
+  background: #2f3655;
+}
+
+.adminpanel-card-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.adminpanel-card-value {
+  font-size: 24px;
+  display: block;
+  font-weight: bold;
+}
+
+.adminpanel-card-label {
+  opacity: 0.5;
+  font-size: small;
+}
+
+/* Badges */
+.adminpanel-badge {
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  display: inline-block;
+}
+
+.adminpanel-badge-primary {
+  background: #6476af;
+}
+
+.adminpanel-badge-warning {
+  background: #f39c12;
+}
+
+.adminpanel-badge-danger {
+  background: #c0392b;
+}
+
+.adminpanel-badge-success {
+  background: #27ae60;
+}
+
+.adminpanel-badge-dark {
+  background: #4a3f6b;
+}
+
+.adminpanel-badge-pending {
+  background: #e67e22;
+}
+
+.adminpanel-badge-approved {
+  background: #27ae60;
+}
+
+.adminpanel-badge-rejected {
+  background: #c0392b;
+}
+
+/* Buttons */
+.adminpanel-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  transition: opacity 0.2s ease;
+}
+
+.adminpanel-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.adminpanel-btn-primary {
+  background: #6476af;
+}
+
+.adminpanel-btn-success {
+  background: #27ae60;
+}
+
+.adminpanel-btn-danger {
+  background: #c0392b;
+}
+
+.adminpanel-btn-warning {
+  background: #f39c12;
+}
+
+.adminpanel-btn-gray {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.adminpanel-btn-dark-red {
+  background: #7f0000;
+}
+
+/* Filters Section */
+.adminpanel-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.adminpanel-search-input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.adminpanel-select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #252b45;
+  color: white;
+  cursor: pointer;
+}
+
+/* User/Item Row */
+.adminpanel-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adminpanel-item-flex {
+  flex: 1;
+}
+
+.adminpanel-item-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.adminpanel-username {
+  font-weight: bold;
+}
+
+.adminpanel-item-details {
+  opacity: 0.5;
+  font-size: small;
+}
+
+.adminpanel-suspension-text {
+  display: block;
+  color: #e74c3c;
+  margin-top: 2px;
+  font-size: small;
+}
+
+.adminpanel-profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.adminpanel-profile-img-sm {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Button Groups */
+.adminpanel-button-group {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+/* Inline Forms */
+.adminpanel-inline-form {
+  margin-top: 10px;
+}
+
+.adminpanel-textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  box-sizing: border-box;
+  resize: vertical;
+  margin-bottom: 10px;
+}
+
+.adminpanel-input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  box-sizing: border-box;
+}
+
+.adminpanel-input-small {
+  width: 80px;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+/* Proof/Attachment Links */
+.adminpanel-proof-link {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.adminpanel-resource-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: white;
+  text-decoration: none;
+  font-size: 13px;
+  margin-bottom: 8px;
+  margin-right: 8px;
+}
+
+.adminpanel-resource-link-external {
+  background: rgba(100, 118, 175, 0.3);
+}
+
+/* Stats Grid */
+.adminpanel-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .adminpanel-stats-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Custom Inputs Section */
+.adminpanel-custom-section {
+  margin-bottom: 8px;
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+}
+
+.adminpanel-custom-label {
+  opacity: 0.6;
+  font-size: small;
+}
+
+.adminpanel-custom-value {
+  margin: 4px 0 0;
+  font-size: 14px;
+}
+
+.adminpanel-custom-code {
+  opacity: 0.4;
+  font-size: x-small;
+}
+
+/* Announcement Card */
+.adminpanel-announcement-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.adminpanel-announcement-message {
+  margin: 0 0 6px;
+}
+
+.adminpanel-announcement-meta {
+  opacity: 0.5;
+  font-size: small;
+}
+
+.adminpanel-delete-btn {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Room Card */
+.adminpanel-room-card {
+  cursor: pointer;
+  text-align: center;
+}
+
+.adminpanel-room-card:hover {
+  background: #2f3655;
+}
+
+.adminpanel-room-type-badge {
+  margin-bottom: 8px;
+}
+
+.adminpanel-room-name {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: bold;
+}
+
+.adminpanel-room-stats {
+  opacity: 0.5;
+  display: block;
+  font-size: small;
+}
+
+.adminpanel-room-suspended-count {
+  color: #e74c3c;
+  display: block;
+  margin-top: 4px;
+  font-size: small;
+}
+
+/* Modal */
+.adminpanel-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.adminpanel-modal {
+  background: #1a1f35;
+  border-radius: 12px;
+  padding: 20px;
+  width: 650px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.adminpanel-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.adminpanel-modal-title {
+  margin: 0;
+}
+
+.adminpanel-modal-title-sm {
+  margin: 0 0 4px;
+}
+
+.adminpanel-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.adminpanel-modal-content {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.adminpanel-modal-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Member Item in Room Modal */
+.adminpanel-member-item {
+  margin-bottom: 8px;
+}
+
+.adminpanel-member-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adminpanel-member-info {
+  flex: 1;
+}
+
+.adminpanel-member-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.adminpanel-member-name {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.adminpanel-suspension-info {
+  color: #e74c3c;
+  display: block;
+  margin-top: 2px;
+  font-size: small;
+}
+
+.adminpanel-violations-info {
+  opacity: 0.5;
+  display: block;
+  font-size: small;
+}
+
+.adminpanel-suspend-form {
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.adminpanel-suspend-inputs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Drill Down Items */
+.adminpanel-drill-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.adminpanel-drill-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+
+.adminpanel-drill-content {
+  margin: 0;
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.adminpanel-drill-footer {
+  opacity: 0.4;
+  font-size: small;
+}
+
+/* History Items */
+.adminpanel-history-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.adminpanel-history-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6476af;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.adminpanel-history-action {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.adminpanel-history-by {
+  display: block;
+  opacity: 0.5;
+  font-size: small;
+}
+
+.adminpanel-history-reason {
+  display: block;
+  opacity: 0.5;
+  font-size: small;
+}
+
+.adminpanel-history-date {
+  opacity: 0.4;
+  font-size: small;
+}
+
+/* Loading/Empty States */
+.adminpanel-loading {
+  opacity: 0.5;
+}
+
+.adminpanel-empty {
+  opacity: 0.5;
+  text-align: center;
+}
+
+/* Utility Classes */
+.adminpanel-text-center {
+  text-align: center;
+}
+
+.adminpanel-mb-16 {
+  margin-bottom: 16px;
+}
+
+.adminpanel-mt-2 {
+  margin-top: 2px;
+}
+
+.adminpanel-full-width {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.adminpanel-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

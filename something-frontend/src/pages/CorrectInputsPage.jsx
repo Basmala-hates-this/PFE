@@ -8,7 +8,7 @@ import { customSelect } from "../assets/components/selectStyles";
 
 
 export default function CorrectInputsPage() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const token = localStorage.getItem("token");
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 

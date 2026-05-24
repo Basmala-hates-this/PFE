@@ -1,0 +1,592 @@
+/* SuperAdminPanel.css */
+
+/* Main Container */
+.superadmin-container {
+  min-height: 100vh;
+  background: #1a1f35;
+  color: white;
+  padding: 20px;
+}
+
+/* Header Section */
+.superadmin-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 24px;
+}
+
+.superadmin-back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.superadmin-title {
+  margin: 0;
+}
+
+.superadmin-subtitle {
+  opacity: 0.5;
+}
+
+/* Tabs Section */
+.superadmin-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 12px;
+}
+
+.superadmin-tab {
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+  font-weight: 400;
+}
+
+.superadmin-tab-active {
+  background: #6476af;
+  font-weight: 600;
+}
+
+/* Stats Grid */
+.superadmin-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+/* Cards */
+.superadmin-card {
+  background: #252b45;
+  border-radius: 10px;
+  padding: 16px;
+  margin-bottom: 12px;
+}
+
+.superadmin-card-clickable {
+  cursor: pointer;
+  text-align: center;
+}
+
+.superadmin-card-icon {
+  font-size: 28px;
+  margin-bottom: 6px;
+}
+
+.superadmin-card-value {
+  font-size: 24px;
+  display: block;
+  font-weight: bold;
+}
+
+.superadmin-card-label {
+  opacity: 0.5;
+  font-size: small;
+}
+
+/* Badges */
+.superadmin-badge {
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.superadmin-badge-primary {
+  background: #6476af;
+}
+
+.superadmin-badge-warning {
+  background: #f39c12;
+}
+
+.superadmin-badge-danger {
+  background: #c0392b;
+}
+
+.superadmin-badge-success {
+  background: #27ae60;
+}
+
+.superadmin-badge-dark {
+  background: #4a3f6b;
+}
+
+.superadmin-badge-gray {
+  background: #2d3b6b;
+}
+
+.superadmin-badge-override {
+  background: #7f8c8d;
+}
+
+.superadmin-badge-pending {
+  background: #e67e22;
+}
+
+.superadmin-badge-overridden {
+  background: #555;
+}
+
+/* Buttons */
+.superadmin-btn {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.superadmin-btn-warning {
+  background: #f39c12;
+}
+
+.superadmin-btn-danger {
+  background: #c0392b;
+}
+
+.superadmin-btn-success {
+  background: #27ae60;
+}
+
+.superadmin-btn-primary {
+  background: #6476af;
+}
+
+.superadmin-btn-gray {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Application/Admin Item Layout */
+.superadmin-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 0;
+}
+
+.superadmin-item-row-with-margin {
+  margin-bottom: 12px;
+}
+
+.superadmin-item-flex {
+  flex: 1;
+}
+
+.superadmin-item-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.superadmin-item-details {
+  opacity: 0.5;
+  font-size: small;
+}
+
+/* Inline Edit Forms */
+.superadmin-edit-form {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 12px;
+}
+
+.superadmin-edit-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.superadmin-permissions-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.superadmin-permission-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.superadmin-rooms-group {
+  margin-bottom: 12px;
+}
+
+.superadmin-rooms-title {
+  margin: 0 0 8px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+.superadmin-rooms-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.superadmin-room-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 10px;
+  border-radius: 6px;
+}
+
+.superadmin-room-type {
+  opacity: 0.5;
+  font-size: 11px;
+}
+
+.superadmin-button-group {
+  display: flex;
+  gap: 8px;
+}
+
+/* Search Input */
+.superadmin-search-input {
+  padding: 7px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  width: 220px;
+}
+
+/* Profile Image */
+.superadmin-profile-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Admin Permissions Display */
+.superadmin-permissions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.superadmin-permission-tag {
+  font-size: 10px;
+}
+
+.superadmin-no-permissions {
+  opacity: 0.4;
+  font-size: small;
+}
+
+.superadmin-rooms-info {
+  opacity: 0.4;
+  display: block;
+  margin-top: 4px;
+  font-size: small;
+}
+
+/* Divider */
+.superadmin-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 24px;
+  margin-top: 8px;
+}
+
+/* Header with Search */
+.superadmin-header-with-search {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.superadmin-section-title {
+  margin: 0;
+}
+
+/* Logs */
+.superadmin-log-item {
+  opacity: 1;
+}
+
+.superadmin-log-item-overridden {
+  opacity: 0.5;
+}
+
+.superadmin-log-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.superadmin-log-dot-overridden {
+  background: #555;
+}
+
+.superadmin-log-content {
+  flex: 1;
+}
+
+.superadmin-log-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.superadmin-log-admin {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.superadmin-log-details {
+  opacity: 0.6;
+  font-size: small;
+}
+
+.superadmin-log-override-info {
+  display: block;
+  opacity: 0.4;
+  margin-top: 2px;
+  font-size: small;
+}
+
+.superadmin-log-timestamp {
+  opacity: 0.4;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.superadmin-override-form {
+  margin-top: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.superadmin-override-input {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 6px 10px;
+  color: white;
+  font-size: 13px;
+}
+
+/* Modal */
+.superadmin-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.superadmin-modal {
+  background: #1a1f35;
+  border-radius: 12px;
+  padding: 20px;
+  width: 650px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.superadmin-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.superadmin-modal-title {
+  margin: 0;
+}
+
+.superadmin-modal-close {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.superadmin-modal-content {
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Drill Down Items */
+.superadmin-drill-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.superadmin-drill-user-info {
+  flex: 1;
+}
+
+.superadmin-drill-user-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.superadmin-drill-username {
+  font-weight: bold;
+}
+
+.superadmin-drill-suspension {
+  display: block;
+  color: #e74c3c;
+  margin-top: 2px;
+  font-size: small;
+}
+
+/* Post/Comment Items */
+.superadmin-post-header {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.superadmin-post-title {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+
+.superadmin-post-content {
+  margin: 0;
+  opacity: 0.7;
+  font-size: 13px;
+}
+
+.superadmin-post-stats {
+  opacity: 0.4;
+  font-size: small;
+}
+
+/* History Items */
+.superadmin-history-item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.superadmin-history-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6476af;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.superadmin-history-action {
+  font-size: 13px;
+  font-weight: bold;
+}
+
+.superadmin-history-by {
+  display: block;
+  opacity: 0.5;
+  font-size: small;
+}
+
+.superadmin-history-reason {
+  display: block;
+  opacity: 0.5;
+  font-size: small;
+}
+
+.superadmin-history-date {
+  opacity: 0.4;
+  font-size: small;
+}
+
+/* Room Items */
+.superadmin-room-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.superadmin-room-name {
+  font-weight: bold;
+}
+
+.superadmin-room-meta {
+  display: block;
+  opacity: 0.5;
+  margin-top: 4px;
+  font-size: small;
+}
+
+/* Empty/Loading States */
+.superadmin-loading {
+  opacity: 0.5;
+}
+
+.superadmin-empty {
+  opacity: 0.5;
+  text-align: center;
+}
+
+/* Utility Classes */
+.superadmin-text-center {
+  text-align: center;
+}
+
+.superadmin-flex-shrink {
+  flex-shrink: 0;
+}
+
+.superadmin-mb-16 {
+  margin-bottom: 16px;
+}
+
+.superadmin-mb-32 {
+  margin-bottom: 32px;
+}
+
+.superadmin-mt-8 {
+  margin-top: 8px;
+}
+
+.superadmin-full-width {
+  width: 100%;
+  box-sizing: border-box;
+}

@@ -1,0 +1,361 @@
+/* RoomChat.css */
+
+/* Main Container */
+.roomchat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #1a1f35;
+}
+
+/* Header Section */
+.roomchat-header {
+  padding: 15px 20px;
+  background: #252b45;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.roomchat-back-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.roomchat-room-name {
+  margin: 0;
+  color: white;
+}
+
+.roomchat-room-stats {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: small;
+}
+
+.roomchat-leave-button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: red;
+  background: transparent;
+  border: 1px solid red;
+}
+
+.roomchat-admin-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 10px;
+}
+
+.roomchat-admin-button {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+}
+
+.roomchat-admin-button-danger {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: red;
+}
+
+/* Messages Area */
+.roomchat-messages-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roomchat-no-messages {
+  color: rgba(255, 255, 255, 0.4);
+  text-align: center;
+}
+
+/* Individual Message */
+.roomchat-message-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.roomchat-message-right {
+  align-items: flex-end;
+}
+
+.roomchat-message-left {
+  align-items: flex-start;
+}
+
+.roomchat-reply-preview {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 4px;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  max-width: 60%;
+}
+
+.roomchat-message-bubble {
+  max-width: 60%;
+  padding: 10px 14px;
+  border-radius: 12px;
+}
+
+.roomchat-message-bubble-right {
+  background: #6476af;
+}
+
+.roomchat-message-bubble-left {
+  background: #2d3350;
+}
+
+.roomchat-message-author {
+  opacity: 0.7;
+  font-size: 11px;
+}
+
+.roomchat-message-content {
+  margin: 4px 0 0;
+  color: white;
+}
+
+.roomchat-message-attachment {
+  max-width: 200px;
+  border-radius: 8px;
+  margin-top: 6px;
+}
+
+.roomchat-message-file-link {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: white;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.roomchat-message-timestamp {
+  opacity: 0.5;
+  font-size: 10px;
+}
+
+.roomchat-message-edited {
+  opacity: 0.4;
+  font-size: 10px;
+}
+
+/* Message Actions */
+.roomchat-message-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.roomchat-action-button {
+  font-size: 10px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+}
+
+.roomchat-action-button-danger {
+  font-size: 10px;
+  background: none;
+  border: none;
+  color: #fc0c0c;
+  cursor: pointer;
+}
+
+/* Edit Input */
+.roomchat-edit-input {
+  width: 100%;
+  padding: 4px;
+  border-radius: 4px;
+  margin-top: 4px;
+  background: white;
+  border: 1px solid #ccc;
+}
+
+.roomchat-edit-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.roomchat-edit-save {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.roomchat-edit-cancel {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* Reply Preview Bar */
+.roomchat-reply-bar {
+  padding: 8px 20px;
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roomchat-reply-text {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: small;
+}
+
+.roomchat-reply-close {
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* Input Area */
+.roomchat-input-area {
+  padding: 15px 20px;
+  background: #252b45;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.roomchat-attach-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.roomchat-file-input {
+  display: none;
+}
+
+.roomchat-attachment-name {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: small;
+}
+
+.roomchat-message-input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.roomchat-send-button {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: #6476af;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+/* Modal Overlay */
+.roomchat-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.roomchat-modal {
+  background: #1a1f35;
+  border-radius: 12px;
+  padding: 20px;
+  width: 400px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.roomchat-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.roomchat-modal-title {
+  margin: 0;
+}
+
+.roomchat-modal-close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: white;
+}
+
+/* Member List */
+.roomchat-member-item {
+  padding: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.roomchat-member-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.roomchat-member-avatar {
+  font-size: 20px;
+}
+
+.roomchat-member-username {
+  font-weight: normal;
+}
+
+.roomchat-admin-badge {
+  background: gold;
+  color: black;
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-size: 11px;
+}
+
+.roomchat-make-admin-button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: gold;
+  border: none;
+  color: black;
+  cursor: pointer;
+  font-size: 12px;
+}
