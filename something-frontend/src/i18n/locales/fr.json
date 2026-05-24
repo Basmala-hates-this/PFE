@@ -592,5 +592,173 @@
   "noUniError": "Veuillez sélectionner une université valide.",
   "noMajorError": "Veuillez sélectionner au moins une spécialité valide.",
   "successMessage": "Informations mises à jour avec succès !"
+},
+"reorientation": {
+  "title": "Une dernière étape 👋",
+  "subtitle": "Votre demande de statut professeur a été examinée et votre compte a été défini comme étudiant. Puisque vous vous êtes inscrit avec plusieurs spécialités, veuillez sélectionner celle avec laquelle vous souhaitez continuer.",
+  "saving": "Enregistrement...",
+  "confirm": "Confirmer la spécialité",
+  "noMajorError": "Veuillez sélectionner une spécialité.",
+  "successMessage": "Spécialité sélectionnée ! Bienvenue sur StudyBuddy."
+},
+"adminPanel": {
+  "title": "Panneau d'administration",
+  "superAdminBtn": "⚡ Panneau SuperAdmin",
+  "sessionOutdated": "Votre session est expirée. Veuillez vous déconnecter et vous reconnecter pour accéder au panneau d'administration.",
+
+  "tabs": {
+    "announcements": "📢 Annonces",
+    "users": "👥 Utilisateurs",
+    "professors": "🎓 Professeurs",
+    "reports": "🚩 Signalements",
+    "resources": "📦 Ressources",
+    "hidden": "🙈 Masqué",
+    "other": "🔤 Autres saisies",
+    "roomRequests": "📬 Demandes de salles",
+    "rooms": "🏠 Modération des salles"
+  },
+
+  "users": {
+    "title": "Gestion des utilisateurs",
+    "searchPlaceholder": "Rechercher par nom d'utilisateur...",
+    "allRoles": "Tous les rôles",
+    "student": "Étudiant",
+    "professor": "Professeur",
+    "allStatus": "Tous les statuts",
+    "suspended": "suspendu",
+    "pendingVerification": "Vérification en attente",
+    "searchBtn": "Rechercher",
+    "noUsers": "Aucun utilisateur trouvé.",
+    "pendingProf": "prof en attente",
+    "suspendedUntil": "Suspendu jusqu'au",
+    "rating": "note",
+    "violations": "violations",
+    "suspend": "Suspendre",
+    "unsuspend": "Lever la suspension",
+    "history": "📋 Historique",
+    "suspendDaysPrompt": "Suspendre pour combien de jours ?",
+    "suspendReasonPrompt": "Raison de la suspension ?",
+    "suspendSuccess": "Utilisateur suspendu.",
+    "unsuspendSuccess": "Suspension levée."
+  },
+
+  "professors": {
+    "title": "Vérification des professeurs en attente",
+    "noPending": "Aucune demande de professeur en attente.",
+    "university": "Université",
+    "viewProof": "📄 Voir le document de preuve",
+    "rejectPlaceholder": "Raison du rejet...",
+    "confirmReject": "Confirmer le rejet",
+    "rejecting": "Rejet en cours...",
+    "cancel": "Annuler",
+    "verify": "Vérifier",
+    "verifying": "Vérification...",
+    "reject": "Rejeter",
+    "verifySuccess": "Professeur vérifié !",
+    "rejectSuccess": "Professeur rejeté et rétrogradé en étudiant.",
+    "rejectReasonRequired": "Veuillez saisir une raison de rejet."
+  },
+
+  "reports": {
+    "title": "Contenu signalé",
+    "noReports": "Aucun contenu signalé.",
+    "reports": "signalement(s)",
+    "alreadyHidden": "⚠️ Déjà masqué",
+    "hideContent": "Masquer le contenu",
+    "hiding": "Masquage..."
+  },
+
+  "resources": {
+    "title": "Approbation des ressources en attente",
+    "noPending": "Aucune ressource en attente.",
+    "viewImage": "🖼️ Voir l'image",
+    "viewPdf": "📄 Voir le PDF",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "openLink": "Ouvrir le lien"
+  },
+
+  "hidden": {
+    "title": "Contenu masqué",
+    "noHidden": "Aucun contenu masqué.",
+    "autoHidden": "masqué auto",
+    "manuallyHidden": "masqué manuellement",
+    "reports": "signalement(s)",
+    "restore": "Restaurer",
+    "restoring": "Restauration..."
+  },
+
+  "other": {
+    "title": "Validation université / spécialité personnalisée",
+    "noPending": "Aucune saisie personnalisée en attente.",
+    "customUni": "Université personnalisée :",
+    "code": "Code",
+    "customMajors": "Spécialité(s) personnalisée(s) :",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "alreadyProcessed": "Déjà"
+  },
+
+  "announcements": {
+    "title": "Annonces de la plateforme",
+    "placeholder": "Rédigez une annonce pour toute la plateforme...",
+    "post": "Publier l'annonce",
+    "posting": "Publication...",
+    "noAnnouncements": "Aucune annonce pour l'instant.",
+    "deleteConfirm": "Supprimer cette annonce ?"
+  },
+
+  "roomRequests": {
+    "title": "Demandes de salles thématiques",
+    "noPending": "Aucune demande de salle en attente.",
+    "subject": "Sujet",
+    "usersWaiting": "utilisateur(s) en attente de cette salle",
+    "rejectPlaceholder": "Raison du rejet...",
+    "confirmReject": "Confirmer le rejet",
+    "cancel": "Annuler",
+    "approve": "✅ Approuver",
+    "reject": "❌ Rejeter",
+    "processing": "Traitement...",
+    "rejectReasonRequired": "Veuillez saisir une raison de rejet."
+  },
+
+  "rooms": {
+    "title": "Modération des salles",
+    "noRooms": "Aucune salle assignée.",
+    "searchPlaceholder": "Rechercher des salles...",
+    "allTypes": "Tous les types",
+    "public": "Public",
+    "university": "Université",
+    "major": "Spécialité",
+    "subject": "Matière",
+    "members": "membres",
+    "suspended": "suspendu",
+    "deleteRoom": "🗑️ Supprimer la salle",
+    "deleteConfirm": "Supprimer définitivement cette salle ?",
+    "noMembers": "Aucun membre.",
+    "suspendedInRoom": "suspendu dans la salle",
+    "until": "Jusqu'au",
+    "roomViolations": "Violations dans la salle",
+    "suspend": "Suspendre",
+    "unsuspend": "Lever la suspension",
+    "daysPlaceholder": "Jours...",
+    "reasonPlaceholder": "Raison...",
+    "confirm": "Confirmer",
+    "confirming": "Suspension...",
+    "cancel": "Annuler",
+    "suspendFieldsRequired": "Veuillez renseigner les jours et la raison."
+  },
+
+  "drillDown": {
+    "nothing": "Rien à afficher.",
+    "hiddenBadge": "masqué",
+    "comments": "commentaires",
+    "type": "Type",
+    "membersCount": "Membres",
+    "uni": "Uni",
+    "majorLabel": "Spécialité",
+    "reason": "Raison",
+    "historyBy": "Par"
+  }
 }
 }

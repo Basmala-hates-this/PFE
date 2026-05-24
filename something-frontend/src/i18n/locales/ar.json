@@ -591,5 +591,173 @@
   "noUniError": "يرجى اختيار جامعة صحيحة.",
   "noMajorError": "يرجى اختيار تخصص واحد على الأقل.",
   "successMessage": "تم تحديث المعلومات بنجاح!"
+},
+"reorientation": {
+  "title": "خطوة أخيرة 👋",
+  "subtitle": "تمت مراجعة طلب صفة الأستاذ وتم تعيين حسابك كطالب. نظراً لتسجيلك بعدة تخصصات، يرجى اختيار التخصص الذي تريد المتابعة به.",
+  "saving": "جارٍ الحفظ...",
+  "confirm": "تأكيد التخصص",
+  "noMajorError": "يرجى اختيار تخصص.",
+  "successMessage": "تم اختيار التخصص! مرحباً بك في StudyBuddy."
+},
+"adminPanel": {
+  "title": "لوحة الإدارة",
+  "superAdminBtn": "⚡ لوحة المشرف الأعلى",
+  "sessionOutdated": "انتهت صلاحية جلستك. يرجى تسجيل الخروج وإعادة تسجيل الدخول للوصول إلى لوحة الإدارة.",
+
+  "tabs": {
+    "announcements": "📢 الإعلانات",
+    "users": "👥 المستخدمون",
+    "professors": "🎓 الأساتذة",
+    "reports": "🚩 البلاغات",
+    "resources": "📦 الموارد",
+    "hidden": "🙈 المخفي",
+    "other": "🔤 مدخلات أخرى",
+    "roomRequests": "📬 طلبات الغرف",
+    "rooms": "🏠 إدارة الغرف"
+  },
+
+  "users": {
+    "title": "إدارة المستخدمين",
+    "searchPlaceholder": "البحث باسم المستخدم...",
+    "allRoles": "كل الأدوار",
+    "student": "طالب",
+    "professor": "أستاذ",
+    "allStatus": "كل الحالات",
+    "suspended": "موقوف",
+    "pendingVerification": "في انتظار التحقق",
+    "searchBtn": "بحث",
+    "noUsers": "لا يوجد مستخدمون.",
+    "pendingProf": "أستاذ معلق",
+    "suspendedUntil": "موقوف حتى",
+    "rating": "التقييم",
+    "violations": "مخالفات",
+    "suspend": "إيقاف",
+    "unsuspend": "رفع الإيقاف",
+    "history": "📋 السجل",
+    "suspendDaysPrompt": "الإيقاف لكم من يوم؟",
+    "suspendReasonPrompt": "سبب الإيقاف؟",
+    "suspendSuccess": "تم إيقاف المستخدم.",
+    "unsuspendSuccess": "تم رفع الإيقاف."
+  },
+
+  "professors": {
+    "title": "طلبات التحقق من الأساتذة المعلقة",
+    "noPending": "لا توجد طلبات أستاذ معلقة.",
+    "university": "الجامعة",
+    "viewProof": "📄 عرض وثيقة الإثبات",
+    "rejectPlaceholder": "سبب الرفض...",
+    "confirmReject": "تأكيد الرفض",
+    "rejecting": "جارٍ الرفض...",
+    "cancel": "إلغاء",
+    "verify": "تحقق",
+    "verifying": "جارٍ التحقق...",
+    "reject": "رفض",
+    "verifySuccess": "تم التحقق من الأستاذ!",
+    "rejectSuccess": "تم رفض الأستاذ وتحويله إلى طالب.",
+    "rejectReasonRequired": "يرجى إدخال سبب الرفض."
+  },
+
+  "reports": {
+    "title": "المحتوى المُبلَّغ عنه",
+    "noReports": "لا يوجد محتوى مُبلَّغ عنه.",
+    "reports": "بلاغ(ات)",
+    "alreadyHidden": "⚠️ مخفي بالفعل",
+    "hideContent": "إخفاء المحتوى",
+    "hiding": "جارٍ الإخفاء..."
+  },
+
+  "resources": {
+    "title": "الموارد في انتظار الموافقة",
+    "noPending": "لا توجد موارد معلقة.",
+    "viewImage": "🖼️ عرض الصورة",
+    "viewPdf": "📄 عرض PDF",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "openLink": "فتح الرابط"
+  },
+
+  "hidden": {
+    "title": "المحتوى المخفي",
+    "noHidden": "لا يوجد محتوى مخفي.",
+    "autoHidden": "مخفي تلقائياً",
+    "manuallyHidden": "مخفي يدوياً",
+    "reports": "بلاغ(ات)",
+    "restore": "استعادة",
+    "restoring": "جارٍ الاستعادة..."
+  },
+
+  "other": {
+    "title": "التحقق من الجامعة / التخصص المخصص",
+    "noPending": "لا توجد مدخلات مخصصة معلقة.",
+    "customUni": "جامعة مخصصة:",
+    "code": "الرمز",
+    "customMajors": "تخصص(ات) مخصصة:",
+    "approve": "موافقة",
+    "reject": "رفض",
+    "alreadyProcessed": "تمت المعالجة"
+  },
+
+  "announcements": {
+    "title": "إعلانات المنصة",
+    "placeholder": "اكتب إعلاناً للمنصة بأكملها...",
+    "post": "نشر الإعلان",
+    "posting": "جارٍ النشر...",
+    "noAnnouncements": "لا توجد إعلانات بعد.",
+    "deleteConfirm": "حذف هذا الإعلان؟"
+  },
+
+  "roomRequests": {
+    "title": "طلبات غرف المواد",
+    "noPending": "لا توجد طلبات غرف معلقة.",
+    "subject": "المادة",
+    "usersWaiting": "مستخدم(ون) في انتظار هذه الغرفة",
+    "rejectPlaceholder": "سبب الرفض...",
+    "confirmReject": "تأكيد الرفض",
+    "cancel": "إلغاء",
+    "approve": "✅ موافقة",
+    "reject": "❌ رفض",
+    "processing": "جارٍ المعالجة...",
+    "rejectReasonRequired": "يرجى إدخال سبب الرفض."
+  },
+
+  "rooms": {
+    "title": "إدارة الغرف",
+    "noRooms": "لا توجد غرف مخصصة.",
+    "searchPlaceholder": "البحث في الغرف...",
+    "allTypes": "كل الأنواع",
+    "public": "عام",
+    "university": "جامعة",
+    "major": "تخصص",
+    "subject": "مادة",
+    "members": "أعضاء",
+    "suspended": "موقوف",
+    "deleteRoom": "🗑️ حذف الغرفة",
+    "deleteConfirm": "حذف هذه الغرفة نهائياً؟",
+    "noMembers": "لا يوجد أعضاء.",
+    "suspendedInRoom": "موقوف في الغرفة",
+    "until": "حتى",
+    "roomViolations": "مخالفات الغرفة",
+    "suspend": "إيقاف",
+    "unsuspend": "رفع الإيقاف",
+    "daysPlaceholder": "أيام...",
+    "reasonPlaceholder": "السبب...",
+    "confirm": "تأكيد",
+    "confirming": "جارٍ الإيقاف...",
+    "cancel": "إلغاء",
+    "suspendFieldsRequired": "يرجى تعبئة الأيام والسبب."
+  },
+
+  "drillDown": {
+    "nothing": "لا شيء للعرض.",
+    "hiddenBadge": "مخفي",
+    "comments": "تعليقات",
+    "type": "النوع",
+    "membersCount": "الأعضاء",
+    "uni": "الجامعة",
+    "majorLabel": "التخصص",
+    "reason": "السبب",
+    "historyBy": "بواسطة"
+  }
 }
 }

@@ -1,13 +1,19 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
+ import { useTranslation } from 'react-i18next';
+ import i18n from '../i18n/index.js';
+ 
 export default function ReorientationPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [selectedMajor, setSelectedMajor] = useState("");
   const [loading, setLoading] = useState(false);
+  const { t, i18n } = useTranslation();
+const isRTL = i18n.language === 'ar';
+
+
 
   useEffect(() => {
     // if no reorientation needed, redirect away
@@ -17,7 +23,7 @@ export default function ReorientationPage() {
   }, []);
 
   const handleSubmit = async () => {
-    if (!selectedMajor) return alert("Please select a major.");
+    if (!selectedMajor) return alert(t("reorientation.noMajorError"));
     setLoading(true);
     try {
       const res = await axios.post(
@@ -35,7 +41,7 @@ export default function ReorientationPage() {
       localStorage.setItem("currentUser", JSON.stringify(updatedUser));
       console.log(currentUser);
 
-      alert("Major selected! Welcome to StudyBuddy.");
+      alert(t("reorientation.successMessage"))
       navigate("/dashboard");
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
@@ -45,19 +51,49 @@ export default function ReorientationPage() {
     
   };
 
+
+  const currentLang = i18n.language;
+   
+  
+  
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem('language', lang);
+    // document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+    document.documentElement.lang = lang;
+  };
+  const handleSelectChange = (event) => {
+      // Grabs the value ('en', 'fr', or 'ar') from the chosen option
+      changeLanguage(event.target.value);
+    };
+  
+  
+
   return (
     <div style={{
       minHeight: "100vh", background: "#1a1f35", color: "white",
       display: "flex", alignItems: "center", justifyContent: "center", padding: "20px"
     }}>
+       <div className="language-switcher">
+      <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
+      <select 
+        id="lang-select"
+        value={currentLang} // Keeps the dropdown synced with your active language
+        onChange={handleSelectChange}
+        className="lang-dropdown"
+      >
+        <option value="en">English</option>
+        <option value="fr">Français</option>
+        <option value="ar">العربية</option>
+      </select>
+    </div>
       <div style={{
         background: "#252b45", borderRadius: "12px", padding: "32px",
         width: "100%", maxWidth: "480px"
       }}>
-        <h2 style={{ margin: "0 0 8px" }}>One More Step 👋</h2>
-        <p style={{ opacity: 0.6, marginBottom: "24px", fontSize: "14px" }}>
-          Your professor status request was reviewed and your account has been set to student.
-          Since you registered with multiple majors, please select the one major you'd like to continue with.
+        <h2   dir={isRTL ? "rtl" : "ltr"} style={{ margin: "0 0 8px" }}>{t("reorientation.title")}</h2>
+        <p dir={isRTL ? "rtl" : "ltr"} style={{ opacity: 0.6, marginBottom: "24px", fontSize: "14px" }}>
+          {t("reorientation.subtitle")}
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
@@ -92,7 +128,7 @@ export default function ReorientationPage() {
             opacity: loading ? 0.7 : 1
           }}
         >
-          {loading ? "Saving..." : "Confirm Major"}
+          {loading ? t("reorientation.saving") : t("reorientation.confirm")}
         </button>
       </div>
     </div>

@@ -2,15 +2,19 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
- 
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n/index.js";
+
 const API = "http://localhost:5000/api/admin";
- 
+
 export default function AdminPanel() {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [activeTab, setActiveTab] = useState("announcements");
- 
 
   const [stats, setStats] = useState(null);
 
@@ -18,102 +22,99 @@ export default function AdminPanel() {
   const [userSearch, setUserSearch] = useState("");
   const [userRoleFilter, setUserRoleFilter] = useState("");
   const [userStatusFilter, setUserStatusFilter] = useState("");
- 
 
   const [pendingProfessors, setPendingProfessors] = useState([]);
   const [rejectReason, setRejectReason] = useState("");
   const [rejectingId, setRejectingId] = useState(null);
- 
- 
+
   const [reports, setReports] = useState([]);
- 
- 
+
   const [announcements, setAnnouncements] = useState([]);
   const [newAnnouncement, setNewAnnouncement] = useState("");
 
-
   const [drillDown, setDrillDown] = useState(null);
-// shape: { type: "users"|"posts"|"comments"|"rooms"|"suspended"|"userHistory", data: [...], title: "" }
- 
+  // shape: { type: "users"|"posts"|"comments"|"rooms"|"suspended"|"userHistory", data: [...], title: "" }
+
   const isSuperAdmin = currentUser?.authorityLevel === "superadmin";
- 
+
   const headers = { Authorization: `Bearer ${token}` };
 
-
   const [pendingResources, setPendingResources] = useState([]);
-const [hiddenContent, setHiddenContent] = useState([]);
-const [otherInputs, setOtherInputs] = useState([]);
+  const [hiddenContent, setHiddenContent] = useState([]);
+  const [otherInputs, setOtherInputs] = useState([]);
 
-const [roomRequests, setRoomRequests] = useState([]);
-const [rejectingRoomId, setRejectingRoomId] = useState(null);
-const [rejectRoomReason, setRejectRoomReason] = useState("");
+  const [roomRequests, setRoomRequests] = useState([]);
+  const [rejectingRoomId, setRejectingRoomId] = useState(null);
+  const [rejectRoomReason, setRejectRoomReason] = useState("");
 
-const [roomRequestLoading, setRoomRequestLoading] = useState(null); // stores the requestId being processed
+  const [roomRequestLoading, setRoomRequestLoading] = useState(null); // stores the requestId being processed
 
+  const [moderationRooms, setModerationRooms] = useState([]);
+  const [selectedRoom, setSelectedRoom] = useState(null);
+  const [roomSuspendingId, setRoomSuspendingId] = useState(null);
+  const [roomSuspendDays, setRoomSuspendDays] = useState("");
+  const [roomSuspendReason, setRoomSuspendReason] = useState("");
 
-const [moderationRooms, setModerationRooms] = useState([]);
-const [selectedRoom, setSelectedRoom] = useState(null);
-const [roomSuspendingId, setRoomSuspendingId] = useState(null);
-const [roomSuspendDays, setRoomSuspendDays] = useState("");
-const [roomSuspendReason, setRoomSuspendReason] = useState("");
+  //i want search in room tab...
+  const [roomSearch, setRoomSearch] = useState("");
+  const [roomTypeFilter, setRoomTypeFilter] = useState("");
 
-//i want search in room tab...
-const [roomSearch, setRoomSearch] = useState("");
-const [roomTypeFilter, setRoomTypeFilter] = useState("");
+  const [userPermissions, setUserPermissions] = useState([]);
 
-const [userPermissions, setUserPermissions] = useState([]);
+  const [actionLoading, setActionLoading] = useState(false);
+  //////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////
 
-
-const [actionLoading, setActionLoading] = useState(false);
- //////////////////////////////////////////////////////////////////////////////////
- ///////////////////////////////////////////////////////////////////////////////////////////////////
- //////////////////////////////////////////////////////////////////////////////////
- 
- useEffect(() => {
-  const fetchPermissions = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/users/me/permissions", { headers });
-      setUserPermissions(res.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-  fetchPermissions();
-}, []);
+  useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        const res = await axios.get(
+          "http://localhost:5000/api/users/me/permissions",
+          { headers },
+        );
+        setUserPermissions(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    fetchPermissions();
+  }, []);
 
   useEffect(() => {
     const level = currentUser?.authorityLevel;
     if (level !== "admin" && level !== "superadmin") {
-       alert("Your session is outdated. Please log out and log back in to access the admin panel.");
+      alert(t("adminPanel.sessionOutdated"));
       navigate("/dashboard");
     }
   }, []);
- 
-  
- useEffect(() => {
-  //if (activeTab === "stats") fetchStats();
-  if (activeTab === "users") fetchUsers();
-  if (activeTab === "professors") fetchPendingProfessors();
-  if (activeTab === "reports") fetchReports();
-  if (activeTab === "resources") fetchPendingResources();
-  if (activeTab === "hidden") fetchHiddenContent();
-  if (activeTab === "other") fetchOtherInputs();
-  if (activeTab === "announcements") fetchAnnouncements();
-  if (activeTab === "room-requests") fetchRoomRequests();
-  if (activeTab === "rooms") fetchModerationRooms();
-}, [activeTab]);
+
+  useEffect(() => {
+    //if (activeTab === "stats") fetchStats();
+    if (activeTab === "users") fetchUsers();
+    if (activeTab === "professors") fetchPendingProfessors();
+    if (activeTab === "reports") fetchReports();
+    if (activeTab === "resources") fetchPendingResources();
+    if (activeTab === "hidden") fetchHiddenContent();
+    if (activeTab === "other") fetchOtherInputs();
+    if (activeTab === "announcements") fetchAnnouncements();
+    if (activeTab === "room-requests") fetchRoomRequests();
+    if (activeTab === "rooms") fetchModerationRooms();
+  }, [activeTab]);
 
   ////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
- 
+
   const fetchStats = async () => {
     try {
       const res = await axios.get(`${API}/stats`, { headers });
       setStats(res.data);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
- 
+
   const fetchUsers = async () => {
     try {
       const params = new URLSearchParams();
@@ -123,381 +124,562 @@ const [actionLoading, setActionLoading] = useState(false);
       const res = await axios.get(`${API}/users?${params}`, { headers });
       setUsers(res.data);
       console.log("user sample:", res.data[0]);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
- 
+
   const fetchPendingProfessors = async () => {
     try {
       const res = await axios.get(`${API}/professors/pending`, { headers });
       setPendingProfessors(res.data);
       console.log("prof sample:", res.data[0]);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
- 
 
   //just noting that this might be a problem causer....
- const fetchReports = async () => {
-  try {
-    const res = await axios.get(`${API}/reports`, { headers });
-    const flat = [
-      ...res.data.posts.map(p => ({ ...p, type: "post" })),
-      ...res.data.comments.map(c => ({ ...c, type: "comment" }))
-    ];
-    setReports(flat);
-  } catch (err) { console.error(err); }
-};
- 
+  const fetchReports = async () => {
+    try {
+      const res = await axios.get(`${API}/reports`, { headers });
+      const flat = [
+        ...res.data.posts.map((p) => ({ ...p, type: "post" })),
+        ...res.data.comments.map((c) => ({ ...c, type: "comment" })),
+      ];
+      setReports(flat);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   const fetchAnnouncements = async () => {
     try {
       const res = await axios.get(`${API}/announcements`);
       setAnnouncements(res.data);
       console.log("announcements raw:", res.data[0]);
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error(err);
+    }
   };
- 
- 
+
   const handleSuspend = async (userId) => {
-    const days = prompt("Suspend for how many days?");
+    const days = prompt(t("adminPanel.users.suspendDaysPrompt"))
     if (!days) return;
-    const reason = prompt("Reason for suspension?");
+    const reason = prompt(t("adminPanel.users.suspendReasonPrompt"))
     if (!reason) return;
     setActionLoading(true);
     try {
-      await axios.patch(`${API}/users/${userId}/suspend`, { days: Number(days), reason }, { headers });
-      alert("User suspended.");
+      await axios.patch(
+        `${API}/users/${userId}/suspend`,
+        { days: Number(days), reason },
+        { headers },
+      );
+      alert(t("adminPanel.users.suspendSuccess"))
       fetchUsers();
-    } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-     finally { setActionLoading(false); }
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
   };
- 
+
   const handleUnsuspend = async (userId) => {
-  setActionLoading(true);
-  try {
-    await axios.patch(`${API}/users/${userId}/unsuspend`, {}, { headers });
-    alert("User unsuspended.");
-    fetchUsers();
-  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  finally { setActionLoading(false); }
-};
- 
+    setActionLoading(true);
+    try {
+      await axios.patch(`${API}/users/${userId}/unsuspend`, {}, { headers });
+      alert(t("adminPanel.users.unsuspendSuccess"))
+      fetchUsers();
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleVerifyProfessor = async (userId) => {
     setActionLoading(true);
     try {
       await axios.patch(`${API}/professors/${userId}/verify`, {}, { headers });
-      alert("Professor verified!");
+      alert(t("adminPanel.professors.verifySuccess"));
       fetchPendingProfessors();
       fetchStats();
-    } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-      finally { setActionLoading(false); }
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
   };
- 
+
   const handleRejectProfessor = async (userId) => {
-    if (!rejectReason.trim()) return alert("Please enter a rejection reason.");
+    if (!rejectReason.trim()) return alert(t("adminPanel.professors.rejectReasonRequired"));
     setActionLoading(true);
     try {
-      await axios.patch(`${API}/professors/${userId}/reject`, { reason: rejectReason }, { headers });
-      alert("Professor rejected and demoted to student.");
+      await axios.patch(
+        `${API}/professors/${userId}/reject`,
+        { reason: rejectReason },
+        { headers },
+      );
+      alert(t("adminPanel.professors.rejectSuccess"));
       setRejectingId(null);
       setRejectReason("");
       fetchPendingProfessors();
       fetchStats();
-    } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-      finally { setActionLoading(false); }
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
   };
- 
- const handleHideContent = async (type, postId, commentId) => {
-  if (!window.confirm(`Hide this ${type}?`)) return;
-  setActionLoading(true);
-  try {
-    await axios.patch(`${API}/content/hide`, { type, postId, commentId }, { headers });
-    alert("Content hidden.");
-    
-    setReports(prev => prev.map(item => {
-      if (type === "post" && item.type === "post" && item.id === postId) {
-        return { ...item, isHidden: true };
-      }
-      if (type === "comment" && item.type === "comment" && item.id === commentId) {
-        return { ...item, isHidden: true };
-      }
-      return item;
-    }));
 
-  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  finally { setActionLoading(false); }
-};
- 
+  const handleHideContent = async (type, postId, commentId) => {
+    if (!window.confirm(t("adminPanel.reports.hideContent") + ` this ${type}?`)) return;
+    setActionLoading(true);
+    try {
+      await axios.patch(
+        `${API}/content/hide`,
+        { type, postId, commentId },
+        { headers },
+      );
+      alert("Content hidden.");
+
+      setReports((prev) =>
+        prev.map((item) => {
+          if (type === "post" && item.type === "post" && item.id === postId) {
+            return { ...item, isHidden: true };
+          }
+          if (
+            type === "comment" &&
+            item.type === "comment" &&
+            item.id === commentId
+          ) {
+            return { ...item, isHidden: true };
+          }
+          return item;
+        }),
+      );
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   const handleCreateAnnouncement = async () => {
     if (!newAnnouncement.trim()) return;
     setActionLoading(true);
     try {
-      await axios.post(`${API}/announcements`, { message: newAnnouncement }, { headers });
+      await axios.post(
+        `${API}/announcements`,
+        { message: newAnnouncement },
+        { headers },
+      );
       setNewAnnouncement("");
       fetchAnnouncements();
-    } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-    finally { setActionLoading(false); }
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
   };
- 
+
   const handleDeleteAnnouncement = async (id) => {
-    if (!window.confirm("Delete this announcement?")) return;
+    if (!window.confirm(t("adminPanel.announcements.deleteConfirm"))) return;
     try {
       await axios.delete(`${API}/announcements/${id}`, { headers });
       fetchAnnouncements();
-    } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    }
   };
-
 
   const handleApproveResource = async (postId, approved) => {
     setActionLoading(true);
-  try {
-    await axios.patch(`${API}/content/resource`, { postId, approved }, { headers });
-    fetchPendingResources();
-    fetchStats();
-  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  finally { setActionLoading(false); }
-};
+    try {
+      await axios.patch(
+        `${API}/content/resource`,
+        { postId, approved },
+        { headers },
+      );
+      fetchPendingResources();
+      fetchStats();
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-const handleRestoreContent = async (type, postId, commentId = null) => {
-  if (!window.confirm(`Restore this ${type}?`)) return;
-  setActionLoading(true);
-  try {
-    await axios.patch(`${API}/content/restore`, { type, postId, commentId }, { headers });
-    fetchHiddenContent();
-  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  finally { setActionLoading(false); }
-};
+  const handleRestoreContent = async (type, postId, commentId = null) => {
+    if (!window.confirm(t("adminPanel.hidden.restore") + ` this ${type}?`)) return;
+    setActionLoading(true);
+    try {
+      await axios.patch(
+        `${API}/content/restore`,
+        { type, postId, commentId },
+        { headers },
+      );
+      fetchHiddenContent();
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-const handleValidateOtherInput = async (userId, approved) => {
-  setActionLoading(true);
-  try {
-    await axios.patch(`${API}/other-inputs/validate`, { userId, approved }, { headers });
-    fetchOtherInputs();
-  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  finally { setActionLoading(false); }
-};
- 
- 
-  const card = { background: "#252b45", borderRadius: "10px", padding: "16px", marginBottom: "12px" };
-  const badge = (color) => ({ background: color, color: "white", padding: "2px 8px", borderRadius: "10px", fontSize: "11px" });
-  const btn = (color = "#6476af") => ({ padding: "6px 14px", borderRadius: "6px", background: color, border: "none", color: "white", cursor: "pointer", fontSize: "12px" });
- 
-//   const tabs = [
-//   { id: "stats", label: "📊 Stats" },
-//   { id: "users", label: "👥 Users" },
-//   { id: "professors", label: "🎓 Professors" },
-//   { id: "reports", label: "🚩 Reports" },
-//   { id: "resources", label: "📦 Resources" },
-//   { id: "hidden", label: "🙈 Hidden" },
-//   { id: "other", label: "🔤 Other Inputs" },
-//   { id: "announcements", label: "📢 Announcements" },
-// ];
-//this mess so only realated tabs show based on permissions
-const tabs = [
-  // { id: "stats", label: "📊 Stats" },
-  { id: "announcements", label: "📢 Announcements" },
-  ...(isSuperAdmin || userPermissions.includes("SUSPEND_USERS")
-    ? [{ id: "users", label: "👥 Users" }] : []),
-  ...(isSuperAdmin || userPermissions.includes("VERIFY_PROFESSORS")
-    ? [{ id: "professors", label: "🎓 Professors" }] : []),
-  ...(isSuperAdmin || userPermissions.includes("HANDLE_REPORTS")
-    ? [{ id: "reports", label: "🚩 Reports" }] : []),
-  ...(isSuperAdmin || userPermissions.includes("APPROVE_RESOURCES")
-    ? [{ id: "resources", label: "📦 Resources" }] : []),
-  ...(isSuperAdmin || userPermissions.includes("MODERATE_CONTENT")
-    ? [{ id: "hidden", label: "🙈 Hidden" }] : []),
-  ...(isSuperAdmin || userPermissions.includes("VALIDATE_OTHER")
-    ? [{ id: "other", label: "🔤 Other Inputs" }] : []),
-  ...(isSuperAdmin || userPermissions.includes("MANAGE_ROOMS")
-  ? [
-      { id: "room-requests", label: "📬 Room Requests" },
-      { id: "rooms", label: "🏠 Room Moderation" }
-    ] 
-  : []),
-];
+  const handleValidateOtherInput = async (userId, approved) => {
+    setActionLoading(true);
+    try {
+      await axios.patch(
+        `${API}/other-inputs/validate`,
+        { userId, approved },
+        { headers },
+      );
+      fetchOtherInputs();
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
+  const card = {
+    background: "#252b45",
+    borderRadius: "10px",
+    padding: "16px",
+    marginBottom: "12px",
+  };
+  const badge = (color) => ({
+    background: color,
+    color: "white",
+    padding: "2px 8px",
+    borderRadius: "10px",
+    fontSize: "11px",
+  });
+  const btn = (color = "#6476af") => ({
+    padding: "6px 14px",
+    borderRadius: "6px",
+    background: color,
+    border: "none",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "12px",
+  });
+
+  //   const tabs = [
+  //   { id: "stats", label: "📊 Stats" },
+  //   { id: "users", label: "👥 Users" },
+  //   { id: "professors", label: "🎓 Professors" },
+  //   { id: "reports", label: "🚩 Reports" },
+  //   { id: "resources", label: "📦 Resources" },
+  //   { id: "hidden", label: "🙈 Hidden" },
+  //   { id: "other", label: "🔤 Other Inputs" },
+  //   { id: "announcements", label: "📢 Announcements" },
+  // ];
+  //this mess so only realated tabs show based on permissions
+  const tabs = [
+    // { id: "stats", label: "📊 Stats" },
+    { id: "announcements", label: t("adminPanel.tabs.announcements") },
+    ...(isSuperAdmin || userPermissions.includes("SUSPEND_USERS")
+      ? [{ id: "users", label: t("adminPanel.tabs.users") }]
+      : []),
+    ...(isSuperAdmin || userPermissions.includes("VERIFY_PROFESSORS")
+      ? [{ id: "professors", label: t("adminPanel.tabs.professors") }]
+      : []),
+    ...(isSuperAdmin || userPermissions.includes("HANDLE_REPORTS")
+      ? [{ id: "reports", label: t("adminPanel.tabs.reports") }]
+      : []),
+    ...(isSuperAdmin || userPermissions.includes("APPROVE_RESOURCES")
+      ? [{ id: "resources", label: t("adminPanel.tabs.resources") }]
+      : []),
+    ...(isSuperAdmin || userPermissions.includes("MODERATE_CONTENT")
+      ? [{ id: "hidden", label: t("adminPanel.tabs.hidden") }]
+      : []),
+    ...(isSuperAdmin || userPermissions.includes("VALIDATE_OTHER")
+      ? [{ id: "other", label: t("adminPanel.tabs.other") }]
+      : []),
+    ...(isSuperAdmin || userPermissions.includes("MANAGE_ROOMS")
+      ? [
+          { id: "room-requests", label: t("adminPanel.tabs.roomRequests") },
+          { id: "rooms", label: t("adminPanel.tabs.rooms") },
+        ]
+      : []),
+  ];
 
   const fetchDrillDown = async (type) => {
-  try {
-    switch(type) {
-      case "users": {
-        const res = await axios.get(`${API}/users`, { headers });
-        setDrillDown({ type: "users", title: "All Users", data: res.data });
-        break;
+    try {
+      switch (type) {
+        case "users": {
+          const res = await axios.get(`${API}/users`, { headers });
+          setDrillDown({ type: "users", title: "All Users", data: res.data });
+          break;
+        }
+        case "suspended": {
+          const res = await axios.get(`${API}/users?status=suspended`, {
+            headers,
+          });
+          setDrillDown({
+            type: "users",
+            title: "Suspended Users",
+            data: res.data,
+          });
+          break;
+        }
+        case "posts": {
+          const res = await axios.get(`${API}/posts`, { headers });
+          setDrillDown({ type: "posts", title: "All Posts", data: res.data });
+          break;
+        }
+        case "comments": {
+          const res = await axios.get(`${API}/posts`, { headers });
+          const comments = [];
+          res.data.forEach((post) => {
+            post.comments?.forEach((c) =>
+              comments.push({ ...c, postTitle: post.title || "Untitled" }),
+            );
+          });
+          setDrillDown({
+            type: "comments",
+            title: "All Comments",
+            data: comments,
+          });
+          break;
+        }
+        case "rooms": {
+          const res = await axios.get(`${API}/rooms`, { headers });
+          setDrillDown({ type: "rooms", title: "All Rooms", data: res.data });
+          break;
+        }
+        default:
+          break;
       }
-      case "suspended": {
-        const res = await axios.get(`${API}/users?status=suspended`, { headers });
-        setDrillDown({ type: "users", title: "Suspended Users", data: res.data });
-        break;
-      }
-      case "posts": {
-        const res = await axios.get(`${API}/posts`, { headers });
-        setDrillDown({ type: "posts", title: "All Posts", data: res.data });
-        break;
-      }
-      case "comments": {
-        const res = await axios.get(`${API}/posts`, { headers });
-        const comments = [];
-        res.data.forEach(post => {
-          post.comments?.forEach(c => comments.push({ ...c, postTitle: post.title || "Untitled" }));
-        });
-        setDrillDown({ type: "comments", title: "All Comments", data: comments });
-        break;
-      }
-      case "rooms": {
-      const res = await axios.get(`${API}/rooms`, { headers });
-       setDrillDown({ type: "rooms", title: "All Rooms", data: res.data });
-       break;
-      }
-      default: break;
+    } catch (err) {
+      console.error(err);
     }
-  } catch (err) { console.error(err); }
-};
- 
+  };
 
-const fetchPendingResources = async () => {
-  try {
-    const res = await axios.get(`${API}/resources/pending`, { headers });
-    setPendingResources(res.data);
-    console.log("resource sample:", res.data[0]);
-  } catch (err) { console.error(err); }
-};
+  const fetchPendingResources = async () => {
+    try {
+      const res = await axios.get(`${API}/resources/pending`, { headers });
+      setPendingResources(res.data);
+      console.log("resource sample:", res.data[0]);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-const fetchHiddenContent = async () => {
-  try {
-    const res = await axios.get(`${API}/content/hidden`, { headers });
-    const flat = [
-      ...res.data.posts.map(p => ({ ...p, type: "post" })),
-      ...res.data.comments.map(c => ({ ...c, type: "comment" }))
-    ];
-    setHiddenContent(flat);
-  } catch (err) { console.error(err); }
-};
+  const fetchHiddenContent = async () => {
+    try {
+      const res = await axios.get(`${API}/content/hidden`, { headers });
+      const flat = [
+        ...res.data.posts.map((p) => ({ ...p, type: "post" })),
+        ...res.data.comments.map((c) => ({ ...c, type: "comment" })),
+      ];
+      setHiddenContent(flat);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-const fetchOtherInputs = async () => {
-  try {
-    const res = await axios.get(`${API}/other-inputs`, { headers });
-     console.log("other inputs raw:", res.data);
-    setOtherInputs(res.data);
-  } catch (err) { console.error(err); }
-};
+  const fetchOtherInputs = async () => {
+    try {
+      const res = await axios.get(`${API}/other-inputs`, { headers });
+      console.log("other inputs raw:", res.data);
+      setOtherInputs(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
+  const fetchRoomRequests = async () => {
+    try {
+      const res = await axios.get(`${API}/room-requests`, { headers });
+      setRoomRequests(res.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-const fetchRoomRequests = async () => {
-  try {
-    const res = await axios.get(`${API}/room-requests`, { headers });
-    setRoomRequests(res.data);
-  } catch (err) { console.error(err); }
-};
+  const handleRoomRequest = async (requestId, approved) => {
+    if (!approved && !rejectRoomReason.trim())
+      return alert(t("adminPanel.roomRequests.rejectReasonRequired"))
+    setRoomRequestLoading(requestId);
+    try {
+      await axios.post(
+        `${API}/room-requests/handle`,
+        { requestId, approved, reason: rejectRoomReason },
+        { headers },
+      );
+      setRejectingRoomId(null);
+      setRejectRoomReason("");
+      fetchRoomRequests();
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setRoomRequestLoading(null);
+    }
+  };
 
-const handleRoomRequest = async (requestId, approved) => {
-  if (!approved && !rejectRoomReason.trim()) return alert("Please enter a rejection reason.");
-  setRoomRequestLoading(requestId);
-  try {
-    await axios.post(`${API}/room-requests/handle`, 
-      { requestId, approved, reason: rejectRoomReason }, 
-      { headers }
-    );
-    setRejectingRoomId(null);
-    setRejectRoomReason("");
-    fetchRoomRequests();
-  } catch (err) { 
-    alert(err.response?.data?.message || "Something went wrong."); 
-  } finally {
-    setRoomRequestLoading(null);
-  }
-};
+  const fetchModerationRooms = async () => {
+    try {
+      const [roomsRes, usersRes] = await Promise.all([
+        axios.get(`${API}/rooms-moderation`, { headers }),
+        axios.get(`${API}/users`, { headers }),
+      ]);
+      console.log("room sample:", roomsRes.data[0]);
+      setModerationRooms(roomsRes.data);
+      setUsers(usersRes.data);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-const fetchModerationRooms = async () => {
-  try {
-    const [roomsRes, usersRes] = await Promise.all([
-      axios.get(`${API}/rooms-moderation`, { headers }),
-      axios.get(`${API}/users`, { headers })
-    ]);
-    console.log("room sample:", roomsRes.data[0]);
-    setModerationRooms(roomsRes.data);
-    setUsers(usersRes.data);
-  } catch (err) { console.error(err); }
-};
+  const handleRoomSuspend = async (roomId, userId) => {
+    if (!roomSuspendDays || !roomSuspendReason.trim())
+      return alert(t("adminPanel.rooms.suspendFieldsRequired"));
+    setActionLoading(true);
+    try {
+      await axios.patch(
+        `${API}/rooms-moderation/suspend`,
+        {
+          roomId,
+          userId,
+          days: Number(roomSuspendDays),
+          reason: roomSuspendReason,
+        },
+        { headers },
+      );
+      setRoomSuspendingId(null);
+      setRoomSuspendDays("");
+      setRoomSuspendReason("");
+      const [roomsRes, usersRes] = await Promise.all([
+        axios.get(`${API}/rooms-moderation`, { headers }),
+        axios.get(`${API}/users`, { headers }),
+      ]);
+      setModerationRooms(roomsRes.data);
+      setUsers(usersRes.data);
+      setSelectedRoom(roomsRes.data.find((r) => r.id === roomId));
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-const handleRoomSuspend = async (roomId, userId) => {
-  if (!roomSuspendDays || !roomSuspendReason.trim()) return alert("Please fill in days and reason.");
-  setActionLoading(true);
-  try {
-    await axios.patch(`${API}/rooms-moderation/suspend`,
-      { roomId, userId, days: Number(roomSuspendDays), reason: roomSuspendReason },
-      { headers }
-    );
-    setRoomSuspendingId(null);
-    setRoomSuspendDays("");
-    setRoomSuspendReason("");
-    const [roomsRes, usersRes] = await Promise.all([  
-      axios.get(`${API}/rooms-moderation`, { headers }),
-      axios.get(`${API}/users`, { headers })
-    ]);
-    setModerationRooms(roomsRes.data);
-    setUsers(usersRes.data);  
-    setSelectedRoom(roomsRes.data.find(r => r.id === roomId));
-  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  finally { setActionLoading(false); }
-};
+  const handleRoomUnsuspend = async (roomId, userId) => {
+    setActionLoading(true);
+    try {
+      await axios.patch(
+        `${API}/rooms-moderation/unsuspend`,
+        { roomId, userId },
+        { headers },
+      );
+      const [roomsRes, usersRes] = await Promise.all([
+        axios.get(`${API}/rooms-moderation`, { headers }),
+        axios.get(`${API}/users`, { headers }),
+      ]);
+      setModerationRooms(roomsRes.data);
+      setUsers(usersRes.data);
+      setSelectedRoom(roomsRes.data.find((r) => r.id === roomId));
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
-const handleRoomUnsuspend = async (roomId, userId) => {
-  setActionLoading(true);
-  try {
-    await axios.patch(`${API}/rooms-moderation/unsuspend`, { roomId, userId }, { headers });
-    const [roomsRes, usersRes] = await Promise.all([ 
-      axios.get(`${API}/rooms-moderation`, { headers }),
-      axios.get(`${API}/users`, { headers })
-    ]);
-    setModerationRooms(roomsRes.data);
-    setUsers(usersRes.data);  
-    setSelectedRoom(roomsRes.data.find(r => r.id === roomId));
-  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-  finally { setActionLoading(false); }
-};
+  const handleDeleteRoom = async (roomId) => {
+    if (!window.confirm(t("adminPanel.rooms.deleteConfirm"))) return;
+    try {
+      await axios.delete(`${API}/rooms-moderation/${roomId}`, { headers });
+      setSelectedRoom(null);
+      fetchModerationRooms();
+    } catch (err) {
+      alert(err.response?.data?.message || "Something went wrong.");
+    }
+  };
 
-const handleDeleteRoom = async (roomId) => {
-  if (!window.confirm("Permanently delete this room?")) return;
-  try {
-    await axios.delete(`${API}/rooms-moderation/${roomId}`, { headers });
-    setSelectedRoom(null);
-    fetchModerationRooms();
-  } catch (err) { alert(err.response?.data?.message || "Something went wrong."); }
-};
-
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////
   return (
-    <div style={{ minHeight: "100vh", background: "#1a1f35", color: "white", padding: "20px" }}>
- 
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#1a1f35",
+        color: "white",
+        padding: "20px",
+      }}
+    >
       {/* header */}
-      <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "24px" }}>
-        <button onClick={() => navigate("/profile")} style={{ background: "none", border: "none", color: "white", fontSize: "20px", cursor: "pointer" }}>←</button>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "15px",
+          marginBottom: "24px",
+        }}
+      >
+        <button
+          onClick={() => navigate("/profile")}
+          style={{
+            background: "none",
+            border: "none",
+            color: "white",
+            fontSize: "20px",
+            cursor: "pointer",
+          }}
+        >
+          ←
+        </button>
         <div>
-          <h2 style={{ margin: 0 }}>Admin Panel</h2>
-          <small style={{ opacity: 0.5 }}>@{currentUser?.username} — {currentUser?.authorityLevel}</small>
+          <h2 style={{ margin: 0 }}>{t("adminPanel.title")}</h2>
+          <small style={{ opacity: 0.5 }}>
+            @{currentUser?.username} — {currentUser?.authorityLevel}
+          </small>
         </div>
         {isSuperAdmin && (
-          <button onClick={() => navigate("/superadmin")} style={{ ...btn("#4a3f6b"), marginLeft: "auto" }}>
-            ⚡ SuperAdmin Panel
+          <button
+            onClick={() => navigate("/superadmin")}
+            style={{ ...btn("#4a3f6b"), marginLeft: "auto" }}
+          >
+            {t("adminPanel.superAdminBtn")}
           </button>
         )}
       </div>
- 
+
       {/* tabs */}
-      <div style={{ display: "flex", gap: "6px", marginBottom: "24px", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "12px", flexWrap: "wrap" }}>
-        {tabs.map(tab => (
-          <button key={tab.id} onClick={() => setActiveTab(tab.id)} style={{
-            padding: "8px 16px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px",
-            background: activeTab === tab.id ? "#6476af" : "rgba(255,255,255,0.08)",
-            color: "white", fontWeight: activeTab === tab.id ? "600" : "400"
-          }}>
+      <div
+        style={{
+          display: "flex",
+          gap: "6px",
+          marginBottom: "24px",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          paddingBottom: "12px",
+          flexWrap: "wrap",
+        }}
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              padding: "8px 16px",
+              borderRadius: "8px",
+              border: "none",
+              cursor: "pointer",
+              fontSize: "13px",
+              background:
+                activeTab === tab.id ? "#6476af" : "rgba(255,255,255,0.08)",
+              color: "white",
+              fontWeight: activeTab === tab.id ? "600" : "400",
+            }}
+          >
             {tab.label}
           </button>
         ))}
       </div>
- 
+
       {/* ── STATS TAB ──....maybe admins should not have this and only supperadmin should? */}
       {/* {activeTab === "stats" && (
         <div>
@@ -528,134 +710,308 @@ const handleDeleteRoom = async (roomId) => {
         </div>
         
       )} */}
- 
+
       {/* ── USERS TAB ── */}
       {activeTab === "users" && (
         <div>
-          <h3 style={{ marginBottom: "16px" }}>User Management</h3>
- 
+          <h3 style={{ marginBottom: "16px" }}>
+            {t("adminPanel.users.title")}
+          </h3>
+
           {/* filters */}
-          <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "10px",
+              marginBottom: "16px",
+              flexWrap: "wrap",
+            }}
+          >
             <input
-              type="text" placeholder="Search by username..."
-              value={userSearch} onChange={(e) => setUserSearch(e.target.value)}
-              style={{ padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", flex: 1 }}
+              type="text"
+              placeholder={t("adminPanel.users.searchPlaceholder")}
+              value={userSearch}
+              onChange={(e) => setUserSearch(e.target.value)}
+              style={{
+                padding: "8px",
+                borderRadius: "6px",
+                border: "1px solid rgba(255,255,255,0.2)",
+                background: "rgba(255,255,255,0.1)",
+                color: "white",
+                flex: 1,
+              }}
             />
-            <select value={userRoleFilter} onChange={(e) => setUserRoleFilter(e.target.value)}
-              style={{ padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "#252b45", color: "white" }}>
-              <option value="">All Roles</option>
-              <option value="student">Student</option>
-              <option value="professor">Professor</option>
+            <select
+              value={userRoleFilter}
+              onChange={(e) => setUserRoleFilter(e.target.value)}
+              style={{
+                padding: "8px",
+                borderRadius: "6px",
+                border: "1px solid rgba(255,255,255,0.2)",
+                background: "#252b45",
+                color: "white",
+              }}
+            >
+              <option value="">{t("adminPanel.users.allRoles")}</option>
+              <option value="student">{t("adminPanel.users.student")}</option>
+              <option value="professor">
+                {t("adminPanel.users.professor")}
+              </option>
             </select>
-            <select value={userStatusFilter} onChange={(e) => setUserStatusFilter(e.target.value)}
-              style={{ padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "#252b45", color: "white" }}>
-              <option value="">All Status</option>
-              <option value="suspended">Suspended</option>
-              <option value="pending">Pending Verification</option>
+            <select
+              value={userStatusFilter}
+              onChange={(e) => setUserStatusFilter(e.target.value)}
+              style={{
+                padding: "8px",
+                borderRadius: "6px",
+                border: "1px solid rgba(255,255,255,0.2)",
+                background: "#252b45",
+                color: "white",
+              }}
+            >
+              <option value="">{t("adminPanel.users.allStatus")}</option>
+              <option value="suspended">
+                {t("adminPanel.users.suspended")}
+              </option>
+              <option value="pending">
+                {t("adminPanel.users.pendingVerification")}
+              </option>
             </select>
-            <button onClick={fetchUsers} style={btn()}>Search</button>
+            <button onClick={fetchUsers} style={btn()}>
+              {t("adminPanel.users.searchBtn")}
+            </button>
           </div>
- 
-          {users.length === 0 ? <p style={{ opacity: 0.5 }}>No users found.</p> : (
-            users.map(user => {
-              const isSuspended = user.suspended_until && new Date(user.suspended_until) > new Date();
+
+          {users.length === 0 ? (
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.users.noUsers")}</p>
+          ) : (
+            users.map((user) => {
+              const isSuspended =
+                user.suspended_until &&
+                new Date(user.suspended_until) > new Date();
               return (
-                <div key={user.id} style={{ ...card, display: "flex", alignItems: "center", gap: "12px" }}>
-                  <img src={user.profile_pic_url || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
+                <div
+                  key={user.id}
+                  style={{
+                    ...card,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                  }}
+                >
+                  <img
+                    src={user.profile_pic_url || Cat}
+                    alt="pfp"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
                   <div style={{ flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginBottom: "4px",
+                      }}
+                    >
                       <strong>@{user.username}</strong>
                       <span style={badge("#6476af")}>{user.role}</span>
-{user.authority_level !== "user" && <span style={badge("#4a3f6b")}>{user.authority_level}</span>}
-                      {isSuspended && <span style={badge("#c0392b")}>suspended</span>}
-{user.verification_status === "pending" && <span style={badge("#e67e22")}>pending prof</span>}
+                      {user.authority_level !== "user" && (
+                        <span style={badge("#4a3f6b")}>
+                          {user.authority_level}
+                        </span>
+                      )}
+                      {isSuspended && (
+                        <span style={badge("#c0392b")}>
+                          {t("adminPanel.users.suspended")}
+                        </span>
+                      )}
+                      {user.verification_status === "pending" && (
+                        <span style={badge("#e67e22")}>
+                          {t("adminPanel.users.pendingProf")}
+                        </span>
+                      )}
                     </div>
                     <small style={{ opacity: 0.5 }}>
-                      {user.email} • rating: {user.rating ?? 1}/5 • violations: {user.violation_count || 0}
-
+                      {user.email} • {t("adminPanel.users.rating")}: {user.rating ?? 1}/5 • {t("adminPanel.users.violations")}:{" "}
+                      {user.violation_count || 0} 
                     </small>
                     {isSuspended && (
-                      <small style={{ display: "block", color: "#e74c3c", marginTop: "2px" }}>
-Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.suspension_reason}
-                      </small>
+                      <small
+                        style={{
+                          display: "block",
+                          color: "#e74c3c",
+                          marginTop: "2px",
+                        }}
+                      >
+{`${t("adminPanel.users.suspendedUntil")} ${new Date(user.suspended_until).toLocaleDateString()} — ${user.suspension_reason}`}                      </small>
                     )}
                   </div>
-                  <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "6px",
+                      flexWrap: "wrap",
+                      justifyContent: "flex-end",
+                    }}
+                  >
                     {!isSuspended && user.authorityLevel === "user" && (
-<button onClick={() => handleSuspend(user.id)} disabled={actionLoading} style={btn("#c0392b")}>Suspend</button>
+                      <button
+                        onClick={() => handleSuspend(user.id)}
+                        disabled={actionLoading}
+                        style={btn("#c0392b")}
+                      >
+                        {t("adminPanel.users.suspend")}
+                      </button>
                     )}
                     {isSuspended && (
-<button onClick={() => handleUnsuspend(user.id)} disabled={actionLoading} style={btn("#27ae60")}>Unsuspend</button>
+                      <button
+                        onClick={() => handleUnsuspend(user.id)}
+                        disabled={actionLoading}
+                        style={btn("#27ae60")}
+                      >
+                        {t("adminPanel.users.unsuspend")}
+                      </button>
                     )}
                     {user.actionHistory?.length > 0 && (
-                       <button
-                        onClick={() => setDrillDown({ 
-                         type: "history", 
-                         title: `@${user.username} History`, 
-                         data: user.actionHistory 
-                         })}
+                      <button
+                        onClick={() =>
+                          setDrillDown({
+                            type: "history",
+                            title: `@${user.username} History`,
+                            data: user.actionHistory,
+                          })
+                        }
                         style={btn()}
-                         >
-                        📋 History
-                       </button>
-                      )}
-                    
+                      >
+                        {t("adminPanel.users.history")}
+                      </button>
+                    )}
                   </div>
                 </div>
-                
               );
-              
             })
-            
           )}
         </div>
-        
       )}
- 
+
       {/* ── PROFESSORS TAB ── */}
       {activeTab === "professors" && (
         <div>
-          <h3 style={{ marginBottom: "16px" }}>Pending Professor Verification</h3>
+          <h3 style={{ marginBottom: "16px" }}>
+            {t("adminPanel.professors.title")}
+          </h3>
           {pendingProfessors.length === 0 ? (
-            <p style={{ opacity: 0.5 }}>No pending professor requests.</p>
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.professors.noPending")}</p>
           ) : (
-            pendingProfessors.map(prof => (
+            pendingProfessors.map((prof) => (
               <div key={prof.id} style={card}>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "10px" }}>
-                  <img src={prof.profile_pic_url || Cat} alt="pfp" style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover" }} />
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    marginBottom: "10px",
+                  }}
+                >
+                  <img
+                    src={prof.profile_pic_url || Cat}
+                    alt="pfp"
+                    style={{
+                      width: "40px",
+                      height: "40px",
+                      borderRadius: "50%",
+                      objectFit: "cover",
+                    }}
+                  />
                   <div>
                     <strong>@{prof.username}</strong>
-                    <small style={{ display: "block", opacity: 0.5 }}>{prof.email}</small>
-<small style={{ display: "block", opacity: 0.5 }}>University: {prof.university_code}</small>
+                    <small style={{ display: "block", opacity: 0.5 }}>
+                      {prof.email}
+                    </small>
+                    <small style={{ display: "block", opacity: 0.5 }}>
+                      {`${t("adminPanel.professors.university")}: ${prof.university_code}`}
+                    </small>
                   </div>
                 </div>
- 
+
                 {prof.proof_file_url && (
-                  <a href={prof.proof_file_url} target="_blank" rel="noopener noreferrer"
-                    style={{ display: "inline-block", marginBottom: "10px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px" }}>
-                    📄 View Proof Document
+                  <a
+                    href={prof.proof_file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-block",
+                      marginBottom: "10px",
+                      padding: "6px 12px",
+                      background: "rgba(255,255,255,0.1)",
+                      borderRadius: "6px",
+                      color: "white",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                    }}
+                  >
+                    {t("adminPanel.professors.viewProof")}
                   </a>
                 )}
- 
+
                 {rejectingId === prof.id ? (
                   <div style={{ marginTop: "10px" }}>
                     <input
-                      type="text" placeholder="Reason for rejection..."
-                      value={rejectReason} onChange={(e) => setRejectReason(e.target.value)}
-                      style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }}
+                      type="text"
+                      placeholder={t("adminPanel.professors.rejectPlaceholder")}
+                      value={rejectReason}
+                      onChange={(e) => setRejectReason(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        borderRadius: "6px",
+                        border: "1px solid rgba(255,255,255,0.2)",
+                        background: "rgba(255,255,255,0.1)",
+                        color: "white",
+                        boxSizing: "border-box",
+                        marginBottom: "8px",
+                      }}
                     />
                     <div style={{ display: "flex", gap: "8px" }}>
-<button onClick={() => handleRejectProfessor(prof.id)} disabled={actionLoading} style={btn("#c0392b")}>
-  {actionLoading ? "Rejecting..." : "Confirm Reject"}
-</button>                      <button onClick={() => { setRejectingId(null); setRejectReason(""); }} style={btn("rgba(255,255,255,0.1)")}>Cancel</button>
+                      <button
+                        onClick={() => handleRejectProfessor(prof.id)}
+                        disabled={actionLoading}
+                        style={btn("#c0392b")}
+                      >
+                        {actionLoading ? t("adminPanel.professors.rejecting") : t("adminPanel.professors.confirmReject")}
+                      </button>{" "}
+                      <button
+                        onClick={() => {
+                          setRejectingId(null);
+                          setRejectReason("");
+                        }}
+                        style={btn("rgba(255,255,255,0.1)")}
+                      >
+                        {t("adminPanel.professors.cancel")}
+                      </button>
                     </div>
                   </div>
                 ) : (
                   <div style={{ display: "flex", gap: "8px" }}>
-                    <button onClick={() => handleVerifyProfessor(prof.id)} disabled={actionLoading} style={btn("#27ae60")}>
-  {actionLoading ? "Verifying..." : "Verify"}
-</button>
-<button onClick={() => setRejectingId(prof.id)} disabled={actionLoading} style={btn("#c0392b")}>Reject</button>
+                    <button
+                      onClick={() => handleVerifyProfessor(prof.id)}
+                      disabled={actionLoading}
+                      style={btn("#27ae60")}
+                    >
+                      {actionLoading ? t("adminPanel.professors.verifying") : t("adminPanel.professors.verify")}
+                    </button>
+                    <button
+                      onClick={() => setRejectingId(prof.id)}
+                      disabled={actionLoading}
+                      style={btn("#c0392b")}
+                    >
+                      {t("adminPanel.professors.reject")}
+                    </button>
                   </div>
                 )}
               </div>
@@ -664,226 +1020,454 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
         </div>
       )}
 
-      
- 
       {/* ── REPORTS TAB ── */}
       {activeTab === "reports" && (
         <div>
-          <h3 style={{ marginBottom: "16px" }}>Reported Content</h3>
+          <h3 style={{ marginBottom: "16px" }}>{t("adminPanel.reports.title")}</h3>
           {reports.length === 0 ? (
-            <p style={{ opacity: 0.5 }}>No reported content.</p>
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.reports.noReports")}</p>
           ) : (
-            reports.map(item => (
+            reports.map((item) => (
               <div key={item.id} style={card}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                  <span style={badge(item.type === "post" ? "#6476af" : "#4a3f6b")}>{item.type}</span>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <span
+                    style={badge(item.type === "post" ? "#6476af" : "#4a3f6b")}
+                  >
+                    {item.type}
+                  </span>
                   <strong>@{item.author_username}</strong>
-                  <span style={{ marginLeft: "auto", opacity: 0.5, fontSize: "12px" }}>
-                    {item.reports?.length} report(s)
+                  <span
+                    style={{
+                      marginLeft: "auto",
+                      opacity: 0.5,
+                      fontSize: "12px",
+                    }}
+                  >
+                    {`${item.reports?.length} ${t("adminPanel.reports.reports")}`}
                   </span>
                 </div>
-                <p style={{ margin: "0 0 8px", opacity: 0.8, fontSize: "14px" }}>{item.content?.slice(0, 150)}</p>
+                <p
+                  style={{ margin: "0 0 8px", opacity: 0.8, fontSize: "14px" }}
+                >
+                  {item.content?.slice(0, 150)}
+                </p>
                 <div style={{ marginBottom: "10px" }}>
                   {item.reports?.map((r, i) => (
-                    <small key={i} style={{ display: "block", opacity: 0.5, fontSize: "11px" }}>
-                      — {r.reason} ({new Date(r.createdAt).toLocaleDateString()})
+                    <small
+                      key={i}
+                      style={{
+                        display: "block",
+                        opacity: 0.5,
+                        fontSize: "11px",
+                      }}
+                    >
+                      — {r.reason} ({new Date(r.createdAt).toLocaleDateString()}
+                      )
                     </small>
                   ))}
                 </div>
                 {!item.isHidden && (
                   <button
-                    onClick={() => handleHideContent(item.type, item.type === "post" ? item.id : item.postId, item.type === "comment" ? item.id : null)}
+                    onClick={() =>
+                      handleHideContent(
+                        item.type,
+                        item.type === "post" ? item.id : item.postId,
+                        item.type === "comment" ? item.id : null,
+                      )
+                    }
                     style={btn("#c0392b")}
-                     disabled={actionLoading}
+                    disabled={actionLoading}
                   >
-                    {actionLoading ? "Hiding..." : "Hide Content"}
+                    {actionLoading ? t("adminPanel.reports.hiding") : t("adminPanel.reports.hideContent")}
                   </button>
                 )}
-                {item.isHidden && <span style={{ color: "#e74c3c", fontSize: "12px" }}>⚠️ Already hidden</span>}
+                {item.isHidden && (
+                  <span style={{ color: "#e74c3c", fontSize: "12px" }}>
+                    {t("adminPanel.reports.alreadyHidden")}
+                  </span>
+                )}
               </div>
             ))
           )}
         </div>
       )}
       {/* ── RESOURCES TAB ── */}
-{activeTab === "resources" && (
-  <div>
-    <h3 style={{ marginBottom: "16px" }}>Pending Resource Approval</h3>
-    {pendingResources.length === 0 ? (
-      <p style={{ opacity: 0.5 }}>No pending resources.</p>
-    ) : (
-      pendingResources.map(post => (
-        <div key={post.id} style={card}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-            <strong>@{post.author_username}</strong>
-            <span style={badge("#6476af")}>{post.author_role}</span>
-            <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(post.created_at).toLocaleDateString()}</small>
-          </div>
-          {post.title && <strong style={{ display: "block", marginBottom: "4px" }}>{post.title}</strong>}
-          <p style={{ margin: "0 0 10px", opacity: 0.7, fontSize: "13px" }}>{post.content?.slice(0, 120)}</p>
+      {activeTab === "resources" && (
+        <div>
+          <h3 style={{ marginBottom: "16px" }}>{t("adminPanel.resources.title")}</h3>
+          {pendingResources.length === 0 ? (
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.resources.noPending")}</p>
+          ) : (
+            pendingResources.map((post) => (
+              <div key={post.id} style={card}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <strong>@{post.author_username}</strong>
+                  <span style={badge("#6476af")}>{post.author_role}</span>
+                  <small style={{ marginLeft: "auto", opacity: 0.5 }}>
+                    {new Date(post.created_at).toLocaleDateString()}
+                  </small>
+                </div>
+                {post.title && (
+                  <strong style={{ display: "block", marginBottom: "4px" }}>
+                    {post.title}
+                  </strong>
+                )}
+                <p
+                  style={{ margin: "0 0 10px", opacity: 0.7, fontSize: "13px" }}
+                >
+                  {post.content?.slice(0, 120)}
+                </p>
 
-          {post.image_url && (
-            <a href={post.image_url} target="_blank" rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px", marginRight: "8px" }}>
-              🖼️ View Image
-            </a>
-          )}
-          {post.pdf_url && (
-            <a href={post.pdf_url} target="_blank" rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(255,255,255,0.1)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px", marginRight: "8px" }}>
-              📄 View PDF
-            </a>
-          )}
-          {post.resource_link && (
-            <a href={post.resource_link} target="_blank" rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px" }}>
-              🔗 {post.resource_label || "Open Link"}
-            </a>
-          )}
+                {post.image_url && (
+                  <a
+                    href={post.image_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "6px 12px",
+                      background: "rgba(255,255,255,0.1)",
+                      borderRadius: "6px",
+                      color: "white",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                      marginBottom: "8px",
+                      marginRight: "8px",
+                    }}
+                  >
+                    {t("adminPanel.resources.viewImage")}
+                  </a>
+                )}
+                {post.pdf_url && (
+                  <a
+                    href={post.pdf_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "6px 12px",
+                      background: "rgba(255,255,255,0.1)",
+                      borderRadius: "6px",
+                      color: "white",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                      marginBottom: "8px",
+                      marginRight: "8px",
+                    }}
+                  >
+                    {t("adminPanel.resources.viewPdf")}
+                  </a>
+                )}
+                {post.resource_link && (
+                  <a
+                    href={post.resource_link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "6px 12px",
+                      background: "rgba(100,118,175,0.3)",
+                      borderRadius: "6px",
+                      color: "white",
+                      textDecoration: "none",
+                      fontSize: "13px",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    🔗 {post.resource_label ||  t("adminPanel.resources.openLink")}
+                  </a>
+                )}
 
-          <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
-            <button onClick={() => handleApproveResource(post.id, true)} disabled={actionLoading} style={btn("#27ae60")}>
-  {actionLoading ? "..." : " Approve"}
-</button>
-<button onClick={() => handleApproveResource(post.id, false)} disabled={actionLoading} style={btn("#c0392b")}>
-  {actionLoading ? "..." : " Reject"}
-</button>
-          </div>
-        </div>
-      ))
-    )}
-  </div>
-)}
-
-{/* ── HIDDEN CONTENT TAB ── */}
-{activeTab === "hidden" && (
-  <div>
-    <h3 style={{ marginBottom: "16px" }}>Hidden Content</h3>
-    {hiddenContent.length === 0 ? (
-      <p style={{ opacity: 0.5 }}>No hidden content.</p>
-    ) : (
-      hiddenContent.map(item => (
-        <div key={item.id} style={card}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-            <span style={badge(item.type === "post" ? "#6476af" : "#4a3f6b")}>{item.type}</span>
-            <strong>@{item.author_username}</strong>
-            {item.autoHidden && <span style={badge("#e67e22")}>auto-hidden</span>}
-            {!item.autoHidden && <span style={badge("#c0392b")}>manually hidden</span>}
-            {item.type === "comment" && (
-              <small style={{ opacity: 0.5, fontSize: "11px" }}>in: {item.postTitle || item.postId}</small>
-            )}
-          </div>
-          <p style={{ margin: "0 0 10px", opacity: 0.7, fontSize: "13px" }}>{item.content?.slice(0, 150)}</p>
-          {item.reports?.length > 0 && (
-            <small style={{ display: "block", opacity: 0.5, marginBottom: "8px" }}>
-              🚩 {item.reports.length} report(s)
-            </small>
-          )}
-          <button
-            onClick={() => handleRestoreContent(
-              item.type,
-              item.type === "post" ? item.id : item.postId,
-              item.type === "comment" ? item.id : null
-            )}
-            disabled={actionLoading}
-            style={btn("#27ae60")}
-          >
-             {actionLoading ? "Restoring..." : " Restore"}
-          </button>
-        </div>
-      ))
-    )}
-  </div>
-)}
-
-{/* ── OTHER INPUTS TAB ── */}
-{activeTab === "other" && (
-  <div>
-    <h3 style={{ marginBottom: "16px" }}>Custom University / Major Validation</h3>
-    {otherInputs.length === 0 ? (
-      <p style={{ opacity: 0.5 }}>No custom inputs pending.</p>
-    ) : (
-      otherInputs.map(u => (
-        <div key={u.id} style={card}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-            <strong>@{u.username}</strong>
-            <span style={badge("#6476af")}>{u.role}</span>
-            <span style={badge(
-              u.otherInputStatus === "approved" ? "#27ae60" :
-              u.otherInputStatus === "rejected" ? "#c0392b" : "#e67e22"
-            )}>{u.otherInputStatus || "pending"}</span>
-          </div>
-          <small style={{ opacity: 0.5, display: "block", marginBottom: "8px" }}>{u.email}</small>
-
-          {u.customUni && (
-            <div style={{ marginBottom: "8px", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "6px" }}>
-              <small style={{ opacity: 0.6 }}>Custom University:</small>
-              <p style={{ margin: "4px 0 0", fontSize: "14px" }}>{u.customUni.name}</p>
-              <small style={{ opacity: 0.4 }}>Code: {u.customUni.code}</small>
-            </div>
-          )}
-
-          {u.customMajors?.length > 0 && (
-            <div style={{ marginBottom: "10px", padding: "8px", background: "rgba(255,255,255,0.05)", borderRadius: "6px" }}>
-              <small style={{ opacity: 0.6 }}>Custom Major(s):</small>
-              {u.customMajors.map((m, i) => (
-                <p key={i} style={{ margin: "4px 0 0", fontSize: "14px" }}>{m}</p>
-              ))}
-            </div>
-          )}
-
-          {u.otherInputStatus === "pending" && (
-            <div style={{ display: "flex", gap: "8px" }}>
-              <button onClick={() => handleValidateOtherInput(u.id, true)} disabled={actionLoading} style={btn("#27ae60")}>
-  {actionLoading ? "..." : "Approve"}
-</button>
-<button onClick={() => handleValidateOtherInput(u.id, false)} disabled={actionLoading} style={btn("#c0392b")}>
-  {actionLoading ? "..." : "Reject"}
-</button>
-            </div>
-          )}
-          {u.otherInputStatus !== "pending" && (
-            <small style={{ opacity: 0.5 }}>Already {u.otherInputStatus}</small>
+                <div style={{ display: "flex", gap: "8px", marginTop: "10px" }}>
+                  <button
+                    onClick={() => handleApproveResource(post.id, true)}
+                    disabled={actionLoading}
+                    style={btn("#27ae60")}
+                  >
+                    {actionLoading ? "..." : t("adminPanel.resources.approve")}
+                  </button>
+                  <button
+                    onClick={() => handleApproveResource(post.id, false)}
+                    disabled={actionLoading}
+                    style={btn("#c0392b")}
+                  >
+                    {actionLoading ? "..." : t("adminPanel.resources.reject")}
+                  </button>
+                </div>
+              </div>
+            ))
           )}
         </div>
-      ))
-    )}
-  </div>
-)}
- 
+      )}
+
+      {/* ── HIDDEN CONTENT TAB ── */}
+      {activeTab === "hidden" && (
+        <div>
+          <h3 style={{ marginBottom: "16px" }}>{t("adminPanel.hidden.title")}</h3>
+          {hiddenContent.length === 0 ? (
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.hidden.noHidden")}</p>
+          ) : (
+            hiddenContent.map((item) => (
+              <div key={item.id} style={card}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <span
+                    style={badge(item.type === "post" ? "#6476af" : "#4a3f6b")}
+                  >
+                    {item.type}
+                  </span>
+                  <strong>@{item.author_username}</strong>
+                  {item.autoHidden && (
+                    <span style={badge("#e67e22")}>{t("adminPanel.hidden.autoHidden")}</span>
+                  )}
+                  {!item.autoHidden && (
+                    <span style={badge("#c0392b")}>{t("adminPanel.hidden.manuallyHidden")}</span>
+                  )}
+                  {item.type === "comment" && (
+                    <small style={{ opacity: 0.5, fontSize: "11px" }}>
+                      in: {item.postTitle || item.postId}
+                    </small>
+                  )}
+                </div>
+                <p
+                  style={{ margin: "0 0 10px", opacity: 0.7, fontSize: "13px" }}
+                >
+                  {item.content?.slice(0, 150)}
+                </p>
+                {item.reports?.length > 0 && (
+                  <small
+                    style={{
+                      display: "block",
+                      opacity: 0.5,
+                      marginBottom: "8px",
+                    }}
+                  >
+                    {` ${item.reports.length} ${t("adminPanel.hidden.reports")}`}
+                  </small>
+                )}
+                <button
+                  onClick={() =>
+                    handleRestoreContent(
+                      item.type,
+                      item.type === "post" ? item.id : item.postId,
+                      item.type === "comment" ? item.id : null,
+                    )
+                  }
+                  disabled={actionLoading}
+                  style={btn("#27ae60")}
+                >
+                  {actionLoading ? t("adminPanel.hidden.restoring") : t("adminPanel.hidden.restore")}
+                </button>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* ── OTHER INPUTS TAB ── */}
+      {activeTab === "other" && (
+        <div>
+          <h3 style={{ marginBottom: "16px" }}>
+            {t("adminPanel.other.title")}
+          </h3>
+          {otherInputs.length === 0 ? (
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.other.noPending")}</p>
+          ) : (
+            otherInputs.map((u) => (
+              <div key={u.id} style={card}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
+                >
+                  <strong>@{u.username}</strong>
+                  <span style={badge("#6476af")}>{u.role}</span>
+                  <span
+                    style={badge(
+                      u.otherInputStatus === "approved"
+                        ? "#27ae60"
+                        : u.otherInputStatus === "rejected"
+                          ? "#c0392b"
+                          : "#e67e22",
+                    )}
+                  >
+                    {u.otherInputStatus || "pending"}
+                  </span>
+                </div>
+                <small
+                  style={{
+                    opacity: 0.5,
+                    display: "block",
+                    marginBottom: "8px",
+                  }}
+                >
+                  {u.email}
+                </small>
+
+                {u.customUni && (
+                  <div
+                    style={{
+                      marginBottom: "8px",
+                      padding: "8px",
+                      background: "rgba(255,255,255,0.05)",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    <small style={{ opacity: 0.6 }}>{t("adminPanel.other.customUni")}</small>
+                    <p style={{ margin: "4px 0 0", fontSize: "14px" }}>
+                      {u.customUni.name}
+                    </p>
+                    <small style={{ opacity: 0.4 }}>
+                      {`${t("adminPanel.other.code")}: ${u.customUni.code}`}
+                    </small>
+                  </div>
+                )}
+
+                {u.customMajors?.length > 0 && (
+                  <div
+                    style={{
+                      marginBottom: "10px",
+                      padding: "8px",
+                      background: "rgba(255,255,255,0.05)",
+                      borderRadius: "6px",
+                    }}
+                  >
+                    <small style={{ opacity: 0.6 }}>{t("adminPanel.other.customMajors")}</small>
+                    {u.customMajors.map((m, i) => (
+                      <p
+                        key={i}
+                        style={{ margin: "4px 0 0", fontSize: "14px" }}
+                      >
+                        {m}
+                      </p>
+                    ))}
+                  </div>
+                )}
+
+                {u.otherInputStatus === "pending" && (
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      onClick={() => handleValidateOtherInput(u.id, true)}
+                      disabled={actionLoading}
+                      style={btn("#27ae60")}
+                    >
+                      {actionLoading ? "..." : t("adminPanel.other.approve")}
+                    </button>
+                    <button
+                      onClick={() => handleValidateOtherInput(u.id, false)}
+                      disabled={actionLoading}
+                      style={btn("#c0392b")}
+                    >
+                      {actionLoading ? "..." : t("adminPanel.other.reject")}
+                    </button>
+                  </div>
+                )}
+                {u.otherInputStatus !== "pending" && (
+                  <small style={{ opacity: 0.5 }}>
+                    {`${t("adminPanel.other.alreadyProcessed")} ${u.otherInputStatus}`}
+                  </small>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
       {/* ── ANNOUNCEMENTS TAB ── */}
       {activeTab === "announcements" && (
         <div>
-          <h3 style={{ marginBottom: "16px" }}>Platform Announcements</h3>
- 
+          <h3 style={{ marginBottom: "16px" }}>{t("adminPanel.announcements.title")}</h3>
+
           {isSuperAdmin && (
             <div style={{ ...card, marginBottom: "20px" }}>
               <textarea
                 value={newAnnouncement}
                 onChange={(e) => setNewAnnouncement(e.target.value)}
-                placeholder="Write a platform-wide announcement..."
-                style={{ width: "100%", minHeight: "80px", padding: "10px", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", resize: "vertical", marginBottom: "10px" }}
+                placeholder={t("adminPanel.announcements.placeholder")}
+                style={{
+                  width: "100%",
+                  minHeight: "80px",
+                  padding: "10px",
+                  borderRadius: "8px",
+                  border: "1px solid rgba(255,255,255,0.2)",
+                  background: "rgba(255,255,255,0.1)",
+                  color: "white",
+                  boxSizing: "border-box",
+                  resize: "vertical",
+                  marginBottom: "10px",
+                }}
               />
-              <button onClick={handleCreateAnnouncement} disabled={!newAnnouncement.trim() || actionLoading} style={btn()}>
-  {actionLoading ? "Posting..." : " Post Announcement"}
-</button>
+              <button
+                onClick={handleCreateAnnouncement}
+                disabled={!newAnnouncement.trim() || actionLoading}
+                style={btn()}
+              >
+                {actionLoading ? t("adminPanel.announcements.posting") : t("adminPanel.announcements.post")}
+              </button>
             </div>
           )}
- 
+
           {announcements.length === 0 ? (
-            <p style={{ opacity: 0.5 }}>No announcements yet.</p>
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.announcements.noAnnouncements")}</p>
           ) : (
-            announcements.map(a => (
+            announcements.map((a) => (
               <div key={a.id} style={card}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                  }}
+                >
                   <div>
                     <p style={{ margin: "0 0 6px" }}>{a.message}</p>
                     <small style={{ opacity: 0.5 }}>
-                      By @{a.created_by_username} — {new Date(a.created_at).toLocaleString()}
-                      </small>
+                      By @{a.created_by_username} —{" "}
+                      {new Date(a.created_at).toLocaleString()}
+                    </small>
                   </div>
                   {isSuperAdmin && (
-                    <button onClick={() => handleDeleteAnnouncement(a.id)} style={{ background: "none", border: "none", color: "#e74c3c", cursor: "pointer", fontSize: "16px" }}>🗑️</button>
+                    <button
+                      onClick={() => handleDeleteAnnouncement(a.id)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#e74c3c",
+                        cursor: "pointer",
+                        fontSize: "16px",
+                      }}
+                    >
+                      🗑️
+                    </button>
                   )}
                 </div>
               </div>
@@ -895,365 +1479,785 @@ Suspended until {new Date(user.suspended_until).toLocaleDateString()} — {user.
       {/* ── REQUEST SUBJECT ROOMS TAB ── */}
 
       {activeTab === "room-requests" && (
-  <div>
-    <h3 style={{ marginBottom: "16px" }}>Subject Room Requests</h3>
-    {roomRequests.length === 0 ? (
-      <p style={{ opacity: 0.5 }}>No pending room requests.</p>
-    ) : (
-      (roomRequests ?? []).map(req => (
-        <div key={req.id} style={card}>
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-            <strong>@{req.username}</strong>
-            <span style={badge("#6476af")}>{req.major}</span>
-            <small style={{ marginLeft: "auto", opacity: 0.5 }}>
-              {new Date(req.requested_at).toLocaleDateString()}
-            </small>
-          </div>
-
-          <p style={{ margin: "0 0 4px", fontSize: "14px" }}>
-            Subject: <strong>{req.subject}</strong>
-          </p>
-          <small style={{ opacity: 0.5, display: "block", marginBottom: "10px" }}>
-            {req.notifyUsers?.length ?? 0} user(s) waiting on this room
-          </small>
-
-          {rejectingRoomId === req.id ? (
-            <div>
-              <input
-                type="text"
-                placeholder="Reason for rejection..."
-                value={rejectRoomReason}
-                onChange={(e) => setRejectRoomReason(e.target.value)}
-                style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }}
-              />
-              <div style={{ display: "flex", gap: "8px" }}>
-                <button onClick={() => handleRoomRequest(req.id, false)} style={btn("#c0392b")}>
-                  Confirm Reject
-                </button>
-                <button onClick={() => { setRejectingRoomId(null); setRejectRoomReason(""); }} style={btn("rgba(255,255,255,0.1)")}>
-                  Cancel
-                </button>
-              </div>
-            </div>
+        <div>
+          <h3 style={{ marginBottom: "16px" }}>{t("adminPanel.roomRequests.title")}</h3>
+          {roomRequests.length === 0 ? (
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.roomRequests.noPending")}</p>
           ) : (
-            <div style={{ display: "flex", gap: "8px" }}>
-              
-                <button 
-                    onClick={() => handleRoomRequest(req.id, true)} 
-                     disabled={roomRequestLoading === req.id}
-                     style={btn(roomRequestLoading === req.id ? "#1a6b40" : "#27ae60")}>
-                     {roomRequestLoading === req.id ? "Processing..." : "✅ Approve"}
-                      </button>
-                     <button 
-                     onClick={() => { setRejectingRoomId(req.id); setRejectRoomReason(""); }} 
-                     disabled={roomRequestLoading === req.id}
-                     style={btn("#c0392b")}>
-                      ❌ Reject
-                        </button>
-             </div>
-             
-           
-          )}
-        </div>
-      ))
-    )}
-  </div>
-)}
-
-{activeTab === "rooms" && (
-  <div>
-    <h3 style={{ marginBottom: "16px" }}>Room Moderation</h3>
-    {moderationRooms.length === 0 ? (
-      <p style={{ opacity: 0.5 }}>No rooms assigned.</p>
-    ) : (
-      <>
-      {/* search and filter */}
-      <div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
-  <input
-    type="text"
-    placeholder="Search rooms..."
-    value={roomSearch}
-    onChange={e => setRoomSearch(e.target.value)}
-    style={{ flex: 1, padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white" }}
-  />
-  <select
-    value={roomTypeFilter}
-    onChange={e => setRoomTypeFilter(e.target.value)}
-    style={{ padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "#252b45", color: "white" }}
-  >
-    <option value="">All Types</option>
-    {isSuperAdmin && <option value="public">Public</option>}
-    <option value="university">University</option>
-    <option value="major">Major</option>
-    <option value="subject">Subject</option>
-  </select>
-</div>
-        {/* stat cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "12px", marginBottom: "24px" }}>
-          {moderationRooms
-             .filter(r => isSuperAdmin ? r.type !== "private" : true)
-  .filter(r => roomTypeFilter ? r.type === roomTypeFilter : true)
-  .filter(r => roomSearch.trim() ? r.name?.toLowerCase().includes(roomSearch.toLowerCase()) : true)
-  .map(room => {
-              const activeSuspensions = room.suspendedMembers?.filter(
-                s => new Date(s.until) > new Date()
-              ).length || 0;
-              return (
-                <div key={room.id} onClick={() => setSelectedRoom(room)}
-                  style={{ ...card, cursor: "pointer", textAlign: "center" }}
-                  onMouseEnter={e => e.currentTarget.style.background = "#2f3655"}
-                  onMouseLeave={e => e.currentTarget.style.background = "#252b45"}
+            (roomRequests ?? []).map((req) => (
+              <div key={req.id} style={card}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                    marginBottom: "8px",
+                  }}
                 >
-                  <div style={{ marginBottom: "8px" }}>
-                    <span style={{
-                      ...badge(
-                        room.type === "public" ? "#27ae60" :
-                        room.type === "subject" ? "#f39c12" :
-                        room.type === "university" ? "#6476af" : "#4a3f6b"
-                      )
-                    }}>{room.type}</span>
-                  </div>
-                  <strong style={{ display: "block", marginBottom: "6px" }}>{room.name}</strong>
-                  <small style={{ opacity: 0.5, display: "block" }}>
-                    👥 {room.members?.length || 0} members
+                  <strong>@{req.username}</strong>
+                  <span style={badge("#6476af")}>{req.major}</span>
+                  <small style={{ marginLeft: "auto", opacity: 0.5 }}>
+                    {new Date(req.requested_at).toLocaleDateString()}
                   </small>
-                  {activeSuspensions > 0 && (
-                    <small style={{ color: "#e74c3c", display: "block", marginTop: "4px" }}>
-                      🚫 {activeSuspensions} suspended
-                    </small>
-                  )}
                 </div>
-              );
-            })}
-        </div>
-      </>
-    )}
 
-    {/* room drill-down modal */}
-    {selectedRoom && (
-      <div className="modal-overlay" onClick={() => setSelectedRoom(null)}>
-        <div className="modal" onClick={e => e.stopPropagation()}
-          style={{ width: "650px", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
+                <p style={{ margin: "0 0 4px", fontSize: "14px" }}>
+                  {`${t("adminPanel.roomRequests.subject")}: `}<strong>{req.subject}</strong>
+                </p>
+                <small
+                  style={{
+                    opacity: 0.5,
+                    display: "block",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {`${req.notifyUsers?.length ?? 0} ${t("adminPanel.roomRequests.usersWaiting")}`}
+                </small>
 
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <div>
-              <h3 style={{ margin: "0 0 4px" }}>{selectedRoom.name}</h3>
-              <small style={{ opacity: 0.5 }}>{selectedRoom.type} • {selectedRoom.members?.length || 0} members</small>
-            </div>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-              {isSuperAdmin && selectedRoom.type !== 'public' &&  (
-                <button onClick={() => handleDeleteRoom(selectedRoom.id)} style={btn("#7f0000")}>
-                  🗑️ Delete Room
-                </button>
-              )}
-              <button onClick={() => setSelectedRoom(null)}
-                style={{ background: "none", border: "none", color: "white", fontSize: "20px", cursor: "pointer" }}>✕</button>
-            </div>
-          </div>
-
-          <div style={{ overflowY: "auto", flex: 1 }}>
-            {selectedRoom.members?.length === 0 ? (
-              <p style={{ opacity: 0.5 }}>No members.</p>
-            ) : (
-              selectedRoom.members?.map(memberId => {
-                const memberUser = users.find(u => u.id === memberId);
-                const suspension = selectedRoom.suspendedMembers?.find(
-                  s => s.userId === memberId && new Date(s.until) > new Date()
-                );
-                const isSuspendedInRoom = !!suspension;
-                const isSuspending = roomSuspendingId === memberId;
-
-                return (
-                  <div key={memberId} style={{ ...card, marginBottom: "8px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          <strong style={{ fontSize: "13px" }}>
-                            {memberUser ? `@${memberUser.username}` : memberId}
-                          </strong>
-                          {memberUser && <span style={badge("#6476af")}>{memberUser.role}</span>}
-                          {isSuspendedInRoom && <span style={badge("#c0392b")}>suspended in room</span>}
-                        </div>
-                        {isSuspendedInRoom && (
-                          <small style={{ color: "#e74c3c", display: "block", marginTop: "2px" }}>
-                            Until {new Date(suspension.until).toLocaleDateString()} — {suspension.reason}
-                          </small>
-                        )}
-                        {memberUser?.roomViolations?.[selectedRoom.id] > 0 && (
-                          <small style={{ opacity: 0.5, display: "block" }}>
-                            Room violations: {memberUser.roomViolations[selectedRoom.id]}
-                          </small>
-                        )}
-                      </div>
-
-                      <div style={{ display: "flex", gap: "6px" }}>
-                        {!isSuspendedInRoom ? (
-                          <button onClick={() => setRoomSuspendingId(memberId)} style={btn("#c0392b")}>
-                            Suspend
-                          </button>
-                        ) : (
-                         <button onClick={() => handleRoomUnsuspend(selectedRoom.id, memberId)} disabled={actionLoading} style={btn("#27ae60")}>
-  {actionLoading ? "..." : "Unsuspend"}
-</button>
-                        )}
-                      </div>
+                {rejectingRoomId === req.id ? (
+                  <div>
+                    <input
+                      type="text"
+                     placeholder={t("adminPanel.roomRequests.rejectPlaceholder")}
+                      value={rejectRoomReason}
+                      onChange={(e) => setRejectRoomReason(e.target.value)}
+                      style={{
+                        width: "100%",
+                        padding: "8px",
+                        borderRadius: "6px",
+                        border: "1px solid rgba(255,255,255,0.2)",
+                        background: "rgba(255,255,255,0.1)",
+                        color: "white",
+                        boxSizing: "border-box",
+                        marginBottom: "8px",
+                      }}
+                    />
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button
+                        onClick={() => handleRoomRequest(req.id, false)}
+                        style={btn("#c0392b")}
+                      >
+                        {t("adminPanel.roomRequests.confirmReject")}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setRejectingRoomId(null);
+                          setRejectRoomReason("");
+                        }}
+                        style={btn("rgba(255,255,255,0.1)")}
+                      >
+                        {t("adminPanel.roomRequests.cancel")}
+                      </button>
                     </div>
-
-                    {/* suspend form */}
-                    {isSuspending && (
-                      <div style={{ marginTop: "10px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", padding: "10px" }}>
-                        <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-                          <input
-                            type="number"
-                            placeholder="Days..."
-                            value={roomSuspendDays}
-                            onChange={e => setRoomSuspendDays(e.target.value)}
-                            style={{ width: "80px", padding: "6px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white" }}
-                          />
-                          <input
-                            type="text"
-                            placeholder="Reason..."
-                            value={roomSuspendReason}
-                            onChange={e => setRoomSuspendReason(e.target.value)}
-                            style={{ flex: 1, padding: "6px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white" }}
-                          />
-                        </div>
-                        <div style={{ display: "flex", gap: "8px" }}>
-                          <button onClick={() => handleRoomSuspend(selectedRoom.id, memberId)} disabled={actionLoading} style={btn("#c0392b")}>
-  {actionLoading ? "Suspending..." : "Confirm"}
-</button>
-                          <button onClick={() => { setRoomSuspendingId(null); setRoomSuspendDays(""); setRoomSuspendReason(""); }} style={btn("rgba(255,255,255,0.1)")}>
-                            Cancel
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
-                );
-              })
-            )}
-          </div>
-        </div>
-      </div>
-    )}
-  </div>
-)}
-
-      {drillDown && (
-  <div className="modal-overlay" onClick={() => setDrillDown(null)}>
-    <div className="modal" onClick={e => e.stopPropagation()}
-      style={{ width: "650px", maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
-      
-      {/* header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-        <h3 style={{ margin: 0 }}>{drillDown.title}</h3>
-        <button onClick={() => setDrillDown(null)}
-          style={{ background: "none", border: "none", color: "white", fontSize: "20px", cursor: "pointer" }}>✕</button>
-      </div>
-
-      <div style={{ overflowY: "auto", flex: 1 }}>
-
-        {/* USERS */}
-        {drillDown.type === "users" && drillDown.data.map(u => {
-const isSuspended = u.suspended_until && new Date(u.suspended_until) > new Date();
-          return (
-            <div key={u.id} style={{ ...card, display: "flex", alignItems: "center", gap: "12px" }}>
-              <img src={u.profile_pic_url || Cat} alt="pfp"
-                style={{ width: "36px", height: "36px", borderRadius: "50%", objectFit: "cover" }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "4px" }}>
-                  <strong>@{u.username}</strong>
-                  <span style={badge("#6476af")}>{u.role}</span>
-                  {isSuspended && <span style={badge("#c0392b")}>suspended</span>}
-                  {u.verificationStatus === "pending" && <span style={badge("#e67e22")}>pending</span>}
-                </div>
-                <small style={{ opacity: 0.5 }}>{u.email} • rating: {u.rating ?? 1}/5 • violations: {u.violation_count || 0}</small>
-                {isSuspended && (
-                  <small style={{ display: "block", color: "#e74c3c", marginTop: "2px" }}>
-Until {new Date(u.suspended_until).toLocaleDateString()} — {u.suspension_reason}
-                  </small>
+                ) : (
+                  <div style={{ display: "flex", gap: "8px" }}>
+                    <button
+                      onClick={() => handleRoomRequest(req.id, true)}
+                      disabled={roomRequestLoading === req.id}
+                      style={btn(
+                        roomRequestLoading === req.id ? "#1a6b40" : "#27ae60",
+                      )}
+                    >
+                      {roomRequestLoading === req.id
+                        ? "....."
+                        : t("adminPanel.roomRequests.approve")}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setRejectingRoomId(req.id);
+                        setRejectRoomReason("");
+                      }}
+                      disabled={roomRequestLoading === req.id}
+                      style={btn("#c0392b")}
+                    >
+                      {t("adminPanel.roomRequests.reject")}
+                    </button>
+                  </div>
                 )}
               </div>
-              {/* action history button */}
-              {u.actionHistory?.length > 0 && (
-                <button onClick={() => setDrillDown({ type: "history", title: `@${u.username} History`, data: u.actionHistory })}
-                  style={btn()}>📋 History</button>
+            ))
+          )}
+        </div>
+      )}
+
+      {activeTab === "rooms" && (
+        <div>
+          <h3 style={{ marginBottom: "16px" }}>{t("adminPanel.rooms.title")}</h3>
+          {moderationRooms.length === 0 ? (
+            <p style={{ opacity: 0.5 }}>{t("adminPanel.rooms.noRooms")}</p>
+          ) : (
+            <>
+              {/* search and filter */}
+              <div
+                style={{
+                  display: "flex",
+                  gap: "10px",
+                  marginBottom: "16px",
+                  flexWrap: "wrap",
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder={t("adminPanel.rooms.searchPlaceholder")}
+                  value={roomSearch}
+                  onChange={(e) => setRoomSearch(e.target.value)}
+                  style={{
+                    flex: 1,
+                    padding: "8px",
+                    borderRadius: "6px",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    background: "rgba(255,255,255,0.1)",
+                    color: "white",
+                  }}
+                />
+                <select
+                  value={roomTypeFilter}
+                  onChange={(e) => setRoomTypeFilter(e.target.value)}
+                  style={{
+                    padding: "8px",
+                    borderRadius: "6px",
+                    border: "1px solid rgba(255,255,255,0.2)",
+                    background: "#252b45",
+                    color: "white",
+                  }}
+                >
+                  <option value="">{t("adminPanel.rooms.allTypes")}</option>
+                  {isSuperAdmin && <option value="public">{t("adminPanel.rooms.public")}</option>}
+                  <option value="university">{t("adminPanel.rooms.university")}</option>
+                  <option value="major">{t("adminPanel.rooms.major")}</option>
+                  <option value="subject">{t("adminPanel.rooms.subject")}</option>
+                </select>
+              </div>
+              {/* stat cards */}
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(3, 1fr)",
+                  gap: "12px",
+                  marginBottom: "24px",
+                }}
+              >
+                {moderationRooms
+                  .filter((r) => (isSuperAdmin ? r.type !== "private" : true))
+                  .filter((r) =>
+                    roomTypeFilter ? r.type === roomTypeFilter : true,
+                  )
+                  .filter((r) =>
+                    roomSearch.trim()
+                      ? r.name?.toLowerCase().includes(roomSearch.toLowerCase())
+                      : true,
+                  )
+                  .map((room) => {
+                    const activeSuspensions =
+                      room.suspendedMembers?.filter(
+                        (s) => new Date(s.until) > new Date(),
+                      ).length || 0;
+                    return (
+                      <div
+                        key={room.id}
+                        onClick={() => setSelectedRoom(room)}
+                        style={{
+                          ...card,
+                          cursor: "pointer",
+                          textAlign: "center",
+                        }}
+                        onMouseEnter={(e) =>
+                          (e.currentTarget.style.background = "#2f3655")
+                        }
+                        onMouseLeave={(e) =>
+                          (e.currentTarget.style.background = "#252b45")
+                        }
+                      >
+                        <div style={{ marginBottom: "8px" }}>
+                          <span
+                            style={{
+                              ...badge(
+                                room.type === "public"
+                                  ? "#27ae60"
+                                  : room.type === "subject"
+                                    ? "#f39c12"
+                                    : room.type === "university"
+                                      ? "#6476af"
+                                      : "#4a3f6b",
+                              ),
+                            }}
+                          >
+                            {room.type}
+                          </span>
+                        </div>
+                        <strong
+                          style={{ display: "block", marginBottom: "6px" }}
+                        >
+                          {room.name}
+                        </strong>
+                        <small style={{ opacity: 0.5, display: "block" }}>
+                          {` ${room.members?.length || 0} ${t("adminPanel.rooms.members")}`}
+                        </small>
+                        {activeSuspensions > 0 && (
+                          <small
+                            style={{
+                              color: "#e74c3c",
+                              display: "block",
+                              marginTop: "4px",
+                            }}
+                          >
+                            {` ${activeSuspensions} ${t("adminPanel.rooms.suspended")}`}
+                          </small>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
+            </>
+          )}
+
+          {/* room drill-down modal */}
+          {selectedRoom && (
+            <div
+              className="modal-overlay"
+              onClick={() => setSelectedRoom(null)}
+            >
+              <div
+                className="modal"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  width: "650px",
+                  maxHeight: "80vh",
+                  display: "flex",
+                  flexDirection: "column",
+                }}
+              >
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    marginBottom: "16px",
+                  }}
+                >
+                  <div>
+                    <h3 style={{ margin: "0 0 4px" }}>{selectedRoom.name}</h3>
+                    <small style={{ opacity: 0.5 }}>
+                      {/* {selectedRoom.type} • {selectedRoom.members?.length || 0}{" "}
+                      members */}
+                      {selectedRoom.type} • {selectedRoom.members?.length || 0}
+                       {t("adminPanel.rooms.members")}
+                    </small>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: "8px",
+                      alignItems: "center",
+                    }}
+                  >
+                    {isSuperAdmin && selectedRoom.type !== "public" && (
+                      <button
+                        onClick={() => handleDeleteRoom(selectedRoom.id)}
+                        style={btn("#7f0000")}
+                      >
+                        {t("adminPanel.rooms.deleteRoom")}
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setSelectedRoom(null)}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "white",
+                        fontSize: "20px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+
+                <div style={{ overflowY: "auto", flex: 1 }}>
+                  {selectedRoom.members?.length === 0 ? (
+                    <p style={{ opacity: 0.5 }}>{t("adminPanel.rooms.noMembers")}</p>
+                  ) : (
+                    selectedRoom.members?.map((memberId) => {
+                      const memberUser = users.find((u) => u.id === memberId);
+                      const suspension = selectedRoom.suspendedMembers?.find(
+                        (s) =>
+                          s.userId === memberId &&
+                          new Date(s.until) > new Date(),
+                      );
+                      const isSuspendedInRoom = !!suspension;
+                      const isSuspending = roomSuspendingId === memberId;
+
+                      return (
+                        <div
+                          key={memberId}
+                          style={{ ...card, marginBottom: "8px" }}
+                        >
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "10px",
+                            }}
+                          >
+                            <div style={{ flex: 1 }}>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "8px",
+                                }}
+                              >
+                                <strong style={{ fontSize: "13px" }}>
+                                  {memberUser
+                                    ? `@${memberUser.username}`
+                                    : memberId}
+                                </strong>
+                                {memberUser && (
+                                  <span style={badge("#6476af")}>
+                                    {memberUser.role}
+                                  </span>
+                                )}
+                                {isSuspendedInRoom && (
+                                  <span style={badge("#c0392b")}>
+                                    {t("adminPanel.rooms.suspendedInRoom")}
+                                  </span>
+                                )}
+                              </div>
+                              {isSuspendedInRoom && (
+                                <small
+                                  style={{
+                                    color: "#e74c3c",
+                                    display: "block",
+                                    marginTop: "2px",
+                                  }}
+                                >
+                                  {`${t("adminPanel.rooms.until")} ${" "}`}
+                                  {new Date(
+                                    suspension.until,
+                                  ).toLocaleDateString()}{" "}
+                                  — {suspension.reason}
+                                </small>
+                              )}
+                              {memberUser?.roomViolations?.[selectedRoom.id] >
+                                0 && (
+                                <small
+                                  style={{ opacity: 0.5, display: "block" }}
+                                >
+                                  {`${t("adminPanel.rooms.roomViolations")}: ${" "}`}
+                                  {memberUser.roomViolations[selectedRoom.id]}
+                                </small>
+                              )}
+                            </div>
+
+                            <div style={{ display: "flex", gap: "6px" }}>
+                              {!isSuspendedInRoom ? (
+                                <button
+                                  onClick={() => setRoomSuspendingId(memberId)}
+                                  style={btn("#c0392b")}
+                                >
+                                  {t("adminPanel.rooms.suspend")}
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() =>
+                                    handleRoomUnsuspend(
+                                      selectedRoom.id,
+                                      memberId,
+                                    )
+                                  }
+                                  disabled={actionLoading}
+                                  style={btn("#27ae60")}
+                                >
+                                  {actionLoading ? "..." : t("adminPanel.rooms.unsuspend")}
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* suspend form */}
+                          {isSuspending && (
+                            <div
+                              style={{
+                                marginTop: "10px",
+                                background: "rgba(255,255,255,0.05)",
+                                borderRadius: "8px",
+                                padding: "10px",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: "8px",
+                                  marginBottom: "8px",
+                                }}
+                              >
+                                <input
+                                  type="number"
+                                  placeholder={t("adminPanel.rooms.daysPlaceholder")}
+                                  value={roomSuspendDays}
+                                  onChange={(e) =>
+                                    setRoomSuspendDays(e.target.value)
+                                  }
+                                  style={{
+                                    width: "80px",
+                                    padding: "6px",
+                                    borderRadius: "6px",
+                                    border: "1px solid rgba(255,255,255,0.2)",
+                                    background: "rgba(255,255,255,0.1)",
+                                    color: "white",
+                                  }}
+                                />
+                                <input
+                                  type="text"
+                                  placeholder={t("adminPanel.rooms.reasonPlaceholder")}
+                                  value={roomSuspendReason}
+                                  onChange={(e) =>
+                                    setRoomSuspendReason(e.target.value)
+                                  }
+                                  style={{
+                                    flex: 1,
+                                    padding: "6px",
+                                    borderRadius: "6px",
+                                    border: "1px solid rgba(255,255,255,0.2)",
+                                    background: "rgba(255,255,255,0.1)",
+                                    color: "white",
+                                  }}
+                                />
+                              </div>
+                              <div style={{ display: "flex", gap: "8px" }}>
+                                <button
+                                  onClick={() =>
+                                    handleRoomSuspend(selectedRoom.id, memberId)
+                                  }
+                                  disabled={actionLoading}
+                                  style={btn("#c0392b")}
+                                >
+                                  {actionLoading ? "..." : t("adminPanel.rooms.confirm")}
+                                </button>
+                                <button
+                                  onClick={() => {
+                                    setRoomSuspendingId(null);
+                                    setRoomSuspendDays("");
+                                    setRoomSuspendReason("");
+                                  }}
+                                  style={btn("rgba(255,255,255,0.1)")}
+                                >
+                                  {t("adminPanel.rooms.cancel")}
+                                </button>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {drillDown && (
+        <div className="modal-overlay" onClick={() => setDrillDown(null)}>
+          <div
+            className="modal"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              width: "650px",
+              maxHeight: "80vh",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* header */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: "16px",
+              }}
+            >
+              <h3 style={{ margin: 0 }}>{drillDown.title}</h3>
+              <button
+                onClick={() => setDrillDown(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "white",
+                  fontSize: "20px",
+                  cursor: "pointer",
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div style={{ overflowY: "auto", flex: 1 }}>
+              {/* USERS */}
+              {drillDown.type === "users" &&
+                drillDown.data.map((u) => {
+                  const isSuspended =
+                    u.suspended_until &&
+                    new Date(u.suspended_until) > new Date();
+                  return (
+                    <div
+                      key={u.id}
+                      style={{
+                        ...card,
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                      }}
+                    >
+                      <img
+                        src={u.profile_pic_url || Cat}
+                        alt="pfp"
+                        style={{
+                          width: "36px",
+                          height: "36px",
+                          borderRadius: "50%",
+                          objectFit: "cover",
+                        }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: "8px",
+                            alignItems: "center",
+                            marginBottom: "4px",
+                          }}
+                        >
+                          <strong>@{u.username}</strong>
+                          <span style={badge("#6476af")}>{u.role}</span>
+                          {isSuspended && (
+                            <span style={badge("#c0392b")}>suspended</span>
+                          )}
+                          {u.verificationStatus === "pending" && (
+                            <span style={badge("#e67e22")}>pending</span>
+                          )}
+                        </div>
+                        <small style={{ opacity: 0.5 }}>
+                          {u.email} • {t("adminPanel.users.rating")}: {u.rating ?? 1}/5 
+                          • {t("adminPanel.users.violations")}: {u.violation_count || 0}
+                        </small>
+                        {isSuspended && (
+                          <small
+                            style={{
+                              display: "block",
+                              color: "#e74c3c",
+                              marginTop: "2px",
+                            }}
+                          >
+                            Until{" "}
+                            {new Date(u.suspended_until).toLocaleDateString()} —{" "}
+                            {u.suspension_reason}
+                          </small>
+                        )}
+                      </div>
+                      {/* action history button */}
+                      {u.actionHistory?.length > 0 && (
+                        <button
+                          onClick={() =>
+                            setDrillDown({
+                              type: "history",
+                              title: `@${u.username} History`,
+                              data: u.actionHistory,
+                            })
+                          }
+                          style={btn()}
+                        >
+                          📋 History
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+
+              {/* POSTS */}
+              {drillDown.type === "posts" &&
+                drillDown.data.map((post) => (
+                  <div key={post.id} style={card}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        alignItems: "center",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      <strong>@{post.authorUsername}</strong>
+                      <span style={badge("#6476af")}>{post.authorRole}</span>
+                      {post.isHidden && (
+                        <span style={badge("#c0392b")}>hidden</span>
+                      )}
+                      {post.reports?.length > 0 && (
+                        <span style={badge("#e67e22")}>
+                          🚩 {post.reports.length}
+                        </span>
+                      )}
+                      <small style={{ marginLeft: "auto", opacity: 0.5 }}>
+                        {new Date(post.created_at).toLocaleDateString()}
+                      </small>
+                    </div>
+                    {post.title && (
+                      <strong style={{ display: "block", marginBottom: "4px" }}>
+                        {post.title}
+                      </strong>
+                    )}
+                    <p style={{ margin: 0, opacity: 0.7, fontSize: "13px" }}>
+                      {post.content?.slice(0, 120)}...
+                    </p>
+                    <small style={{ opacity: 0.4 }}>
+                      {/* {`💬 ${post.comments?.length || 0} ${t("adminPanel.drillDown.comments")}`}
+                       comments • 👍{" "}
+                      {post.votes?.useful || 0} • 👎 {post.votes?.useless || 0} */}
+                      {`💬 ${post.comments?.length || 0} ${t("adminPanel.drillDown.comments")}
+                       •👍 ${post.votes?.useful || 0} • 
+                       👎 ${post.votes?.useless || 0}`}
+                    </small>
+                  </div>
+                ))}
+
+              {/* COMMENTS */}
+              {drillDown.type === "comments" &&
+                drillDown.data.map((comment) => (
+                  <div key={comment.id} style={card}>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "8px",
+                        alignItems: "center",
+                        marginBottom: "6px",
+                      }}
+                    >
+                      <strong>@{comment.authorUsername}</strong>
+                      {comment.isHidden && (
+                        <span style={badge("#c0392b")}>{t("adminPanel.drillDown.hiddenBadge")}</span>
+                      )}
+                      {comment.reports?.length > 0 && (
+                        <span style={badge("#e67e22")}>
+                          🚩 {comment.reports.length}
+                        </span>
+                      )}
+                      <small style={{ marginLeft: "auto", opacity: 0.5 }}>
+                        {new Date(comment.createdAt).toLocaleDateString()}
+                      </small>
+                    </div>
+                    <p
+                      style={{
+                        margin: "0 0 4px",
+                        opacity: 0.7,
+                        fontSize: "13px",
+                      }}
+                    >
+                      {comment.content?.slice(0, 120)}
+                    </p>
+                    <small style={{ opacity: 0.4 }}>
+                      In post: {comment.postTitle}
+                    </small>
+                  </div>
+                ))}
+
+              {/* ROOMS */}
+              {drillDown.type === "rooms" &&
+                drillDown.data.map((room) => (
+                  <div
+                    key={room.id}
+                    style={{
+                      ...card,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <div>
+                      <strong>{room.name}</strong>
+                      <small
+                        style={{
+                          display: "block",
+                          opacity: 0.5,
+                          marginTop: "4px",
+                        }}
+                      >
+                        {`${t("adminPanel.drillDown.type")}: ${room.type}`} • {`${t("adminPanel.drillDown.membersCount")}: ${room.members?.length || 0}`}
+                        {/* {room.university && `•  {`${t("adminPanel.drillDown.uni")}: ${room.university}`}`} */}
+                        {room.university && `• ${t("adminPanel.drillDown.uni")}: ${room.university}`}
+                        {room.major && `• ${t("adminPanel.drillDown.majorLabel")}: ${room.major}`}
+                      </small>
+                    </div>
+                    <span
+                      style={badge(
+                        room.type === "public"
+                          ? "#27ae60"
+                          : room.type === "private"
+                            ? "#c0392b"
+                            : room.type === "subject"
+                              ? "#f39c12"
+                              : "#6476af",
+                      )}
+                    >
+                      {room.type}
+                    </span>
+                  </div>
+                ))}
+
+              {/* ACTION HISTORY */}
+              {drillDown.type === "history" &&
+                drillDown.data.map((entry, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      ...card,
+                      display: "flex",
+                      gap: "12px",
+                      alignItems: "flex-start",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        background: "#6476af",
+                        marginTop: "6px",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div>
+                      <strong style={{ fontSize: "13px" }}>
+                        {entry.action}
+                      </strong>
+                      {entry.by && (
+                        <small style={{ display: "block", opacity: 0.5 }}>
+                          {`${t("adminPanel.drillDown.historyBy")} @${entry.by}`}
+                        </small>
+                      )}
+                      {entry.reason && (
+                        <small style={{ display: "block", opacity: 0.5 }}>
+                          {`${t("adminPanel.drillDown.reason")}: ${entry.reason}`}
+                        </small>
+                      )}
+                      <small style={{ opacity: 0.4 }}>
+                        {new Date(entry.date).toLocaleString()}
+                      </small>
+                    </div>
+                  </div>
+                ))}
+
+              {drillDown.data?.length === 0 && (
+                <p style={{ opacity: 0.5, textAlign: "center" }}>
+                  {t("adminPanel.drillDown.nothing")}
+                </p>
               )}
             </div>
-          );
-        })}
-
-        {/* POSTS */}
-        {drillDown.type === "posts" && drillDown.data.map(post => (
-          <div key={post.id} style={card}>
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
-              <strong>@{post.authorUsername}</strong>
-              <span style={badge("#6476af")}>{post.authorRole}</span>
-              {post.isHidden && <span style={badge("#c0392b")}>hidden</span>}
-              {post.reports?.length > 0 && <span style={badge("#e67e22")}>🚩 {post.reports.length}</span>}
-              <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(post.created_at).toLocaleDateString()}</small>
-            </div>
-            {post.title && <strong style={{ display: "block", marginBottom: "4px" }}>{post.title}</strong>}
-            <p style={{ margin: 0, opacity: 0.7, fontSize: "13px" }}>{post.content?.slice(0, 120)}...</p>
-            <small style={{ opacity: 0.4 }}>💬 {post.comments?.length || 0} comments • 👍 {post.votes?.useful || 0} • 👎 {post.votes?.useless || 0}</small>
           </div>
-        ))}
-
-        {/* COMMENTS */}
-        {drillDown.type === "comments" && drillDown.data.map(comment => (
-          <div key={comment.id} style={card}> 
-            <div style={{ display: "flex", gap: "8px", alignItems: "center", marginBottom: "6px" }}>
-              <strong>@{comment.authorUsername}</strong>
-              {comment.isHidden && <span style={badge("#c0392b")}>hidden</span>}
-              {comment.reports?.length > 0 && <span style={badge("#e67e22")}>🚩 {comment.reports.length}</span>}
-              <small style={{ marginLeft: "auto", opacity: 0.5 }}>{new Date(comment.createdAt).toLocaleDateString()}</small>
-            </div>
-            <p style={{ margin: "0 0 4px", opacity: 0.7, fontSize: "13px" }}>{comment.content?.slice(0, 120)}</p>
-            <small style={{ opacity: 0.4 }}>In post: {comment.postTitle}</small>
-          </div>
-        ))}
-
-        {/* ROOMS */}
-        {drillDown.type === "rooms" && drillDown.data.map(room => (
-          <div key={room.id} style={{ ...card, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <div>
-              <strong>{room.name}</strong>
-              <small style={{ display: "block", opacity: 0.5, marginTop: "4px" }}>
-                Type: {room.type} • Members: {room.members?.length || 0}
-                {room.university && ` • Uni: ${room.university}`}
-                {room.major && ` • Major: ${room.major}`}
-              </small>
-            </div>
-            <span style={badge(
-              room.type === "public" ? "#27ae60" :
-              room.type === "private" ? "#c0392b" :
-              room.type === "subject" ? "#f39c12" : "#6476af"
-            )}>{room.type}</span>
-          </div>
-        ))}
-
-        {/* ACTION HISTORY */}
-        {drillDown.type === "history" && drillDown.data.map((entry, i) => (
-          <div key={i} style={{ ...card, display: "flex", gap: "12px", alignItems: "flex-start" }}>
-            <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#6476af", marginTop: "6px", flexShrink: 0 }} />
-            <div>
-              <strong style={{ fontSize: "13px" }}>{entry.action}</strong>
-              {entry.by && <small style={{ display: "block", opacity: 0.5 }}>By @{entry.by}</small>}
-              {entry.reason && <small style={{ display: "block", opacity: 0.5 }}>Reason: {entry.reason}</small>}
-              <small style={{ opacity: 0.4 }}>{new Date(entry.date).toLocaleString()}</small>
-            </div>
-          </div>
-        ))}
-
-        {drillDown.data?.length === 0 && (
-          <p style={{ opacity: 0.5, textAlign: "center" }}>Nothing to show.</p>
-        )}
-
-      </div>
-    </div>
-  </div>
-)}
- 
+        </div>
+      )}
     </div>
   );
 }

@@ -592,5 +592,173 @@
   "noUniError": "Please select a valid university.",
   "noMajorError": "Please select at least one valid major.",
   "successMessage": "Information updated successfully!"
+},
+"reorientation": {
+  "title": "One More Step 👋",
+  "subtitle": "Your professor status request was reviewed and your account has been set to student. Since you registered with multiple majors, please select the one major you'd like to continue with.",
+  "saving": "Saving...",
+  "confirm": "Confirm Major",
+  "noMajorError": "Please select a major.",
+  "successMessage": "Major selected! Welcome to StudyBuddy."
+},
+"adminPanel": {
+  "title": "Admin Panel",
+  "superAdminBtn": "⚡ SuperAdmin Panel",
+  "sessionOutdated": "Your session is outdated. Please log out and log back in to access the admin panel.",
+
+  "tabs": {
+    "announcements": "📢 Announcements",
+    "users": "👥 Users",
+    "professors": "🎓 Professors",
+    "reports": "🚩 Reports",
+    "resources": "📦 Resources",
+    "hidden": "🙈 Hidden",
+    "other": "🔤 Other Inputs",
+    "roomRequests": "📬 Room Requests",
+    "rooms": "🏠 Room Moderation"
+  },
+
+  "users": {
+    "title": "User Management",
+    "searchPlaceholder": "Search by username...",
+    "allRoles": "All Roles",
+    "student": "Student",
+    "professor": "Professor",
+    "allStatus": "All Status",
+    "suspended": "suspended",
+    "pendingVerification": "Pending Verification",
+    "searchBtn": "Search",
+    "noUsers": "No users found.",
+    "pendingProf": "pending prof",
+    "suspendedUntil": "Suspended until",
+    "rating": "rating",
+    "violations": "violations",
+    "suspend": "Suspend",
+    "unsuspend": "Unsuspend",
+    "history": "📋 History",
+    "suspendDaysPrompt": "Suspend for how many days?",
+    "suspendReasonPrompt": "Reason for suspension?",
+    "suspendSuccess": "User suspended.",
+    "unsuspendSuccess": "User unsuspended."
+  },
+
+  "professors": {
+    "title": "Pending Professor Verification",
+    "noPending": "No pending professor requests.",
+    "university": "University",
+    "viewProof": "📄 View Proof Document",
+    "rejectPlaceholder": "Reason for rejection...",
+    "confirmReject": "Confirm Reject",
+    "rejecting": "Rejecting...",
+    "cancel": "Cancel",
+    "verify": "Verify",
+    "verifying": "Verifying...",
+    "reject": "Reject",
+    "verifySuccess": "Professor verified!",
+    "rejectSuccess": "Professor rejected and demoted to student.",
+    "rejectReasonRequired": "Please enter a rejection reason."
+  },
+
+  "reports": {
+    "title": "Reported Content",
+    "noReports": "No reported content.",
+    "reports": "report(s)",
+    "alreadyHidden": "⚠️ Already hidden",
+    "hideContent": "Hide Content",
+    "hiding": "Hiding..."
+  },
+
+  "resources": {
+    "title": "Pending Resource Approval",
+    "noPending": "No pending resources.",
+    "viewImage": "🖼️ View Image",
+    "viewPdf": "📄 View PDF",
+    "approve": "Approve",
+    "reject": "Reject",
+    "openLink": "Open Link"
+  },
+
+  "hidden": {
+    "title": "Hidden Content",
+    "noHidden": "No hidden content.",
+    "autoHidden": "auto-hidden",
+    "manuallyHidden": "manually hidden",
+    "reports": "report(s)",
+    "restore": "Restore",
+    "restoring": "Restoring..."
+  },
+
+  "other": {
+    "title": "Custom University / Major Validation",
+    "noPending": "No custom inputs pending.",
+    "customUni": "Custom University:",
+    "code": "Code",
+    "customMajors": "Custom Major(s):",
+    "approve": "Approve",
+    "reject": "Reject",
+    "alreadyProcessed": "Already"
+  },
+
+  "announcements": {
+    "title": "Platform Announcements",
+    "placeholder": "Write a platform-wide announcement...",
+    "post": "Post Announcement",
+    "posting": "Posting...",
+    "noAnnouncements": "No announcements yet.",
+    "deleteConfirm": "Delete this announcement?"
+  },
+
+  "roomRequests": {
+    "title": "Subject Room Requests",
+    "noPending": "No pending room requests.",
+    "subject": "Subject",
+    "usersWaiting": "user(s) waiting on this room",
+    "rejectPlaceholder": "Reason for rejection...",
+    "confirmReject": "Confirm Reject",
+    "cancel": "Cancel",
+    "approve": "✅ Approve",
+    "reject": "❌ Reject",
+    "processing": "Processing...",
+    "rejectReasonRequired": "Please enter a rejection reason."
+  },
+
+  "rooms": {
+    "title": "Room Moderation",
+    "noRooms": "No rooms assigned.",
+    "searchPlaceholder": "Search rooms...",
+    "allTypes": "All Types",
+    "public": "Public",
+    "university": "University",
+    "major": "Major",
+    "subject": "Subject",
+    "members": "members",
+    "suspended": "suspended",
+    "deleteRoom": "🗑️ Delete Room",
+    "deleteConfirm": "Permanently delete this room?",
+    "noMembers": "No members.",
+    "suspendedInRoom": "suspended in room",
+    "until": "Until",
+    "roomViolations": "Room violations",
+    "suspend": "Suspend",
+    "unsuspend": "Unsuspend",
+    "daysPlaceholder": "Days...",
+    "reasonPlaceholder": "Reason...",
+    "confirm": "Confirm",
+    "confirming": "Suspending...",
+    "cancel": "Cancel",
+    "suspendFieldsRequired": "Please fill in days and reason."
+  },
+
+  "drillDown": {
+    "nothing": "Nothing to show.",
+    "hiddenBadge": "hidden",
+    "comments": "comments",
+    "type": "Type",
+    "membersCount": "Members",
+    "uni": "Uni",
+    "majorLabel": "Major",
+    "reason": "Reason",
+    "historyBy": "By"
+  }
 }
 }
