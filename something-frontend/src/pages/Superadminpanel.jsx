@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n/index.js";
 
 const API = "http://localhost:5000/api/admin";
 
@@ -17,6 +19,9 @@ const PERMISSIONS = [
 ];
 
 export default function SuperAdminPanel() {
+  const { t, i18n } = useTranslation();
+  const isRTL = i18n.language === "ar";
+
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -47,10 +52,9 @@ export default function SuperAdminPanel() {
 
   //override this shit
   const [overridingLogId, setOverridingLogId] = useState(null);
-const [overrideReason, setOverrideReason] = useState("");
+  const [overrideReason, setOverrideReason] = useState("");
 
-
-const [actionLoading, setActionLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
   //////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -71,7 +75,6 @@ const [actionLoading, setActionLoading] = useState(false);
     }
   }, [activeTab]);
   // loading the shit
- 
 
   ///////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////
@@ -108,7 +111,7 @@ const [actionLoading, setActionLoading] = useState(false);
 
   const handleUpgradeAdmin = async (userId) => {
     console.log("upgrading userId:", userId);
-      setActionLoading(true);
+    setActionLoading(true);
     try {
       await axios.patch(
         `${API}/users/${userId}/upgrade-admin`,
@@ -227,9 +230,9 @@ const [actionLoading, setActionLoading] = useState(false);
   };
 
   const tabs = [
-    { id: "stats", label: "📊 Stats" },
-    { id: "admins", label: "🛡️ Admin Management" },
-    { id: "logs", label: "📋 Platform Logs" },
+    { id: "stats", label: t("superadmin.tabs.stats") },
+    { id: "admins", label: t("superadmin.tabs.admins") },
+    { id: "logs", label: t("superadmin.tabs.logs") },
   ];
 
   //aplicats
@@ -246,7 +249,7 @@ const [actionLoading, setActionLoading] = useState(false);
   const handleRejectApplication = async (userId) => {
     if (!rejectAppReason.trim())
       return alert("Please enter a rejection reason.");
-      setActionLoading(true);
+    setActionLoading(true);
     try {
       await axios.post(
         `${API}/applications/reject`,
@@ -259,8 +262,9 @@ const [actionLoading, setActionLoading] = useState(false);
       fetchApplications();
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
     }
-    finally {      setActionLoading(false); }
   };
 
   const fetchAllRooms = async () => {
@@ -284,7 +288,7 @@ const [actionLoading, setActionLoading] = useState(false);
   };
 
   const handleEditAdminPermissions = async (adminId) => {
-      setActionLoading(true);
+    setActionLoading(true);
     try {
       await axios.patch(
         `${API}/users/${adminId}/edit-permissions`,
@@ -298,17 +302,18 @@ const [actionLoading, setActionLoading] = useState(false);
       fetchCurrentAdmins();
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
+    } finally {
+      setActionLoading(false);
     }
-    finally {      setActionLoading(false); }
   };
 
   const fetchDrillDown = async (type) => {
-    setDrillDown({ type, title: "Loading...", data: null });
+    setDrillDown({ type, title: t("superadmin.stats.loading"), data: null });
     try {
       switch (type) {
         case "users": {
           const res = await axios.get(`${API}/users`, { headers });
-          setDrillDown({ type: "users", title: "All Users", data: res.data });
+          setDrillDown({ type: "users", title: t("superadmin.drill.titleUsers"), data: res.data });
 
           break;
         }
@@ -318,27 +323,31 @@ const [actionLoading, setActionLoading] = useState(false);
           });
           setDrillDown({
             type: "users",
-            title: "Suspended Users",
+            title: t("superadmin.drill.titleSuspendedUsers"),
             data: res.data,
           });
           break;
         }
         case "posts": {
           const res = await axios.get(`${API}/posts`, { headers });
-          
-          setDrillDown({ type: "posts", title: "All Posts", data: res.data });
+
+          setDrillDown({ type: "posts", title: t("superadmin.drill.titlePosts"), data: res.data });
           console.log("post sample for drilldown:", res.data[0]);
           break;
         }
-       case "comments": {
-  const res = await axios.get(`${API}/comments`, { headers });
-  console.log("comment sample:", res.data[0]);
-  setDrillDown({ type: "comments", title: "All Comments", data: res.data });
-  break;
-}
+        case "comments": {
+          const res = await axios.get(`${API}/comments`, { headers });
+          console.log("comment sample:", res.data[0]);
+          setDrillDown({
+            type: "comments",
+            title: t("superadmin.drill.titleComments"),
+            data: res.data,
+          });
+          break;
+        }
         case "rooms": {
           const res = await axios.get(`${API}/rooms`, { headers });
-          setDrillDown({ type: "rooms", title: "All Rooms", data: res.data });
+          setDrillDown({ type: "rooms", title: t("superadmin.drill.titleRooms"), data: res.data });
           break;
         }
         default:
@@ -349,22 +358,26 @@ const [actionLoading, setActionLoading] = useState(false);
     }
   };
 
-
-
   const handleOverride = async (logId) => {
-  if (!overrideReason.trim()) return alert("Please enter a reason for the override.");
+    if (!overrideReason.trim())
+      return alert("Please enter a reason for the override.");
     setActionLoading(true);
-  try {
-    await axios.post(`${API}/logs/${logId}/override`, { reason: overrideReason }, { headers });
-    alert("Action overridden successfully.");
-    setOverridingLogId(null);
-    setOverrideReason("");
-    fetchLogs(); // refresh so the overridden badge shows immediately
-  } catch (err) {
-    alert(err.response?.data?.message || "Override failed.");
-  }
-  finally { setActionLoading(false); }
-};
+    try {
+      await axios.post(
+        `${API}/logs/${logId}/override`,
+        { reason: overrideReason },
+        { headers },
+      );
+      alert("Action overridden successfully.");
+      setOverridingLogId(null);
+      setOverrideReason("");
+      fetchLogs(); // refresh so the overridden badge shows immediately
+    } catch (err) {
+      alert(err.response?.data?.message || "Override failed.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   //////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -402,9 +415,9 @@ const [actionLoading, setActionLoading] = useState(false);
           ←
         </button>
         <div>
-          <h2 style={{ margin: 0 }}>⚡ SuperAdmin Panel</h2>
+          <h2 style={{ margin: 0 }}>{t("superadmin.title")}</h2>
           <small style={{ opacity: 0.5 }}>
-            @{currentUser?.username} — superadmin
+            @{currentUser?.username} — {t("superadmin.subtitle")}
           </small>
         </div>
       </div>
@@ -443,9 +456,9 @@ const [actionLoading, setActionLoading] = useState(false);
       {/* ── STATS TAB ── */}
       {activeTab === "stats" && (
         <div>
-          <h3 style={{ marginBottom: "16px" }}>Platform Overview</h3>
+          <h3 style={{ marginBottom: "16px" }}>{t("superadmin.stats.title")}</h3>
           {!stats ? (
-            <p style={{ opacity: 0.5 }}>Loading...</p>
+            <p style={{ opacity: 0.5 }}>{t("superadmin.stats.loading")}</p>
           ) : (
             <div
               style={{
@@ -456,43 +469,43 @@ const [actionLoading, setActionLoading] = useState(false);
             >
               {[
                 {
-                  label: "Total Users",
+                  label: t("superadmin.stats.totalUsers"),
                   value: stats.totalUsers,
                   icon: "👥",
                   action: () => fetchDrillDown("users"),
                 },
                 {
-                  label: "Total Posts",
+                  label: t("superadmin.stats.totalPosts"),
                   value: stats.totalPosts,
                   icon: "📝",
                   action: () => fetchDrillDown("posts"),
                 },
                 {
-                  label: "Total Comments",
+                  label: t("superadmin.stats.totalComments"),
                   value: stats.totalComments,
                   icon: "🗨️",
                   action: () => fetchDrillDown("comments"),
                 },
                 {
-                  label: "Total Rooms",
+                  label: t("superadmin.stats.totalRooms"),
                   value: stats.totalRooms,
                   icon: "🏠",
                   action: () => fetchDrillDown("rooms"),
                 },
                 {
-                  label: "Suspended Users",
+                  label: t("superadmin.stats.suspendedUsers"),
                   value: stats.suspendedUsers,
                   icon: "🚫",
                   action: () => fetchDrillDown("suspended"),
                 },
                 {
-                  label: "Pending Professors",
+                  label: t("superadmin.stats.pendingProfessors"),
                   value: stats.pendingProfessors,
                   icon: "🎓",
                   action: () => navigate("/admin"),
                 },
                 {
-                  label: "Reported Content",
+                  label: t("superadmin.stats.reportedContent"),
                   value: stats.reportedContent,
                   icon: "🚩",
                   action: () => navigate("/admin"),
@@ -525,10 +538,10 @@ const [actionLoading, setActionLoading] = useState(false);
       {activeTab === "admins" && (
         <div>
           {/* ── APPLICATIONS ── */}
-          <h3 style={{ marginBottom: "16px" }}>Admin Applications</h3>
+          <h3 style={{ marginBottom: "16px" }}>{t("superadmin.admins.applicationsTitle")}</h3>
           {applications.length === 0 ? (
             <p style={{ opacity: 0.5, marginBottom: "32px" }}>
-              No pending applications.
+              {t("superadmin.admins.noApplications")}
             </p>
           ) : (
             applications.map((app) => {
@@ -554,11 +567,11 @@ const [actionLoading, setActionLoading] = useState(false);
                         }}
                       >
                         <strong>@{app.username}</strong>
-                        <span style={badge("#6476af")}>applicant</span>
-                        <span style={badge("#f39c12")}>⭐ {app.rating}/5</span>
+                        <span style={badge("#6476af")}>{t("superadmin.admins.applicant")}</span>
+                        <span style={badge("#f39c12")}> {app.rating}/5</span>
                       </div>
                       <small style={{ opacity: 0.5 }}>
-                        {app.email} • Applied{" "}
+                        {app.email} • {t("superadmin.admins.applied")}{" "}
                         {new Date(app.appliedAt).toLocaleString()}
                       </small>
                     </div>
@@ -572,7 +585,7 @@ const [actionLoading, setActionLoading] = useState(false);
                         }}
                         style={btn("#f39c12")}
                       >
-                        🛡️ Accept
+                        {t("superadmin.admins.accept")}
                       </button>
                       <button
                         onClick={() => {
@@ -581,7 +594,7 @@ const [actionLoading, setActionLoading] = useState(false);
                         }}
                         style={btn("#c0392b")}
                       >
-                        ✕ Reject
+                        {t("superadmin.admins.reject")}
                       </button>
                     </div>
                   </div>
@@ -601,7 +614,7 @@ const [actionLoading, setActionLoading] = useState(false);
                           opacity: 0.7,
                         }}
                       >
-                        Select permissions:
+                        {t("superadmin.admins.selectPerms")}
                       </p>
                       <div
                         style={{
@@ -627,7 +640,7 @@ const [actionLoading, setActionLoading] = useState(false);
                               checked={selectedPermissions.includes(p.key)}
                               onChange={() => togglePermission(p.key)}
                             />
-                            {p.label}
+                            {t(`perm.${p.key}`)}
                           </label>
                         ))}
                       </div>
@@ -640,13 +653,13 @@ const [actionLoading, setActionLoading] = useState(false);
                               opacity: 0.7,
                             }}
                           >
-                            Assign rooms to moderate:
+                            {t("superadmin.admins.assignRooms")}
                           </p>
                           {allRooms.filter(
                             (r) => r.type !== "private" && r.type !== "public",
                           ).length === 0 ? (
                             <small style={{ opacity: 0.5 }}>
-                              No rooms available.
+                              {t("superadmin.admins.noRooms")}
                             </small>
                           ) : (
                             <div
@@ -708,7 +721,7 @@ const [actionLoading, setActionLoading] = useState(false);
                           disabled={actionLoading}
                           style={btn("#27ae60")}
                         >
-                          {actionLoading ? "Upgrading..." : "Confirm"}
+                          {actionLoading ? t("superadmin.admins.upgrading") : t("superadmin.admins.confirm")}
                         </button>
                         <button
                           onClick={() => {
@@ -718,7 +731,7 @@ const [actionLoading, setActionLoading] = useState(false);
                           }}
                           style={btn("rgba(255,255,255,0.1)")}
                         >
-                          Cancel
+                          {t("superadmin.admins.cancel")}
                         </button>
                       </div>
                     </div>
@@ -734,7 +747,7 @@ const [actionLoading, setActionLoading] = useState(false);
                     >
                       <input
                         type="text"
-                        placeholder="Reason for rejection..."
+                        placeholder={t("superadmin.admins.rejectPlaceholder")}
                         value={rejectAppReason}
                         onChange={(e) => setRejectAppReason(e.target.value)}
                         style={{
@@ -753,7 +766,7 @@ const [actionLoading, setActionLoading] = useState(false);
                           onClick={() => handleRejectApplication(app.user_id)}
                           style={btn("#c0392b")}
                         >
-                          {actionLoading ? "Rejecting..." : "Confirm Reject"}
+                          {actionLoading ? t("superadmin.admins.rejecting") : t("superadmin.admins.confirmReject")}
                         </button>
                         <button
                           onClick={() => {
@@ -762,7 +775,7 @@ const [actionLoading, setActionLoading] = useState(false);
                           }}
                           style={btn("rgba(255,255,255,0.1)")}
                         >
-                          Cancel
+                          {t("superadmin.admins.cancel")}
                         </button>
                       </div>
                     </div>
@@ -788,10 +801,10 @@ const [actionLoading, setActionLoading] = useState(false);
                 marginBottom: "16px",
               }}
             >
-              <h3 style={{ margin: 0 }}>Current Admins</h3>
+              <h3 style={{ margin: 0 }}>{t("superadmin.admins.currentTitle")}</h3>
               <input
                 type="text"
-                placeholder="Search admins..."
+                placeholder={t("superadmin.admins.searchPlaceholder")}
                 value={adminSearch}
                 onChange={(e) => {
                   setAdminSearch(e.target.value);
@@ -809,7 +822,7 @@ const [actionLoading, setActionLoading] = useState(false);
             </div>
 
             {currentAdmins.length === 0 ? (
-              <p style={{ opacity: 0.5 }}>No admins yet.</p>
+              <p style={{ opacity: 0.5 }}>{t("superadmin.admins.noAdmins")}</p>
             ) : (
               currentAdmins.map((admin) => {
                 const isEditing = editingAdminId === admin.id;
@@ -842,7 +855,7 @@ const [actionLoading, setActionLoading] = useState(false);
                           }}
                         >
                           <strong>@{admin.username}</strong>
-                          <span style={badge("#4a3f6b")}>admin</span>
+                          <span style={badge("#4a3f6b")}>{t("superadmin.admins.adminBadge")}</span>
                           <span style={badge("#f39c12")}>
                             ⭐ {admin.rating ?? 1}/5
                           </span>
@@ -859,7 +872,10 @@ const [actionLoading, setActionLoading] = useState(false);
                           }}
                         >
                           {admin.permissions?.length > 0 ? (
-  (Array.isArray(admin.permissions) ? admin.permissions : []).map((p) => (
+                            (Array.isArray(admin.permissions)
+                              ? admin.permissions
+                              : []
+                            ).map((p) => (
                               <span
                                 key={p}
                                 style={{
@@ -872,24 +888,29 @@ const [actionLoading, setActionLoading] = useState(false);
                             ))
                           ) : (
                             <small style={{ opacity: 0.4 }}>
-                              No permissions
+                              {t("superadmin.admins.noPermissions")}
                             </small>
                           )}
                         </div>
-{Array.isArray(admin.assignedRooms) && admin.assignedRooms.length > 0 && (
+                        {Array.isArray(admin.assignedRooms) &&
+                          admin.assignedRooms.length > 0 && (
                             <small
-                            style={{
-                              opacity: 0.4,
-                              display: "block",
-                              marginTop: "4px",
-                            }}
-                          >
-                            Rooms:{" "}
-                            {admin.assignedRooms
-                              .map((rid) => allRooms.find((r) => r.id === rid)?.name || rid)
-                              .join(", ")}
-                          </small>
-                        )}
+                              style={{
+                                opacity: 0.4,
+                                display: "block",
+                                marginTop: "4px",
+                              }}
+                            >
+                              {t("superadmin.admins.rooms")}{" "}
+                              {admin.assignedRooms
+                                .map(
+                                  (rid) =>
+                                    allRooms.find((r) => r.id === rid)?.name ||
+                                    rid,
+                                )
+                                .join(", ")}
+                            </small>
+                          )}
                       </div>
                       <div
                         style={{ display: "flex", gap: "6px", flexShrink: 0 }}
@@ -897,9 +918,25 @@ const [actionLoading, setActionLoading] = useState(false);
                         <button
                           onClick={() => {
                             setEditingAdminId(isEditing ? null : admin.id);
-                            setSelectedPermissions(isEditing ? [] : [...(Array.isArray(admin.permissions) ? admin.permissions : [])]);
-                            
-                            setSelectedRooms(isEditing ? [] : [...(Array.isArray(admin.assignedRooms) ? admin.assignedRooms : [])]);
+                            setSelectedPermissions(
+                              isEditing
+                                ? []
+                                : [
+                                    ...(Array.isArray(admin.permissions)
+                                      ? admin.permissions
+                                      : []),
+                                  ],
+                            );
+
+                            setSelectedRooms(
+                              isEditing
+                                ? []
+                                : [
+                                    ...(Array.isArray(admin.assignedRooms)
+                                      ? admin.assignedRooms
+                                      : []),
+                                  ],
+                            );
 
                             setUpgradingId(null);
                           }}
@@ -907,13 +944,13 @@ const [actionLoading, setActionLoading] = useState(false);
                             isEditing ? "rgba(255,255,255,0.1)" : "#6476af",
                           )}
                         >
-                          {isEditing ? "Cancel" : "✏️ Edit"}
+                          {isEditing ? t("superadmin.admins.cancel") : t("superadmin.admins.edit")}
                         </button>
                         <button
                           onClick={() => handleRemoveAdmin(admin.id)}
                           style={btn("#c0392b")}
                         >
-                          🗑️ Remove
+                          {t("superadmin.admins.remove")}
                         </button>
                       </div>
                     </div>
@@ -934,7 +971,7 @@ const [actionLoading, setActionLoading] = useState(false);
                             opacity: 0.7,
                           }}
                         >
-                          Edit permissions:
+                          {t("superadmin.admins.editPerms")}
                         </p>
                         <div
                           style={{
@@ -960,7 +997,7 @@ const [actionLoading, setActionLoading] = useState(false);
                                 checked={selectedPermissions.includes(p.key)}
                                 onChange={() => togglePermission(p.key)}
                               />
-                              {p.label}
+                              {t(`perm.${p.key}`)}
                             </label>
                           ))}
                         </div>
@@ -973,14 +1010,14 @@ const [actionLoading, setActionLoading] = useState(false);
                                 opacity: 0.7,
                               }}
                             >
-                              Assigned rooms:
+                              {t("superadmin.admins.assignedRooms")}
                             </p>
                             {allRooms.filter(
                               (r) =>
                                 r.type !== "private" && r.type !== "public",
                             ).length === 0 ? (
                               <small style={{ opacity: 0.5 }}>
-                                No rooms available.
+                                {t("superadmin.admins.noRooms")}
                               </small>
                             ) : (
                               <div
@@ -1047,7 +1084,7 @@ const [actionLoading, setActionLoading] = useState(false);
                           disabled={actionLoading}
                           style={btn("#27ae60")}
                         >
-                          {actionLoading ? "Saving..." : "Save Changes"}
+                          {actionLoading ? t("superadmin.admins.saving") : t("superadmin.admins.saveChanges")}
                         </button>
                       </div>
                     )}
@@ -1061,96 +1098,154 @@ const [actionLoading, setActionLoading] = useState(false);
 
       {/* ── LOGS TAB ── */}
       {activeTab === "logs" && (
-  <div>
-    <h3 style={{ marginBottom: "16px" }}>Platform Action Logs</h3>
-    {logs.length === 0 ? (
-      <p style={{ opacity: 0.5 }}>No logs yet.</p>
-    ) : (
-      logs.map((log) => {
-        const isOverridable = ["suspend_user", "hide_post", "hide_comment", "room_suspend", "approve_resource", "reject_resource"].includes(log.action);
-        const isOverriding = overridingLogId === log.id;
+        <div>
+          <h3 style={{ marginBottom: "16px" }}>{t("superadmin.logs.title")}</h3>
+          {logs.length === 0 ? (
+            <p style={{ opacity: 0.5 }}>{t("superadmin.logs.empty")}</p>
+          ) : (
+            logs.map((log) => {
+              const isOverridable = [
+                "suspend_user",
+                "hide_post",
+                "hide_comment",
+                "room_suspend",
+                "approve_resource",
+                "reject_resource",
+              ].includes(log.action);
+              const isOverriding = overridingLogId === log.id;
 
-        return (
-          <div key={log.id} style={{ ...card, opacity: log.overridden_by ? 0.5 : 1 }}>
-            {/* main log row */}
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              <div style={{
-                width: "8px", height: "8px", borderRadius: "50%",
-                background: log.overridden_by ? "#555" : logActionColor(log.action),
-                flexShrink: 0,
-              }} />
-              <div style={{ flex: 1 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                  <strong style={{ fontSize: "13px" }}>@{log.admin_username}</strong>
-                  <span style={{ ...badge(log.overridden_by ? "#555" : logActionColor(log.action)), fontSize: "10px" }}>
-                    {log.action}
-                  </span>
-                  {log.overridden_by && (
-                    <span style={{ ...badge("#7f8c8d"), fontSize: "10px" }}>
-                      ↩ overridden by @{log.overridden_by}
-                    </span>
+              return (
+                <div
+                  key={log.id}
+                  style={{ ...card, opacity: log.overridden_by ? 0.5 : 1 }}
+                >
+                  {/* main log row */}
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "12px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "50%",
+                        background: log.overridden_by
+                          ? "#555"
+                          : logActionColor(log.action),
+                        flexShrink: 0,
+                      }}
+                    />
+                    <div style={{ flex: 1 }}>
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "8px",
+                        }}
+                      >
+                        <strong style={{ fontSize: "13px" }}>
+                          @{log.admin_username}
+                        </strong>
+                        <span
+                          style={{
+                            ...badge(
+                              log.overridden_by
+                                ? "#555"
+                                : logActionColor(log.action),
+                            ),
+                            fontSize: "10px",
+                          }}
+                        >
+                          {log.action}
+                        </span>
+                        {log.overridden_by && (
+                          <span
+                            style={{ ...badge("#7f8c8d"), fontSize: "10px" }}
+                          >
+                            {t("superadmin.logs.overriddenBy")} @{log.overridden_by}
+                          </span>
+                        )}
+                      </div>
+                      <small style={{ opacity: 0.6 }}>{log.details}</small>
+                      {log.overridden_by && (
+                        <small
+                          style={{
+                            display: "block",
+                            opacity: 0.4,
+                            marginTop: "2px",
+                          }}
+                        >
+                          {t("superadmin.logs.overrideReason")} {log.override_reason} •{" "}
+                          {new Date(log.overridden_at).toLocaleString()}
+                        </small>
+                      )}
+                    </div>
+                    <small
+                      style={{ opacity: 0.4, fontSize: "11px", flexShrink: 0 }}
+                    >
+                      {new Date(log.created_at).toLocaleString()}
+                    </small>
+                    {/* override button — only for overridable actions that haven't been overridden yet */}
+                    {isOverridable && !log.overridden_by && (
+                      <button
+                        onClick={() => {
+                          setOverridingLogId(isOverriding ? null : log.id);
+                          setOverrideReason("");
+                        }}
+                        style={btn(
+                          isOverriding ? "rgba(255,255,255,0.1)" : "#c0392b",
+                        )}
+                      >
+                        {isOverriding ? t("superadmin.admins.cancel") : t("superadmin.logs.override")}
+                      </button>
+                    )}
+                  </div>
+
+                  {/* inline override form */}
+                  {isOverriding && (
+                    <div
+                      style={{
+                        marginTop: "10px",
+                        background: "rgba(255,255,255,0.05)",
+                        borderRadius: "8px",
+                        padding: "12px",
+                        display: "flex",
+                        gap: "8px",
+                        alignItems: "center",
+                      }}
+                    >
+                      <input
+                        value={overrideReason}
+                        onChange={(e) => setOverrideReason(e.target.value)}
+                        placeholder={t("superadmin.logs.overridePlaceholder")}
+                        style={{
+                          flex: 1,
+                          background: "rgba(255,255,255,0.08)",
+                          border: "1px solid rgba(255,255,255,0.15)",
+                          borderRadius: "6px",
+                          padding: "6px 10px",
+                          color: "white",
+                          fontSize: "13px",
+                        }}
+                      />
+                      <button
+                        onClick={() => handleOverride(log.id)}
+                        style={btn("#e74c3c")}
+                        disabled={actionLoading}
+                      >
+                        {actionLoading ? t("superadmin.logs.overriding") : t("superadmin.logs.confirmOverride")}
+                      </button>
+                    </div>
                   )}
                 </div>
-                <small style={{ opacity: 0.6 }}>{log.details}</small>
-                {log.overridden_by && (
-                  <small style={{ display: "block", opacity: 0.4, marginTop: "2px" }}>
-                    Reason: {log.override_reason} • {new Date(log.overridden_at).toLocaleString()}
-                  </small>
-                )}
-              </div>
-              <small style={{ opacity: 0.4, fontSize: "11px", flexShrink: 0 }}>
-                {new Date(log.created_at).toLocaleString()}
-              </small>
-              {/* override button — only for overridable actions that haven't been overridden yet */}
-              {isOverridable && !log.overridden_by && (
-                <button
-                  onClick={() => {
-                    setOverridingLogId(isOverriding ? null : log.id);
-                    setOverrideReason("");
-                  }}
-                  style={btn(isOverriding ? "rgba(255,255,255,0.1)" : "#c0392b")}
-                >
-                  {isOverriding ? "Cancel" : "↩ Override"}
-                </button>
-              )}
-            </div>
-
-            {/* inline override form */}
-            {isOverriding && (
-              <div style={{
-                marginTop: "10px",
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: "8px",
-                padding: "12px",
-                display: "flex",
-                gap: "8px",
-                alignItems: "center",
-              }}>
-                <input
-                  value={overrideReason}
-                  onChange={(e) => setOverrideReason(e.target.value)}
-                  placeholder="Reason for override..."
-                  style={{
-                    flex: 1,
-                    background: "rgba(255,255,255,0.08)",
-                    border: "1px solid rgba(255,255,255,0.15)",
-                    borderRadius: "6px",
-                    padding: "6px 10px",
-                    color: "white",
-                    fontSize: "13px",
-                  }}
-                />
-                <button onClick={() => handleOverride(log.id)} style={btn("#e74c3c")} disabled={actionLoading}>
-                  {actionLoading ? "Overriding..." : "Confirm Override"}
-                </button>
-              </div>
-            )}
-          </div>
-        );
-      })
-    )}
-  </div>
-)}
+              );
+            })
+          )}
+        </div>
+      )}
       {/* this could go so wrong in so many places... */}
       {drillDown && (
         <div className="modal-overlay" onClick={() => setDrillDown(null)}>
@@ -1190,10 +1285,12 @@ const [actionLoading, setActionLoading] = useState(false);
 
             <div style={{ overflowY: "auto", flex: 1 }}>
               {/* USERS */}
-              {drillDown.type === "users" && Array.isArray(drillDown.data) &&
+              {drillDown.type === "users" &&
+                Array.isArray(drillDown.data) &&
                 drillDown.data.map((u) => {
                   const isSuspended =
-                    u.suspended_until && new Date(u.suspended_until) > new Date();
+                    u.suspended_until &&
+                    new Date(u.suspended_until) > new Date();
                   return (
                     <div
                       key={u.id}
@@ -1226,14 +1323,14 @@ const [actionLoading, setActionLoading] = useState(false);
                           <strong>@{u.username}</strong>
                           <span style={badge("#6476af")}>{u.role}</span>
                           {isSuspended && (
-                            <span style={badge("#c0392b")}>suspended</span>
+                            <span style={badge("#c0392b")}>{t("superadmin.drill.suspended")}</span>
                           )}
                           {u.verification_status === "pending" && (
-                            <span style={badge("#e67e22")}>pending</span>
+                            <span style={badge("#e67e22")}>{t("superadmin.drill.pending")}</span>
                           )}
                         </div>
                         <small style={{ opacity: 0.5 }}>
-                          {u.email} • rating: {u.rating ?? 1}/5 • violations:{" "}
+                          {u.email} • {t("superadmin.drill.rating")} {u.rating ?? 1}/5 • {t("superadmin.drill.violations")}{" "}
                           {u.violation_count || 0}
                         </small>
                         {isSuspended && (
@@ -1244,7 +1341,7 @@ const [actionLoading, setActionLoading] = useState(false);
                               marginTop: "2px",
                             }}
                           >
-                            Until{" "}
+                            {t("superadmin.drill.until")}{" "}
                             {new Date(u.suspended_until).toLocaleDateString()} —{" "}
                             {u.suspension_reason}
                           </small>
@@ -1256,28 +1353,28 @@ const [actionLoading, setActionLoading] = useState(false);
                           onClick={() =>
                             setDrillDown({
                               type: "history",
-                              title: `@${u.username} History`,
+                              title: `@${u.username} ${t("superadmin.drill.titleHistory")}`,
                               data: u.action_history,
                             })
                           }
                           style={btn()}
                         >
-                          📋 History
+                          {t("superadmin.drill.history")}
                         </button>
-                     
                       )}
-                          <button
-            onClick={() => handleDeleteAccount(u.id, u.username)}
-            style={btn("#7f0000")}
-          >
-           Delete
-          </button>
+                      <button
+                        onClick={() => handleDeleteAccount(u.id, u.username)}
+                        style={btn("#7f0000")}
+                      >
+                        {t("superadmin.drill.delete")}
+                      </button>
                     </div>
                   );
                 })}
 
               {/* POSTS */}
-              {drillDown.type === "posts" && Array.isArray(drillDown.data) &&
+              {drillDown.type === "posts" &&
+                Array.isArray(drillDown.data) &&
                 drillDown.data.map((post) => (
                   <div key={post.id} style={card}>
                     <div
@@ -1291,7 +1388,7 @@ const [actionLoading, setActionLoading] = useState(false);
                       <strong>@{post.author_username}</strong>
                       <span style={badge("#6476af")}>{post.author_role}</span>
                       {post.isHidden && (
-                        <span style={badge("#c0392b")}>hidden</span>
+                        <span style={badge("#c0392b")}>{t("superadmin.drill.hidden")}</span>
                       )}
                       {post.reports?.length > 0 && (
                         <span style={badge("#e67e22")}>
@@ -1311,14 +1408,15 @@ const [actionLoading, setActionLoading] = useState(false);
                       {post.content?.slice(0, 120)}...
                     </p>
                     <small style={{ opacity: 0.4 }}>
-                      💬 {post.comments?.length || 0} comments • 👍{" "}
+                      💬 {post.comments?.length || 0} {t("superadmin.drill.comments")} • 👍{" "}
                       {post.votes?.useful || 0} • 👎 {post.votes?.useless || 0}
                     </small>
                   </div>
                 ))}
 
               {/* COMMENTS */}
-              {drillDown.type === "comments" && Array.isArray(drillDown.data) &&
+              {drillDown.type === "comments" &&
+                Array.isArray(drillDown.data) &&
                 drillDown.data.map((comment) => (
                   <div key={comment.id} style={card}>
                     <div
@@ -1331,7 +1429,7 @@ const [actionLoading, setActionLoading] = useState(false);
                     >
                       <strong>@{comment.authorUsername}</strong>
                       {comment.isHidden && (
-                        <span style={badge("#c0392b")}>hidden</span>
+                        <span style={badge("#c0392b")}>{t("superadmin.drill.hidden")}</span>
                       )}
                       {comment.reports?.length > 0 && (
                         <span style={badge("#e67e22")}>
@@ -1346,19 +1444,20 @@ const [actionLoading, setActionLoading] = useState(false);
                       style={{
                         margin: "0 0 4px",
                         opacity: 0.7,
-                        fontSize: "13px", 
+                        fontSize: "13px",
                       }}
                     >
                       {comment.content?.slice(0, 120)}
                     </p>
                     <small style={{ opacity: 0.4 }}>
-                      In post: {comment.postTitle}
+                      {t("superadmin.drill.inPost")} {comment.postTitle}
                     </small>
                   </div>
                 ))}
 
               {/* ROOMS */}
-              {drillDown.type === "rooms" && Array.isArray(drillDown.data) &&
+              {drillDown.type === "rooms" &&
+                Array.isArray(drillDown.data) &&
                 drillDown.data.map((room) => (
                   <div
                     key={room.id}
@@ -1378,9 +1477,9 @@ const [actionLoading, setActionLoading] = useState(false);
                           marginTop: "4px",
                         }}
                       >
-                        Type: {room.type} • Members: {room.members?.length || 0}
-                        {room.university && ` • Uni: ${room.university}`}
-                        {room.major && ` • Major: ${room.major}`}
+                        {t("superadmin.drill.type")} {room.type} • {t("superadmin.drill.members")}{room.members?.length || 0}
+                        {room.university && <> • {t("superadmin.drill.uni")} {room.university}</>}
+{room.major && <> • {t("superadmin.drill.major")} {room.major}</>}
                       </small>
                     </div>
                     <span
@@ -1400,7 +1499,8 @@ const [actionLoading, setActionLoading] = useState(false);
                 ))}
 
               {/* ACTION HISTORY */}
-              {drillDown.type === "history" && Array.isArray(drillDown.data) &&
+              {drillDown.type === "history" &&
+                Array.isArray(drillDown.data) &&
                 drillDown.data.map((entry, i) => (
                   <div
                     key={i}
@@ -1427,12 +1527,12 @@ const [actionLoading, setActionLoading] = useState(false);
                       </strong>
                       {entry.by && (
                         <small style={{ display: "block", opacity: 0.5 }}>
-                          By @{entry.by}
+                          {`${t("superadmin.drill.by")} @`} {entry.by}
                         </small>
                       )}
                       {entry.reason && (
                         <small style={{ display: "block", opacity: 0.5 }}>
-                          Reason: {entry.reason}
+                         {t("superadmin.drill.reason")} {entry.reason}
                         </small>
                       )}
                       <small style={{ opacity: 0.4 }}>
@@ -1443,10 +1543,10 @@ const [actionLoading, setActionLoading] = useState(false);
                 ))}
 
               {!drillDown.data ? (
-                <p style={{ opacity: 0.5, textAlign: "center" }}>Loading...</p>
+                <p style={{ opacity: 0.5, textAlign: "center" }}>{t("superadmin.stats.loading")}</p>
               ) : drillDown.data.length === 0 ? (
                 <p style={{ opacity: 0.5, textAlign: "center" }}>
-                  Nothing to show.
+                  {t("superadmin.drill.empty")}
                 </p>
               ) : null}
             </div>
