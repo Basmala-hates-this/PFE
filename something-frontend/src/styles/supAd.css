@@ -1,10 +1,11 @@
-/* SuperAdminPanel.css */
+/* SuperAdminPanel Styles */
+/* Uses variables from pallette.css with gradient background */
 
 /* Main Container */
 .superadmin-container {
   min-height: 100vh;
-  background: #1a1f35;
-  color: white;
+  background: linear-gradient(180deg, var(--bg-main), var(--dark), var(--blue-dark));
+  color: var(--text-main);
   padding: 20px;
 }
 
@@ -19,17 +20,24 @@
 .superadmin-back-button {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-main);
   font-size: 20px;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.superadmin-back-button:hover {
+  opacity: 0.7;
 }
 
 .superadmin-title {
   margin: 0;
+  color: var(--blue-light);
 }
 
 .superadmin-subtitle {
   opacity: 0.5;
+  font-size: small;
 }
 
 /* Tabs Section */
@@ -37,8 +45,9 @@
   display: flex;
   gap: 6px;
   margin-bottom: 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-soft);
   padding-bottom: 12px;
+  flex-wrap: wrap;
 }
 
 .superadmin-tab {
@@ -48,13 +57,20 @@
   cursor: pointer;
   font-size: 13px;
   background: rgba(255, 255, 255, 0.08);
-  color: white;
+  color: var(--text-main);
   font-weight: 400;
+  transition: all 0.2s ease;
+}
+
+.superadmin-tab:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
 }
 
 .superadmin-tab-active {
-  background: #6476af;
+  background: var(--accent);
   font-weight: 600;
+  box-shadow: 0 2px 8px rgba(56, 189, 248, 0.3);
 }
 
 /* Stats Grid */
@@ -66,10 +82,19 @@
 
 /* Cards */
 .superadmin-card {
-  background: #252b45;
-  border-radius: 10px;
+  background: var(--bg-card);
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
   padding: 16px;
   margin-bottom: 12px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 4px solid var(--accent);
+  box-shadow: var(--shadow-soft);
+}
+
+.superadmin-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
 }
 
 .superadmin-card-clickable {
@@ -86,10 +111,11 @@
   font-size: 24px;
   display: block;
   font-weight: bold;
+  color: var(--blue-light);
 }
 
 .superadmin-card-label {
-  opacity: 0.5;
+  opacity: 0.7;
   font-size: small;
 }
 
@@ -99,43 +125,18 @@
   padding: 2px 8px;
   border-radius: 10px;
   font-size: 11px;
+  display: inline-block;
 }
 
-.superadmin-badge-primary {
-  background: #6476af;
-}
-
-.superadmin-badge-warning {
-  background: #f39c12;
-}
-
-.superadmin-badge-danger {
-  background: #c0392b;
-}
-
-.superadmin-badge-success {
-  background: #27ae60;
-}
-
-.superadmin-badge-dark {
-  background: #4a3f6b;
-}
-
-.superadmin-badge-gray {
-  background: #2d3b6b;
-}
-
-.superadmin-badge-override {
-  background: #7f8c8d;
-}
-
-.superadmin-badge-pending {
-  background: #e67e22;
-}
-
-.superadmin-badge-overridden {
-  background: #555;
-}
+.superadmin-badge-primary { background: var(--accent); }
+.superadmin-badge-warning { background: var(--warning); }
+.superadmin-badge-danger { background: var(--danger); }
+.superadmin-badge-success { background: var(--success); }
+.superadmin-badge-dark { background: var(--blue-dark); }
+.superadmin-badge-gray { background: #2d3b6b; }
+.superadmin-badge-override { background: #7f8c8d; }
+.superadmin-badge-pending { background: var(--warning); }
+.superadmin-badge-overridden { background: #555; }
 
 /* Buttons */
 .superadmin-btn {
@@ -145,34 +146,26 @@
   color: white;
   cursor: pointer;
   font-size: 12px;
+  transition: all 0.2s ease;
 }
 
-.superadmin-btn-warning {
-  background: #f39c12;
+.superadmin-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 
-.superadmin-btn-danger {
-  background: #c0392b;
-}
-
-.superadmin-btn-success {
-  background: #27ae60;
-}
-
-.superadmin-btn-primary {
-  background: #6476af;
-}
-
-.superadmin-btn-gray {
-  background: rgba(255, 255, 255, 0.1);
-}
+.superadmin-btn-warning { background: var(--warning); }
+.superadmin-btn-danger { background: var(--danger); }
+.superadmin-btn-success { background: var(--success); }
+.superadmin-btn-primary { background: var(--accent); }
+.superadmin-btn-gray { background: rgba(255, 255, 255, 0.1); }
 
 /* Application/Admin Item Layout */
 .superadmin-item-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 0;
+  flex-wrap: wrap;
 }
 
 .superadmin-item-row-with-margin {
@@ -188,10 +181,11 @@
   align-items: center;
   gap: 8px;
   margin-bottom: 4px;
+  flex-wrap: wrap;
 }
 
 .superadmin-item-details {
-  opacity: 0.5;
+  opacity: 0.6;
   font-size: small;
 }
 
@@ -224,6 +218,10 @@
   font-size: 13px;
 }
 
+.superadmin-permission-label input {
+  cursor: pointer;
+}
+
 .superadmin-rooms-group {
   margin-bottom: 12px;
 }
@@ -251,6 +249,11 @@
   background: rgba(255, 255, 255, 0.05);
   padding: 4px 10px;
   border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.superadmin-room-label:hover {
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .superadmin-room-type {
@@ -261,16 +264,24 @@
 .superadmin-button-group {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 /* Search Input */
 .superadmin-search-input {
   padding: 7px 12px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-input);
+  color: var(--text-main);
   width: 220px;
+  transition: all 0.2s;
+}
+
+.superadmin-search-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 5px var(--accent-glow);
 }
 
 /* Profile Image */
@@ -279,6 +290,7 @@
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
+  border: 2px solid var(--accent);
 }
 
 /* Admin Permissions Display */
@@ -307,7 +319,7 @@
 
 /* Divider */
 .superadmin-divider {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border-soft);
   padding-top: 24px;
   margin-top: 8px;
 }
@@ -318,10 +330,13 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .superadmin-section-title {
   margin: 0;
+  color: var(--blue-light);
 }
 
 /* Logs */
@@ -352,11 +367,13 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .superadmin-log-admin {
   font-size: 13px;
   font-weight: bold;
+  color: var(--blue-light);
 }
 
 .superadmin-log-details {
@@ -385,16 +402,22 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .superadmin-override-input {
   flex: 1;
   background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid var(--border-soft);
   border-radius: 6px;
   padding: 6px 10px;
-  color: white;
+  color: var(--text-main);
   font-size: 13px;
+}
+
+.superadmin-override-input:focus {
+  outline: none;
+  border-color: var(--accent);
 }
 
 /* Modal */
@@ -404,21 +427,41 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .superadmin-modal {
-  background: #1a1f35;
-  border-radius: 12px;
+  background: linear-gradient(135deg, var(--bg-main), var(--blue-dark));
+  border-radius: 20px;
   padding: 20px;
   width: 650px;
   max-height: 80vh;
   display: flex;
   flex-direction: column;
+  border: 1px solid var(--accent);
+  box-shadow: var(--shadow-soft);
+  animation: slideUp 0.2s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .superadmin-modal-header {
@@ -426,23 +469,46 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-soft);
 }
 
 .superadmin-modal-title {
   margin: 0;
+  color: var(--blue-light);
 }
 
 .superadmin-modal-close {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-main);
   font-size: 20px;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.superadmin-modal-close:hover {
+  opacity: 0.7;
 }
 
 .superadmin-modal-content {
   overflow-y: auto;
   flex: 1;
+  padding-right: 5px;
+}
+
+.superadmin-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.superadmin-modal-content::-webkit-scrollbar-track {
+  background: var(--border-soft);
+  border-radius: 3px;
+}
+
+.superadmin-modal-content::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
 }
 
 /* Drill Down Items */
@@ -450,6 +516,7 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 
 .superadmin-drill-user-info {
@@ -461,15 +528,17 @@
   gap: 8px;
   align-items: center;
   margin-bottom: 4px;
+  flex-wrap: wrap;
 }
 
 .superadmin-drill-username {
   font-weight: bold;
+  color: var(--blue-light);
 }
 
 .superadmin-drill-suspension {
   display: block;
-  color: #e74c3c;
+  color: var(--danger);
   margin-top: 2px;
   font-size: small;
 }
@@ -480,12 +549,14 @@
   gap: 8px;
   align-items: center;
   margin-bottom: 6px;
+  flex-wrap: wrap;
 }
 
 .superadmin-post-title {
   display: block;
   margin-bottom: 4px;
   font-weight: bold;
+  color: var(--blue-light);
 }
 
 .superadmin-post-content {
@@ -510,7 +581,7 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #6476af;
+  background: var(--accent);
   margin-top: 6px;
   flex-shrink: 0;
 }
@@ -542,10 +613,13 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .superadmin-room-name {
   font-weight: bold;
+  color: var(--blue-light);
 }
 
 .superadmin-room-meta {
@@ -558,11 +632,14 @@
 /* Empty/Loading States */
 .superadmin-loading {
   opacity: 0.5;
+  text-align: center;
+  padding: 20px;
 }
 
 .superadmin-empty {
-  opacity: 0.5;
+  opacity: 0.6;
   text-align: center;
+  padding: 20px;
 }
 
 /* Utility Classes */
@@ -589,4 +666,22 @@
 .superadmin-full-width {
   width: 100%;
   box-sizing: border-box;
+}
+
+/* Scrollbar Styling */
+.superadmin-rooms-list::-webkit-scrollbar,
+.superadmin-modal-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.superadmin-rooms-list::-webkit-scrollbar-track,
+.superadmin-modal-content::-webkit-scrollbar-track {
+  background: var(--border-soft);
+  border-radius: 3px;
+}
+
+.superadmin-rooms-list::-webkit-scrollbar-thumb,
+.superadmin-modal-content::-webkit-scrollbar-thumb {
+  background: var(--accent);
+  border-radius: 3px;
 }

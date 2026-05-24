@@ -58,11 +58,11 @@ didnt use most of them...+the namings are bad...idc*/
   --text-postTitle: #000000;
 
   /* === Accent === */
-  --accent: #0315a0;
+  --accent: #253396;
   --accent-hover: #0369a1;
   --accent-glow: #b0dbed;
 
   /* === Borders & Effects === */
-  --border-soft: rgba(9, 190, 184, 0.46);
+  --border-soft: rgba(8, 120, 116, 0.867);
   --shadow-soft: 0 8px 20px rgba(12, 142, 248, 0.596);
 }

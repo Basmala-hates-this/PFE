@@ -1,14 +1,13 @@
-/* SearchPage.css */
+/* SearchPage Styles */
+/* Matching profile.css styling */
 
-/* Main Container */
 .searchpage-container {
   min-height: 100vh;
-  background: #1a1f35;
-  color: white;
+  background: linear-gradient(180deg, var(--bg-main), var(--dark), var(--blue-dark));
+  color: var(--text-main);
   padding: 20px;
 }
 
-/* Header Section */
 .searchpage-header {
   display: flex;
   align-items: center;
@@ -19,21 +18,21 @@
 .searchpage-back-button {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-main);
   font-size: 20px;
   cursor: pointer;
 }
 
 .searchpage-title {
   margin: 0;
+  color: var(--blue-light);
 }
 
-/* Tabs Section */
 .searchpage-tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-soft);
   padding-bottom: 10px;
 }
 
@@ -43,93 +42,41 @@
   font-size: 14px;
   cursor: pointer;
   padding-bottom: 8px;
-  transition: all 0.2s ease;
+  transition: all 0.02s ease;
 }
 
 .searchpage-tab-active {
-  color: white;
-  border-bottom: 2px solid #6476af;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
 }
 
 .searchpage-tab-inactive {
-  color: rgba(255, 255, 255, 0.4);
-  border-bottom: none;
+  color: var(--text-muted);
 }
 
-/* Loading State */
-.searchpage-loading {
-  opacity: 0.5;
-}
-
-/* Empty State */
-.searchpage-empty {
-  opacity: 0.5;
-}
-
-/* Post Card */
-.searchpage-post-card {
-  padding: 15px;
-  background: #252b45;
-  border-radius: 8px;
-  margin-bottom: 10px;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.searchpage-post-card:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.searchpage-post-header {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-
-.searchpage-post-author {
-  font-weight: bold;
-}
-
-.searchpage-post-role-badge {
-  background: #6476af;
-  color: white;
-  padding: 2px 8px;
-  border-radius: 10px;
-  font-size: 11px;
-}
-
-.searchpage-post-title {
-  margin: 0 0 6px;
-  font-size: 15px;
-}
-
-.searchpage-post-content {
-  margin: 0 0 8px;
-  opacity: 0.8;
-  font-size: 14px;
-}
-
-.searchpage-post-date {
-  opacity: 0.5;
-  font-size: small;
-}
-
-/* User Card */
+.searchpage-post-card,
 .searchpage-user-card {
   padding: 15px;
-  background: #252b45;
-  border-radius: 8px;
+  background: var(--bg-card);
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
   margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.02s ease;
+  border-left: 3px solid var(--accent);
+  box-shadow: var(--shadow-soft);
 }
 
+.searchpage-post-card:hover,
 .searchpage-user-card:hover {
-  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(5px);
+  background: var(--bg-soft);
+}
+
+.searchpage-post-author,
+.searchpage-username {
+  font-weight: bold;
+  color: var(--blue-light);
 }
 
 .searchpage-user-avatar {
@@ -137,19 +84,5 @@
   height: 45px;
   border-radius: 50%;
   object-fit: cover;
-}
-
-.searchpage-user-info {
-  flex: 1;
-}
-
-.searchpage-username {
-  font-weight: bold;
-}
-
-.searchpage-user-details {
-  display: block;
-  opacity: 0.5;
-  margin-top: 2px;
-  font-size: small;
+  border: 2px solid var(--accent);
 }

@@ -1,33 +1,48 @@
-/* PublicProfile.css */
+/* PublicProfile Styles */
+/* Uses variables from pallette.css */
 
 /* Main Container */
 .publicprofile-container {
   min-height: 100vh;
-  background: #071039;
-  color: white;
+  background: linear-gradient(180deg, var(--bg-main), var(--dark), var(--blue-dark));
+  color: var(--text-main);
   padding: 20px;
+  overflow: auto;
 }
 
 /* Back Button */
 .publicprofile-back-button {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-main);
   font-size: 20px;
   cursor: pointer;
   margin-bottom: 20px;
+  transition: opacity 0.2s;
+}
+
+.publicprofile-back-button:hover {
+  opacity: 0.7;
 }
 
 /* Profile Card */
 .publicprofile-card {
-  background: #252b45;
-  border-radius: 12px;
+  background: var(--bg-card);
+  backdrop-filter: blur(4px);
+  border-radius: 20px;
   padding: 20px;
   display: flex;
   align-items: center;
   gap: 20px;
   margin-bottom: 20px;
   flex-wrap: wrap;
+  border-left: 6px solid var(--accent);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.3s ease;
+}
+
+.publicprofile-card:hover {
+  transform: translateY(-2px);
 }
 
 .publicprofile-avatar {
@@ -35,6 +50,8 @@
   height: 80px;
   border-radius: 50%;
   object-fit: cover;
+  border: 3px solid var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
 }
 
 .publicprofile-info {
@@ -43,10 +60,12 @@
 
 .publicprofile-username {
   margin: 0 0 6px;
+  color: var(--blue-light);
+  font-size: 24px;
 }
 
 .publicprofile-role-badge {
-  background: #6476af;
+  background: var(--accent);
   color: white;
   padding: 2px 8px;
   border-radius: 10px;
@@ -57,47 +76,74 @@
 .publicprofile-major {
   margin: 8px 0 4px;
   opacity: 0.7;
+  font-size: 14px;
 }
 
 .publicprofile-rating {
   margin: 0;
   opacity: 0.7;
+  font-size: 14px;
 }
 
 /* Button Styles */
 .publicprofile-follow-button {
   padding: 8px 20px;
   border-radius: 8px;
-  background: #6476af;
+  background: var(--accent);
   border: none;
   color: white;
   cursor: pointer;
   font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.publicprofile-follow-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
 .publicprofile-follow-button-following {
   background: transparent;
-  border: 1px solid #6476af;
+  border: 1px solid var(--accent);
+  color: var(--text-main);
+}
+
+.publicprofile-follow-button-following:hover {
+  background: rgba(100, 118, 175, 0.2);
 }
 
 .publicprofile-connections-button {
   padding: 8px 20px;
   border-radius: 8px;
   background: transparent;
-  border: 1px solid #6476af;
-  color: white;
+  border: 1px solid var(--accent);
+  color: var(--text-main);
   cursor: pointer;
   font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.publicprofile-connections-button:hover {
+  background: rgba(100, 118, 175, 0.2);
+  transform: translateY(-1px);
 }
 
 .publicprofile-report-button {
   padding: 8px 20px;
   border-radius: 8px;
   background: transparent;
-  border: 1px solid #c0392b;
-  color: #c0392b;
+  border: 1px solid var(--danger);
+  color: var(--danger);
   cursor: pointer;
   font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.publicprofile-report-button:hover {
+  background: var(--danger);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .publicprofile-button-disabled {
@@ -120,74 +166,110 @@
 }
 
 .publicprofile-stat-card {
-  background: #252b45;
-  border-radius: 8px;
+  background: var(--bg-card);
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
   padding: 15px;
   text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border-soft);
+  cursor: pointer;
+}
+
+.publicprofile-stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  border-color: var(--accent);
 }
 
 .publicprofile-stat-value {
   font-size: 22px;
   font-weight: bold;
+  color: var(--blue-light);
 }
 
 .publicprofile-stat-label {
   margin: 4px 0 0;
-  opacity: 0.5;
+  opacity: 0.6;
   font-size: 12px;
 }
 
 /* Majors Section */
 .publicprofile-majors-section {
-  background: #252b45;
-  border-radius: 8px;
+  background: var(--bg-card);
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
   padding: 15px;
   margin-bottom: 20px;
+  border-left: 4px solid var(--accent);
+  box-shadow: var(--shadow-soft);
 }
 
 .publicprofile-majors-title {
   margin: 0 0 15px;
-  color: #5DADE2;
+  color: var(--blue-light);
+  font-size: 18px;
 }
 
 .publicprofile-major-item {
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.publicprofile-major-item:last-child {
+  border-bottom: none;
 }
 
 .publicprofile-major-name {
-  color: #85C1E9;
+  color: var(--blue-soft);
 }
 
 /* Recent Posts Section */
 .publicprofile-posts-title {
   margin-bottom: 15px;
+  color: var(--blue-light);
+  font-size: 18px;
 }
 
 .publicprofile-no-posts {
-  opacity: 0.5;
+  opacity: 0.6;
+  text-align: center;
+  padding: 20px;
 }
 
 .publicprofile-post-card {
-  background: #252b45;
-  border-radius: 8px;
+  background: var(--bg-card);
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
   padding: 15px;
   margin-bottom: 10px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border-left: 3px solid var(--accent);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.publicprofile-post-card:hover {
+  transform: translateX(5px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .publicprofile-post-title {
   margin: 0 0 6px;
+  color: var(--blue-light);
+  font-size: 16px;
 }
 
 .publicprofile-post-content {
   margin: 0 0 8px;
   opacity: 0.8;
   font-size: 14px;
+  line-height: 1.4;
 }
 
 .publicprofile-post-date {
   opacity: 0.5;
-  font-size: small;
+  font-size: 11px;
 }
 
 /* RTL Support */
@@ -197,4 +279,18 @@
 
 .publicprofile-ltr {
   direction: ltr;
+}
+
+/* Loading State */
+.publicprofile-loading {
+  text-align: center;
+  padding: 40px;
+  opacity: 0.6;
+}
+
+/* Error State */
+.publicprofile-error {
+  text-align: center;
+  padding: 40px;
+  color: var(--danger);
 }

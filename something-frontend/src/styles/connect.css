@@ -1,14 +1,13 @@
-/* ConnectionsPage.css */
+/* ConnectionsPage Styles */
+/* Matching profile.css styling */
 
-/* Main Container */
 .connections-container {
   min-height: 100vh;
-  background: #1a1f35;
-  color: white;
+  background: linear-gradient(180deg, var(--bg-main), var(--dark), var(--blue-dark));
+  color: var(--text-main);
   padding: 20px;
 }
 
-/* Header Section */
 .connections-header {
   display: flex;
   align-items: center;
@@ -19,21 +18,21 @@
 .connections-back-button {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-main);
   font-size: 20px;
   cursor: pointer;
 }
 
 .connections-title {
   margin: 0;
+  color: var(--blue-light);
 }
 
-/* Tabs Section */
 .connections-tabs {
   display: flex;
   gap: 10px;
   margin-bottom: 20px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-soft);
   padding-bottom: 10px;
 }
 
@@ -47,30 +46,32 @@
 }
 
 .connections-tab-active {
-  color: white;
-  border-bottom: 2px solid #6476af;
+  color: var(--accent);
+  border-bottom: 2px solid var(--accent);
 }
 
 .connections-tab-inactive {
-  color: rgba(255, 255, 255, 0.4);
-  border-bottom: none;
+  color: var(--text-muted);
 }
 
-/* User Card */
 .connections-user-card {
   padding: 15px;
-  background: #252b45;
-  border-radius: 8px;
+  background: var(--bg-card);
+  backdrop-filter: blur(4px);
+  border-radius: 18px;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  border-left: 3px solid var(--accent);
+  box-shadow: var(--shadow-soft);
 }
 
 .connections-user-card:hover {
-  background: rgba(255, 255, 255, 0.08);
+  transform: translateX(5px);
+  background: var(--bg-soft);
 }
 
 .connections-user-avatar {
@@ -78,28 +79,17 @@
   height: 45px;
   border-radius: 50%;
   object-fit: cover;
-}
-
-.connections-user-info {
-  flex: 1;
+  border: 2px solid var(--accent);
 }
 
 .connections-username {
   font-weight: bold;
+  color: var(--blue-light);
 }
 
 .connections-user-details {
   display: block;
-  opacity: 0.5;
+  opacity: 0.6;
   margin-top: 2px;
   font-size: small;
-}
-
-/* Loading and Empty States */
-.connections-loading {
-  opacity: 0.5;
-}
-
-.connections-empty {
-  opacity: 0.5;
 }

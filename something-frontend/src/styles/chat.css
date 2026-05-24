@@ -1,38 +1,47 @@
-/* RoomChat.css */
+/* RoomChat Styles */
+/* Uses variables from pallette.css */
 
 /* Main Container */
 .roomchat-container {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: #1a1f35;
+  background: linear-gradient(180deg, var(--bg-main), #204864, var(--blue-dark));
 }
 
 /* Header Section */
 .roomchat-header {
   padding: 15px 20px;
-  background: #252b45;
+  background: var(--bg-header);
+  backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   gap: 15px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--accent);
+  box-shadow: var(--shadow-soft);
+  color: var(--text-main);
 }
 
 .roomchat-back-button {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-muted);
   font-size: 20px;
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.roomchat-back-button:hover {
+  opacity: 0.7;
 }
 
 .roomchat-room-name {
   margin: 0;
-  color: white;
+  color: var(--blue-light);
 }
 
 .roomchat-room-stats {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
   font-size: small;
 }
 
@@ -40,9 +49,16 @@
   padding: 6px 12px;
   border-radius: 6px;
   cursor: pointer;
-  color: red;
+  color: var(--danger);
   background: transparent;
-  border: 1px solid red;
+  border: 1px solid var(--danger);
+  transition: all 0.2s;
+}
+
+.roomchat-leave-button:hover {
+  background: var(--danger);
+  color: white;
+  transform: translateY(-1px);
 }
 
 .roomchat-admin-actions {
@@ -57,7 +73,13 @@
   cursor: pointer;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  color: white;
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+
+.roomchat-admin-button:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
 }
 
 .roomchat-admin-button-danger {
@@ -66,7 +88,14 @@
   cursor: pointer;
   background: rgba(255, 255, 255, 0.1);
   border: none;
-  color: red;
+  color: var(--danger);
+  transition: all 0.2s;
+}
+
+.roomchat-admin-button-danger:hover {
+  background: var(--danger);
+  color: white;
+  transform: translateY(-1px);
 }
 
 /* Messages Area */
@@ -80,8 +109,9 @@
 }
 
 .roomchat-no-messages {
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-muted);
   text-align: center;
+  padding: 40px;
 }
 
 /* Individual Message */
@@ -98,28 +128,35 @@
   align-items: flex-start;
 }
 
+/* Reply Preview */
 .roomchat-reply-preview {
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-main);
   margin-bottom: 4px;
   padding: 4px 8px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.563);
   border-radius: 6px;
   max-width: 60%;
+  border-left: 2px solid var(--accent);
 }
 
+/* Message Bubble */
 .roomchat-message-bubble {
   max-width: 60%;
   padding: 10px 14px;
   border-radius: 12px;
+  box-shadow: var(--shadow-sm);
 }
 
 .roomchat-message-bubble-right {
-  background: #6476af;
+  background: var(--accent);
+  border-radius: 12px 12px 4px 12px;
 }
 
 .roomchat-message-bubble-left {
-  background: #2d3350;
+  background: var(--bg-card);
+  border-radius: 12px 12px 12px 4px;
+  border-left: 3px solid var(--accent);
 }
 
 .roomchat-message-author {
@@ -129,13 +166,21 @@
 
 .roomchat-message-content {
   margin: 4px 0 0;
-  color: white;
+  color: var(--text-main);
+  word-wrap: break-word;
 }
 
+/* Attachments */
 .roomchat-message-attachment {
   max-width: 200px;
   border-radius: 8px;
   margin-top: 6px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.roomchat-message-attachment:hover {
+  transform: scale(1.02);
 }
 
 .roomchat-message-file-link {
@@ -144,9 +189,15 @@
   padding: 6px 10px;
   background: rgba(255, 255, 255, 0.1);
   border-radius: 6px;
-  color: white;
+  color: var(--text-main);
   text-decoration: none;
   font-size: 12px;
+  transition: all 0.2s;
+}
+
+.roomchat-message-file-link:hover {
+  background: var(--accent);
+  transform: translateY(-1px);
 }
 
 .roomchat-message-timestamp {
@@ -170,16 +221,26 @@
   font-size: 10px;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--text-muted);
   cursor: pointer;
+  transition: color 0.2s;
+}
+
+.roomchat-action-button:hover {
+  color: var(--accent);
 }
 
 .roomchat-action-button-danger {
   font-size: 10px;
   background: none;
   border: none;
-  color: #fc0c0c;
+  color: var(--danger);
   cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.roomchat-action-button-danger:hover {
+  opacity: 0.7;
 }
 
 /* Edit Input */
@@ -189,7 +250,8 @@
   border-radius: 4px;
   margin-top: 4px;
   background: white;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border-soft);
+  color: black;
 }
 
 .roomchat-edit-actions {
@@ -203,6 +265,15 @@
   padding: 2px 8px;
   border-radius: 4px;
   cursor: pointer;
+  background: var(--success);
+  border: none;
+  color: white;
+  transition: all 0.2s;
+}
+
+.roomchat-edit-save:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 
 .roomchat-edit-cancel {
@@ -210,37 +281,56 @@
   padding: 2px 8px;
   border-radius: 4px;
   cursor: pointer;
+  background: var(--danger);
+  border: none;
+  color: white;
+  transition: all 0.2s;
+}
+
+.roomchat-edit-cancel:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 
 /* Reply Preview Bar */
 .roomchat-reply-bar {
   padding: 8px 20px;
   background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  border-top: 1px solid var(--accent);
+  border-bottom: 1px solid var(--accent);
 }
 
 .roomchat-reply-text {
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--text-soft);
   font-size: small;
 }
 
 .roomchat-reply-close {
   background: none;
   border: none;
-  color: white;
+  color: var(--text-main);
   cursor: pointer;
   font-size: 16px;
+  transition: opacity 0.2s;
+}
+
+.roomchat-reply-close:hover {
+  opacity: 0.7;
 }
 
 /* Input Area */
 .roomchat-input-area {
   padding: 15px 20px;
-  background: #252b45;
+  background: var(--bg-header);
+  backdrop-filter: blur(10px);
   display: flex;
   gap: 10px;
   align-items: center;
+  border-top: 1px solid var(--accent);
 }
 
 .roomchat-attach-button {
@@ -248,6 +338,13 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+
+.roomchat-attach-button:hover {
+  color: var(--accent);
+  transform: scale(1.1);
 }
 
 .roomchat-file-input {
@@ -255,26 +352,44 @@
 }
 
 .roomchat-attachment-name {
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--text-muted);
   font-size: small;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .roomchat-message-input {
   flex: 1;
   padding: 10px;
   border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
-  color: white;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-input);
+  color: var(--text-main);
+  transition: all 0.2s;
+}
+
+.roomchat-message-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 5px var(--accent-glow);
 }
 
 .roomchat-send-button {
   padding: 10px 20px;
   border-radius: 8px;
-  background: #6476af;
+  background: var(--accent);
   border: none;
   color: white;
   cursor: pointer;
+  transition: all 0.2s;
+}
+
+.roomchat-send-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 2px 8px var(--accent-glow);
 }
 
 /* Modal Overlay */
@@ -284,7 +399,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,12 +407,14 @@
 }
 
 .roomchat-modal {
-  background: #1a1f35;
-  border-radius: 12px;
+  background: linear-gradient(135deg, var(--bg-main), var(--blue-dark));
+  border-radius: 20px;
   padding: 20px;
   width: 400px;
   max-height: 80vh;
   overflow-y: auto;
+  border: 1px solid var(--accent);
+  box-shadow: var(--shadow-soft);
 }
 
 .roomchat-modal-header {
@@ -305,10 +422,13 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 15px;
+  border-bottom: 1px solid var(--border-soft);
+  padding-bottom: 10px;
 }
 
 .roomchat-modal-title {
   margin: 0;
+  color: var(--blue-light);
 }
 
 .roomchat-modal-close {
@@ -316,16 +436,26 @@
   border: none;
   font-size: 20px;
   cursor: pointer;
-  color: white;
+  color: var(--text-main);
+  transition: opacity 0.2s;
+}
+
+.roomchat-modal-close:hover {
+  opacity: 0.7;
 }
 
 /* Member List */
 .roomchat-member-item {
   padding: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--border-soft);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: background 0.2s;
+}
+
+.roomchat-member-item:hover {
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .roomchat-member-info {
@@ -340,22 +470,32 @@
 
 .roomchat-member-username {
   font-weight: normal;
+  color: var(--blue-light);
 }
 
 .roomchat-admin-badge {
-  background: gold;
+  background: var(--warning);
   color: black;
   padding: 2px 6px;
   border-radius: 6px;
   font-size: 11px;
+  font-weight: bold;
 }
 
 .roomchat-make-admin-button {
   padding: 4px 10px;
   border-radius: 6px;
-  background: gold;
+  background: var(--warning);
   border: none;
   color: black;
   cursor: pointer;
   font-size: 12px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.roomchat-make-admin-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 2px 5px rgba(241, 196, 15, 0.3);
 }
