@@ -250,7 +250,9 @@
 },
   "rooms": {
       "myRooms": "Mes Salons",
-      "browse": "Parcourir"
+      "browse": "Parcourir",
+      "joinedRooms": "Salons Rejoints",
+      "privateRooms":"Vos salons privés"
     }
   },
   "postModal": {

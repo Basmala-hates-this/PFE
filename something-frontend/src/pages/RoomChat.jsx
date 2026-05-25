@@ -565,7 +565,7 @@ export default function RoomChat() {
       
       {/* header */}
       <div className="roomchat-header">
-        <button onClick={() => navigate("/profile")} className="roomchat-back-button">←</button>
+        <button onClick={() => navigate("/dashboard")} className="roomchat-back-button">←</button>
         <div>
           <h2 className="roomchat-room-name">#{room?.name}</h2>
           <small className="roomchat-room-stats">{`${room?.members?.length} ${t("roomChat.members")}`}</small>

@@ -168,7 +168,7 @@ export default function RoomsView({
               {otherRooms.length > 0 && (
                 <div className="rooms-section">
                   <h3 style={{ marginBottom: "12px", fontSize: "1rem", color: "var(--accent)" }}>
-                    📌 {t?.('dashboard.rooms.joinedRooms') || "Your Rooms"}
+                     {t?.('dashboard.rooms.joinedRooms') || "Your Rooms"}
                   </h3>
                   {otherRooms.map(room => (
                     <div key={room.id} className="room-item" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px", background: "var(--bg-panel)", borderRadius: "8px", marginBottom: "8px" }}>

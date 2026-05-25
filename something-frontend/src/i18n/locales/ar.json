@@ -249,7 +249,9 @@
 },
  "rooms": {
       "myRooms": "غرفي",
-      "browse": "استعراض"
+      "browse": "استعراض",
+      "joinedRooms": "الغرف المنضم إليها",
+      "privateRooms":"غرفك الخاصة"
     }
   },
   "postModal": {

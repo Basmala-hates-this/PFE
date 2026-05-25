@@ -250,7 +250,9 @@
 },
 "rooms": {
       "myRooms": "My Rooms",
-      "browse": "Browse Rooms"
+      "browse": "Browse Rooms",
+      "joinedRooms": "Joined Rooms",
+      "privateRooms":"Your private rooms"
     }
   
   },
