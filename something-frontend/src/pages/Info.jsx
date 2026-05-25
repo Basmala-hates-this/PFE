@@ -14,6 +14,8 @@ import Select from "react-select";
 //pd: CLEAN THE DAMN COMMENTED PARTS U DONT NEED THEM ANYMORE.....i'll do later....donezo...i left my commenst though...
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
+import FloatingHelper from "../assets/components/FloatingHelper";
+
 
 
 
@@ -401,6 +403,7 @@ const handleSelectChange = (event) => {
         <option value="ar">العربية</option>
       </select>
     </div>
+    <FloatingHelper currentPage="register" /> 
              <form  onSubmit={handleSubmit} id="indexForm">{/*<!--action="register.html"   i think this is useless since i added the js redirection--> */}
         <fieldset id="field1" className="fieldInfo" >
            

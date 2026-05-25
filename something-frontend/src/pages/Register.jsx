@@ -7,6 +7,7 @@ import "../styles/register-login.css"
  import axios from "axios";
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
+import FloatingHelper from "../assets/components/FloatingHelper";
 
 //////THE DAMN USERNAME CANNOT BELONG TO ANOTHER USER...IF IT EXISTS ALREADY IT CANNOT BE CHOSEN....fuck...
 
@@ -224,6 +225,7 @@ useEffect(() => {
  
   return (
     <div id="body2">
+      <FloatingHelper currentPage="register" /> 
       <form  id="registerForm" onSubmit={handleSubmit} >
         <fieldset id="field4" >
             <legend  id="logReg">{t("register.legend_main")}</legend>

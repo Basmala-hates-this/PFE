@@ -24,7 +24,8 @@ import SuperadminPanel from "./SuperadminPanel";
 import GuidePage from "./Guide";         
 import Profile from "./Profile";    
 import RoomsView from "../assets/components/RoomsView.jsx";    
-import logo from "../photos/logo2.png";     
+import logo from "../photos/logo2.png";    
+import ChatTab from "./ChatTab"; 
 
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
@@ -1378,11 +1379,12 @@ useEffect(() => {
 )}
 
       {/* CHAT TAB — placeholder */}
-      {activeTab === "chat" &&(
+      {/* {activeTab === "chat" &&(
         <div style={{ padding: "20px" }}>
           <p style={{ opacity: 0.5 }}>{t('dashboard.nav.chat')} — coming soon</p>
         </div>
-      )}
+      )} */}
+      {activeTab === "chat" && !isGuest && <ChatTab />}
 
       {/* ADMIN TAB */}
       {activeTab === "admin" && isAdmin && <AdminPanel embedded />}

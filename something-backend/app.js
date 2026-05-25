@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 
@@ -13,7 +14,7 @@ const messageRoutes = require("./routes/message.routes");
 
 const adminRoutes = require("./routes/admin.routes");
 
-
+const aiRouter = require ("./routes/ai.js");
 
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -45,6 +46,8 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 //private rooms
 app.use("/api/rooms", messageRoutes);
 
+
+app.use("/api/ai", aiRouter);
 
 //crash catcher
 app.use((err, req, res, next) => {
