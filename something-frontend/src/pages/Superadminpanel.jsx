@@ -1620,6 +1620,8 @@ export default function SuperAdminPanel() {
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
 
+  
+
   useEffect(() => {
     if (currentUser?.authorityLevel !== "superadmin") {
       navigate("/dashboard");
@@ -1926,12 +1928,21 @@ export default function SuperAdminPanel() {
     <div className="superadmin-container">
       {/* header */}
       <div className="superadmin-header">
-        <button
-          onClick={() => navigate("/admin")}
-          className="superadmin-back-button"
-        >
-          ←
-        </button>
+       <button
+  onClick={() => window.location.href = "/dashboard"}
+  style={{
+    marginBottom: "20px",
+    padding: "8px 16px",
+    background: "#6476af",
+    border: "none",
+    borderRadius: "8px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "14px"
+  }}
+>
+  ← 
+</button>
         <div>
           <h2 className="superadmin-title">{t("superadmin.title")}</h2>
           <small className="superadmin-subtitle">

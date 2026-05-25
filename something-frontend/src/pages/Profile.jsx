@@ -371,20 +371,20 @@ const handleStatClick = async (type) => {
   <aside className="sidebar">
     <h2 id="h2pro"> {t('profile.title')}</h2>
     <ul>
-      <li onClick={() => navigate("/dashboard")}><span> {t('profile.sidebar.dashboard')} </span></li>
+      {/* <li onClick={() => navigate("/dashboard")}><span> {t('profile.sidebar.dashboard')} </span></li> */}
       {/* <li onClick={() => setShowMyRooms(true)} ><span>My Rooms </span></li> */}
-      <li onClick={() => setShowCreateRoom(true)}><span>{t('profile.sidebar.createRoom')} </span></li>
-      <li onClick={() => setShowJoinRoom(true)}><span>{t('profile.sidebar.joinRoom')}</span></li>
+      {/* <li onClick={() => setShowCreateRoom(true)}><span>{t('profile.sidebar.createRoom')} </span></li>
+      <li onClick={() => setShowJoinRoom(true)}><span>{t('profile.sidebar.joinRoom')}</span></li> */}
       <li onClick={() => { setShowSavedPosts(true); fetchSavedPosts(); }}><span>{t('profile.sidebar.savedPosts')}</span></li>
       <li onClick={() => navigate(`/connections/${user?.id}`)}><span> {t('profile.sidebar.connections')} </span></li>
       <li onClick={()=> navigate("/edit")}><span> {t('profile.sidebar.edit')} </span></li>
-     {(user?.authorityLevel === "admin" || user?.authorityLevel === "superadmin") && (
+     {/* {(user?.authorityLevel === "admin" || user?.authorityLevel === "superadmin") && (
       <li onClick={() => navigate("/admin")}><span>{ t('profile.sidebar.adminPanel')}</span></li>
-      )}
+      )} */}
       <li onClick={handleLogout}><span> {t('profile.sidebar.logout') }</span></li>{/*should logout has a cnfirmation?...i'll judge on that based on how bad the confirmation of deleting an account would be*/ }
       <li className="delete-item"  onClick={handleDeleteAccount}><span> {t('profile.sidebar.deleteAccount')} </span> </li>
     </ul>
-
+ 
   </aside>
 
   {/* <!-- MAIN --> */}

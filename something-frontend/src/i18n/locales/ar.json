@@ -223,7 +223,11 @@
       "selectMajor": "اختر التخصص...",
       "subjectPlaceholder": "اسم المادة...",
       "sendRequest": "إرسال الطلب",
-      "sending": "جارٍ الإرسال..."
+      "sending": "جارٍ الإرسال...",
+       "searchPlaceholder": "البحث عن غرف أو مواد...",
+    "allMajors": "جميع التخصصات",
+    "clearFilters": "مسح التصفية",
+    "noResults": "لم يتم العثور على غرف مطابقة."
     },
     "announcements": {
       "title": "📢 الإعلانات",
@@ -232,6 +236,20 @@
     },
     "comments": {
       "deleteConfirm": "حذف هذا التعليق؟"
+    },
+    "nav": {
+  "chat": "محاثة",
+  "feed": "منشورات",
+  "profile": "حساب",
+  "rooms": "الغرف",
+  "admin": "المشرف",
+  "superadmin": "المشرف الاعلى",
+  "guide": "الدليل",
+  "language": "اللغة"
+},
+ "rooms": {
+      "myRooms": "غرفي",
+      "browse": "استعراض"
     }
   },
   "postModal": {

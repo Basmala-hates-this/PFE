@@ -224,7 +224,11 @@
       "selectMajor": "Select the major...",
       "subjectPlaceholder": "Subject name...",
       "sendRequest": "Send Request",
-      "sending": "Sending..."
+      "sending": "Sending...",
+       "searchPlaceholder": "Search rooms or subjects...",
+    "allMajors": "All Majors",
+    "clearFilters": "Clear Filters",
+    "noResults": "No matching rooms found."
     },
     "announcements": {
       "title": "📢 Announcements",
@@ -233,7 +237,22 @@
     },
     "comments": {
       "deleteConfirm": "Delete this comment?"
+    },
+    "nav": {
+  "chat": "Chat",
+  "feed": "Feed",
+  "profile": "Profile",
+  "rooms": "Rooms",
+  "admin": "Admin",
+  "superadmin": "Super Admin",
+  "guide": "Guide",
+  "language": "Language"
+},
+"rooms": {
+      "myRooms": "My Rooms",
+      "browse": "Browse Rooms"
     }
+  
   },
   "postModal": {
   "hiddenPost": "This post has been hidden by the moderation team.",

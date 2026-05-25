@@ -148,7 +148,7 @@ const handleSubmit = async (e) => {
     window.dispatchEvent(new Event("storage"));
 
     alert(t("editProfile.updateSuccess"));
-    navigate("/profile");
+    navigate("/dashboard");
 
   } catch (err) {
     if (err.response?.data?.message) {
@@ -227,7 +227,7 @@ const PasswordResetLink = () => {
       <a href="#"  className="editPassword" onClick={PasswordResetLink}>{t("editProfile.changePassword")}</a>
     </div>
            <div className="action-buttons">
-             <button type="button"  className="main-btn cancel-btn" onClick={() => navigate("/profile")}>{t("editProfile.cancel")}</button>
+             <button type="button"  className="main-btn cancel-btn" onClick={() => navigate("/dashboard")}>{t("editProfile.cancel")}</button>
 
                 <button type="submit" className="main-btn save-btn" id="saveBtn">
                     {t("editProfile.saveChanges")}

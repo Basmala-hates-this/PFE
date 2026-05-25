@@ -12,13 +12,14 @@
   overflow-x: hidden;
    width: 100%;
   min-height: 100vh;
+ 
 }
 
 /* === Dashboard Layout === */
 .dashboard {
   
- padding: 10px;
-  height: 100vh;
+ padding: 3px;
+  height: 98vh;
   box-sizing: border-box;
   width: 100%;
   max-width: 100%;
@@ -41,13 +42,13 @@
   padding: 20px 20px 0 20px;
   overflow: auto;
   box-shadow: 0 15px 35px #367e969b;
-  height: 98vh;
+  height: 99vh;
   width: calc(100% - 20px);
   max-width: 100%;
   margin: 0 auto;
   box-sizing: border-box;
 }
-
+ 
 /* === Header === */
 .header {
   background: var(--bg-header);
@@ -58,9 +59,9 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
-   height: 90px;        
-  padding: 10px 15px;
+  margin-bottom: 4px;
+   height: 50px;        
+  padding: 2px 5px;
 } 
 
 
@@ -378,3 +379,165 @@ font-size: 0.8rem;
   transform: translateX(18px);
 }
 
+/* ── Navbar ── */
+.dash-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  height: 45px;
+  background: var(--bg-header);
+  border-radius: 10px;
+  margin-bottom: 7px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.nav-tab {
+  background: none;
+  border: none;
+  color: var(--text-main);
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+.nav-tab:hover {
+  background: rgba(166, 192, 218, 0.449);
+  color: white;
+}
+.nav-tab.active {
+  background: rgba(100,118,175,0.3);
+  color: white;
+  font-weight: 600;
+  border-bottom: 2px solid #6476af;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-action-btn {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 8px;
+  color: white;
+  transition: background 0.15s ease;
+  position: relative;
+}
+.nav-action-btn:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+/* pfp in navbar — smaller than the old header pfp */
+.nav-pfp {
+  width: 42px !important;
+  height: 42px !important;
+  margin: 0 4px !important;
+}
+
+/* ── Lang popover ── */
+.lang-popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: #1a2235;
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 6px;
+  z-index: 200;
+  min-width: 120px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+
+.lang-option {
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: rgba(255,255,255,0.8);
+  transition: background 0.15s ease;
+}
+.lang-option:hover {
+  background: rgba(100,118,175,0.25);
+  color: white;
+}
+.lang-option.active {
+  color: #6476af;
+  font-weight: 600;
+}
+
+/* ── Tab content area ── */
+.tab-content {
+  /* height: calc(100vh - 80px);
+  overflow-y: auto;
+  border-radius: 10px; */
+  flex: 1;
+  overflow-y: auto;
+  border-radius: 10px;
+}
+
+
+
+/* Fix for Rooms View buttons */
+.rooms-actions-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.create-room-btn, .join-room-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+}
+
+.create-room-btn {
+  background: #6476af;
+  color: white;
+}
+
+.create-room-btn:hover {
+  background: #4a5a8a;
+  transform: translateY(-1px);
+}
+
+.join-room-btn {
+  background: rgba(100, 118, 175, 0.2);
+  color: var(--text-main);
+  border: 1px solid #6476af;
+}
+
+.join-room-btn:hover {
+  background: rgba(100, 118, 175, 0.4);
+  transform: translateY(-1px);
+}
+
+
+.navLogo{
+ width: 45px;
+  height: 45px;
+   margin-right: 8px ;
+    border-radius: 50%;
+    border: 2px solid whitesmoke;
+}

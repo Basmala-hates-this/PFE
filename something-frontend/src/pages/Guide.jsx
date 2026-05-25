@@ -249,12 +249,12 @@ export default function GuideComponent() {
       <aside className="guide-nav">
         <h2>{t("guide.sidebar.title")}</h2>
         <ul>
-          <li
+          {/* <li
             style={{ backgroundColor: "#0859d38d", borderColor: "#08d3d38d" }}
             onClick={() => navigate("/dashboard")}
           >
             {t("guide.back")}
-          </li>
+          </li> */}
           <li onClick={() => scrollTo("overview")}>{t("guide.nav.overview")}</li>
           <li onClick={() => scrollTo("dashboard")}>{t("guide.nav.dashboard")}</li>
           <li onClick={() => scrollTo("rooms")}>{t("guide.nav.rooms")}</li>

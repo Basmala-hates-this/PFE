@@ -1,11 +1,3 @@
-:root {
-  --bg-dark: #132041;
-  --bg-card: #152a4a;
-  --accent: #38bdf8;
-  --text-main: #f1f5f9;
-  --text-muted: #d0d6e0;
-  --border: #00b815;
-}
 
 .guide-container {
   display: flex;

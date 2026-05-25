@@ -19,6 +19,12 @@ import ReportModal from "../assets/components/ReportModal.jsx";
 import { useTranslation } from 'react-i18next';
 
 import { useRef } from "react";
+import AdminPanel from "./AdminPanel";       
+import SuperadminPanel from "./SuperadminPanel"; 
+import GuidePage from "./Guide";         
+import Profile from "./Profile";    
+import RoomsView from "../assets/components/RoomsView.jsx";    
+import logo from "../photos/logo2.png";     
 
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
@@ -40,6 +46,15 @@ export default function Dashboard() {
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [user, setUser] = useState(null);
+  //////////////////////////////
+  //expensive sarah
+  const [activeTab, setActiveTab] = useState("feed");
+const [langPopover, setLangPopover] = useState(false);
+const langPopoverRef = useRef(null);
+
+const isAdmin = user?.authorityLevel === "admin" || user?.authorityLevel === "superadmin";
+const isSuperAdmin = user?.authorityLevel === "superadmin";
+/////////////////////////
 
   //backen posts
   const [posts, setPosts] = useState([]);
@@ -128,6 +143,16 @@ const [isLight, setIsLight] = useState(
   /////////////////////////////////////////////////////////////////////////////////////
 
   //
+
+  useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (langPopoverRef.current && !langPopoverRef.current.contains(e.target)) {
+      setLangPopover(false);
+    }
+  };
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
   // If user skipped info/register, send them back
   // +for guests
 
@@ -793,8 +818,8 @@ const [isLight, setIsLight] = useState(
       minHeight: "10px",
       fontSize: "16px",
       boxShadow: "none",
-      width: "40%",
-      height: "50px",
+      width: "80%",
+      height: "40px",
 
       "&:hover": {
         border: "2px solid rgba(255,255,255,0.6)",
@@ -881,240 +906,167 @@ useEffect(() => {
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-  return (
-    <div id="body5">
-       {/* <div className="language-switcher">
-      <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
-      <select 
-        id="lang-select"
-        value={currentLang} // Keeps the dropdown synced with your active language
-        onChange={handleSelectChange}
-        className="lang-dropdown"
-      >
-        <option value="en">English</option>
-        <option value="fr">Français</option>
-        <option value="ar">العربية</option>
-      </select>
-    </div> */}
-    
-      {/* <div className={`dashboard ${sidebarOpen ? "" : "sidebar-collapsed"}`}>
-        <button
-          onClick={() => setSidebarOpen((prev) => !prev)}
-          style={{
-            position: "fixed",
-            top: "12px",
-            left: sidebarOpen ? "12px" : "12px",
-            zIndex: 1000,
-            background: "#6476af",
-            border: "none",
-            borderRadius: "6px",
-            color: "white",
-            width: "32px",
-            height: "32px",
-            cursor: "pointer",
-            fontSize: "20px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            marginTop: "10px",
-            marginLeft: sidebarOpen ? "15px" : "1px",
-            transition: "margin-left 0.3s ease",
-          }}
-        >
-          {sidebarOpen ? "✖" : "☰"}
-        </button> */}
+ return (
+  <div id="body5">
 
-        {/* <!-- Sidebar --> */}
-        {/* <aside className="sidebar">
-          <h2>{t('dashboard.sidebar.title')}</h2>
-          <ul>
-            <li id="home-link" onClick={() => fetchRoomsAndPosts()}>
-{t('dashboard.sidebar.refreshFeed')}
-            </li>
-            {!isGuest && (
-              <>
-                <li
-                  id="rooms-link"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setShowBrowseRooms(true);
-                    fetchSubjectRooms();
-                  }}
-                >
-                  {" "}
-                  {t('dashboard.sidebar.browseRooms')}
-                </li>
-                <li onClick={() => navigate("/profile")}>{t('dashboard.sidebar.profile')}</li>
-              </>
-            )}
-            {isGuest && (
-              <>
-                <li
-                  onClick={() => {
-                    localStorage.removeItem("guestToken");
-                    localStorage.removeItem("guestUniversities");
-                    navigate("/");
-                  }}
-                >
-                  {t('dashboard.sidebar.leaveGuest')}
-                </li>
-                <li
-                  onClick={() => {
-                    localStorage.removeItem("guestToken");
-                    localStorage.removeItem("guestUniversities");
-                    navigate("/info");
-                  }}
-                >
-                  {t('dashboard.sidebar.createAccount')}
-                </li>
-              </>
-            )}
-            {/* <li><a href="#" id="logoutBtn" onClick={() => navigate("/login")}>Logout</a></li> logout existing in both dashboard and profile was bugging me
-            right now, lets just keep it in the profile....should it have a confirmation? */}
-            {/*<li id="lgm">{t('dashboard.sidebar.lightMode')} </li>
-             the theme button is the only now to cause issues with clicking anywhere that is not the middle */}
-            {/* <li
-              onClick={(e) => {
-                e.preventDefault();
-                fetchAnnouncements();
-                setShowAnnouncements(true);
-              }}
-            >
-              {t('dashboard.sidebar.announcements')}
-            </li>
-            <li onClick={() => navigate("/guide")}>{t('dashboard.sidebar.guide')}</li>
-          </ul>
-        </aside> */}
+    {/* ── NAVBAR ── */}
+    <nav className="dash-navbar" dir={isRTL ? "rtl" : "ltr"}>
 
-        {/* <!-- Main content --> */}
-        <main className="dashMain">
-          {/* <!-- Header --> */}
-       
-<header className="header" dir={isRTL ? "rtl" : "ltr"}>
-  <h1 className="welH1">
-    {t('dashboard.header.welcome')}{" "}
-    <span
-      className="usernameDisplay"
-      style={{ cursor: isGuest ? "default" : "pointer" }}
-      onClick={() => !isGuest && navigate("/profile")}
+      {/* Left: tabs */}
+      <div className="nav-tabs">
+
+      {!isGuest && (
+  <>
+    <img src={logo} alt="Logo" className="navLogo" />
+    <button
+      className={`nav-tab ${activeTab === "chat" ? "active" : ""}`}
+      onClick={() => setActiveTab("chat")}
     >
-      @{isGuest ? t('dashboard.header.guest') : user?.username || "User"}
-      <small className="tag" style={{ marginLeft: "5px" }}>
-        {isGuest ? t('dashboard.header.guestTag') : user?.role}
-      </small>
-    </span>
-  </h1>
+      {t('dashboard.nav.chat')}
+    </button>
+  </> 
+)}
 
-  <div className="pfp-wrapper" ref={dropdownRef}>
-    <img
-      src={user?.profilePicUrl || Cat}
-      alt="pfp"
-      className="pfp"
-      onClick={() => setDropdownOpen(prev => !prev)}
-      style={{ cursor: "pointer" }}
-    />
+        <button
+          className={`nav-tab ${activeTab === "feed" ? "active" : ""}`}
+          onClick={() => setActiveTab("feed")}
+        >
+          {t('dashboard.nav.feed')}
+        </button>
 
-    {dropdownOpen && (
-      <div className="pfp-dropdown">
-        {/* Refresh feed */}
-        <div className="dd-item" onClick={() => { fetchRoomsAndPosts(); setDropdownOpen(false); }}>
-           {t('dashboard.sidebar.refreshFeed')}
-        </div>
+        {!isGuest && ( <button
+          className={`nav-tab ${activeTab === "profile" ? "active" : ""}`}
+          onClick={() => setActiveTab("profile")}
+        >
+          {t('dashboard.nav.profile')}
+        </button> )}
 
         {!isGuest && (
-          <>
-            <div className="dd-item" onClick={() => { navigate("/profile"); setDropdownOpen(false); }}>
-               {t('dashboard.sidebar.profile')}
-            </div>
-            <div className="dd-item" onClick={() => {
-              setShowBrowseRooms(true);
-              fetchSubjectRooms();
-              setDropdownOpen(false);
-            }}>
-               {t('dashboard.sidebar.browseRooms')}
-            </div>
-          </>
-        )}
-
-        <div className="dd-item" onClick={() => {
-          fetchAnnouncements();
-          setShowAnnouncements(true);
-          setDropdownOpen(false);
-        }}>
-          {t('dashboard.sidebar.announcements')}
-        </div>
-
-        <div className="dd-item" onClick={() => { navigate("/guide"); setDropdownOpen(false); }}>
-          {t('dashboard.sidebar.guide')}
-        </div>
-
-        {/* Language selector */}
-        <div className="dd-item dd-lang">
-          🌐
-          <select
-            value={currentLang}
-            onChange={(e) => { changeLanguage(e.target.value); }}
-            className="dd-lang-select"
-            onClick={e => e.stopPropagation()}
+          <button
+            className={`nav-tab ${activeTab === "rooms" ? "active" : ""}`}
+            onClick={() => setActiveTab("rooms")}
           >
-            <option value="en">English</option>
-            <option value="fr">Français</option>
-            <option value="ar">العربية</option>
-          </select>
-        </div>
-
-        {/* Dark/light toggle */}
-        <div className="dd-item dd-theme-toggle">
-          <span>{isLight ? t('dashboard.sidebar.darkMode') : t('dashboard.sidebar.lightMode')}</span>
-          <label className="toggle-switch">
-            <input
-              type="checkbox"
-              checked={isLight}
-             onChange={() => {
-  document.body.classList.toggle("light-mode");
-  const mode = document.body.classList.contains("light-mode") ? "light" : "dark";
-  localStorage.setItem("theme", mode);
-  setIsLight(mode === "light");
-}}
-            />
-            <span className="toggle-slider" />
-          </label>
-        </div>
-
-        {isGuest && (
-          <>
-            <div className="dd-divider" />
-           
-            <div className="dd-item" onClick={() => {
-              localStorage.removeItem("guestToken");
-              localStorage.removeItem("guestUniversities");
-              navigate("/info");
-            }}>
-               {t('dashboard.sidebar.createAccount')}
-            </div>
-             <div className="dd-item dd-danger" onClick={() => {
-              localStorage.removeItem("guestToken");
-              localStorage.removeItem("guestUniversities");
-              navigate("/");
-            }}>
-               {t('dashboard.sidebar.leaveGuest')}
-            </div>
-          </>
+            {t('dashboard.nav.rooms')}
+          </button>
         )}
-      </div>
-    )}
-  </div>
-</header>
 
-          {/* why is simple css so damn hell?....was using css framwork going to make this worst or better?..guess we never gonna know */}
+        {isAdmin && (
+          <button
+            className={`nav-tab ${activeTab === "admin" ? "active" : ""}`}
+            onClick={() => setActiveTab("admin")}
+          >
+            {t('dashboard.nav.admin')}
+          </button>
+        )}
+
+        {isSuperAdmin && (
+          <button
+            className={`nav-tab ${activeTab === "superadmin" ? "active" : ""}`}
+            onClick={() => setActiveTab("superadmin")}
+          >
+            {t('dashboard.nav.superadmin')}
+          </button>
+        )}
+
+        <button
+          className={`nav-tab ${activeTab === "guide" ? "active" : ""}`}
+          onClick={() => setActiveTab("guide")}
+        >
+          {t('dashboard.nav.guide')}
+        </button>
+
+      </div>
+
+      {/* Right: action buttons + pfp */}
+      <div className="nav-actions">
+
+        {/* Announcements */}
+        <button
+          className="nav-action-btn"
+          title={t('dashboard.sidebar.announcements')}
+          onClick={() => { fetchAnnouncements(); setShowAnnouncements(true); }}
+        >
+          📣
+        </button>
+
+        {/* Language popover */}
+        <div style={{ position: "relative" }} ref={langPopoverRef}>
+          <button
+            className="nav-action-btn"
+            title={t('dashboard.nav.language')}
+            onClick={() => setLangPopover(p => !p)}
+          >
+            🌐
+          </button>
+          {langPopover && (
+            <div className="lang-popover">
+              {[
+                { code: "en", label: "English" },
+                { code: "fr", label: "Français" },
+                { code: "ar", label: "العربية" },
+              ].map(({ code, label }) => (
+                <div
+                  key={code}
+                  className={`lang-option ${currentLang === code ? "active" : ""}`}
+                  onClick={() => { changeLanguage(code); setLangPopover(false); }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Theme toggle */}
+        <button
+          className="nav-action-btn"
+          title={isLight ? t('dashboard.sidebar.darkMode') : t('dashboard.sidebar.lightMode')}
+          onClick={() => {
+            document.body.classList.toggle("light-mode");
+            const mode = document.body.classList.contains("light-mode") ? "light" : "dark";
+            localStorage.setItem("theme", mode);
+            setIsLight(mode === "light");
+          }}
+        >
+          {isLight ? "🌙" : "☀️"}
+        </button>
+
+     
+      </div>
+    </nav>
+
+    {/* ── TAB CONTENT ── */}
+    <div className="tab-content">
+
+      {/* FEED TAB */}
+      {activeTab === "feed" && (
+        <main className="dashMain">
+
+          {/* welcome header */}
+          <header className="header" dir={isRTL ? "rtl" : "ltr"}>
+            <h3 className="welH1">
+              {t('dashboard.header.welcome')}{" "}
+              <span className="usernameDisplay">
+                @{isGuest ? t('dashboard.header.guest') : user?.username || "User"}
+                <small className="tag" style={{ marginLeft: "5px" }}>
+                  {isGuest ? t('dashboard.header.guestTag') : user?.role}
+                </small>
+              </span>
+            </h3>
+               {/* PFP — navigates to profile tab */}
+       <img
+  src={user?.profilePicUrl || Cat}
+  alt="pfp"
+  className="pfp nav-pfp"
+  onClick={() => !isGuest && setActiveTab("profile")}
+  style={{ cursor: "pointer" }}
+/>
+          </header>
+
+          {/* room select + search + post button */}
           <section
             className="room-selection"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              marginBottom: "15px",
-            }}
+            style={{ display: "flex", alignItems: "center", gap: "5px", marginBottom: "7px" }}
           >
             <div style={{ flex: 1 }}>
               <Select
@@ -1126,8 +1078,8 @@ useEffect(() => {
                 styles={cSelect}
               />
             </div>
-            {/* this is gonna hurt.... */}
-            <div style={{ position: "relative", width: "25%" }}>
+
+            <div style={{ position: "relative", width: "35%" }}>
               <input
                 type="text"
                 id="dashSearch"
@@ -1135,9 +1087,7 @@ useEffect(() => {
                 placeholder={t('dashboard.feed.searchPlaceholder')}
                 value={searchQuery}
                 onChange={(e) => handleSearch(e.target.value)}
-                onBlur={() =>
-                  setTimeout(() => setShowSearchDropdown(false), 200)
-                }
+                onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
                 style={{
                   width: "100%",
                   border: "2px solid #8ca4c6",
@@ -1149,84 +1099,32 @@ useEffect(() => {
               />
 
               {showSearchDropdown && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "42px",
-                    left: 0,
-                    right: 0,
-                    background: "#2d3350",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
-                    zIndex: 100,
-                  }}
-                >
+                <div style={{
+                  position: "absolute", top: "42px", left: 0, right: 0,
+                  background: "#2d3350", borderRadius: "8px",
+                  boxShadow: "0 4px 20px rgba(0,0,0,0.3)", zIndex: 100,
+                }}>
                   <div style={{ display: "flex" }}>
                     {/* posts side */}
-                    <div
-                      style={{
-                        flex: 1,
-                        borderRight: "1px solid rgba(255,255,255,0.1)",
-                        maxHeight: "250px",
-                        overflowY: "auto",
-                      }}
-                    >
-                      <p
-                        style={{
-                          padding: "8px 12px",
-                          margin: 0,
-                          color: "rgba(255,255,255,0.5)",
-                          fontSize: "11px",
-                          borderBottom: "1px solid rgba(255,255,255,0.1)",
-                        }}
-                      >
+                    <div style={{ flex: 1, borderRight: "1px solid rgba(255,255,255,0.1)", maxHeight: "250px", overflowY: "auto" }}>
+                      <p style={{ padding: "8px 12px", margin: 0, color: "rgba(255,255,255,0.5)", fontSize: "11px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
                         {t('dashboard.search.posts')}
                       </p>
                       {searchResults.posts.length === 0 ? (
-                        <p
-                          style={{
-                            padding: "12px",
-                            opacity: 0.4,
-                            fontSize: "12px",
-                            textAlign: "center",
-                          }}
-                        >
+                        <p style={{ padding: "12px", opacity: 0.4, fontSize: "12px", textAlign: "center" }}>
                           {t('dashboard.search.noPostsFound')}
                         </p>
                       ) : (
                         searchResults.posts.slice(0, 2).map((post) => (
                           <div
                             key={post.id}
-                            onClick={() => {
-                              setSelectedPost(post);
-                              setShowSearchDropdown(false);
-                              setSearchQuery("");
-                            }}
-                            style={{
-                              padding: "10px 12px",
-                              cursor: "pointer",
-                              borderBottom: "1px solid rgba(255,255,255,0.05)",
-                            }}
-                            onMouseEnter={(e) =>
-                              (e.currentTarget.style.background =
-                                "rgba(255,255,255,0.08)")
-                            }
-                            onMouseLeave={(e) =>
-                              (e.currentTarget.style.background = "transparent")
-                            }
+                            onClick={() => { setSelectedPost(post); setShowSearchDropdown(false); setSearchQuery(""); }}
+                            style={{ padding: "10px 12px", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.05)" }}
+                            onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                           >
-                            <strong
-                              style={{ fontSize: "12px", color: "white" }}
-                            >
-                              @{post.authorUsername}
-                            </strong>
-                            <p
-                              style={{
-                                margin: "2px 0 0",
-                                fontSize: "11px",
-                                color: "rgba(255,255,255,0.6)",
-                              }}
-                            >
+                            <strong style={{ fontSize: "12px", color: "white" }}>@{post.authorUsername}</strong>
+                            <p style={{ margin: "2px 0 0", fontSize: "11px", color: "rgba(255,255,255,0.6)" }}>
                               {post.content?.slice(0, 50)}...
                             </p>
                           </div>
@@ -1236,87 +1134,27 @@ useEffect(() => {
 
                     {/* users side */}
                     {!isGuest && (
-                      <div
-                        style={{
-                          flex: 1,
-                          maxHeight: "250px",
-                          overflowY: "auto",
-                        }}
-                      >
-                        <p
-                          style={{
-                            padding: "8px 12px",
-                            margin: 0,
-                            color: "rgba(255,255,255,0.5)",
-                            fontSize: "11px",
-                            borderBottom: "1px solid rgba(255,255,255,0.1)",
-                          }}
-                        >
+                      <div style={{ flex: 1, maxHeight: "250px", overflowY: "auto" }}>
+                        <p style={{ padding: "8px 12px", margin: 0, color: "rgba(255,255,255,0.5)", fontSize: "11px", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
                           {t('dashboard.search.users')}
                         </p>
                         {searchResults.users.length === 0 ? (
-                          <p
-                            style={{
-                              padding: "12px",
-                              opacity: 0.4,
-                              fontSize: "12px",
-                              textAlign: "center",
-                            }}
-                          >
+                          <p style={{ padding: "12px", opacity: 0.4, fontSize: "12px", textAlign: "center" }}>
                             {t('dashboard.search.noUsersFound')}
                           </p>
                         ) : (
                           searchResults.users.slice(0, 2).map((u) => (
                             <div
                               key={u.id}
-                              onClick={() => {
-                                setShowSearchDropdown(false);
-                                setSearchQuery("");
-                                navigate(`/users/${u.id}`);
-                              }}
-                              style={{
-                                padding: "10px 12px",
-                                cursor: "pointer",
-                                borderBottom:
-                                  "1px solid rgba(255,255,255,0.05)",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "8px",
-                              }}
-                              onMouseEnter={(e) =>
-                                (e.currentTarget.style.background =
-                                  "rgba(255,255,255,0.08)")
-                              }
-                              onMouseLeave={(e) =>
-                                (e.currentTarget.style.background =
-                                  "transparent")
-                              }
+                              onClick={() => { setShowSearchDropdown(false); setSearchQuery(""); navigate(`/users/${u.id}`); }}
+                              style={{ padding: "10px 12px", cursor: "pointer", borderBottom: "1px solid rgba(255,255,255,0.05)", display: "flex", alignItems: "center", gap: "8px" }}
+                              onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.08)"}
+                              onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                             >
-                              <img
-                                src={u.profilePicUrl || Cat}
-                                alt="pfp"
-                                style={{
-                                  width: "28px",
-                                  height: "28px",
-                                  borderRadius: "50%",
-                                  objectFit: "cover",
-                                }}
-                              />
+                              <img src={u.profilePicUrl || Cat} alt="pfp" style={{ width: "28px", height: "28px", borderRadius: "50%", objectFit: "cover" }} />
                               <div>
-                                <strong
-                                  style={{ fontSize: "12px", color: "white" }}
-                                >
-                                  @{u.username}
-                                </strong>
-                                <small
-                                  style={{
-                                    display: "block",
-                                    color: "rgba(255,255,255,0.5)",
-                                    fontSize: "11px",
-                                  }}
-                                >
-                                  {u.role}
-                                </small>
+                                <strong style={{ fontSize: "12px", color: "white" }}>@{u.username}</strong>
+                                <small style={{ display: "block", color: "rgba(255,255,255,0.5)", fontSize: "11px" }}>{u.role}</small>
                               </div>
                             </div>
                           ))
@@ -1325,27 +1163,11 @@ useEffect(() => {
                     )}
                   </div>
 
-                  {/* see all results */}
                   <div
-                    onClick={() => {
-                      setShowSearchDropdown(false);
-                      navigate(`/search?q=${searchQuery}`);
-                    }}
-                    style={{
-                      padding: "10px",
-                      textAlign: "center",
-                      borderTop: "1px solid rgba(255,255,255,0.1)",
-                      cursor: "pointer",
-                      color: "#8ca4c6",
-                      fontSize: "12px",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.background =
-                        "rgba(255,255,255,0.05)")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.background = "transparent")
-                    }
+                    onClick={() => { setShowSearchDropdown(false); navigate(`/search?q=${searchQuery}`); }}
+                    style={{ padding: "10px", textAlign: "center", borderTop: "1px solid rgba(255,255,255,0.1)", cursor: "pointer", color: "#8ca4c6", fontSize: "12px" }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.05)"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
                   >
                     {t('dashboard.search.seeAll', { query: searchQuery })} →
                   </div>
@@ -1356,70 +1178,47 @@ useEffect(() => {
             <button
               id="postBtn"
               className="postBtn"
-              style={{
-                width: "15%",
-                height: "38px",
-                padding: "3px",
-                borderRadius: "6px",
-                whiteSpace: "nowrap",
-              }}
-              onClick={() =>
-                isGuest ? alert(t('dashboard.post.guestVoteAlert')) : setIsModalOpen(true)
-              }
+              style={{ width: "15%", height: "38px", padding: "3px", borderRadius: "6px", whiteSpace: "nowrap" }}
+              onClick={() => isGuest ? alert(t('dashboard.post.guestVoteAlert')) : setIsModalOpen(true)}
             >
               {t('dashboard.feed.writePost')}
             </button>
           </section>
 
-          {/* <!-- Feed --> */}
+          {/* feed */}
           <section className="fyp-container">
-            <h2 className="H2feed">{t('dashboard.feed.title')}</h2>
             <div style={{ display: "flex", gap: "8px", marginBottom: "12px" }}>
               {[
-                { key: "random", label: (t('dashboard.feed.sortAll')) },
-                { key: "recent", label: (t('dashboard.feed.sortRecent')) },
-                { key: "popular", label: (t('dashboard.feed.sortPopular')) },
+                { key: "random", label: t('dashboard.feed.sortAll') },
+                { key: "recent", label: t('dashboard.feed.sortRecent') },
+                { key: "popular", label: t('dashboard.feed.sortPopular') },
               ].map(({ key, label }) => (
                 <button
                   key={key}
                   onClick={() => setSortBy(key)}
                   style={{
-                    padding: "4px 12px",
-                    borderRadius: "20px",
-                    border: "none",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    background:
-                      sortBy === key ? "#6476af" : "rgba(255,255,255,0.1)",
-                    color: "balck",
+                    padding: "4px 12px", borderRadius: "20px", border: "none",
+                    cursor: "pointer", fontSize: "12px",
+                    background: sortBy === key ? "#6476af" : "rgba(255,255,255,0.1)",
+                    color: "black",
                   }}
                 >
                   {label}
                 </button>
-              ))} 
-               <button
-    onClick={() => fetchRoomsAndPosts()}
-    style={{
-      width: "140px",
-      padding: "4px 12px",
-      borderRadius: "20px",
-      border: "none",
-      cursor: "pointer",
-      fontSize: "14px",
-      background: "rgba(255,255,255,0.1)",
-      marginLeft: "auto",  /* pushes it to the far right of the row */
-    }}
-  >
-     {t('dashboard.sidebar.refreshFeed')}
-  </button>
-</div>
-            
+              ))}
+              <button
+                onClick={() => fetchRoomsAndPosts()}
+                style={{
+                  width: "140px", padding: "4px 12px", borderRadius: "20px",
+                  border: "none", cursor: "pointer", fontSize: "14px",
+                  background: "rgba(255,255,255,0.1)", marginLeft: "auto",
+                }}
+              >
+                {t('dashboard.sidebar.refreshFeed')}
+              </button>
+            </div>
+
             <div className="fyp-feed" id="fyp-feed">
-              {/* <p>
-                ehh...the mock are just for funsies....this will not be at all
-                the way this will be..i hope
-                how the tables have turned......damn u ihm prof u ruined my happines of my work
-              </p> */}
               {loading ? (
                 <p>{t('dashboard.feed.loading')}...</p>
               ) : posts.length === 0 ? (
@@ -1431,259 +1230,93 @@ useEffect(() => {
                     <div
                       key={post.id}
                       className="mock-post"
-                      style={{
-                        border: "1px solid #ccc",
-                        marginBottom: "5px",
-                        padding: "14px",
-                        borderRadius: "6px",
-                      }}
+                      style={{ border: "1px solid #ccc", marginBottom: "5px", padding: "14px", borderRadius: "6px" }}
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                          marginBottom: "6px",
-                        }}
-                      >
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
                         <img
                           src={post.authorProfilePic || Cat}
                           alt="pfp"
-                          style={{
-                            width: "40px",
-                            height: "40px",
-                            borderRadius: "50%",
-                            objectFit: "cover",
-                            border: "1px solid var(--dark)",
-                            padding: "2px",
-                            cursor: "pointer"
-                          }}
-                          onClick={() =>!isGuest && navigate(`/users/${post.userId}`)}
+                          style={{ width: "40px", height: "40px", borderRadius: "50%", objectFit: "cover", border: "1px solid var(--dark)", padding: "2px", cursor: "pointer" }}
+                          onClick={() => !isGuest && navigate(`/users/${post.userId}`)}
                         />
-                        <strong
-                        style={{ cursor: "pointer" }}
-                        onClick={() => !isGuest && navigate(`/users/${post.userId}`)}
-                        >@{post.authorUsername}</strong>
-                        <small
-                          style={{
-                            background: "#6476af",
-                            color: "white",
-                            padding: "2px 8px",
-                            borderRadius: "10px",
-                            fontSize: "11px",
-                          }}
-                        >
+                        <strong style={{ cursor: "pointer" }} onClick={() => !isGuest && navigate(`/users/${post.userId}`)}>
+                          @{post.authorUsername}
+                        </strong>
+                        <small style={{ background: "#6476af", color: "white", padding: "2px 8px", borderRadius: "10px", fontSize: "11px" }}>
                           {post.authorRole || "user"}
                         </small>
-                        <small style={{ opacity: 0.6 }}>
-                          {getRoomName(post.roomId)}
-                        </small>
+                        <small style={{ opacity: 0.6 }}>{getRoomName(post.roomId)}</small>
                       </div>
-                      <div
-                        className="post-body"
-                        style={{ marginTop: "10px", marginBottom: "10px" }}
-                      >
+
+                      <div className="post-body" style={{ marginTop: "10px", marginBottom: "10px" }}>
                         {post.title && (
-                          <h3
-                            style={{
-                              margin: "0 0 8px 0",
-                              fontSize: "1.2rem",
-                              color: "var(--text-postTitle)",
-                            }}
-                          >
+                          <h3 style={{ margin: "0 0 8px 0", fontSize: "1.2rem", color: "var(--text-postTitle)" }}>
                             {post.title}
                           </h3>
                         )}
-                        <p style={{ margin: 0, lineHeight: "1.5", opacity: 1 }}>
-                          {post.content}
-                        </p>
+                        <p style={{ margin: 0, lineHeight: "1.5" }}>{post.content}</p>
                       </div>
-                      {/* image attachment */}
+
                       {post.imageUrl && (
                         <div style={{ marginBottom: "8px" }}>
-                          <a
-                            href={post.imageUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <img
-                              src={post.imageUrl}
-                              alt="attachment"
-                              style={{
-                                maxWidth: "100%",
-                                width: "60%",
-                                borderRadius: "8px",
-                                display: "block",
-                                cursor: "pointer",
-                              }}
-                            />
+                          <a href={post.imageUrl} target="_blank" rel="noopener noreferrer">
+                            <img src={post.imageUrl} alt="attachment" style={{ maxWidth: "100%", width: "60%", borderRadius: "8px", display: "block", cursor: "pointer" }} />
                           </a>
-                          <a
-                            href={post.imageUrl}
-                            download
-                            style={{
-                              display: "inline-block",
-                              marginTop: "4px",
-                              fontSize: "13px",
-                              color: "#d4dfed",
-                              backgroundColor: "#2b2b2b7d",
-                              textDecoration: "none",
-                              border: "1px solid #ffffff7d",
-                              padding: "2px 8px",
-                              borderRadius: "6px",
-                            }}
-                          >
+                          <a href={post.imageUrl} download style={{ display: "inline-block", marginTop: "4px", fontSize: "13px", color: "#d4dfed", backgroundColor: "#2b2b2b7d", textDecoration: "none", border: "1px solid #ffffff7d", padding: "2px 8px", borderRadius: "6px" }}>
                             {t('dashboard.post.downloadImage')}
                           </a>
                         </div>
                       )}
 
-                      {/* pdf attachment */}
                       {post.pdfUrl && (
-                        <a
-                          href={post.pdfUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            padding: "6px 12px",
-                            background: "rgba(16, 15, 15, 0.25)",
-                            borderRadius: "6px",
-                            color: "white",
-                            textDecoration: "none",
-                            fontSize: "13px",
-                            marginBottom: "8px",
-                          }}
-                        >
+                        <a href={post.pdfUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(16,15,15,0.25)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px" }}>
                           {t('dashboard.post.viewPdf')}
                         </a>
                       )}
 
-                      {/* resource link */}
                       {post.resourceLink && (
-                        <a
-                          href={post.resourceLink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: "6px",
-                            padding: "6px 12px",
-                            background: "rgba(100,118,175,0.3)",
-                            borderRadius: "6px",
-                            color: "white",
-                            textDecoration: "none",
-                            fontSize: "13px",
-                            marginBottom: "8px",
-                            height: "30px",
-                          }}
-                        >
-                          🔗 {post.resourceLabel || "Open Resource"}
+                        <a href={post.resourceLink} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px", height: "30px" }}>
+                          🔗 {post.resourceLabel || t('dashboard.post.openResource')}
                         </a>
                       )}
-                      <small>
-                        {post.createdAt
-                          ? new Date(post.createdAt).toLocaleString()
-                          : "—"}
-                      </small>
+
+                      <small>{post.createdAt ? new Date(post.createdAt).toLocaleString() : "—"}</small>
+
                       <div style={{ marginTop: "8px" }}>
                         <button
-                          onClick={() =>
-                            isGuest
-                              ? alert(t('dashboard.post.guestVoteAlert'))
-                              : handleVote(post.id, "useful")
-                          }
-                          style={{
-                            fontSize: "13px",
-                            padding: "2px 8px",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            color: "#000000",
-                            backgroundColor: "#27ae5f9a",
-                            border: "1px solid #27ae60b3",
-                            height: "30px",
-                          }}
+                          onClick={() => isGuest ? alert(t('dashboard.post.guestVoteAlert')) : handleVote(post.id, "useful")}
+                          style={{ fontSize: "13px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", color: "#000000", backgroundColor: "#27ae5f9a", border: "1px solid #27ae60b3", height: "30px" }}
                         >
-                          {post.voteUseful}{t('dashboard.post.useful')}{" "}
+                          {post.voteUseful}{t('dashboard.post.useful')}
                         </button>
+
                         <button
-                          onClick={() =>
-                            isGuest
-                              ? alert(t('dashboard.post.guestVoteAlert'))
-                              : handleVote(post.id, "useless")
-                          }
-                          style={{
-                            marginLeft: "8px",
-                            fontSize: "13px",
-                            padding: "2px 8px",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            color: "#000000",
-                            backgroundColor: "#d9770693",
-                            border: "1px solid #c0392bb3",
-                            height: "30px",
-                          }}
+                          onClick={() => isGuest ? alert(t('dashboard.post.guestVoteAlert')) : handleVote(post.id, "useless")}
+                          style={{ marginLeft: "8px", fontSize: "13px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", color: "#000000", backgroundColor: "#d9770693", border: "1px solid #c0392bb3", height: "30px" }}
                         >
-                          {post.voteUseless}{t('dashboard.post.useless')}{" "}
+                          {post.voteUseless}{t('dashboard.post.useless')}
                         </button>
+
                         <button
                           onClick={() => setSelectedPost(post)}
-                          style={{
-                            marginLeft: "8px",
-                            fontSize: "13px",
-                            padding: "2px 8px",
-                            borderRadius: "6px",
-                            cursor: "pointer",
-                            color: "#000000",
-                            backgroundColor: "#297fb990",
-                            border: "1px solid #6cb1df",
-                            height: "30px",
-                          }}
+                          style={{ marginLeft: "8px", fontSize: "13px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", color: "#000000", backgroundColor: "#297fb990", border: "1px solid #6cb1df", height: "30px" }}
                         >
                           {t('dashboard.post.comments')} {post.commentCount}
                         </button>
+
                         {!isGuest && (
                           <button
                             onClick={() => handleSavePost(post.id)}
-                            style={{
-                              marginLeft: "8px",
-                              cursor: "pointer",
-                              color: savedPostIds.includes(post.id)
-                                ? "black"
-                                : "inherit",
-                              background: "none",
-                              borderRadius: "8px",
-                              fontSize: "13px",
-                              height: "30px",
-                              padding: "4px",
-                              border: savedPostIds.includes(post.id)
-                                ? "2px solid #31d073"
-                                : "2px solid rgba(10, 10, 10, 0.5)",
-                            }}
+                            style={{ marginLeft: "8px", cursor: "pointer", color: savedPostIds.includes(post.id) ? "black" : "inherit", background: "none", borderRadius: "8px", fontSize: "13px", height: "30px", padding: "4px", border: savedPostIds.includes(post.id) ? "2px solid #31d073" : "2px solid rgba(10,10,10,0.5)" }}
                           >
-                           {savedPostIds.includes(post.id) ? t('dashboard.post.saved') : t('dashboard.post.save')}
+                            {savedPostIds.includes(post.id) ? t('dashboard.post.saved') : t('dashboard.post.save')}
                           </button>
                         )}
 
                         {!isGuest && currentUser?.id !== post.userId && (
                           <button
-                            onClick={() =>
-                              setReportTarget({ type: "post", postId: post.id })
-                            }
-                            style={{
-                              marginLeft: "8px",
-                              cursor: "pointer",
-                              color: "#ffffff",
-                              backgroundColor: "#868686cb",
-                              borderColor: "#c0392b",
-                              fontSize: "13px",
-                              height: "30px",
-                              padding: "4px",
-                              borderRadius: "8px",
-                            }}
+                            onClick={() => setReportTarget({ type: "post", postId: post.id })}
+                            style={{ marginLeft: "8px", cursor: "pointer", color: "#ffffff", backgroundColor: "#868686cb", borderColor: "#c0392b", fontSize: "13px", height: "30px", padding: "4px", borderRadius: "8px" }}
                           >
                             {t('dashboard.post.report')}
                           </button>
@@ -1692,41 +1325,16 @@ useEffect(() => {
                         {currentUser?.id === post.userId && (
                           <button
                             onClick={() => handleDeletePost(post.id)}
-                            style={{
-                              marginLeft: "8px",
-                              cursor: "pointer",
-                              color: "#f6f4f4",
-                              backgroundColor: "#868686db",
-                              border: "2px,solid, #ff0101",
-                              fontSize: "13px",
-                              height: "30px",
-                              padding: "4px",
-                              borderRadius: "8px",
-                            }}
+                            style={{ marginLeft: "8px", cursor: "pointer", color: "#f6f4f4", backgroundColor: "#868686db", border: "2px solid #ff0101", fontSize: "13px", height: "30px", padding: "4px", borderRadius: "8px" }}
                           >
                             {t('dashboard.post.delete')}
                           </button>
                         )}
+
                         {currentUser?.id === post.userId && (
                           <button
-                            onClick={() => {
-                              setEditingPost(post);
-                              setEditPostTitle(post.title);
-                              setEditPostContent(post.content);
-                            }}
-                            style={{
-                              marginLeft: "8px",
-                              color: "#fff",
-                              cursor: "pointer",
-                              backgroundColor: "#868686d6",
-                              border: "2px solid green",
-                              fontSize: "13px",
-                              height: "30px",
-                              padding: "4px",
-                              borderRadius: "8px",
-                              width: "60px",
-                              textAlign: "center",
-                            }}
+                            onClick={() => { setEditingPost(post); setEditPostTitle(post.title); setEditPostContent(post.content); }}
+                            style={{ marginLeft: "8px", color: "#fff", cursor: "pointer", backgroundColor: "#868686d6", border: "2px solid green", fontSize: "13px", height: "30px", padding: "4px", borderRadius: "8px", width: "60px", textAlign: "center" }}
                           >
                             {t('dashboard.post.edit')}
                           </button>
@@ -1739,558 +1347,185 @@ useEffect(() => {
             </div>
           </section>
         </main>
-        {/* right down here we fuck around and find out */}
-        {isModalOpen && (
-          <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                }}
-              >
-                <h3 style={{ margin: 0 }}>{t('dashboard.postModal.title')}</h3>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "20px",
-                    cursor: "pointer",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
+      )}
 
-              <input
-                type="text"
-                placeholder={t('dashboard.postModal.titlePlaceholder')}
-                value={postTitle}
-                onChange={(e) => setPostTitle(e.target.value)}
-                style={{
-                  width: "100%",
-                  marginBottom: "10px",
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border: "1px solid #ccc",
-                  boxSizing: "border-box",
-                }}
-              />
+      {/* PROFILE TAB */}
+      {activeTab === "profile" &&   <Profile embedded />}
 
-              <Select
-                options={groupedRoomOptions}
-                value={selectedPostRoom}
-                onChange={(selected) => setSelectedPostRoom(selected)}
-                placeholder={t('dashboard.postModal.selectRoom')}
-                styles={customSelect}
-                // isMulti
-              />
-              <br />
+      
+      {/* ROOMS TAB */}
+{activeTab === "rooms" &&  (
+  <main className="dashMain">
+    <RoomsView 
+      userRooms={userRooms}
+      setUserRooms={setUserRooms}
+      subjectRoomsData={subjectRoomsData}
+      subjectRoomsLoading={subjectRoomsLoading}
+      fetchSubjectRooms={fetchSubjectRooms}
+      handleJoinSubjectRoom={handleJoinSubjectRoom}
+      handleCreateAndJoinSubjectRoom={handleCreateAndJoinSubjectRoom}
+      handleLeaveSubjectRoom={handleLeaveSubjectRoom}
+      handleRequestSubjectRoom={handleRequestSubjectRoom}
+      requestMajor={requestMajor}
+      setRequestMajor={setRequestMajor}
+      requestSubject={requestSubject}
+      setRequestSubject={setRequestSubject}
+      requestFeedback={requestFeedback}
+      requestLoading={requestLoading}
+      t={t}
+    />
+  </main>
+)}
 
-              <textarea
-                value={postContent}
-                onChange={(e) => setPostContent(e.target.value)}
-                placeholder={t('dashboard.postModal.contentPlaceholder')}
-                style={{
-                  width: "100%",
-                  minHeight: "120px",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  border: "1px solid #ccc",
-                  boxSizing: "border-box",
-                  resize: "vertical",
-                }}
-              />
+      {/* CHAT TAB — placeholder */}
+      {activeTab === "chat" &&(
+        <div style={{ padding: "20px" }}>
+          <p style={{ opacity: 0.5 }}>{t('dashboard.nav.chat')} — coming soon</p>
+        </div>
+      )}
 
-              {/* //////attachment thingies.....this is gonna be messy....the football player?! */}
-              {/* image/pdf attachment */}
-              <div style={{ marginTop: "10px" }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "6px",
-                    opacity: 0.7,
-                    fontSize: "13px",
-                  }}
-                >
-                  {t('dashboard.postModal.attachLabel')}
-                </label>
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  onChange={(e) => setPostAttachment(e.target.files[0])}
-                  style={{ fontSize: "13px", color: "white" }}
-                />
-                {postAttachment && (
-                  <small
-                    style={{ display: "block", marginTop: "4px", opacity: 0.6 }}
-                  >
-                    Selected: {postAttachment.name}
-                    <button
-                      onClick={() => setPostAttachment(null)}
-                      style={{
-                        marginLeft: "8px",
-                        background: "none",
-                        border: "none",
-                        color: "#fc0c0c",
-                        cursor: "pointer",
-                        fontSize: "11px",
-                      }}
-                    >
-                      ✕ Remove
-                    </button>
-                  </small>
-                )}
-              </div>
+      {/* ADMIN TAB */}
+      {activeTab === "admin" && isAdmin && <AdminPanel embedded />}
 
-              {/* resource link */}
-              <div style={{ marginTop: "10px" }}>
-                <label
-                  style={{
-                    display: "block",
-                    marginBottom: "6px",
-                    opacity: 0.7,
-                    fontSize: "13px",
-                  }}
-                >
-                  {t('dashboard.postModal.resourceLinkLabel')} (Google Drive, GitHub, etc.)
-                </label>
-                <input
-                  type="url"
-                  placeholder={t('dashboard.postModal.resourceLinkPlaceholder')}
-                  value={postResourceLink}
-                  onChange={(e) => setPostResourceLink(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "8px",
-                    border: "1px solid #ccc",
-                    boxSizing: "border-box",
-                    marginBottom: "6px",
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder={t('dashboard.postModal.resourceLabelPlaceholder')}
-                  value={postResourceLabel}
-                  onChange={(e) => setPostResourceLabel(e.target.value)}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "8px",
-                    border: "1px solid #ccc",
-                    boxSizing: "border-box",
-                  }}
-                />
-              </div>
+      {/* SUPERADMIN TAB */}
+      {activeTab === "superadmin" && isSuperAdmin && <SuperadminPanel embedded />}
 
-              <br />
-              <br />
+      {/* GUIDE TAB */}
+      {activeTab === "guide" && <GuidePage embedded />}
 
-              <div
-                className="modal-actions"
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "10px",
-                }}
-              >
-                <button onClick={() => setIsModalOpen(false)}>{t('dashboard.postModal.cancel')}</button>
-                <button
-                  onClick={handleSubmitPost}
-                   disabled={!postContent.trim() || !selectedPostRoom || isSubmitting}
-                >
-                  {isSubmitting ? t('dashboard.postModal.posting') : t('dashboard.postModal.post')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {editingPost && (
-          <div className="modal-overlay" onClick={() => setEditingPost(null)}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                }}
-              >
-                <h3 style={{ margin: 0 }}>{t('dashboard.postModal.editTitle')}</h3>
-                <button
-                  onClick={() => setEditingPost(null)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "20px",
-                    cursor: "pointer",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <input
-                type="text"
-                value={editPostTitle}
-                onChange={(e) => setEditPostTitle(e.target.value)}
-                placeholder="Title"
-                style={{
-                  width: "100%",
-                  marginBottom: "10px",
-                  padding: "8px",
-                  borderRadius: "8px",
-                  border: "1px solid #ccc",
-                  boxSizing: "border-box",
-                }}
-              />
-
-              <textarea
-                value={editPostContent}
-                onChange={(e) => setEditPostContent(e.target.value)}
-                placeholder="Content"
-                style={{
-                  width: "100%",
-                  minHeight: "120px",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  border: "1px solid #ccc",
-                  boxSizing: "border-box",
-                  resize: "vertical",
-                }}
-              />
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  gap: "10px",
-                  marginTop: "15px",
-                }}
-              >
-                <button onClick={() => setEditingPost(null)} style={{padding:"4px", width:"60px", textAlign:"center", backgroundColor:"#da2828", color:"white", borderRadius:"8px",marginLeft:"20px"}}>{t('dashboard.postModal.cancel')}</button>
-                <button onClick={() => handleEditPost(editingPost.id)} 
-                  disabled={isSubmitting}
-                  style={{padding:"4px", backgroundColor:"#3ada28", color:"black", borderRadius:"8px",marginLeft:"20px", width:"60px", textAlign:"center"}}
-                  >
-                    {isSubmitting ? t('dashboard.postModal.saving') : t('dashboard.postModal.save')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {selectedPost && (
-          <PostModal
-            postId={selectedPost.id}
-            onClose={() => setSelectedPost(null)}
-            isGuest={isGuest}
-          />
-        )}
-
-        {/* i seriosly need better modals.....but UI for last apperantly */}
-
-        {showBrowseRooms && (
-          <div
-            className="modal-overlay"
-            onClick={() => setShowBrowseRooms(false)}
-          >
-            <div
-              className="modal"
-              onClick={(e) => e.stopPropagation()}
-              style={{ maxHeight: "100vh", overflowY: "auto" }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "15px",
-                }}
-              >
-                <h3 style={{ margin: 0 }}>{t('dashboard.browseRooms.title')}</h3>
-                <button
-                  onClick={() => setShowBrowseRooms(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "20px",
-                    cursor: "pointer",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              {subjectRoomsLoading ? (
-                <p style={{ opacity: 0.5, textAlign: "center" }}>Loading...</p>
-              ) : subjectRoomsData.length === 0 ? (
-                <p style={{ opacity: 0.5, textAlign: "center" }}>
-                  {t('dashboard.browseRooms.noRooms')}
-                </p>
-              ) : (
-                subjectRoomsData.map(({ major, majorId, rooms, available }) => (
-                  <div key={major} style={{ marginBottom: "20px" }}>
-                    <h4
-                      style={{
-                        margin: "0 0 10px",
-                        color: "#6476af",
-                        borderBottom: "1px solid rgba(255,255,255,0.1)",
-                        paddingBottom: "6px",
-                      }}
-                    >
-                      {major}
-                    </h4>
-
-                    {/* joined rooms */}
-                    {rooms.map((room) => (
-                      <div
-                        key={room.id}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          padding: "8px 10px",
-                          marginBottom: "6px",
-                          background: "rgba(100,118,175,0.2)",
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <span>✓ {room.name}</span>
-                        <button
-                          onClick={() => handleLeaveSubjectRoom(room.id)}
-                          style={{
-                            fontSize: "11px",
-                            padding: "3px 10px",
-                            borderRadius: "6px",
-                            background: "transparent",
-                            border: "1px solid #fc0c0c",
-                            color: "#fc0c0c",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {t('dashboard.browseRooms.leave')}
-                        </button>
-                      </div>
-                    ))}
-
-                    {/* available subjects not yet created */}
-                    {available.map((subject) => (
-                      <div
-                        key={subject}
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          alignItems: "center",
-                          padding: "8px 10px",
-                          marginBottom: "6px",
-                          background: "rgba(255,255,255,0.05)",
-                          borderRadius: "8px",
-                        }}
-                      >
-                        <span style={{ opacity: 0.7 }}>{subject}</span>
-                        <button
-                          onClick={() =>
-                            handleCreateAndJoinSubjectRoom(
-                              major,
-                              majorId,
-                              subject,
-                            )
-                          }
-                          style={{
-                            fontSize: "11px",
-                            padding: "3px 10px",
-                            borderRadius: "6px",
-                            background: "#6476af",
-                            border: "none",
-                            color: "white",
-                            cursor: "pointer",
-                          }}
-                        >
-                          {t('dashboard.browseRooms.join')}
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ))
-              )}
-
-              {/* request a subject room */}
-              <div
-                style={{
-                  marginTop: "24px",
-                  borderTop: "1px solid rgba(255,255,255,0.1)",
-                  paddingTop: "16px",
-                }}
-              >
-                <h4
-                  style={{ margin: "0 0 12px", opacity: 0.7, fontSize: "13px" }}
-                >
-                  {t('dashboard.browseRooms.requestTitle')}
-                </h4>
-
-                {/* major dropdown — only user's own majors */}
-                <select
-                  value={requestMajor}
-                  onChange={(e) => {
-                    setRequestMajor(e.target.value);
-                    setRequestFeedback("");
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "6px",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    background: "#252b45",
-                    color: "white",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <option value="">{t('dashboard.browseRooms.selectMajor')}</option>
-                  {subjectRoomsData.map(({ major , majorId }) => (
-                    <option key={major} value={majorId}>
-                      {major}
-                    </option>
-                  ))}
-                </select>
-
-                <input
-                  type="text"
-                  placeholder={t('dashboard.browseRooms.subjectPlaceholder')}
-                  value={requestSubject}
-                  onChange={(e) => {
-                    setRequestSubject(e.target.value);
-                    setRequestFeedback("");
-                  }}
-                  style={{
-                    width: "100%",
-                    padding: "8px",
-                    borderRadius: "6px",
-                    border: "1px solid rgba(255,255,255,0.2)",
-                    background: "rgba(255,255,255,0.1)",
-                    color: "white",
-                    boxSizing: "border-box",
-                    marginBottom: "8px",
-                  }}
-                />
-
-                {requestFeedback && (
-                  <p
-                    style={{
-                      margin: "0 0 8px",
-                      fontSize: "13px",
-                      color:
-                        requestFeedback.includes("notified") ||
-                        requestFeedback.includes("submitted")
-                          ? "#27ae60"
-                          : "#e74c3c",
-                    }}
-                  >
-                    {requestFeedback}
-                  </p>
-                )}
-
-                <button
-                  onClick={handleRequestSubjectRoom}
-                  disabled={
-                    !requestMajor || !requestSubject.trim() || requestLoading
-                  }
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "6px",
-                    background: "#6476af",
-                    border: "none",
-                    color: "white",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    opacity: !requestMajor || !requestSubject.trim() ? 0.5 : 1,
-                  }}
-                >
-                 {requestLoading ? t('dashboard.browseRooms.sending') : t('dashboard.browseRooms.sendRequest')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {reportTarget && (
-          <ReportModal
-            type={reportTarget.type}
-            postId={reportTarget.postId}
-            onClose={() => setReportTarget(null)}
-          />
-        )}
-
-        {showAnnouncements && (
-          <div
-            className="modal-overlay"
-            onClick={() => setShowAnnouncements(false)}
-          >
-            <div
-              className="modal"
-              onClick={(e) => e.stopPropagation()}
-              style={{
-                maxHeight: "80vh",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  marginBottom: "16px",
-                }}
-              >
-                <h3 style={{ margin: 0 }}>{t('dashboard.announcements.title')}</h3>
-                <button
-                  onClick={() => setShowAnnouncements(false)}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    fontSize: "20px",
-                    cursor: "pointer",
-                  }}
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div style={{ overflowY: "auto", flex: 1 }}>
-                {announcements.length === 0 ? (
-                  <p style={{ opacity: 0.5, textAlign: "center" }}>
-                    {t('dashboard.announcements.empty')}
-                  </p>
-                ) : (
-                  announcements.map((a) => (
-                    <div
-                      key={a.id}
-                      style={{
-                        background: "#252b45",
-                        borderRadius: "10px",
-                        padding: "14px",
-                        marginBottom: "10px",
-                      }}
-                    >
-                      <p style={{ margin: "0 0 8px" }}>{a.message}</p>
-                      <small style={{ opacity: 0.5 }}>
-                        By @{a.created_by_username} —{" "}
-                        {new Date(a.created_at).toLocaleString()}
-                      </small>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        )}
-      {/* </div> */}
     </div>
-  );
+
+    {/* ── ALL MODALS STAY HERE (unchanged) ── */}
+
+    {isModalOpen && (
+      <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+            <h3 style={{ margin: 0 }}>{t('dashboard.postModal.title')}</h3>
+            <button onClick={() => setIsModalOpen(false)} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
+          </div>
+          <input type="text" placeholder={t('dashboard.postModal.titlePlaceholder')} value={postTitle} onChange={(e) => setPostTitle(e.target.value)} style={{ width: "100%", marginBottom: "10px", padding: "8px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box" }} />
+          <Select options={groupedRoomOptions} value={selectedPostRoom} onChange={(selected) => setSelectedPostRoom(selected)} placeholder={t('dashboard.postModal.selectRoom')} styles={customSelect} />
+          <br />
+          <textarea value={postContent} onChange={(e) => setPostContent(e.target.value)} placeholder={t('dashboard.postModal.contentPlaceholder')} style={{ width: "100%", minHeight: "120px", padding: "10px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box", resize: "vertical" }} />
+          <div style={{ marginTop: "10px" }}>
+            <label style={{ display: "block", marginBottom: "6px", opacity: 0.7, fontSize: "13px" }}>{t('dashboard.postModal.attachLabel')}</label>
+            <input type="file" accept="image/*,.pdf" onChange={(e) => setPostAttachment(e.target.files[0])} style={{ fontSize: "13px", color: "white" }} />
+            {postAttachment && (
+              <small style={{ display: "block", marginTop: "4px", opacity: 0.6 }}>
+                {postAttachment.name}
+                <button onClick={() => setPostAttachment(null)} style={{ marginLeft: "8px", background: "none", border: "none", color: "#fc0c0c", cursor: "pointer", fontSize: "11px" }}>✕ Remove</button>
+              </small>
+            )}
+          </div>
+          <div style={{ marginTop: "10px" }}>
+            <label style={{ display: "block", marginBottom: "6px", opacity: 0.7, fontSize: "13px" }}>{t('dashboard.postModal.resourceLinkLabel')} (Google Drive, GitHub, etc.)</label>
+            <input type="url" placeholder={t('dashboard.postModal.resourceLinkPlaceholder')} value={postResourceLink} onChange={(e) => setPostResourceLink(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box", marginBottom: "6px" }} />
+            <input type="text" placeholder={t('dashboard.postModal.resourceLabelPlaceholder')} value={postResourceLabel} onChange={(e) => setPostResourceLabel(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box" }} />
+          </div>
+          <br /><br />
+          <div className="modal-actions" style={{ display: "flex", justifyContent: "flex-end", gap: "10px" }}>
+            <button onClick={() => setIsModalOpen(false)}>{t('dashboard.postModal.cancel')}</button>
+            <button onClick={handleSubmitPost} disabled={!postContent.trim() || !selectedPostRoom || isSubmitting}>
+              {isSubmitting ? t('dashboard.postModal.posting') : t('dashboard.postModal.post')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {editingPost && (
+      <div className="modal-overlay" onClick={() => setEditingPost(null)}>
+        <div className="modal" onClick={(e) => e.stopPropagation()}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+            <h3 style={{ margin: 0 }}>{t('dashboard.postModal.editTitle')}</h3>
+            <button onClick={() => setEditingPost(null)} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
+          </div>
+          <input type="text" value={editPostTitle} onChange={(e) => setEditPostTitle(e.target.value)} placeholder="Title" style={{ width: "100%", marginBottom: "10px", padding: "8px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box" }} />
+          <textarea value={editPostContent} onChange={(e) => setEditPostContent(e.target.value)} placeholder="Content" style={{ width: "100%", minHeight: "120px", padding: "10px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box", resize: "vertical" }} />
+          <div style={{ display: "flex", justifyContent: "flex-end", gap: "10px", marginTop: "15px" }}>
+            <button onClick={() => setEditingPost(null)} style={{ padding: "4px", width: "60px", textAlign: "center", backgroundColor: "#da2828", color: "white", borderRadius: "8px" }}>{t('dashboard.postModal.cancel')}</button>
+            <button onClick={() => handleEditPost(editingPost.id)} disabled={isSubmitting} style={{ padding: "4px", backgroundColor: "#3ada28", color: "black", borderRadius: "8px", width: "60px", textAlign: "center" }}>
+              {isSubmitting ? t('dashboard.postModal.saving') : t('dashboard.postModal.save')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {selectedPost && <PostModal postId={selectedPost.id} onClose={() => setSelectedPost(null)} isGuest={isGuest} />}
+
+    {showBrowseRooms && (
+      <div className="modal-overlay" onClick={() => setShowBrowseRooms(false)}>
+        <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxHeight: "100vh", overflowY: "auto" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "15px" }}>
+            <h3 style={{ margin: 0 }}>{t('dashboard.browseRooms.title')}</h3>
+            <button onClick={() => setShowBrowseRooms(false)} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
+          </div>
+          {subjectRoomsLoading ? (
+            <p style={{ opacity: 0.5, textAlign: "center" }}>Loading...</p>
+          ) : subjectRoomsData.length === 0 ? (
+            <p style={{ opacity: 0.5, textAlign: "center" }}>{t('dashboard.browseRooms.noRooms')}</p>
+          ) : (
+            subjectRoomsData.map(({ major, majorId, rooms, available }) => (
+              <div key={major} style={{ marginBottom: "20px" }}>
+                <h4 style={{ margin: "0 0 10px", color: "#6476af", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "6px" }}>{major}</h4>
+                {rooms.map((room) => (
+                  <div key={room.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", marginBottom: "6px", background: "rgba(100,118,175,0.2)", borderRadius: "8px" }}>
+                    <span>✓ {room.name}</span>
+                    <button onClick={() => handleLeaveSubjectRoom(room.id)} style={{ fontSize: "11px", padding: "3px 10px", borderRadius: "6px", background: "transparent", border: "1px solid #fc0c0c", color: "#fc0c0c", cursor: "pointer" }}>{t('dashboard.browseRooms.leave')}</button>
+                  </div>
+                ))}
+                {available.map((subject) => (
+                  <div key={subject} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", marginBottom: "6px", background: "rgba(255,255,255,0.05)", borderRadius: "8px" }}>
+                    <span style={{ opacity: 0.7 }}>{subject}</span>
+                    <button onClick={() => handleCreateAndJoinSubjectRoom(major, majorId, subject)} style={{ fontSize: "11px", padding: "3px 10px", borderRadius: "6px", background: "#6476af", border: "none", color: "white", cursor: "pointer" }}>{t('dashboard.browseRooms.join')}</button>
+                  </div>
+                ))}
+              </div>
+            ))
+          )}
+          <div style={{ marginTop: "24px", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "16px" }}>
+            <h4 style={{ margin: "0 0 12px", opacity: 0.7, fontSize: "13px" }}>{t('dashboard.browseRooms.requestTitle')}</h4>
+            <select value={requestMajor} onChange={(e) => { setRequestMajor(e.target.value); setRequestFeedback(""); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "#252b45", color: "white", marginBottom: "8px" }}>
+              <option value="">{t('dashboard.browseRooms.selectMajor')}</option>
+              {subjectRoomsData.map(({ major, majorId }) => <option key={major} value={majorId}>{major}</option>)}
+            </select>
+            <input type="text" placeholder={t('dashboard.browseRooms.subjectPlaceholder')} value={requestSubject} onChange={(e) => { setRequestSubject(e.target.value); setRequestFeedback(""); }} style={{ width: "100%", padding: "8px", borderRadius: "6px", border: "1px solid rgba(255,255,255,0.2)", background: "rgba(255,255,255,0.1)", color: "white", boxSizing: "border-box", marginBottom: "8px" }} />
+            {requestFeedback && <p style={{ margin: "0 0 8px", fontSize: "13px", color: requestFeedback.includes("notified") || requestFeedback.includes("submitted") ? "#27ae60" : "#e74c3c" }}>{requestFeedback}</p>}
+            <button onClick={handleRequestSubjectRoom} disabled={!requestMajor || !requestSubject.trim() || requestLoading} style={{ padding: "8px 16px", borderRadius: "6px", background: "#6476af", border: "none", color: "white", cursor: "pointer", fontSize: "13px", opacity: !requestMajor || !requestSubject.trim() ? 0.5 : 1 }}>
+              {requestLoading ? t('dashboard.browseRooms.sending') : t('dashboard.browseRooms.sendRequest')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {reportTarget && <ReportModal type={reportTarget.type} postId={reportTarget.postId} onClose={() => setReportTarget(null)} />}
+
+    {showAnnouncements && (
+      <div className="modal-overlay" onClick={() => setShowAnnouncements(false)}>
+        <div className="modal" onClick={(e) => e.stopPropagation()} style={{ maxHeight: "80vh", display: "flex", flexDirection: "column" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+            <h3 style={{ margin: 0 }}>{t('dashboard.announcements.title')}</h3>
+            <button onClick={() => setShowAnnouncements(false)} style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer" }}>✕</button>
+          </div>
+          <div style={{ overflowY: "auto", flex: 1 }}>
+            {announcements.length === 0 ? (
+              <p style={{ opacity: 0.5, textAlign: "center" }}>{t('dashboard.announcements.empty')}</p>
+            ) : (
+              announcements.map((a) => (
+                <div key={a.id} style={{ background: "#252b45", borderRadius: "10px", padding: "14px", marginBottom: "10px" }}>
+                  <p style={{ margin: "0 0 8px" }}>{a.message}</p>
+                  <small style={{ opacity: 0.5 }}>By @{a.created_by_username} — {new Date(a.created_at).toLocaleString()}</small>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+  </div>
+);
 }

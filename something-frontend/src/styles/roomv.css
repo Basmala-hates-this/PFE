@@ -1,0 +1,46 @@
+
+.rooms-subtabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.subtab {
+  flex: 1;
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.subtab:hover {
+  background: rgba(100, 118, 175, 0.2);
+}
+
+.subtab.active {
+  background: var(--accent);
+  color: white;
+}
+
+/* Browse Rooms Search Bar */
+.browse-search-bar input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.browse-search-bar select option {
+  background: var(--bg-card);
+  color: var(--text-main);
+}
+
+.browse-search-bar button:hover {
+  background: rgba(100, 118, 175, 0.5);
+}

@@ -224,7 +224,11 @@
       "selectMajor": "Sélectionner la filière...",
       "subjectPlaceholder": "Nom de la matière...",
       "sendRequest": "Envoyer la demande",
-      "sending": "Envoi..."
+      "sending": "Envoi...",
+       "searchPlaceholder": "Rechercher des salons ou matières...",
+    "allMajors": "Toutes les filières",
+    "clearFilters": "Effacer les filtres",
+    "noResults": "Aucun salon correspondant trouvé."
     },
     "announcements": {
       "title": "📢 Annonces",
@@ -233,6 +237,20 @@
     },
     "comments": {
       "deleteConfirm": "Supprimer ce commentaire ?"
+    },
+    "nav": {
+  "chat": "discussion",
+  "feed": "Feed",
+  "profile": "Profile",
+  "rooms": "Salles :",
+  "admin": "Admin",
+  "superadmin": "Super Admin",
+  "guide": "Guide",
+  "language": "langue"
+},
+  "rooms": {
+      "myRooms": "Mes Salons",
+      "browse": "Parcourir"
     }
   },
   "postModal": {

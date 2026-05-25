@@ -2847,26 +2847,35 @@ export default function AdminPanel() {
     <div className="adminpanel-container">
       {/* header */}
       <div className="adminpanel-header">
-        <button
-          onClick={() => navigate("/profile")}
-          className="adminpanel-back-button"
-        >
-          ←
-        </button>
+       <button
+  onClick={() => window.location.href = "/dashboard"}
+  style={{
+    marginBottom: "20px",
+    padding: "8px 16px",
+    background: "#6476af",
+    border: "none",
+    borderRadius: "8px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "14px"
+  }}
+>
+  ← 
+</button>
         <div>
           <h2 className="adminpanel-title">{t("adminPanel.title")}</h2>
           <small className="adminpanel-subtitle">
             @{currentUser?.username} — {currentUser?.authorityLevel}
           </small>
         </div>
-        {isSuperAdmin && (
+        {/* {isSuperAdmin && (
           <button
             onClick={() => navigate("/superadmin")}
             className="adminpanel-superadmin-btn"
           >
             {t("adminPanel.superAdminBtn")}
           </button>
-        )}
+        )} */}
       </div>
 
       {/* tabs */}
