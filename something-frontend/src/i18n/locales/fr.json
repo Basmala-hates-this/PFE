@@ -157,7 +157,9 @@
       "lightMode": "☀️ Mode clair",
       "darkMode": "🌙 Mode sombre",
       "announcements": "📢 Annonces",
-      "guide": "Guide"
+      "guide": "Guide",
+      "leave": "Quitter le mode invité",
+      "create": "Créer un compte"
     },
     "header": {
       "welcome": "Bienvenue",

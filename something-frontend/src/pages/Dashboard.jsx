@@ -975,11 +975,31 @@ useEffect(() => {
         >
           {t('dashboard.nav.guide')}
         </button>
+      
+         {isGuest && (
+        <button
+        style={{"fontSize":"14px", "padding":"6px 10px","color":"var(--text-muted)","cursor":"pointer"}}
+          className="nav-action-btn"
+          title={t('dashboard.sidebar.create')}
+          onClick={() => { navigate("/info"); localStorage.removeItem("currentUser"); localStorage.removeItem("token"); localStorage.removeItem("guestToken"); }}
+        >
+          {t('dashboard.sidebar.create')}
+        </button>)}
+           {isGuest && (
+        <button
+        style={{"fontSize":"14px", "padding":"6px 10px","color":"var(--text-muted)","cursor":"pointer"}}
+          className="nav-action-btn"
+          title={t('dashboard.sidebar.leave')}
+          onClick={() => { navigate("/"); localStorage.removeItem("currentUser"); localStorage.removeItem("token"); localStorage.removeItem("guestToken"); }}
+        >
+          {t('dashboard.sidebar.leave')}
+        </button>)}
 
       </div>
 
       {/* Right: action buttons + pfp */}
       <div className="nav-actions">
+      
 
         {/* Announcements */}
         <button

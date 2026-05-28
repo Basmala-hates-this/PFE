@@ -1,36 +1,58 @@
 import { useState, useRef, useEffect } from "react";
 
-// ─── SYSTEM PROMPT for registration helper ─────────────────────────────────────
 const REG_SYSTEM_PROMPT = `
 You are a friendly registration assistant for StudyBuddy, an academic social network for Algerian university students.
 
-Your ONLY job: help users fill out the registration/login form they're currently looking at.
+Your ONLY job: help users fill out the registration/login form they are currently looking at.
 
-YOU KNOW THESE FORMS EXIST:
-1. LOGIN page — fields: email, password. Also has "Forgot password?" link.
-2. REGISTER page — fields: full name, username, email, password, confirm password.
-3. INFO page (after register) — fields: university (select or type custom), major (select or type custom), year of study, profile picture (optional). This page is mandatory before accessing the platform.
-
+THE FORMS:
+1. LOGIN — fields: email or username(user choice of input), password. Has "Forgot password?" link and back to home page that leads to welcome page .
+2. INFO () — fields:full name,date of birth, university (select or type custom),role(professor or student), major (select or type custom), professor role require a proof of status(work contart or a degree in a form of a png or pdf-size limit is 2mb-). Mandatory before accessing the platform.it has 2 links,back to home(welcome)page ,and "already have an account"link that leads to login page.
+3. REGISTER(after info) — fields:  username, email otp code, password, confirm password.
+4.GUEST(in welcome page along side with create account and login button) -users who want to explore the app without registering can select "Continue as Guest",they are prompted to choose up to 5 universities with thier choice,
+ and will only see a limited version of the platform(read only). They won't have access to chat rooms or personalized features, but can browse  general info.
+ 5. request rest password: fields: registed email,they get a link via that email if valid and will lead to the reset password page with new password and confirm password fields.
+6. fin : a celebratory page after successful registration, with a set of navigation buttons(go to dashboard,back to home-welcome page-,back to login) buttons and a "celebrate again "button that launches th confetti animation on the page.
 HOW TO HELP:
-- If they ask "what do I put here?" → explain the current field clearly
-- If they're confused about university/major → tell them to select from the list or type a custom one if theirs isn't there
-- If they ask about password rules → say: at least 6 characters
-- If they ask about username → say: unique, no spaces, letters/numbers only recommended
-- If they ask about the info page → explain it sets up their academic profile for room access
-- If they hit an error → help them diagnose it (wrong password, email taken, etc.)
+- "what do I put here?" → explain the field clearly
+- university/major confusion → select from list, or type a custom one if not listed
+- password rules → at least 8 characters,one uppercase, one number, one special character
+- username → unique, no spaces, letters/numbers recommended,the speacila characters allowed are : ~ $ & - _
+- info page → sets up their academic profile for room access.
+-register page sets the information needed for login and profile view
+- errors → help diagnose (wrong password, email taken, fields missing, etc.)
 
-PERSONALITY: Short, clear, reassuring. Max 2-3 sentences per reply. You're a helper popup, not an essay writer.
-
+PERSONALITY: Short, clear, reassuring. Max 3-4 sentences. You are a helper popup, not an essay.
 Respond in the same language the user writes in (Arabic/French/English).
 `;
+
+async function callAI(messages) {
+  const response = await fetch("http://localhost:5000/api/ai/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ messages, system: REG_SYSTEM_PROMPT }),
+  });
+  if (!response.ok) throw new Error("AI request failed");
+  const data = await response.json();
+  return data.content?.[0]?.text || "Not sure — try again?";
+}
+
+const QUICK = {
+  register: ["What goes in username?", "Password rules?", "Why do I need an email?"],
+  login: ["I forgot my password", "Wrong password error?", "Which email do I use?"],
+  info: ["What is 'university' field?", "I don't see my major", "Can I skip this page?"],
+};
+
+const GREETINGS = {
+  register: " I can help you fill out this form. Ask if you get stuck!",
+  login: " Need help logging in? Ask me anything.",
+  info: "Hellooo~~, This sets up your academic profile. Ask me about any field!",
+};
 
 export default function FloatingHelper({ currentPage = "register" }) {
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: getGreeting(currentPage),
-    },
+    { role: "assistant", content: GREETINGS[currentPage] || GREETINGS.register },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,7 +61,6 @@ export default function FloatingHelper({ currentPage = "register" }) {
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
 
-  // stop pulsing after 5s
   useEffect(() => {
     const t = setTimeout(() => setPulse(false), 5000);
     return () => clearTimeout(t);
@@ -49,14 +70,8 @@ export default function FloatingHelper({ currentPage = "register" }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  function getGreeting(page) {
-    if (page === "login") return "Hey! 👋 Need help logging in? Ask me anything.";
-    if (page === "info") return "Almost there! 🎉 This page sets up your academic profile. I can help with any field — just ask!";
-    return "Hey! 👋 I can help you fill out this form. Just ask if you get stuck on anything!";
-  }
-
   const sendMessage = async (text) => {
-    const content = text || input.trim();
+    const content = (text || input).trim();
     if (!content || loading) return;
     setInput("");
 
@@ -65,24 +80,10 @@ export default function FloatingHelper({ currentPage = "register" }) {
     setLoading(true);
 
     try {
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1000,
-          system: REG_SYSTEM_PROMPT,
-          messages: newMessages.map((m) => ({ role: m.role, content: m.content })),
-        }),
-      });
-      const data = await response.json();
-      const reply = data.content?.[0]?.text || "Not sure about that — try again?";
+      const reply = await callAI(newMessages.map((m) => ({ role: m.role, content: m.content })));
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Oops! Connection issue. Try again in a sec." },
-      ]);
+      setMessages((prev) => [...prev, { role: "assistant", content: "Oops! Connection issue. Try again." }]);
     } finally {
       setLoading(false);
     }
@@ -93,11 +94,7 @@ export default function FloatingHelper({ currentPage = "register" }) {
       alert("Voice input not supported. Try Chrome.");
       return;
     }
-    if (listening) {
-      recognitionRef.current?.stop();
-      setListening(false);
-      return;
-    }
+    if (listening) { recognitionRef.current?.stop(); setListening(false); return; }
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const r = new SR();
     recognitionRef.current = r;
@@ -110,61 +107,43 @@ export default function FloatingHelper({ currentPage = "register" }) {
     setListening(true);
   };
 
-  const quickQuestions = {
-    register: ["What goes in username?", "Password rules?", "What's my email for?"],
-    login: ["I forgot my password", "Wrong password error?", "What email do I use?"],
-    info: ["What is 'university'?", "I don't see my major", "Can I skip this?"],
-  };
+  const quick = QUICK[currentPage] || QUICK.register;
 
   return (
-    <div style={floatStyles.wrapper}>
-      {/* chat window */}
+    <div style={f.wrapper}>
       {open && (
-        <div style={floatStyles.window}>
-          {/* header */}
-          <div style={floatStyles.header}>
+        <div style={f.window}>
+          <div style={f.header}>
             <span>🤖 Registration Helper</span>
-            <button onClick={() => setOpen(false)} style={floatStyles.closeBtn}>✕</button>
+            <button onClick={() => setOpen(false)} style={f.closeBtn}>✕</button>
           </div>
 
-          {/* messages */}
-          <div style={floatStyles.messages}>
+          <div style={f.messages}>
             {messages.map((m, i) => (
-              <div
-                key={i}
-                style={{
-                  ...floatStyles.bubble,
-                  ...(m.role === "user" ? floatStyles.userBubble : floatStyles.aiBubble),
-                }}
-              >
-                <p style={floatStyles.bubbleText}>{m.content}</p>
+              <div key={i} style={{ ...f.bubble, ...(m.role === "user" ? f.userBubble : f.aiBubble) }}>
+                <p style={f.bubbleText}>{m.content}</p>
               </div>
             ))}
             {loading && (
-              <div style={{ ...floatStyles.bubble, ...floatStyles.aiBubble }}>
-                <p style={{ ...floatStyles.bubbleText, opacity: 0.5 }}>typing...</p>
+              <div style={{ ...f.bubble, ...f.aiBubble }}>
+                <p style={{ ...f.bubbleText, opacity: 0.5 }}>typing...</p>
               </div>
             )}
             <div ref={bottomRef} />
           </div>
 
-          {/* quick suggestions */}
           {messages.length <= 2 && (
-            <div style={floatStyles.quickRow}>
-              {(quickQuestions[currentPage] || quickQuestions.register).map((q) => (
-                <button key={q} style={floatStyles.quickBtn} onClick={() => sendMessage(q)}>
-                  {q}
-                </button>
+            <div style={f.quickRow}>
+              {quick.map((q) => (
+                <button key={q} style={f.quickBtn} onClick={() => sendMessage(q)}>{q}</button>
               ))}
             </div>
           )}
 
-          {/* input */}
-          <div style={floatStyles.inputRow}>
+          <div style={f.inputRow}>
             <button
               onClick={toggleVoice}
-              style={{ ...floatStyles.iconBtn, background: listening ? "#e74c3c" : "rgba(100,118,175,0.3)" }}
-              title="Voice input"
+              style={{ ...f.iconBtn, background: listening ? "#e74c3c" : "rgba(100,118,175,0.3)" }}
             >
               {listening ? "⏹" : "🎤"}
             </button>
@@ -174,12 +153,12 @@ export default function FloatingHelper({ currentPage = "register" }) {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && sendMessage()}
               placeholder="Ask me anything..."
-              style={floatStyles.input}
+              style={f.input}
             />
             <button
               onClick={() => sendMessage()}
               disabled={!input.trim() || loading}
-              style={{ ...floatStyles.iconBtn, background: input.trim() ? "#6476af" : "rgba(255,255,255,0.1)", opacity: !input.trim() ? 0.5 : 1 }}
+              style={{ ...f.iconBtn, background: input.trim() ? "#6476af" : "rgba(255,255,255,0.1)", opacity: !input.trim() ? 0.5 : 1 }}
             >
               ➤
             </button>
@@ -187,22 +166,18 @@ export default function FloatingHelper({ currentPage = "register" }) {
         </div>
       )}
 
-      {/* floating button */}
       <button
         onClick={() => { setOpen((o) => !o); setPulse(false); }}
-        style={{
-          ...floatStyles.fab,
-          animation: pulse && !open ? "pulse 1.5s infinite" : "none",
-        }}
-        title="Need help? Ask the assistant"
+        style={{ ...f.fab, animation: pulse && !open ? "sbPulse 1.5s infinite" : "none" }}
+        title="Need help?"
       >
         {open ? "✕" : "🤖"}
       </button>
 
       <style>{`
-        @keyframes pulse {
-          0% { box-shadow: 0 0 0 0 rgba(100,118,175,0.7); }
-          70% { box-shadow: 0 0 0 12px rgba(100,118,175,0); }
+        @keyframes sbPulse {
+          0%   { box-shadow: 0 0 0 0 rgba(100,118,175,0.7); }
+          70%  { box-shadow: 0 0 0 12px rgba(100,118,175,0); }
           100% { box-shadow: 0 0 0 0 rgba(100,118,175,0); }
         }
       `}</style>
@@ -210,139 +185,72 @@ export default function FloatingHelper({ currentPage = "register" }) {
   );
 }
 
-const floatStyles = {
+const f = {
   wrapper: {
-    position: "fixed",
-    bottom: "24px",
-    right: "24px",
-    zIndex: 9999,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "flex-end",
-    gap: "12px",
-    fontFamily: "inherit",
+    position: "fixed", bottom: "24px", right: "24px",
+    zIndex: 9999, display: "flex", flexDirection: "column",
+    alignItems: "flex-end", gap: "12px", fontFamily: "inherit",
   },
   fab: {
-    width: "52px",
-    height: "52px",
-    borderRadius: "50%",
-    border: "none",
+    width: "52px", height: "52px", borderRadius: "50%", border: "none",
     background: "linear-gradient(135deg, #6476af, #4a5a8a)",
-    color: "white",
-    fontSize: "22px",
-    cursor: "pointer",
+    color: "white", fontSize: "22px", cursor: "pointer",
     boxShadow: "0 4px 20px rgba(100,118,175,0.5)",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
+    display: "flex", alignItems: "center", justifyContent: "center",
     transition: "transform 0.2s",
   },
   window: {
-    width: "320px",
-    maxHeight: "420px",
-    background: "#1a2236",
-    borderRadius: "16px",
+    width: "320px", maxHeight: "430px",
+    background: "#1a2236", borderRadius: "16px",
     boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
     border: "1px solid rgba(255,255,255,0.1)",
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
+    display: "flex", flexDirection: "column", overflow: "hidden",
   },
   header: {
     padding: "12px 16px",
     background: "rgba(100,118,175,0.2)",
     borderBottom: "1px solid rgba(255,255,255,0.08)",
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontSize: "13px",
-    fontWeight: "600",
-    color: "white",
+    display: "flex", justifyContent: "space-between", alignItems: "center",
+    fontSize: "13px", fontWeight: "600", color: "white",
   },
   closeBtn: {
-    background: "none",
-    border: "none",
-    color: "rgba(255,255,255,0.6)",
-    cursor: "pointer",
-    fontSize: "16px",
-    lineHeight: 1,
+    background: "none", border: "none",
+    color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: "16px",
   },
   messages: {
-    flex: 1,
-    overflowY: "auto",
-    padding: "12px",
-    display: "flex",
-    flexDirection: "column",
-    gap: "8px",
+    flex: 1, overflowY: "auto", padding: "12px",
+    display: "flex", flexDirection: "column", gap: "8px",
   },
-  bubble: {
-    maxWidth: "85%",
-    padding: "8px 12px",
-    borderRadius: "12px",
-  },
-  userBubble: {
-    alignSelf: "flex-end",
-    background: "#6476af",
-    borderBottomRightRadius: "3px",
-  },
+  bubble: { maxWidth: "85%", padding: "8px 12px", borderRadius: "12px" },
+  userBubble: { alignSelf: "flex-end", background: "#6476af", borderBottomRightRadius: "3px" },
   aiBubble: {
-    alignSelf: "flex-start",
-    background: "rgba(255,255,255,0.07)",
-    border: "1px solid rgba(255,255,255,0.08)",
-    borderBottomLeftRadius: "3px",
+    alignSelf: "flex-start", background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(255,255,255,0.08)", borderBottomLeftRadius: "3px",
   },
-  bubbleText: {
-    margin: 0,
-    fontSize: "13px",
-    lineHeight: "1.5",
-    color: "white",
-    whiteSpace: "pre-wrap",
-  },
+  bubbleText: { margin: 0, fontSize: "13px", lineHeight: "1.5", color: "white", whiteSpace: "pre-wrap" },
   quickRow: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "6px",
-    padding: "8px 12px",
+    display: "flex", flexWrap: "wrap", gap: "6px", padding: "8px 12px",
     borderTop: "1px solid rgba(255,255,255,0.05)",
   },
   quickBtn: {
-    padding: "4px 10px",
-    borderRadius: "12px",
-    border: "1px solid rgba(100,118,175,0.4)",
-    background: "transparent",
-    color: "rgba(255,255,255,0.6)",
-    fontSize: "11px",
-    cursor: "pointer",
+    padding: "4px 10px", borderRadius: "12px",
+    border: "1px solid rgba(100,118,175,0.4)", background: "transparent",
+    color: "rgba(255,255,255,0.6)", fontSize: "11px", cursor: "pointer",
   },
   inputRow: {
-    display: "flex",
-    gap: "6px",
-    padding: "10px 12px",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
-    alignItems: "center",
+    display: "flex", gap: "6px", padding: "10px 12px",
+    borderTop: "1px solid rgba(255,255,255,0.08)", alignItems: "center",
   },
   input: {
-    flex: 1,
-    padding: "8px 12px",
-    borderRadius: "10px",
+    flex: 1, padding: "8px 12px", borderRadius: "10px",
     border: "1px solid rgba(255,255,255,0.12)",
-    background: "rgba(255,255,255,0.05)",
-    color: "white",
-    fontSize: "13px",
-    outline: "none",
-    fontFamily: "inherit",
+    background: "rgba(255,255,255,0.05)", color: "white",
+    fontSize: "13px", outline: "none", fontFamily: "inherit",
   },
   iconBtn: {
-    width: "36px",
-    height: "36px",
-    borderRadius: "10px",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "14px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-    transition: "all 0.2s",
+    width: "36px", height: "36px", borderRadius: "10px", border: "none",
+    cursor: "pointer", fontSize: "14px", display: "flex",
+    alignItems: "center", justifyContent: "center", flexShrink: 0,
+    transition: "all 0.2s", color: "white",
   },
 };

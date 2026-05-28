@@ -705,7 +705,7 @@ const handleStatClick = async (type) => {
       
       <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
         <h3 style={{margin:0}}>{t('profile.savedPostsModal.title')}</h3>
-        <button onClick={() => setShowSavedPosts(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+        <button onClick={() => setShowSavedPosts(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer", color:"#ff0000"}}>✕</button>
       </div>
 
       {/* search */}
