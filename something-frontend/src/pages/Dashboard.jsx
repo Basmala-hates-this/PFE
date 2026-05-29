@@ -1316,7 +1316,7 @@ const LIMIT = 251;
                       {post.videoUrl && (
   <video
     controls
-    style={{ maxWidth: "50%", borderRadius: "8px", marginBottom: "8px" }}
+    style={{ maxWidth: "40%", borderRadius: "8px", marginBottom: "8px" }}
   >
     <source src={post.videoUrl} />
     Your browser does not support video.
