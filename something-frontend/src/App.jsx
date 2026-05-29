@@ -34,18 +34,24 @@ function App() {
   useEffect(() => {
   const interval = setInterval(() => {
     const token = localStorage.getItem("token");
+    const currentuser = localStorage.getItem("currentUser");
+    const guest = localStorage.getItem("guestToken");
     if (!token) return;
 
     try {
       const payload = JSON.parse(atob(token.split(".")[1]));
       if (payload.exp * 1000 < Date.now()) {
         localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+        localStorage.removeItem("guestToken");
         alert("Your session has expired. Please log in again.");
         window.location.href = "/login";
       }
     } catch (err) {
       // malformed token
       localStorage.removeItem("token");
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("guestToken");
       window.location.href = "/login";
     }
   }, 60000); // checks every 60 seconds
