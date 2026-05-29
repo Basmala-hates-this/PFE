@@ -80,19 +80,42 @@ const getPostsByUser = async (userId) => {
   return toCamel(result.rows);
 };
 
+// const updatePost = async (postId, userId, updatedData) => {
+//  const post = await getPostById(postId);
+// if (!post) return null;
+// if (post.userId !== userId) return { error: 'Not authorized to edit this post' };
+
+//   const result = await pool.query(
+//     `UPDATE posts SET title = $1, content = $2, is_updated = true
+//      WHERE id = $3 RETURNING *`,
+//     [updatedData.title, updatedData.content, postId]
+//   );
+//   return toCamel(result.rows[0]);
+// };
 const updatePost = async (postId, userId, updatedData) => {
- const post = await getPostById(postId);
-if (!post) return null;
-if (post.userId !== userId) return { error: 'Not authorized to edit this post' };
+  const post = await getPostById(postId);
+  if (!post) return null;
+  if (post.userId !== userId) return { error: 'Not authorized to edit this post' };
 
   const result = await pool.query(
-    `UPDATE posts SET title = $1, content = $2, is_updated = true
-     WHERE id = $3 RETURNING *`,
-    [updatedData.title, updatedData.content, postId]
+    `UPDATE posts 
+     SET title = $1, content = $2, is_updated = true,
+         image_url = $3, pdf_url = $4, video_url = $5,
+         resource_link = $6, resource_label = $7
+     WHERE id = $8 RETURNING *`,
+    [
+      updatedData.title,
+      updatedData.content,
+      updatedData.image ?? null,
+      updatedData.pdf ?? null,
+      updatedData.video ?? null,
+      updatedData.resourceLink ?? null,
+      updatedData.resourceLabel ?? null,
+      postId,
+    ]
   );
   return toCamel(result.rows[0]);
 };
-
 const deletePost = async (postId, userId) => {
   const post = await getPostById(postId);
   if (!post) return false;

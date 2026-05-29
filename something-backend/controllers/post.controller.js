@@ -127,14 +127,44 @@ const getPostsAll = async (req, res) => {
   res.json(posts);
 };
 
+// const updatePost = async (req, res) => {
+//   const { id } = req.params;
+//   const { title, content } = req.body;
+//   const userId = req.user.id;
+
+//   const updatedPost = await postRepo.updatePost(id, userId, { title, content });
+//   if (!updatedPost) return res.status(404).json({ message: 'Post not found' });
+//   if (updatedPost.error) return res.status(403).json({ message: updatedPost.error });
+
+//   res.json(updatedPost);
+// };
+
 const updatePost = async (req, res) => {
   const { id } = req.params;
-  const { title, content } = req.body;
+  const { title, content, resourceLink, resourceLabel, removeAttachment } = req.body;
   const userId = req.user.id;
 
-  const updatedPost = await postRepo.updatePost(id, userId, { title, content });
-  if (!updatedPost) return res.status(404).json({ message: 'Post not found' });
-  if (updatedPost.error) return res.status(403).json({ message: updatedPost.error });
+  const existing = await postRepo.getPostById(id);
+  if (!existing) return res.status(404).json({ message: 'Post not found' });
+  if (existing.userId !== userId) return res.status(403).json({ message: 'Not authorized' });
+
+  const newImage = req.file && req.file.mimetype.startsWith('image/')
+    ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
+  const newPdf = req.file && req.file.mimetype === 'application/pdf'
+    ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
+  const newVideo = req.file && req.file.mimetype.startsWith('video/')
+    ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
+
+  const clearAttachment = removeAttachment === "true";
+
+  const updatedPost = await postRepo.updatePost(id, userId, {
+    title, content,
+    resourceLink: resourceLink || null,
+    resourceLabel: resourceLabel || null,
+    image: newImage !== undefined ? newImage : (clearAttachment ? null : existing.imageUrl),
+    pdf: newPdf !== undefined ? newPdf : (clearAttachment ? null : existing.pdfUrl),
+    video: newVideo !== undefined ? newVideo : (clearAttachment ? null : existing.videoUrl),
+  });
 
   res.json(updatedPost);
 };
