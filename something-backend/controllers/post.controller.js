@@ -30,11 +30,14 @@ const createPost = async (req, res) => {
 
   const pdf = req.file && req.file.mimetype === 'application/pdf'
     ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+    const video = req.file && req.file.mimetype.startsWith('video/')
+  ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+
 
   const newPost = await postRepo.createPost({
     title, content, roomId,
     authorId, authorUsername, authorRole,
-    image, pdf,
+    image, pdf,video, 
     resourceLink: resourceLink || null,
     resourceLabel: resourceLabel || null,
   });
@@ -187,13 +190,17 @@ const addComment = async (req, res) => {
   const pdf = req.file && req.file.mimetype === 'application/pdf'
     ? `http://localhost:5000/uploads/${req.file.filename}` : null;
 
+    const video = req.file && req.file.mimetype.startsWith('video/')
+  ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+
+
   const comment = await commentRepo.createComment({
     postId,
     authorId,
     authorUsername,
     content,
     parentCommentId: parentCommentId || null,
-    image, pdf,
+    image, pdf,video,
     resourceLink: resourceLink || null,
     resourceLabel: resourceLabel || null,
   });
@@ -281,7 +288,7 @@ const searchPosts = async (req, res) => {
      LIMIT 20`,
     [`%${q}%`]
   );
-
+ 
   res.json(toCamel(result.rows));
 };
 

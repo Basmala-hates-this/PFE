@@ -4,8 +4,8 @@ const pool = require('../db');
 const createPost = async (postData) => {
   const result = await pool.query(
     `INSERT INTO posts 
-      (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url, resource_link, resource_label)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+      (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url,video_url, resource_link, resource_label)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
      RETURNING *`,
     [
       postData.roomId,
@@ -16,6 +16,7 @@ const createPost = async (postData) => {
       postData.content,
       postData.image || null,
       postData.pdf || null,
+      postData.video || null, 
       postData.resourceLink || null,
       postData.resourceLabel || null,
     ]
@@ -143,7 +144,7 @@ const approveResource = async (postId, approved) => {
 };
 
 module.exports = {
-  createPost,
+  createPost, 
   getPostById,
   getPostsByRoom,
   getPostsByUser,

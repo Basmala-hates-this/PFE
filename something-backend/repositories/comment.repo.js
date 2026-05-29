@@ -4,8 +4,8 @@ const pool = require('../db');
 const createComment = async (commentData) => {
   const result = await pool.query(
     `INSERT INTO comments
-      (post_id, user_id, author_username, content, parent_comment_id, image_url, pdf_url, resource_link, resource_label)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      (post_id, user_id, author_username, content, parent_comment_id, image_url, pdf_url,video_url, resource_link, resource_label)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
      RETURNING *`,
     [
       commentData.postId,
@@ -15,6 +15,7 @@ const createComment = async (commentData) => {
       commentData.parentCommentId || null,
       commentData.image || null,
       commentData.pdf || null,
+      commentData.video || null, 
       commentData.resourceLink || null,
       commentData.resourceLabel || null,
     ]

@@ -295,6 +295,10 @@ export default function SearchPage() {
     fetchResults();
   }, [query]);
 
+
+  const [expanded, setExpanded] = useState(false);
+const LIMIT = 120;
+
   //////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////
@@ -347,7 +351,17 @@ export default function SearchPage() {
                       <small className="searchpage-post-role-badge">{post.authorRole || "user"}</small>
                     </div>
                     {post.title && <h3 className="searchpage-post-title">{post.title}</h3>}
-                    <p className="searchpage-post-content">{post.content}</p>
+                    <p className="searchpage-post-content"> {!expanded && post.content.length > LIMIT
+    ? post.content.slice(0, LIMIT) + "..."
+    : post.content}
+  {/* {post.content.length > LIMIT && (
+    <span
+      onClick={() => setExpanded(!expanded)}
+      style={{ color: "#8ca4c6", cursor: "pointer", fontSize: "13px", marginLeft: "4px" }}
+    >
+      {expanded ? " see less" : " see more"}
+    </span>
+  )}*/}</p> 
                     <small className="searchpage-post-date">{new Date(post.createdAt).toLocaleString()}</small>
                   </div>
                 ))

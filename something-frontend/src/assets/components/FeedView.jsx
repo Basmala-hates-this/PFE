@@ -31,6 +31,10 @@ export default function FeedView({ user, isGuest, posts, setPosts, userRooms, se
   const guestToken = localStorage.getItem("guestToken");
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
+
+  const [expanded, setExpanded] = useState(false);
+const LIMIT = 251; 
+
   // Fetch rooms and posts
   const fetchRoomsAndPosts = async () => {
     setLoading(true);
@@ -353,7 +357,19 @@ export default function FeedView({ user, isGuest, posts, setPosts, userRooms, se
                   </div>
                   <div className="post-body">
                     {post.title && <h3>{post.title}</h3>}
-                    <p>{post.content}</p>
+                    <p style={{ margin: "0 0 8px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+  {!expanded && post.content.length > LIMIT
+    ? post.content.slice(0, LIMIT) + "..."
+    : post.content}
+  {post.content.length > LIMIT && (
+    <span
+      onClick={() => setExpanded(!expanded)}
+      style={{ color: "#8ca4c6", cursor: "pointer", fontSize: "13px", marginLeft: "4px" }}
+    >
+      {expanded ? " see less" : " see more"}
+    </span>
+  )}
+</p>
                   </div>
                   {/* Attachments */}
                   {post.imageUrl && (
@@ -366,6 +382,15 @@ export default function FeedView({ user, isGuest, posts, setPosts, userRooms, se
                       {t('dashboard.post.viewPdf')}
                     </a>
                   )}
+                  {post.videoUrl && (
+  <video
+    controls
+    style={{ maxWidth: "50%", borderRadius: "8px", marginBottom: "8px" }}
+  >
+    <source src={post.videoUrl} />
+    Your browser does not support video.
+  </video>
+)}
                   {post.resourceLink && (
                     <a href={post.resourceLink} target="_blank" rel="noopener noreferrer" className="resource-link">
                       🔗 {post.resourceLabel || "Open Resource"}
@@ -430,7 +455,7 @@ function PostCreateModal({ onClose, onSubmit, postTitle, setPostTitle, postConte
         <textarea placeholder={t('dashboard.postModal.contentPlaceholder')} value={postContent} onChange={e => setPostContent(e.target.value)} style={{ width: "100%", minHeight: "120px", padding: "10px", borderRadius: "8px", resize: "vertical" }} />
         <div style={{ marginTop: "10px" }}>
           <label>{t('dashboard.postModal.attachLabel')}</label>
-          <input type="file" accept="image/*,.pdf" onChange={e => setPostAttachment(e.target.files[0])} />
+          <input type="file" accept="image/*,.pdf,video/*" onChange={e => setPostAttachment(e.target.files[0])} />
         </div>
         <div style={{ marginTop: "10px" }}>
           <input type="url" placeholder={t('dashboard.postModal.resourceLinkPlaceholder')} value={postResourceLink} onChange={e => setPostResourceLink(e.target.value)} style={{ width: "100%", padding: "8px", borderRadius: "8px", marginBottom: "6px" }} />

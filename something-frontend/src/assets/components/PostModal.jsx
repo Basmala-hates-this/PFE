@@ -8,6 +8,8 @@ import ReportModal from "./ReportModal.jsx";
 
 function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, onEdit, onReply, editingComment, editCommentContent, setEditCommentContent, handleEditComment, setEditingComment, depth = 0 }) {
   const { t } = useTranslation();
+  const [expanded, setExpanded] = useState(false);
+  const LIMIT = 251;
   
   if (comment.isHidden) return (
     <div style={{ marginLeft: depth > 0 ? "20px" : "0", padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)", opacity: 0.4, fontStyle: "italic", fontSize: "13px" }}>
@@ -25,7 +27,7 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
     src={comment.authorProfilePic || Cat } 
     alt="pfp"
     style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover", cursor: "pointer" }}
-    onClick={() => window.location.href = `/users/${comment.userId}`}
+    onClick={() => window.location.href = `/users/${comment.userId}`} 
   />
           <strong
   style={{ fontSize: "13px", cursor: "pointer" }}
@@ -52,6 +54,12 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
            {t('postModal.viewPdf')}
           </a>
         )}
+        {comment.videoUrl && (
+  <video controls style={{ maxWidth: "100%", borderRadius: "8px", marginBottom: "6px" }}>
+    <source src={comment.videoUrl} />
+  </video>
+)}
+        
         {comment.resourceLink && (
           <a href={comment.resourceLink} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "6px" }}>
             🔗 {comment.resourceLabel || t('postModal.openResource')}
@@ -134,6 +142,8 @@ const [comments, setComments] = useState([]);
 const [commentFilter, setCommentFilter] = useState("all");
 
 const { t } = useTranslation();
+const [expanded, setExpanded] = useState(false);
+const LIMIT = 251;
 
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -324,7 +334,19 @@ const buildCommentTree = (comments) => {
 </strong>
             <small style={{background:"#6476af", color:"white", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>{post.authorRole || "user"}</small>
           </div>
-          <p style={{margin:"0 0 8px"}}>{post.content}</p>
+          <p style={{ margin: "0 0 8px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+  {!expanded && post.content.length > LIMIT
+    ? post.content.slice(0, LIMIT) + "..."
+    : post.content}
+  {post.content.length > LIMIT && (
+    <span
+      onClick={() => setExpanded(!expanded)}
+      style={{ color: "#8ca4c6", cursor: "pointer", fontSize: "13px", marginLeft: "4px" }}
+    >
+      {expanded ? " see less" : " see more"}
+    </span>
+  )}
+</p>
           {/* image attachment */}
 {post.imageUrl && (
   <div style={{marginBottom:"8px"}}>
@@ -355,6 +377,15 @@ const buildCommentTree = (comments) => {
   >
     {t('postModal.viewPdf')}
   </a>
+)}
+{post.videoUrl && (
+  <video
+    controls
+    style={{ maxWidth: "50%", borderRadius: "8px", marginBottom: "8px" }}
+  >
+    <source src={post.videoUrl} />
+    Your browser does not support video.
+  </video>
 )}
 
 {/* resource link */}
@@ -488,7 +519,7 @@ const buildCommentTree = (comments) => {
     <input
       type="file"
       id="commentFileInput"
-      accept="image/*,.pdf"
+      accept="image/*,.pdf,video/*"
       style={{display:"none"}}
       onChange={(e) => setCommentAttachment(e.target.files[0])}
     />

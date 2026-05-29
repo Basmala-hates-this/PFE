@@ -813,6 +813,7 @@ const handleStatClick = async (type) => {
                     {post.imageUrl && <span style={{fontSize:"12px"}}>🖼️</span>}
                     {post.pdfUrl && <span style={{fontSize:"12px"}}>📄</span>}
                     {post.resourceLink && <span style={{fontSize:"12px"}}>🔗</span>}
+                    {post.videoUrl && <span style={{fontSize:"12px"}}>🎥</span>}
                   </div>
                 </div>
 
@@ -846,6 +847,15 @@ const handleStatClick = async (type) => {
                     📄 View PDF
                   </a>
                 )}
+                {post.videoUrl && (
+  <video
+    controls
+    style={{ maxWidth: "50%", borderRadius: "8px", marginBottom: "8px" }}
+  >
+    <source src={post.videoUrl} />
+    Your browser does not support video.
+  </video>
+)}
 
                 {/* resource link */}
                 {post.resourceLink && (

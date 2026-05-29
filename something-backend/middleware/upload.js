@@ -28,11 +28,16 @@ const upload = multer({
   storage,
   limits: { fileSize: 20 * 1024 * 1024 }, // 20MB limit
   fileFilter: (req, file, cb) => {
-    const  allowed = /jpeg|jpg|png|gif|webp|pdf/;
-    const isValid = allowed.test(path.extname(file.originalname).toLowerCase());
-    if (isValid) cb(null, true);
-    else cb(new Error("Images and PDF only!"));
+    const allowedExts = /jpeg|jpg|png|gif|webp|pdf|mp4|mov|avi|mkv|webm/;
+  const allowedMimes = /image\/(jpeg|jpg|png|gif|webp)|application\/pdf|video\/(mp4|quicktime|x-msvideo|x-matroska|webm)/;
+
+  const extValid = allowedExts.test(path.extname(file.originalname).toLowerCase());
+  const mimeValid = allowedMimes.test(file.mimetype);
+
+  if (extValid && mimeValid) cb(null, true);
+  else cb(new Error("Images, PDFs, and videos only!"));
   }
 });
+
 
 module.exports = upload;

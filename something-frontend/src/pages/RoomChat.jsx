@@ -422,6 +422,9 @@ export default function RoomChat() {
   const isImage = (fileUrl) => {
     return /\.(jpg|jpeg|png|gif|webp)$/i.test(fileUrl);
   };
+  const isVideo = (fileUrl) => {
+  return /\.(mp4|mov|avi|mkv|webm)$/i.test(fileUrl);
+};
 
   const { t } = useTranslation();
 
@@ -646,7 +649,14 @@ export default function RoomChat() {
                       alt="attachment"
                       className="roomchat-message-attachment"
                     />
-                  ) : (
+                  ): isVideo(msg.attachment) ? (
+    <video
+      controls
+      style={{ maxWidth: "200px", borderRadius: "8px", marginTop: "6px" }}
+    >
+      <source src={msg.attachment} />
+    </video>
+  ) : (
                     <a
                       href={msg.attachment}
                       target="_blank"
@@ -692,7 +702,7 @@ export default function RoomChat() {
         <input
           type="file"
           id="attachmentInput"
-          accept="image/*,.pdf,.doc,.docx,.txt,.zip"
+          accept="image/*,.pdf,.doc,.docx,.txt,.zip,video/*"
           className="roomchat-file-input"
           onChange={(e) => setAttachment(e.target.files[0])}
         />

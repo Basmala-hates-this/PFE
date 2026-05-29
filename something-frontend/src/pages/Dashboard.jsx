@@ -904,6 +904,13 @@ useEffect(() => {
 
 
 
+
+const [expanded, setExpanded] = useState(false);
+const LIMIT = 251;
+
+
+
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1275,7 +1282,19 @@ useEffect(() => {
                             {post.title}
                           </h3>
                         )}
-                        <p style={{ margin: 0, lineHeight: "1.5" }}>{post.content}</p>
+                        <p style={{ margin: "0 0 8px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+  {!expanded && post.content.length > LIMIT
+    ? post.content.slice(0, LIMIT) + "..."
+    : post.content}
+  {post.content.length > LIMIT && (
+    <span
+      onClick={() => setExpanded(!expanded)}
+      style={{ color: "#8ca4c6", cursor: "pointer", fontSize: "13px", marginLeft: "4px" }}
+    >
+      {expanded ? " see less" : " see more"}
+    </span>
+  )}
+</p>
                       </div>
 
                       {post.imageUrl && (
@@ -1294,12 +1313,22 @@ useEffect(() => {
                           {t('dashboard.post.viewPdf')}
                         </a>
                       )}
+                      {post.videoUrl && (
+  <video
+    controls
+    style={{ maxWidth: "50%", borderRadius: "8px", marginBottom: "8px" }}
+  >
+    <source src={post.videoUrl} />
+    Your browser does not support video.
+  </video>
+)}
 
                       {post.resourceLink && (
                         <a href={post.resourceLink} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "8px", height: "30px" }}>
                           🔗 {post.resourceLabel || t('dashboard.post.openResource')}
                         </a>
                       )}
+                      <br />
 
                       <small>{post.createdAt ? new Date(post.createdAt).toLocaleString() : "—"}</small>
 
@@ -1432,7 +1461,7 @@ useEffect(() => {
           <textarea value={postContent} onChange={(e) => setPostContent(e.target.value)} placeholder={t('dashboard.postModal.contentPlaceholder')} style={{ width: "100%", minHeight: "120px", padding: "10px", borderRadius: "8px", border: "1px solid #ccc", boxSizing: "border-box", resize: "vertical" }} />
           <div style={{ marginTop: "10px" }}>
             <label style={{ display: "block", marginBottom: "6px", opacity: 0.7, fontSize: "13px" }}>{t('dashboard.postModal.attachLabel')}</label>
-            <input type="file" accept="image/*,.pdf" onChange={(e) => setPostAttachment(e.target.files[0])} style={{ fontSize: "13px", color: "white" }} />
+            <input type="file" accept="image/*,.pdf,video/*" onChange={(e) => setPostAttachment(e.target.files[0])} style={{ fontSize: "13px", color: "white" }} />
             {postAttachment && (
               <small style={{ display: "block", marginTop: "4px", opacity: 0.6 }}>
                 {postAttachment.name}

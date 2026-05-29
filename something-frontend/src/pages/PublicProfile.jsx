@@ -299,6 +299,10 @@ export default function PublicProfile() {
 
   const [majors, setMajors] = useState([]);
 
+
+  const [expanded, setExpanded] = useState(false);
+const LIMIT = 251;
+
   //note to self...maybe change the local storage to a global state?....this might fix the resedue of the logout entirly..
 
   ////////////////////////////////////////////////////////////////
@@ -479,7 +483,18 @@ export default function PublicProfile() {
         posts.slice(0, 5).map(post => (
           <div key={post.id} className="publicprofile-post-card">
             {post.title && <h4 className="publicprofile-post-title">{post.title}</h4>}
-            <p className="publicprofile-post-content">{post.content}</p>
+            <p className="publicprofile-post-content" style={{ margin: "0 0 8px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>  {!expanded && post.content.length > LIMIT
+    ? post.content.slice(0, LIMIT) + "..."
+    : post.content}
+  {/* {post.content.length > LIMIT && (
+    <span
+      onClick={() => setExpanded(!expanded)}
+      style={{ color: "#8ca4c6", cursor: "pointer", fontSize: "13px", marginLeft: "4px" }}
+    >
+      {expanded ? " see less" : " see more"}
+    </span>
+  )} */}
+  </p>
             <small className="publicprofile-post-date">{new Date(post.createdAt).toLocaleString()}</small>
           </div>
         ))

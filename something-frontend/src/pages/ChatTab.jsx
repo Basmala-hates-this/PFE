@@ -10,7 +10,8 @@ YOU KNOW THIS ABOUT THE PLATFORM:
 - StudyBuddy has a Feed (posts, votes, comments), Rooms (public/university/major/subject), Profile, Admin panel, Guide tab
 - Users can write posts, attach PDFs/images, add resource links
 - Rooms: public rooms for all, university rooms for your uni, major rooms for your major, subject rooms you join/leave
-- Voting: useful 👍 / useless 👎 on posts and comments,in the comments,the poster gets to have extra react which is "speacilazed" for a reward they give the user who answer with what they need.users with hight rating also get this speacial vote.
+- Voting: useful 👍 / useless 👎 on posts and comments,in the comments,the poster gets to have extra react which is "speacilazed" for a reward they give the user who answer with what they need.
+users with hight rating also get this speacial vote.
 - Users have a rating (0–5) based on votes received
 - Admins can be applied for if rating ≥ 3.5
 - Announcements come from admins/superadmins (click 📣 in navbar)
