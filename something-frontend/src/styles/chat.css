@@ -93,7 +93,7 @@
 }
 
 .roomchat-admin-button-danger:hover {
-  background: var(--danger);
+  background: #d10d0d;
   color: white;
   transform: translateY(-1px);
 }
@@ -336,7 +336,7 @@
 .roomchat-attach-button {
   background: none;
   border: none;
-  font-size: 20px;
+  font-size: 30px;
   cursor: pointer;
   color: var(--text-main);
   transition: all 0.2s;
@@ -399,7 +399,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(75, 98, 121, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -407,7 +407,7 @@
 }
 
 .roomchat-modal {
-  background: linear-gradient(135deg, var(--bg-main), var(--blue-dark));
+  background: linear-gradient(135deg, var(--dark), var(--blue-dark));
   border-radius: 20px;
   padding: 20px;
   width: 400px;
@@ -498,4 +498,20 @@
   transform: translateY(-1px);
   filter: brightness(1.05);
   box-shadow: 0 2px 5px rgba(241, 196, 15, 0.3);
+}
+
+
+.roomchat-remove-member-button {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #e74c3c;
+  border: none;
+  color: white;
+  cursor: pointer;
+  font-size: 12px;
+  width: 80px;
+}
+
+.roomchat-remove-member-button:hover {
+  background: #c0392b;
 }

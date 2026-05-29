@@ -462,7 +462,8 @@
   "fileTooLarge": "File too large. Maximum size is 20MB.",
   "renamePrompt": "Enter new room name:",
   "makeAdminConfirm": "Upgrade @{{username}} to admin?",
-  "makeAdminSuccess": "@{{username}} is now an admin!"
+  "makeAdminSuccess": "@{{username}} is now an admin!",
+  "removeMember": "Remove"
   },
   "guide": {
     "title": "StudyBuddy Guide",

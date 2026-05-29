@@ -1,0 +1,102 @@
+@startuml ClassDiagram
+title Backend System - Pure UML Class Diagram (Conceptual + Domain Model)
+
+' === Core Domain Entities ===
+class User {
+  - id: UUID
+  - username: String
+  - email: String
+  - passwordHash: String
+  - createdAt: DateTime
+  + follow(user: User)
+  + unfollow(user: User)
+}
+
+class Profile {
+  - bio: Text
+  - avatar: File
+  - major: String
+}
+
+class Post {
+  - id: UUID
+  - content: Text
+  - createdAt: DateTime
+  + addComment(comment: Comment)
+  + addVote(vote: Vote)
+}
+
+class Comment {
+  - id: UUID
+  - content: Text
+  - createdAt: DateTime
+}
+
+class Vote {
+  - id: UUID
+  - type: Enum {Up, Down}
+}
+
+class Room {
+  - id: UUID
+  - name: String
+  - isPrivate: Boolean
+}
+
+class RoomMembership {
+  - role: Enum {Member, Admin}
+}
+
+class Message {
+  - id: UUID
+  - content: Text
+  - createdAt: DateTime
+}
+
+' === Specialized Users ===
+class Admin extends User {
+  + approveUniversity()
+  + suspendUser(user: User)
+}
+
+class Professor extends User {
+  - department: String
+}
+
+class Student extends User {
+  - major: String
+}
+
+' === Utility / Supporting Classes ===
+class EmailService {
+  + sendFollowEmail(email, username)
+  + sendRoomInviteEmail(email, room, inviter)
+  + sendResetEmail(email, link)
+}
+
+class AuthService {
+  + hashPassword(password)
+  + verifyPassword(password, hash)
+  + generateToken(user)
+}
+
+class DatabasePool {
+  - connectionString: String
+  - ssl: Object
+  + query(sql, params): Promise
+}
+
+' === Relationships ===
+User "1" --> "1" Profile : has
+User "1" --> "0..*" Post : creates
+Post "1" --> "0..*" Comment : has
+Post "1" --> "0..*" Vote : receives
+User "0.." --> "0.." Room : joins via RoomMembership
+Room "1" --> "0..*" Message : contains
+Admin --> User : inherits
+Professor --> User : inherits
+Student --> User : inherits
+Post --> User : authoredBy
+Comment --> User : authoredBy
+Message --> User : sentBy
+@enduml

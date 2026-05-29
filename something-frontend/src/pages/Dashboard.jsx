@@ -26,6 +26,7 @@ import Profile from "./Profile";
 import RoomsView from "../assets/components/RoomsView.jsx";
 import logo from "../photos/logo2.png";
 import ChatTab from "./ChatTab";
+import { useTheme } from "../Theme";
 
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
@@ -44,6 +45,7 @@ import ChatTab from "./ChatTab";
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { theme, setTheme } = useTheme();
 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [user, setUser] = useState(null);
@@ -1106,6 +1108,7 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
                 : "dark";
               localStorage.setItem("theme", mode);
               setIsLight(mode === "light");
+              setTheme(theme === "dark" ? "light" : "dark")
             }}
           >
             {isLight ? "🌙" : "☀️"}

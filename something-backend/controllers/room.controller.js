@@ -268,6 +268,77 @@ const createSubjectRoom = async (req, res) => {
   res.status(201).json({ message: 'Room created and joined', room });
 };
 
+
+const removeMember = async (req, res) => {
+  const { roomId, memberId } = req.params;
+  const userId = req.user.id;
+ 
+  // verify requester is an admin of this room
+  const room = await roomRepo.getRoomById(roomId);
+  if (!room) return res.status(404).json({ message: 'Room not found' });
+  if (!room.admins?.includes(userId))
+    return res.status(403).json({ message: 'Only room admins can remove members' });
+
+  // can't remove another admin
+  if (room.admins?.includes(memberId))
+    return res.status(403).json({ message: 'Cannot remove another admin' });
+
+  const result = await roomRepo.removeMember(roomId, memberId);
+  if (result?.error) return res.status(400).json({ message: result.error });
+
+  res.json({ message: 'Member removed successfully' });
+};
+
+
+const kickMember = async (req, res) => {
+  const { roomId, memberId } = req.params;
+  const userId = req.user.id;
+
+  const room = await roomRepo.getRoomById(roomId);
+  if (!room) return res.status(404).json({ message: 'Room not found' });
+
+  // only admins can kick
+  if (!room.admins?.includes(userId))
+    return res.status(403).json({ message: 'Only room admins can remove members' });
+
+  // can't kick another admin
+  if (room.admins?.includes(parseInt(memberId)))
+    return res.status(403).json({ message: 'Cannot remove another admin' });
+
+  // can't kick yourself (that's what leaveRoom is for)
+  if (userId === parseInt(memberId))
+    return res.status(400).json({ message: 'Use leave room instead' });
+
+  const isMember = await roomRepo.isMember(roomId, memberId);
+  if (!isMember) return res.status(404).json({ message: 'User is not a member of this room' });
+
+  await roomRepo.removeMember(roomId, memberId);
+  res.json({ message: 'Member removed successfully' });
+};
+
+
+const inviteMember = async (req, res) => {
+  const { roomId } = req.params;
+  const { userId: inviteeId } = req.body;
+  const userId = req.user.id;
+
+  const room = await roomRepo.getRoomById(roomId);
+  if (!room) return res.status(404).json({ message: 'Room not found' });
+
+  // only admins can invite
+  if (!room.admins?.includes(userId))
+    return res.status(403).json({ message: 'Only admins can invite members' });
+
+  const alreadyMember = await roomRepo.isMember(roomId, inviteeId);
+  if (alreadyMember) return res.status(400).json({ message: 'User is already a member' });
+
+  const count = await roomRepo.getMemberCount(roomId);
+  if (count >= room.memberLimit) return res.status(400).json({ message: 'Room is full' });
+
+  await roomRepo.addMember(roomId, inviteeId);
+  res.json({ message: 'Member added successfully' });
+};
+
 module.exports = {
   getMyRooms,
   getPublicRooms,
@@ -283,4 +354,7 @@ module.exports = {
   joinSubjectRoom,
   leaveSubjectRoom,
   createSubjectRoom,
+  removeMember,
+  kickMember,
+  inviteMember,
 };

@@ -460,7 +460,8 @@
   "fileTooLarge": "الملف كبير جداً. الحجم الأقصى هو 20 ميغابايت.",
   "renamePrompt": "أدخل اسم الغرفة الجديد:",
   "makeAdminConfirm": "ترقية @{{username}} إلى مشرف؟",
-  "makeAdminSuccess": "@{{username}} أصبح مشرفاً الآن!"
+  "makeAdminSuccess": "@{{username}} أصبح مشرفاً الآن!",
+  "removeMember": "إزالة "
   },
   "guide": {
     "title": "دليل StudyBuddy",

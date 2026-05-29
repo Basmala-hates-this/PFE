@@ -461,7 +461,8 @@
   "fileTooLarge": "Fichier trop volumineux. La taille maximale est de 20 Mo.",
   "renamePrompt": "Entrez le nouveau nom du salon :",
   "makeAdminConfirm": "Promouvoir @{{username}} en admin ?",
-  "makeAdminSuccess": "@{{username}} est maintenant admin !"
+  "makeAdminSuccess": "@{{username}} est maintenant admin !",
+  "removeMember":"Retirer "
   },
   "guide": {
     "title": "Guide StudyBuddy",

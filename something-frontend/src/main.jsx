@@ -5,9 +5,13 @@ import "./styles/reset.css"
 import './i18n/index.js'
 
 import App from './App.jsx'
+import { ThemeProvider } from "./Theme";
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
-    <App />
+   <ThemeProvider>
+     <App />
+   </ThemeProvider>
+   
   // </StrictMode>,
 )

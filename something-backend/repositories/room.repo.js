@@ -272,6 +272,8 @@ const getRoomSuspension = async (roomId, userId) => {
  return toCamel(result.rows[0]) || null;
 };
 
+
+
 module.exports = {
   createRoom,
   getRoomById,

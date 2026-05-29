@@ -10,6 +10,8 @@ const adminController= require("../controllers/admin.controller")
 
 router.get("/my-rooms", protect, roomController.getMyRooms);
 router.get("/public-rooms", roomController.getPublicRooms);
+router.delete('/private/:roomId/members/:memberId', protect, guestBlock, roomController.kickMember);
+router.post('/private/:roomId/invite', protect, guestBlock, roomController.inviteMember);
 
 //private rooms require ALOT
 router.post("/private", protect, guestBlock, roomController.createPrivateRoom);

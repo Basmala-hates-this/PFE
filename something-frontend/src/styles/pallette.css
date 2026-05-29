@@ -1,7 +1,7 @@
 /* fucking color pallette only file... 
 didnt use most of them...+the namings are bad...idc*/
 
-:root {
+:root[data-theme="dark"]  {
   /* === Surfaces === */
   --bg-body: #002c93;        
   --bg-sidebar: #020617;    
@@ -39,7 +39,7 @@ didnt use most of them...+the namings are bad...idc*/
 }
 
 
-.light-mode {
+:root[data-theme="light"] {
   /* === Surfaces === */
   --bg-body: #f1f5f9;
   --bg-sidebar: #e2e8f0;
