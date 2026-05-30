@@ -403,7 +403,11 @@ const handleSelectChange = (event) => {
         <option value="ar">العربية</option>
       </select>
     </div>
-    <FloatingHelper currentPage="register" /> 
+
+
+    <FloatingHelper currentPage="info" /> 
+
+
              <form  onSubmit={handleSubmit} id="indexForm">{/*<!--action="register.html"   i think this is useless since i added the js redirection--> */}
         <fieldset id="field1" className="fieldInfo" >
            

@@ -225,7 +225,11 @@ useEffect(() => {
  
   return (
     <div id="body2">
+
+
       <FloatingHelper currentPage="register" /> 
+
+      
       <form  id="registerForm" onSubmit={handleSubmit} >
         <fieldset id="field4" >
             <legend  id="logReg">{t("register.legend_main")}</legend>

@@ -142,7 +142,11 @@ const handleSelectChange = (event) => {
         <option value="ar">العربية</option>
       </select>
     </div>
-    <FloatingHelper currentPage="register" /> 
+
+
+    <FloatingHelper currentPage="welcome/home" /> 
+
+
     
   <div className="home-container">
     <img src={logo2} alt="Logo" className="logo"/>

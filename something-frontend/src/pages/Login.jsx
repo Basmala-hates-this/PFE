@@ -152,7 +152,11 @@ const handleSelectChange = (event) => {
         <option value="ar">العربية</option>
       </select>
     </div>
-    <FloatingHelper currentPage="register" /> 
+
+
+    <FloatingHelper currentPage="login" /> 
+
+
       <form  onSubmit={handleSubmit} id="loginForm" autoComplete="off"> {/*<!--action="dashboard2.1.html"rederect the user to the dashboard after confirming with the database?? --> */}
         <fieldset id="field4">
             <legend id="logReg">{t("login.legend")}</legend>
