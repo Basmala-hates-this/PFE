@@ -462,7 +462,8 @@
   "renamePrompt": "Entrez le nouveau nom du salon :",
   "makeAdminConfirm": "Promouvoir @{{username}} en admin ?",
   "makeAdminSuccess": "@{{username}} est maintenant admin !",
-  "removeMember":"Retirer "
+  "removeMember":"Retirer ",
+  "passkey": "🔑 Clé d'accès :"
   },
   "guide": {
     "title": "Guide StudyBuddy",

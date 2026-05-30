@@ -463,7 +463,8 @@
   "renamePrompt": "Enter new room name:",
   "makeAdminConfirm": "Upgrade @{{username}} to admin?",
   "makeAdminSuccess": "@{{username}} is now an admin!",
-  "removeMember": "Remove"
+  "removeMember": "Remove",
+  "passkey": "🔑 Pass key:"
   },
   "guide": {
     "title": "StudyBuddy Guide",

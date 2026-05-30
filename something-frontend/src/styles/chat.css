@@ -33,6 +33,8 @@
 
 .roomchat-back-button:hover {
   opacity: 0.7;
+  background: rgba(255, 255, 255, 0.493);
+  border-radius: 6px;
 }
 
 .roomchat-room-name {
@@ -160,8 +162,10 @@
 }
 
 .roomchat-message-author {
-  opacity: 0.7;
+  opacity: 1;
   font-size: 11px;
+  font-weight: bold;
+  color: var(--text-main);
 }
 
 .roomchat-message-content {

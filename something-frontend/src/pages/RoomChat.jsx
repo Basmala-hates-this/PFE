@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
 import "../styles/chat.css"; // Import the CSS file
 
+import { Copy } from 'lucide-react';
+
 export default function RoomChat() {
   const { roomId } = useParams();
   const navigate = useNavigate();
@@ -173,6 +175,33 @@ const [followList, setFollowList] = useState([]);
 
 
 
+// const openInvite = async () => {
+//   try {
+//     const [followersRes, followingRes] = await Promise.all([
+//       axios.get(`http://localhost:5000/api/users/${currentUser.id}/followers`, {
+//         headers: { Authorization: `Bearer ${token}` }
+//       }),
+//       axios.get(`http://localhost:5000/api/users/${currentUser.id}/following`, {
+//         headers: { Authorization: `Bearer ${token}` }
+//       })
+//     ]);
+
+//     const merged = [...followersRes.data, ...followingRes.data];
+//     const unique = merged.filter((u, index, self) => 
+//       index === self.findIndex(x => x.id === u.id)
+//     );
+
+//     const notYetMembers = unique.filter(
+//       u => !memberDetails.some(m => m.id === u.id)
+//     );
+
+//     setFollowList(notYetMembers);
+//     setShowMembers(true);  
+//     setShowInvite(true);   
+//   } catch (err) {
+//     console.error("Failed to fetch connections:", err);
+//   }
+// };
 const openInvite = async () => {
   try {
     const [followersRes, followingRes] = await Promise.all([
@@ -188,14 +217,12 @@ const openInvite = async () => {
     const unique = merged.filter((u, index, self) => 
       index === self.findIndex(x => x.id === u.id)
     );
-
     const notYetMembers = unique.filter(
       u => !memberDetails.some(m => m.id === u.id)
     );
 
     setFollowList(notYetMembers);
-    setShowMembers(true);  
-    setShowInvite(true);   
+    setShowInvite(true); // just toggle the panel, modal is already open
   } catch (err) {
     console.error("Failed to fetch connections:", err);
   }
@@ -261,7 +288,46 @@ const handleInvite = async (inviteeId) => {
                   ).then(() => navigate("/profile"));
                 }
               }} className="roomchat-admin-button-danger">{t("roomChat.deleteRoom")}</button>
-              <button onClick={openInvite} className="roomchat-admin-button">+ Invite</button>
+              {/* <button onClick={openInvite} className="roomchat-admin-button">+ Invite</button> */}
+              {/* inside the modal, below the header */}
+{room?.passKey && (
+  <div style={{
+    padding: "8px 12px",
+    background: "rgba(255,255,255,0.05)",
+    borderRadius: "8px",
+    marginBottom: "12px",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center"
+  }}>
+    <small style={{opacity: 0.6}}>{t("roomChat.passkey")}</small>
+    <code 
+    style={{
+      background: "rgba(255, 255, 255, 0)",
+      padding: "2px 8px",
+      borderRadius: "4px",
+      letterSpacing: "2px",
+      color: "var(--text-main)",
+      fontSize: "14px",
+      fontWeight: "bold",
+      userSelect: "all",
+      fontFamily: '"OCR-A", "Courier New", "JetBrains Mono", "monospace"'
+    }}
+    >
+      {room.passKey}
+    </code>
+    <button
+      onClick={() => {
+        navigator.clipboard.writeText(room.passKey);
+        alert("Passkey copied!");
+      }}
+      className="roomchat-admin-button"
+      // style={{background:"none", border:"none", cursor:"pointer", fontSize:"16px",marginLeft:"8px"}}
+    >
+      <Copy size={16} />
+    </button>
+  </div>
+)}
           </div>
         )}
       </div>
@@ -383,13 +449,29 @@ const handleInvite = async (inviteeId) => {
     <div className="roomchat-modal-overlay"  onClick={() => { setShowMembers(false); setShowInvite(false); }}>
       <div className="roomchat-modal" onClick={(e) => e.stopPropagation()}>
         
-        <div className="roomchat-modal-header">
+        {/* <div className="roomchat-modal-header">
           <h3 className="roomchat-modal-title">{`${t("roomChat.membersTitle")} (${room?.members?.length})`}</h3>
 
-<button onClick={() => { setShowMembers(false); setShowInvite(false); }} className="roomchat-modal-close">✕</button>        </div>
+            <button onClick={() => { setShowMembers(false); setShowInvite(false); }} className="roomchat-modal-close">✕</button>     
+         </div> */}
+         <div className="roomchat-modal-header">
+  <h3 className="roomchat-modal-title">{`${t("roomChat.membersTitle")} (${room?.members?.length})`}</h3>
+  <div style={{display:"flex", gap:"8px", alignItems:"center"}}>
+    <button 
+      onClick={() => {
+        if (!showInvite) openInvite(); // fetch connections only when opening
+        else setShowInvite(false);
+      }} 
+      className="roomchat-admin-button" 
+      style={{fontSize:"12px"}}>
+      {showInvite ? "← Back" : "+ Invite"}
+    </button>
+    <button onClick={() => { setShowMembers(false); setShowInvite(false); }} className="roomchat-modal-close">✕</button>
+  </div>
+</div>
 
-        {memberDetails.map(member => (
-          <div key={member.id} className="roomchat-member-item">
+            {memberDetails.map(member => (
+             <div key={member.id} className="roomchat-member-item">
             <div className="roomchat-member-info">
               <span className="roomchat-member-avatar">👤</span>
               <span className="roomchat-member-username">@{member.username}</span>

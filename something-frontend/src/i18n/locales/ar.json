@@ -461,7 +461,8 @@
   "renamePrompt": "أدخل اسم الغرفة الجديد:",
   "makeAdminConfirm": "ترقية @{{username}} إلى مشرف؟",
   "makeAdminSuccess": "@{{username}} أصبح مشرفاً الآن!",
-  "removeMember": "إزالة "
+  "removeMember": "إزالة ",
+  "passkey": " رمز السري:"
   },
   "guide": {
     "title": "دليل StudyBuddy",

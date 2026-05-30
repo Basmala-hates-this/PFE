@@ -54,7 +54,7 @@ didnt use most of them...+the namings are bad...idc*/
 
   /* === Text === */
   --text-main: #020617;
-  --text-muted: #475569;
+  --text-muted: #030f21;
   --text-soft: #64748b;
   --text-postTitle: #000000;
 
@@ -66,4 +66,9 @@ didnt use most of them...+the namings are bad...idc*/
   /* === Borders & Effects === */
   --border-soft: rgba(8, 120, 116, 0.867);
   --shadow-soft: 0 8px 20px rgba(12, 142, 248, 0.596);
+
+   /* === Status === */
+  --success: #22c55e;
+  --warning: #facc15;
+  --danger: #ef4444;
 }
