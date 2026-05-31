@@ -274,7 +274,7 @@
   border: 1px solid var(--border-soft);
   background: var(--bg-input);
   color: var(--text-main);
-  width: 220px;
+  width: 90%;
   transition: all 0.2s;
 }
 

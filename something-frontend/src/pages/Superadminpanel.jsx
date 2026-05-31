@@ -1620,7 +1620,11 @@ export default function SuperAdminPanel() {
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
 
-  
+// useEffect(() => {
+//   if (activeTab === "admins") {
+//     fetchCurrentAdmins(adminSearch);
+//   }
+// }, [adminSearch]);  
 
   useEffect(() => {
     if (currentUser?.authorityLevel !== "superadmin") {
@@ -1642,6 +1646,13 @@ export default function SuperAdminPanel() {
   ///////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
+console.log("adminSearch:", adminSearch);
+console.log("currentAdmins:", currentAdmins);
+const filteredAdmins = currentAdmins.filter((admin) =>
+  admin.username.toLowerCase().includes(adminSearch.toLowerCase()) ||
+  admin.email.toLowerCase().includes(adminSearch.toLowerCase())
+);
+
 
   const fetchStats = async () => {
     try {
@@ -2227,16 +2238,27 @@ export default function SuperAdminPanel() {
                 value={adminSearch}
                 onChange={(e) => {
                   setAdminSearch(e.target.value);
-                  fetchCurrentAdmins(e.target.value);
+                 
                 }}
                 className="superadmin-search-input"
               />
             </div>
 
-            {currentAdmins.length === 0 ? (
-              <p className="superadmin-loading">{t("superadmin.admins.noAdmins")}</p>
+            {/* {currentAdmins.length === 0 ? (
+              <p className="superadmin-loading">{adminSearch.trim() 
+      ? t("superadmin.admins.noSearchResults") // "No admins found matching your search"
+      : t("superadmin.admins.noAdmins")         // "No admins yet"
+    }</p>
             ) : (
-              currentAdmins.map((admin) => {
+              currentAdmins.map((admin)*/}
+              {filteredAdmins.length === 0 ? (
+  <p className="superadmin-loading">
+    {adminSearch.trim()
+      ? t("superadmin.admins.noSearchResults")
+      : t("superadmin.admins.noAdmins")}
+  </p>
+) : (
+  filteredAdmins.map((admin) => { 
                 const isEditing = editingAdminId === admin.id;
                 return (
                   <div key={admin.id} className="superadmin-card">
@@ -2251,7 +2273,7 @@ export default function SuperAdminPanel() {
                           <strong>@{admin.username}</strong>
                           <span className="superadmin-badge superadmin-badge-dark">{t("superadmin.admins.adminBadge")}</span>
                           <span className="superadmin-badge superadmin-badge-warning">
-                            ⭐ {admin.rating ?? 1}/5
+                             {admin.rating ?? 1}/5
                           </span>
                         </div>
                         <small className="superadmin-item-details">

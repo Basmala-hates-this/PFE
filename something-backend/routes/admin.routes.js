@@ -77,7 +77,7 @@ router.patch("/rooms-moderation/unsuspend", protect, adminController.unsuspendFr
 router.delete("/rooms-moderation/:roomId", protect, adminController.deleteRoomAdmin);
 
 //thigs i forgot about sup....wont add that damn share and report private room...cry me a river
-
+ 
 router.get("/admins", protect, adminController.getCurrentAdmins);
 router.patch("/users/:userId/edit-permissions", protect, adminController.editAdminPermissions);
 

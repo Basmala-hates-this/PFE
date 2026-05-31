@@ -831,7 +831,8 @@
     "editPerms": "Modifier les permissions :",
     "assignedRooms": "Salles assignées :",
     "saveChanges": "Enregistrer",
-    "saving": "Enregistrement..."
+    "saving": "Enregistrement...",
+    "noSearchResults": "Aucun admin trouvé."
   },
   "logs": {
     "title": "Journal des actions",

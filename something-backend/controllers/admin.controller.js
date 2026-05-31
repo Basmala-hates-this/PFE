@@ -1022,7 +1022,7 @@ const getRoomRequests = async (req, res) => {
       COALESCE(
         JSON_AGG(rrn.user_id) FILTER (WHERE rrn.user_id IS NOT NULL),
         '[]'
-      ) AS "notifyUsers"
+      ) AS "notifyUsers" 
      FROM room_requests rr
      LEFT JOIN room_request_notify rrn ON rrn.request_id = rr.id
      WHERE rr.status = 'pending'

@@ -100,7 +100,7 @@ export default function Fin() {
     localStorage.setItem("token", data.token);
     localStorage.setItem("currentUser", JSON.stringify(data.user));
     setLoading(false);
-    handleConfetti();
+  //  handleConfetti();
 
   } catch (err) {
     console.error("Error sending profile:", err);

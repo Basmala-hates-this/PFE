@@ -832,7 +832,10 @@
     "editPerms": "Edit permissions:",
     "assignedRooms": "Assigned rooms:",
     "saveChanges": "Save Changes",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "noSearchResults": "No admins found.",
+     "fieldsRequired": "Please select permissions and assigned rooms.",
+     "rejectReasonRequired": "Please enter a rejection reason."
   },
   "logs": {
     "title": "Platform Action Logs",

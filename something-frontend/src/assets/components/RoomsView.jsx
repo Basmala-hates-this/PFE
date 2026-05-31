@@ -325,7 +325,7 @@ export default function RoomsView({
           )}
 
           {/* Request Subject Form */}
-          <div className="request-section" style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+          <div className="request-section" style={{ marginTop: "30px", paddingTop: "20px", borderTop: "1px solid rgba(255,255,255,0.1)",marginBottom:"15px" }}>
             <h4 style={{ margin: "0 0 12px", opacity: 0.7, fontSize: "13px" }}>
               {t?.('dashboard.browseRooms.requestTitle') || "Can't find a subject? Request it!"}
             </h4>
@@ -333,11 +333,11 @@ export default function RoomsView({
               className="major-select" 
               value={requestMajor} 
               onChange={(e) => { setRequestMajor(e.target.value); }}
-              style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", color: "white", border: "1px solid rgba(255,255,255,0.2)" }}
+              style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "8px", background: "rgba(41, 64, 121, 0.34)", color: "white", border: "1px solid rgba(255,255,255,0.2)" }}
             >
               <option value="">{t?.('dashboard.browseRooms.selectMajor') || "Select your major"}</option>
               {subjectRoomsData.map(({ major, majorId }) => (
-                <option key={major} value={majorId}>{major}</option>
+                <option key={major} value={majorId} style={{ background: "rgba(0, 18, 66, 0.69)", color: "white" }}>{major}</option>
               ))}
             </select>
             <input 
@@ -345,7 +345,7 @@ export default function RoomsView({
               placeholder={t?.('dashboard.browseRooms.subjectPlaceholder') || "Subject name (e.g., Calculus II)"} 
               value={requestSubject} 
               onChange={(e) => { setRequestSubject(e.target.value); }}
-              style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", color: "white", border: "1px solid rgba(255,255,255,0.2)" }}
+              style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", color: "var(--text-main)", border: "1px solid rgba(255,255,255,0.2)" }}
             />
             {requestFeedback && (
               <p style={{ marginBottom: "10px", color: requestFeedback.includes("notified") ? "#27ae60" : "#e74c3c" }}>
