@@ -823,7 +823,7 @@ const getCurrentAdmins = async (req, res) => {
      FROM users u
      LEFT JOIN user_permissions up ON up.user_id = u.id
      LEFT JOIN admin_assigned_rooms aar ON aar.user_id = u.id
-     WHERE u.authority_level = 'admin'
+     WHERE u.authority_level IN ('admin', 'superadmin')
      GROUP BY u.id`
   );
   res.json(toCamel(result.rows));

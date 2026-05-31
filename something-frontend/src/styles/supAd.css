@@ -274,8 +274,14 @@
   border: 1px solid var(--border-soft);
   background: var(--bg-input);
   color: var(--text-main);
-  width: 90%;
+  width: 45%;
   transition: all 0.2s;
+  
+}
+.superadmin-search-group{
+display: flex;
+gap: 10px;
+flex-wrap: wrap;
 }
 
 .superadmin-search-input:focus {

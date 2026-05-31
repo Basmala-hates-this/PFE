@@ -1616,6 +1616,8 @@ export default function SuperAdminPanel() {
   const [overrideReason, setOverrideReason] = useState("");
 
   const [actionLoading, setActionLoading] = useState(false);
+
+  const [adminFilter, setAdminFilter] = useState("all");
   //////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1648,10 +1650,10 @@ export default function SuperAdminPanel() {
   ///////////////////////////////////////////////////////////////////////////////
 console.log("adminSearch:", adminSearch);
 console.log("currentAdmins:", currentAdmins);
-const filteredAdmins = currentAdmins.filter((admin) =>
-  admin.username.toLowerCase().includes(adminSearch.toLowerCase()) ||
-  admin.email.toLowerCase().includes(adminSearch.toLowerCase())
-);
+// const filteredAdmins = currentAdmins.filter((admin) =>
+//   admin.username.toLowerCase().includes(adminSearch.toLowerCase()) ||
+//   admin.email.toLowerCase().includes(adminSearch.toLowerCase())
+// );
 
 
   const fetchStats = async () => {
@@ -1929,6 +1931,16 @@ const filteredAdmins = currentAdmins.filter((admin) =>
       setActionLoading(false);
     }
   };
+
+  const filteredAdmins = currentAdmins.filter((admin) => {
+  const matchesSearch =
+    admin.username.toLowerCase().includes(adminSearch.toLowerCase()) ||
+    admin.email.toLowerCase().includes(adminSearch.toLowerCase());
+  const matchesFilter =
+    adminFilter === "all" || admin.authorityLevel === adminFilter;
+  return matchesSearch && matchesFilter;
+});
+
 
   //////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2232,6 +2244,8 @@ const filteredAdmins = currentAdmins.filter((admin) =>
           <div className="superadmin-divider">
             <div className="superadmin-header-with-search">
               <h3 className="superadmin-section-title">{t("superadmin.admins.currentTitle")}</h3>
+              <br />
+              <div className="superadmin-search-group">
               <input
                 type="text"
                 placeholder={t("superadmin.admins.searchPlaceholder")}
@@ -2242,6 +2256,16 @@ const filteredAdmins = currentAdmins.filter((admin) =>
                 }}
                 className="superadmin-search-input"
               />
+              <select
+  value={adminFilter}
+  onChange={(e) => setAdminFilter(e.target.value)}
+  className="superadmin-search-input" // reuse same style
+>
+  <option value="all">All</option>
+  <option value="admin">Admins</option>
+  <option value="superadmin">SuperAdmins</option>
+</select>
+</div>
             </div>
 
             {/* {currentAdmins.length === 0 ? (
@@ -2271,8 +2295,13 @@ const filteredAdmins = currentAdmins.filter((admin) =>
                       <div className="superadmin-item-flex">
                         <div className="superadmin-item-info">
                           <strong>@{admin.username}</strong>
-                          <span className="superadmin-badge superadmin-badge-dark">{t("superadmin.admins.adminBadge")}</span>
-                          <span className="superadmin-badge superadmin-badge-warning">
+<span className={`superadmin-badge ${
+  admin.authorityLevel === 'superadmin' 
+    ? 'superadmin-badge-warning' 
+    : 'superadmin-badge-dark'
+}`}>
+  {admin.authorityLevel === 'superadmin' ? ' SuperAdmin' : t("superadmin.admins.adminBadge")}
+</span>                          <span className="superadmin-badge superadmin-badge-warning">
                              {admin.rating ?? 1}/5
                           </span>
                         </div>
@@ -2312,6 +2341,7 @@ const filteredAdmins = currentAdmins.filter((admin) =>
                             </small>
                           )}
                       </div>
+                      {admin.authorityLevel !== 'superadmin' && (
                       <div className="superadmin-button-group superadmin-flex-shrink">
                         <button
                           onClick={() => {
@@ -2349,6 +2379,7 @@ const filteredAdmins = currentAdmins.filter((admin) =>
                           {t("superadmin.admins.remove")}
                         </button>
                       </div>
+                      )}
                     </div>
 
                     {isEditing && (
