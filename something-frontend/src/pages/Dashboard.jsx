@@ -1565,7 +1565,7 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
                           </p>
                         </div>
 
-                        {post.imageUrl && (
+                        {post.imageUrl && !isGuest &&  (
                           <div style={{ marginBottom: "8px" }}>
                             <a
                               href={post.imageUrl}
@@ -1604,7 +1604,7 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
                           </div>
                         )}
 
-                        {post.pdfUrl && (
+                        {post.pdfUrl && !isGuest && (
                           <a
                             href={post.pdfUrl}
                             target="_blank"
@@ -1625,7 +1625,7 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
                             {t("dashboard.post.viewPdf")}
                           </a>
                         )}
-                        {post.videoUrl && (
+                        {post.videoUrl && !isGuest && (
                           <video
                             controls
                             style={{
@@ -1639,7 +1639,7 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
                           </video>
                         )}
 
-                        {post.resourceLink && (
+                        {post.resourceLink && !isGuest && (
                           <a
                             href={post.resourceLink}
                             target="_blank"
@@ -1861,6 +1861,7 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
               requestFeedback={requestFeedback}
               requestLoading={requestLoading}
               t={t}
+              user={user}
             />
           </main>
         )}

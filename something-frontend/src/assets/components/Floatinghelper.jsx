@@ -75,6 +75,7 @@ export default function FloatingHelper({ currentPage = "register" }) {
   const [pulse, setPulse] = useState(true);
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
 
   useEffect(() => {
     const t = setTimeout(() => setPulse(false), 5000);
@@ -150,27 +151,55 @@ const speakText = (text, index) => {
 };
 
   // ── STT ────────────────────────────────────────────────────────────
-  const toggleVoice = () => {
-    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
-      alert("Voice input not supported. Try Chrome.");
-      return;
+ const toggleVoice = async () => {
+  // if already listening → stop and transcribe
+  if (listening) {
+    mediaRecorderRef.current?.stop();
+    return;
+  }
+
+  // request mic
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch {
+    alert("Mic access denied. Please allow microphone.");
+    return;
+  }
+
+  const chunks = [];
+  const recorder = new MediaRecorder(stream);
+  mediaRecorderRef.current = recorder;
+
+  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+
+  recorder.onstop = async () => {
+    // stop all mic tracks
+    stream.getTracks().forEach(t => t.stop());
+    setListening(false);
+
+    const blob = new Blob(chunks, { type: "audio/webm" });
+    const formData = new FormData();
+    formData.append("audio", blob, "recording.webm");
+
+    try {
+      setLoading(true);
+      const res = await fetch("http://localhost:5000/api/ai/transcribe", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.text) setInput(data.text);
+    } catch {
+      alert("Transcription failed. Try again.");
+    } finally {
+      setLoading(false);
     }
-    if (listening) {
-      recognitionRef.current?.stop();
-      setListening(false);
-      return;
-    }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const r = new SR();
-    recognitionRef.current = r;
-    r.lang = detectLang(messages); // ← auto-detect instead of hardcoded
-    r.interimResults = false;
-    r.onresult = (e) => { setInput(e.results[0][0].transcript); setListening(false); };
-    r.onerror = () => setListening(false);
-    r.onend = () => setListening(false);
-    r.start();
-    setListening(true);
   };
+
+  recorder.start();
+  setListening(true);
+};
 
   const sendMessage = async (text) => {
     const content = (text || input).trim();

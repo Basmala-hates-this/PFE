@@ -3,6 +3,9 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Groq = require("groq-sdk");
 
 const router = express.Router();
+const multer = require("multer");
+const upload = multer({ storage: multer.memoryStorage() });
+
 
 // ─── Gemini ───────────────────────────────────────────────────────────────────
 function toGeminiHistory(messages) {
@@ -90,6 +93,31 @@ router.post("/chat", async (req, res) => {
   return res.status(503).json({
     content: [{ text: "I'm having trouble connecting right now. Try again in a few seconds!" }],
   });
+});
+
+
+// ─── POST /api/ai/transcribe ──────────────────────────────────────────────────
+router.post("/transcribe", upload.single("audio"), async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No audio file provided" });
+
+  try {
+    const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+    // Groq needs a File object — reconstruct from buffer
+    const file = new File([req.file.buffer], "audio.webm", { type: req.file.mimetype });
+
+    const transcription = await groq.audio.transcriptions.create({
+      file,
+      model: "whisper-large-v3-turbo",
+      response_format: "json",
+    });
+
+    console.log("Transcribed:", transcription.text);
+    return res.json({ text: transcription.text });
+  } catch (err) {
+    console.error("Transcription failed:", err.message);
+    return res.status(500).json({ error: "Transcription failed" });
+  }
 });
 
 module.exports = router;

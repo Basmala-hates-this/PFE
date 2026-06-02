@@ -56,9 +56,15 @@ async function callAI(messages, system) {
   return data.content?.[0]?.text || "Sorry, I didn't get that. Try again?";
 }
 
+
+
+
+
 // ─── ASSISTANT CHAT ────────────────────────────────────────────────────────────
 export default function ChatTab() {
   const user = JSON.parse(localStorage.getItem("currentUser"));
+  const mediaRecorderRef = useRef(null);
+const [speakingIndex, setSpeakingIndex] = useState(null);
 
   const [messages, setMessages] = useState([
     {
@@ -77,6 +83,12 @@ export default function ChatTab() {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+
+
+  useEffect(() => {
+  return () => { window.speechSynthesis?.cancel(); };
+}, []);
 
   const sendMessage = async (text) => {
     const content = (text || input).trim();
@@ -103,30 +115,30 @@ export default function ChatTab() {
     }
   };
 
-  const toggleVoice = () => {
-    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
-      alert("Voice input not supported in this browser. Try Chrome.");
-      return;
-    }
-    if (listening) {
-      recognitionRef.current?.stop();
-      setListening(false);
-      return;
-    }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SR();
-    recognitionRef.current = recognition;
-    recognition.lang = "fr-FR";
-    recognition.interimResults = false;
-    recognition.onresult = (e) => {
-      setInput(e.results[0][0].transcript);
-      setListening(false);
-    };
-    recognition.onerror = () => setListening(false);
-    recognition.onend = () => setListening(false);
-    recognition.start();
-    setListening(true);
-  };
+  // const toggleVoice = () => {
+  //   if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+  //     alert("Voice input not supported in this browser. Try Chrome.");
+  //     return;
+  //   }
+  //   if (listening) {
+  //     recognitionRef.current?.stop();
+  //     setListening(false);
+  //     return;
+  //   }
+  //   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  //   const recognition = new SR();
+  //   recognitionRef.current = recognition;
+  //   recognition.lang = "fr-FR";
+  //   recognition.interimResults = false;
+  //   recognition.onresult = (e) => {
+  //     setInput(e.results[0][0].transcript);
+  //     setListening(false);
+  //   };
+  //   recognition.onerror = () => setListening(false);
+  //   recognition.onend = () => setListening(false);
+  //   recognition.start();
+  //   setListening(true);
+  // };
 
   const SUGGESTIONS = [
     "How do I create a post?",
@@ -134,6 +146,77 @@ export default function ChatTab() {
     "What is the rating system?",
     "How do I become an admin?",
   ];
+
+
+  
+function detectFromText(t) {
+  if (/[\u0600-\u06FF]/.test(t)) return "ar";
+  if (/[àâçéèêëîïôùûüœæ]/i.test(t)) return "fr";
+  return "en";
+}
+
+const speakText = (text, index) => {
+  if (!window.speechSynthesis) return;
+  if (speakingIndex === index) {
+    window.speechSynthesis.cancel();
+    setSpeakingIndex(null);
+    return;
+  }
+  window.speechSynthesis.cancel();
+  const PREFERRED = { fr: "Microsoft Julie", en: "Microsoft Zira", ar: "Microsoft Julie" };
+  const speak = (voices) => {
+    const utter = new SpeechSynthesisUtterance(text);
+    const langPrefix = detectFromText(text);
+    const fullLang = langPrefix === "fr" ? "fr-FR" : langPrefix === "ar" ? "ar-DZ" : "en-US";
+    utter.voice = voices.find(v => v.name === PREFERRED[langPrefix])
+      || voices.find(v => v.lang === fullLang)
+      || null;
+    utter.lang = fullLang;
+    utter.rate = 0.95;
+    utter.onstart = () => setSpeakingIndex(index);
+    utter.onend = () => setSpeakingIndex(null);
+    utter.onerror = () => setSpeakingIndex(null);
+    window.speechSynthesis.speak(utter);
+  };
+  const voices = window.speechSynthesis.getVoices();
+  voices.length > 0 ? speak(voices) : (window.speechSynthesis.onvoiceschanged = () => speak(window.speechSynthesis.getVoices()));
+};
+
+const toggleVoice = async () => {
+  if (listening) { mediaRecorderRef.current?.stop(); return; }
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch {
+    alert("Mic access denied.");
+    return;
+  }
+  const chunks = [];
+  const recorder = new MediaRecorder(stream);
+  mediaRecorderRef.current = recorder;
+  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+  recorder.onstop = async () => {
+    stream.getTracks().forEach(t => t.stop());
+    setListening(false);
+    const blob = new Blob(chunks, { type: "audio/webm" });
+    const formData = new FormData();
+    formData.append("audio", blob, "recording.webm");
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token") || localStorage.getItem("guestToken");
+      const res = await fetch("http://localhost:5000/api/ai/transcribe", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.text) setInput(data.text);
+    } catch { alert("Transcription failed."); }
+    finally { setLoading(false); }
+  };
+  recorder.start();
+  setListening(true);
+};
 
   return (
     <div style={s.root}>
@@ -148,10 +231,40 @@ export default function ChatTab() {
         {messages.map((msg, i) => (
           <div key={i} style={{ ...s.bubbleWrap, justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
             {msg.role === "assistant" && <span style={s.botAvatar}>🤖</span>}
-            <div style={{ ...s.bubble, ...(msg.role === "user" ? s.userBubble : s.aiBubble) }}>
+            {/* <div style={{ ...s.bubble, ...(msg.role === "user" ? s.userBubble : s.aiBubble) }}>
               <p style={s.bubbleText}>{msg.content}</p>
-            </div>
+            </div> */}
+            <div style={{ ...s.bubble, ...(msg.role === "user" ? s.userBubble : s.aiBubble) }}>
+  <p style={s.bubbleText}>{msg.content}</p>
+  {msg.role === "assistant" && (
+    <button
+      onClick={() => speakText(msg.content, i)}
+      style={{
+        background: "none", border: "none", cursor: "pointer",
+        fontSize: "12px", color: speakingIndex === i ? "#e74c3c" : "rgba(255,255,255,0.3)",
+        padding: "4px 0 0 0", transition: "color 0.2s",
+      }}
+      title={speakingIndex === i ? "Stop" : "Read aloud"}
+    >
+      {speakingIndex === i ? "⏹" : "🔊"}
+    </button>
+  )}
+</div>
+            {/* {msg.role === "assistant" && (
+  <button
+    onClick={() => speakText(msg.content, i)}
+    style={{
+      background: "none", border: "none", cursor: "pointer",
+      fontSize: "12px", color: speakingIndex === i ? "#e74c3c" : "rgba(255,255,255,0.3)",
+      padding: "4px 0 0 0", transition: "color 0.2s",
+    }}
+    title={speakingIndex === i ? "Stop" : "Read aloud"}
+  >
+    {speakingIndex === i ? "⏹" : "🔊"}
+  </button>
+)} */}
           </div>
+          
         ))}
 
         {loading && (
