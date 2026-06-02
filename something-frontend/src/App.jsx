@@ -26,6 +26,7 @@ import CorrectInputsPage from "./pages/CorrectInputsPage";
 
 import Guide from "./pages/Guide.jsx";
 import { useEffect } from "react";
+import Guide2 from "./pages/GuideComponenet.jsx";
 
 
 
@@ -85,6 +86,7 @@ function App() {
         <Route path="/reorientation" element={<ReorientationPage />} />
         <Route path="/correct-inputs" element={<CorrectInputsPage />} />
         <Route path="/guide" element={<Guide />} />
+        <Route path="/guide2" element={<Guide2 />} />
 
       </Routes>
             </RegistrationProvider>

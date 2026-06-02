@@ -213,7 +213,10 @@
       "post": "Post",
       "posting": "Posting...",
       "save": "Save",
-      "saving": "Saving..."
+      "saving": "Saving...",
+      "createAccount":"Create Account",
+    "login":"Login",
+    "guestCommentBanner":"hello guest"
     },
     "browseRooms": {
       "title": "Browse Rooms",
@@ -265,7 +268,10 @@
     "all": "All",
     "popular": "Most Popular",
     "recent": "Most Recent",
-    "specialized": "Specialized"
+    "specialized": "Specialized",
+    "createAccount":"Create Account",
+    "login":"Login",
+    "guestCommentBanner":"hello guest"
   },
   "noComments": "No comments yet. Be the first!",
   "hiddenComment": "🙈 This comment has been hidden.",
@@ -883,5 +889,135 @@
   "VALIDATE_OTHER": "Validate Other Inputs",
   "APPROVE_RESOURCES": "Approve Resources",
   "DELETE_INACTIVE": "Delete Inactive Accounts"
-}
+},
+"guide2": {
+    "title": "StudyBuddy Guide",
+    "quote": "Perfection is overrated. Persistence builds better stories. Join us and we can Learn, Teach and Build — Together....",
+    "logoAlt": "StudyBuddy logo",
+    "back": "← Back To navigation bar",
+    "sidebar": {
+      "title": "StudyBuddy Guide"
+    },
+    "nav": {
+      "overview": "Overview",
+      "navigationbar": "Navigation Bar",
+      "rooms": "Rooms",
+      "actions": "Actions",
+      "roles": "Roles",
+      "interaction": "Interaction",
+      "account": "Account",
+      "navigation": "Navigation",
+      "quickstart": "Quick Start",
+      "contact": "Contact Us",
+      "chat": "Chat"
+    },
+    "sections": {
+      "overview": {
+        "title": "Overview",
+        "text1": "StudyBuddy is a platform designed to organize discussions, track actions, and manage structured interactions inside purpose specific rooms.",
+        "bullets": [
+          "Create or join rooms",
+          "Participate in discussions",
+          "Track actions and decisions",
+          "Interact with users"
+        ]
+      },
+      "chat": {
+        "title": "Chat",
+        "text1": "The StudyBuddy AI Assistant helps you use the platform more easily. Ask questions about features, navigation, rooms, posts, ratings, announcements, and more..",
+        "bullets": [
+          "Answers questions about StudyBuddy features and navigation.",
+          "Helps users find rooms, posts, resources, and announcements.",
+          "Provides guidance on ratings, voting, and account features.",
+          "Responds in English, French, or Arabic based on the user's language."
+        ],
+        "imageAlt": "Room chat screenshot"
+      },
+      "navigationbar": {
+        "title": "Navigation Bar",
+        "text1": "Your main hub for all StudyBuddy activity. Browse, filter, and interact with posts from your community.",
+        "steps": [
+          "Use the top navigation bar to access Chat, Profile, Rooms, and more",
+          "Select rooms to filter the feed or search for specific content",
+          "Interact with posts using Useful, Useless, Comments, Save, and Report"
+        ],
+        "imageAlt": "Dashboard overview"
+      },
+      "actions": {
+        "title": "Stat Cards",
+        "text1": "Stat cards track events and decisions inside the platform. They help you follow discussion progress and outcomes.",
+        "bullets": [
+          "View history",
+          "Track user activity",
+          "Understand changes"
+        ],
+        "text2": "Clicking on the stat cards will show you the details of the action and the related discussion.",
+        "text3": "Another useful thing is the action sidebar.",
+        "profileAlt": "Profile stat cards",
+        "sidebarAlt": "Action sidebar"
+      },
+      "rooms": {
+        "title": "Rooms",
+        "text1": "Rooms are spaces where discussions happen.",
+        "bullets": [
+          "Join or leave rooms",
+          "Request some rooms",
+          "Start or participate in discussions",
+          "View related actions"
+        ],
+        "joinAlt": "Join room screenshot",
+        "requestAlt": "Request room screenshot",
+        "chatAlt": "Room chat screenshot",
+        "subjectAlt": "Subject room screenshot"
+      },
+      "roles": {
+        "title": "Roles & Permissions",
+        "text1": "Roles define what users can do.",
+        "bullets": [
+          "User",
+          "Admin",
+          "SuperAdmin"
+        ]
+      },
+      "interaction": {
+        "title": "User Interaction",
+        "lines": [
+          "Users interact through discussions and actions.",
+          "Engage in discussions, make decisions, and track outcomes.",
+          "Try posting, commenting, voting, and searching."
+        ]
+      },
+      "account": {
+        "title": "Edit Account",
+        "text1": "Edit your profile and personalize your identity in this platform.",
+        "imageAlt": "Edit profile screenshot"
+      },
+      "navigation": {
+        "title": "Navigation Tips",
+        "bullets": [
+          "Use the top navigation bar to move between pages",
+          "Click the active page tab to stay oriented",
+          "Use this guide anytime you need help"
+        ]
+      },
+      "quickstart": {
+        "title": "Quick Start",
+        "steps": [
+          "Open the Feed from the navigation bar",
+          "Go to Rooms and join one",
+          "Interact with posts and classmates",
+          "Start writing your own posts"
+        ]
+      },
+      "contact": {
+        "title": "Contact Us",
+        "studyBuddyLabel": "Study Buddy mail:",
+        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "superAdmin1Label": "SuperAdmin 1:",
+        "superAdmin1Email": "laouaribasmala75@gmail.com",
+        "superAdmin2Label": "SuperAdmin 2:",
+        "superAdmin2Email": "sarahbennoura87@gmail.com"
+      }
+    }
+  }
 }

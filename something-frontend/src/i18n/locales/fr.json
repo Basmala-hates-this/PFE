@@ -213,7 +213,10 @@
       "post": "Publier",
       "posting": "Publication...",
       "save": "Enregistrer",
-      "saving": "Enregistrement..."
+      "saving": "Enregistrement...",
+      "createAccount":"Créer un compte",
+    "login":"Se connecter",
+    "guestCommentBanner":"bonjour visitieur"
     },
     "browseRooms": {
       "title": "Parcourir les salles",
@@ -264,10 +267,12 @@
     "all": "Tout",
     "popular": "Plus populaire",
     "recent": "Plus récent",
-    "specialized": "Spécialisé"
+    "specialized": "Spécialisé",
+    "login":"Se connecter",
+    "guestCommentBanner":"bonjour visitieur"
   },
   "noComments": "Aucun commentaire. Soyez le premier !",
-  "hiddenComment": "🙈 Ce commentaire a été masqué.",
+  "hiddenComment": " Ce commentaire a été masqué.",
   "reply": "↩ Répondre",
   "replyingTo": "↩ Répondre à",
   "cancelReply": "✕ Annuler",
@@ -880,5 +885,135 @@
   "VALIDATE_OTHER": "Valider d'autres entrées",
   "APPROVE_RESOURCES": "Approuver les ressources",
   "DELETE_INACTIVE": "Supprimer les comptes inactifs"
-}
+},
+"guide2": {
+    "title": "Guide StudyBuddy",
+    "quote": "La perfection est surestimée. La persévérance construit de meilleures histoires. Rejoignez-nous et nous pouvons Apprendre, Enseigner et Construire — Ensemble....",
+    "logoAlt": "Logo StudyBuddy",
+    "back": "← Retour au tableau de bord",
+    "sidebar": {
+      "title": "Guide StudyBuddy"
+    },
+    "nav": {
+      "overview": "Aperçu",
+      "dashboard": "Tableau de bord",
+      "rooms": "Salles",
+      "actions": "Actions",
+      "roles": "Rôles",
+      "interaction": "Interaction",
+      "account": "Compte",
+      "navigation": "Navigation",
+      "quickstart": "Démarrage rapide",
+      "contact": "Contact",
+      "chat": "Assistant IA"
+    },
+    "sections": {
+      "overview": {
+        "title": "Aperçu",
+        "text1": "StudyBuddy est une plateforme conçue pour organiser des discussions, suivre des actions et gérer des interactions structurées dans des salles dédiées.",
+        "bullets": [
+          "Créer ou rejoindre des salles",
+          "Participer aux discussions",
+          "Suivre les actions et décisions",
+          "Interagir avec les utilisateurs"
+        ]
+      },
+   "chat": {
+"title": "Assistant IA",
+"text1": "L'assistant IA StudyBuddy vous aide à utiliser la plateforme et à trouver rapidement les informations dont vous avez besoin.",
+"bullets": [
+"Répond aux questions concernant les fonctionnalités de StudyBuddy.",
+"Aide à trouver des salles, des publications, des ressources et des annonces.",
+"Explique le système de notes, de votes et les fonctionnalités du compte.",
+"Répond en français, anglais ou arabe selon la langue de l'utilisateur."
+],
+        "imageAlt": "Capture d'écran du chat de la salle"
+      },
+      "dashboard": {
+        "title": "Tableau de bord",
+        "text1": "Votre centre principal pour toute l'activité StudyBuddy. Parcourez, filtrez et interagissez avec les publications de votre communauté.",
+        "steps": [
+          "Utilisez la barre de navigation en haut pour accéder au Chat, Profil, Salles et plus encore",
+          "Sélectionnez des salles pour filtrer le fil ou rechercher du contenu spécifique",
+          "Interagissez avec les publications via Utile, Inutile, Commentaires, Enregistrer et Signaler"
+        ],
+        "imageAlt": "Vue d'ensemble du tableau de bord"
+      },
+      "actions": {
+        "title": "Cartes de statistiques",
+        "text1": "Les cartes de statistiques suivent les événements et décisions dans la plateforme. Elles vous aident à suivre la progression des discussions et les résultats.",
+        "bullets": [
+          "Voir l'historique",
+          "Suivre l'activité des utilisateurs",
+          "Comprendre les changements"
+        ],
+        "text2": "Cliquer sur les cartes de statistiques affiche les détails de l'action et la discussion liée.",
+        "text3": "Un autre élément utile est la barre latérale d'actions.",
+        "profileAlt": "Cartes de profil et statistiques",
+        "sidebarAlt": "Barre latérale d'actions"
+      },
+      "rooms": {
+        "title": "Salles",
+        "text1": "Les salles sont des espaces où les discussions ont lieu.",
+        "bullets": [
+          "Rejoindre ou quitter des salles",
+          "Demander certaines salles",
+          "Démarrer ou participer aux discussions",
+          "Voir les actions liées"
+        ],
+        "joinAlt": "Capture d'écran de rejoindre une salle",
+        "requestAlt": "Capture d'écran de demande de salle",
+        "chatAlt": "Capture d'écran du chat de salle",
+        "subjectAlt": "Capture d'écran de la salle de sujet"
+      },
+      "roles": {
+        "title": "Rôles et permissions",
+        "text1": "Les rôles définissent ce que les utilisateurs peuvent faire.",
+        "bullets": [
+          "Utilisateur",
+          "Admin",
+          "SuperAdmin"
+        ]
+      },
+      "interaction": {
+        "title": "Interaction utilisateur",
+        "lines": [
+          "Les utilisateurs interagissent par le biais de discussions et d'actions.",
+          "Participez aux discussions, prenez des décisions et suivez les résultats.",
+          "Essayez de publier, commenter, voter et rechercher."
+        ]
+      },
+      "account": {
+        "title": "Modifier le compte",
+        "text1": "Modifiez votre profil et personnalisez votre identité sur cette plateforme.",
+        "imageAlt": "Capture d'écran de modification du profil"
+      },
+      "navigation": {
+        "title": "Conseils de navigation",
+        "bullets": [
+          "Utilisez la barre de navigation en haut pour passer d'une page à l'autre",
+          "Cliquez sur l'onglet actif pour vous repérer",
+          "Consultez ce guide à tout moment si vous avez besoin d'aide"
+        ]
+      },
+      "quickstart": {
+        "title": "Démarrage rapide",
+        "steps": [
+          "Ouvrez le Fil d'actualité depuis la barre de navigation",
+          "Accédez aux Salles et rejoignez-en une",
+          "Interagissez avec les publications et vos camarades",
+          "Commencez à rédiger vos propres publications"
+        ]
+      },
+      "contact": {
+        "title": "Contact",
+        "studyBuddyLabel": "Mail Study Buddy :",
+        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "superAdmin1Label": "SuperAdmin 1 :",
+        "superAdmin1Email": "laouaribasmala75@gmail.com",
+        "superAdmin2Label": "SuperAdmin 2 :",
+        "superAdmin2Email": "sarahbennoura87@gmail.com"
+      }
+    }
+  }
 }

@@ -21,7 +21,7 @@ import { useTranslation } from "react-i18next";
 import { useRef } from "react";
 import AdminPanel from "./AdminPanel";
 import SuperadminPanel from "./SuperadminPanel";
-import GuidePage from "./Guide";
+import GuidePage from "./GuideComponenet.jsx";
 import Profile from "./Profile";
 import RoomsView from "../assets/components/RoomsView.jsx";
 import logo from "../photos/logo2.png";

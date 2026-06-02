@@ -41,6 +41,16 @@ async function callAI(messages) {
   return data.content?.[0]?.text || "Not sure — try again?";
 }
 
+// ── language detection ──────────────────────────────────────────────
+function detectLang(messages) {
+  const lastUser = [...messages].reverse().find((m) => m.role === "user");
+  if (!lastUser) return "fr-FR";
+  const text = lastUser.content;
+  if (/[\u0600-\u06FF]/.test(text)) return "ar-DZ";
+  if (/[àâçéèêëîïôùûüœæ]/i.test(text)) return "fr-FR";
+  return "en-US";
+}
+
 const QUICK = {
   register: ["What goes in username?", "Password rules?", "Why do I need an email?"],
   login: ["I forgot my password", "Wrong password error?", "Which email do I use?"],
@@ -61,6 +71,7 @@ export default function FloatingHelper({ currentPage = "register" }) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
+  const [speakingIndex, setSpeakingIndex] = useState(null); // which bubble is speaking
   const [pulse, setPulse] = useState(true);
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
@@ -74,10 +85,99 @@ export default function FloatingHelper({ currentPage = "register" }) {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // stop speech when widget closes
+  useEffect(() => {
+    if (!open) {
+      window.speechSynthesis?.cancel();
+      setSpeakingIndex(null);
+    }
+  }, [open]);
+
+  // ── TTS ────────────────────────────────────────────────────────────
+const speakText = (text, index) => {
+  if (!window.speechSynthesis) return;
+
+  if (speakingIndex === index) {
+    window.speechSynthesis.cancel();
+    setSpeakingIndex(null);
+    return;
+  }
+
+  window.speechSynthesis.cancel();
+
+  // detect from the TEXT ITSELF, not conversation history
+  const detectFromText = (t) => {
+    if (/[\u0600-\u06FF]/.test(t)) return "ar";
+    if (/[àâçéèêëîïôùûüœæ]/i.test(t)) return "fr";
+    return "en";
+  };
+
+  const PREFERRED = {
+    "fr": "Microsoft Julie",
+    "en": "Microsoft Zira",
+    "ar": "Microsoft Julie",
+  };
+
+  const speak = (voices) => {
+    const utter = new SpeechSynthesisUtterance(text);
+    const langPrefix = detectFromText(text); // ← reads the actual message
+    const fullLang = langPrefix === "fr" ? "fr-FR" : langPrefix === "ar" ? "ar-DZ" : "en-US";
+
+    const preferred = voices.find(v => v.name === PREFERRED[langPrefix]);
+    const exact = voices.find(v => v.lang === fullLang);
+    const prefix = voices.find(v => v.lang.startsWith(langPrefix));
+
+    utter.voice = preferred || exact || prefix || null;
+    utter.lang = fullLang;
+    utter.rate = 0.95;
+
+    console.log("VOICE:", utter.voice?.name, "| LANG:", fullLang, "| TEXT:", text.slice(0, 30));
+
+    utter.onstart = () => setSpeakingIndex(index);
+    utter.onend = () => setSpeakingIndex(null);
+    utter.onerror = () => setSpeakingIndex(null);
+    window.speechSynthesis.speak(utter);
+  };
+
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length > 0) {
+    speak(voices);
+  } else {
+    window.speechSynthesis.onvoiceschanged = () => {
+      speak(window.speechSynthesis.getVoices());
+    };
+  }
+};
+
+  // ── STT ────────────────────────────────────────────────────────────
+  const toggleVoice = () => {
+    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+      alert("Voice input not supported. Try Chrome.");
+      return;
+    }
+    if (listening) {
+      recognitionRef.current?.stop();
+      setListening(false);
+      return;
+    }
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const r = new SR();
+    recognitionRef.current = r;
+    r.lang = detectLang(messages); // ← auto-detect instead of hardcoded
+    r.interimResults = false;
+    r.onresult = (e) => { setInput(e.results[0][0].transcript); setListening(false); };
+    r.onerror = () => setListening(false);
+    r.onend = () => setListening(false);
+    r.start();
+    setListening(true);
+  };
+
   const sendMessage = async (text) => {
     const content = (text || input).trim();
     if (!content || loading) return;
     setInput("");
+    window.speechSynthesis?.cancel();
+    setSpeakingIndex(null);
 
     const newMessages = [...messages, { role: "user", content }];
     setMessages(newMessages);
@@ -91,24 +191,6 @@ export default function FloatingHelper({ currentPage = "register" }) {
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleVoice = () => {
-    if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
-      alert("Voice input not supported. Try Chrome.");
-      return;
-    }
-    if (listening) { recognitionRef.current?.stop(); setListening(false); return; }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const r = new SR();
-    recognitionRef.current = r;
-    r.lang = "fr-FR";
-    r.interimResults = false;
-    r.onresult = (e) => { setInput(e.results[0][0].transcript); setListening(false); };
-    r.onerror = () => setListening(false);
-    r.onend = () => setListening(false);
-    r.start();
-    setListening(true);
   };
 
   const quick = QUICK[currentPage] || QUICK.register;
@@ -126,6 +208,19 @@ export default function FloatingHelper({ currentPage = "register" }) {
             {messages.map((m, i) => (
               <div key={i} style={{ ...f.bubble, ...(m.role === "user" ? f.userBubble : f.aiBubble) }}>
                 <p style={f.bubbleText}>{m.content}</p>
+                {/* TTS button — only on assistant messages */}
+                {m.role === "assistant" && (
+                  <button
+                    onClick={() => speakText(m.content, i)}
+                    style={{
+                      ...f.ttsBtn,
+                      color: speakingIndex === i ? "#e74c3c" : "rgba(255,255,255,0.4)",
+                    }}
+                    title={speakingIndex === i ? "Stop" : "Read aloud"}
+                  >
+                    {speakingIndex === i ? "⏹" : "🔊"}
+                  </button>
+                )}
               </div>
             ))}
             {loading && (
@@ -232,6 +327,11 @@ const f = {
     border: "1px solid rgba(255,255,255,0.08)", borderBottomLeftRadius: "3px",
   },
   bubbleText: { margin: 0, fontSize: "13px", lineHeight: "1.5", color: "white", whiteSpace: "pre-wrap" },
+  ttsBtn: {
+    background: "none", border: "none", cursor: "pointer",
+    fontSize: "12px", padding: "2px 0 0 0", display: "block",
+    transition: "color 0.2s",
+  },
   quickRow: {
     display: "flex", flexWrap: "wrap", gap: "6px", padding: "8px 12px",
     borderTop: "1px solid rgba(255,255,255,0.05)",
@@ -257,4 +357,4 @@ const f = {
     alignItems: "center", justifyContent: "center", flexShrink: 0,
     transition: "all 0.2s", color: "white",
   },
-};
+}

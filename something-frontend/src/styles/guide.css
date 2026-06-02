@@ -129,13 +129,13 @@
   margin-top: 4rem;
   
 }
-.guideLogo {
+.guide-content .guideLogo {
   max-width: 150px;
-  width: 60px;
+  width: 100%;
   height: auto;
  
-  border: 2px solid antiquewhite;
-   border-radius: 600px;
+  border: 2px solid  #00b815;
+   border-radius: 100%;
   filter: drop-shadow(0 0 8px rgba(0,0,0,0.5));
   margin-bottom: 1.5rem;
 }

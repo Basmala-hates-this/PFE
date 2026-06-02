@@ -481,6 +481,24 @@ const buildCommentTree = (comments) => {
 
         {/* add comment */}
 <div style={{borderTop:"1px solid rgba(255,255,255,0.1)", paddingTop:"10px"}}>
+    {isGuest ? (
+    <div style={{ textAlign: "center", padding: "14px", background: "rgba(100,118,175,0.15)", borderRadius: "10px", border: "1px solid rgba(100,118,175,0.35)" }}>
+      <p style={{ margin: "0 0 10px", fontSize: "13px", opacity: 0.85 }}>💬 {t('dashboard.postModal.guestCommentBanner')}</p>
+      <button
+        onClick={() => window.location.href = "/register"}
+        style={{ padding: "7px 20px", borderRadius: "8px", background: "#6476af", border: "none", color: "white", cursor: "pointer", fontSize: "13px", fontWeight: "bold", marginRight: "8px" }}
+      >
+        {t('dashboard.postModal.createAccount')}
+      </button>
+      <button
+        onClick={() => window.location.href = "/login"}
+        style={{ padding: "7px 20px", borderRadius: "8px", background: "transparent", border: "1px solid rgba(100,118,175,0.6)", color: "white", cursor: "pointer", fontSize: "13px" }}
+      >
+        {t('dashboard.postModal.login')}
+      </button>
+    </div>
+  ) : (
+    <>
   {replyingTo && (
   <div style={{ marginBottom: "6px", fontSize: "12px", display: "flex", alignItems: "center", gap: "8px", padding: "6px 10px", background: "rgba(100,118,175,0.2)", borderRadius: "6px" }}>
     {t('postModal.replyingTo')} <strong>@{replyingTo.username}</strong>
@@ -541,6 +559,8 @@ const buildCommentTree = (comments) => {
      {t('postModal.send')}
     </button>
   </div>
+   </>
+  )}
 
 </div>
 
