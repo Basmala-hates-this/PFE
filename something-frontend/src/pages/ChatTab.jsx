@@ -35,10 +35,18 @@ NAVIGATION HINTS:
 -"to join a subject room,go to rooms tab and find the subject you want to join then click on the "join" button,then you will be able to see the posts in that room and interact with them"
 -"to join a private room,go too rooma tab ,click join private room and add the secret key shared with you "
 -"to create a private room,go to rooms tab and click on the "create private room" button,then you can set the name  and share the secret key with your friends to let them join or add them derectly wen creating if they follow you or so,or add the via the 'members' button u see at the top right of the room"
+-"to see posts from a specific room only, you can filter them via the room filter at the top of the feed, you can choose to see posts from all rooms, or just your university, or just your major, or just a specific subject room you joined"  
+-"if you want to search something or someone ,type your query in the search bar at the top of the feed ,the results would be either in the imidiat dropdown,or 
+you cal click "see more restulets" to see them in a dedicated search page"
+-"you can edit your information or password via the edit button on the profile tab"
+-"you can log out of your account or delet your account entirly via the dedicated buttons on the profile tab"
+-"all your action history is saved in a clickble cards in the profile"
+-"you can access you saved resources via the dedicated button in the profile tab"
+-"admin duties are assigned be assigend only by superadmin, you can always appeal a decision by contacting them via email you can find at the buttom of the guid in the guid tab"
 
 
 ${user ? `CURRENT USER:
-- Username: @${user.username}
+- Username: ${user.username}
 - Role: ${user.role || "student"}
 - Authority: ${user.authorityLevel || "user"}
 - University: ${user.universityName || "not set"}
@@ -79,7 +87,7 @@ const [speakingIndex, setSpeakingIndex] = useState(null);
     {
       role: "assistant",
       content: user
-        ? `Hey @${user.username}! 👋 I'm your StudyBuddy assistant. Ask me anything — how the platform works, study help, writing tips, or just chat!`
+        ? `Hey ${user.username}! 👋 I'm your StudyBuddy assistant. Ask me anything — how the platform works, study help, writing tips, or just chat!`
         : `Hey! 👋 I'm the StudyBuddy assistant. You're browsing as a guest — I can still help you understand the platform. What do you need?`,
     },
   ]);

@@ -366,8 +366,24 @@ const handleStatClick = async (type) => {
 ///////////////////////////////////////////////////////////////////////
     return (
 <div id="body7">
+   <button
+  onClick={() => window.location.href = "/dashboard"}
+  style={{
+    marginBottom: "20px",
+    padding: "8px 16px",
+    background: "#6476af",
+    border: "none",
+    borderRadius: "8px",
+    color: "white",
+    cursor: "pointer",
+    fontSize: "14px"
+  }}
+>
+  ← 
+</button>
     <div className="container">
   {/* <!-- SIDEBAR --> */}
+  
   <aside className="sidebar">
     <h2 id="h2pro"> {t('profile.title')}</h2>
     <ul>
