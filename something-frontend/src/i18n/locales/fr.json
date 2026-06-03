@@ -837,7 +837,9 @@
     "assignedRooms": "Salles assignées :",
     "saveChanges": "Enregistrer",
     "saving": "Enregistrement...",
-    "noSearchResults": "Aucun admin trouvé."
+    "noSearchResults": "Aucun admin trouvé.",
+     "viewProfile": " Voir le profil public",
+"interestedIn": "Intéressé par:"
   },
   "logs": {
     "title": "Journal des actions",

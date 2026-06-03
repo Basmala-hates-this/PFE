@@ -2076,7 +2076,7 @@ console.log("currentAdmins:", currentAdmins);
                   <div
                     className={`superadmin-item-row ${isUpgrading || isRejecting ? "superadmin-item-row-with-margin" : ""}`}
                   >
-                    <div className="superadmin-item-flex">
+                    {/* <div className="superadmin-item-flex">
                       <div className="superadmin-item-info">
                         <strong>@{app.username}</strong>
                         <span className="superadmin-badge superadmin-badge-primary">{t("superadmin.admins.applicant")}</span>
@@ -2086,8 +2086,42 @@ console.log("currentAdmins:", currentAdmins);
                         {app.email} • {t("superadmin.admins.applied")}{" "}
                         {new Date(app.appliedAt).toLocaleString()}
                       </small>
-                    </div>
-                    <div className="superadmin-button-group">
+                    </div> */}
+                    <div className="superadmin-item-flex">
+  <div className="superadmin-item-info">
+    <strong>@{app.username}</strong>
+    <span className="superadmin-badge superadmin-badge-primary">{t("superadmin.admins.applicant")}</span>
+    <span className="superadmin-badge superadmin-badge-warning">{app.rating}/5</span>
+  </div>
+
+  <small className="superadmin-item-details">
+    {app.email} • {t("superadmin.admins.applied")} {new Date(app.appliedAt).toLocaleString()}
+  </small>
+
+  {/* interests */}
+  {app.interests?.length > 0 && (
+    <div style={{ marginTop: "8px" }}>
+      <small style={{ opacity: 0.6, fontSize: "11px", display: "block", marginBottom: "4px" }}>
+        {t("superadmin.admins.interestedIn")}
+      </small>
+      <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
+        {app.interests.map(i => (
+          <span key={i} className="superadmin-badge superadmin-badge-primary">
+            {i.replace(/_/g, " ")}
+          </span>
+        ))}
+      </div>
+    </div>
+  )}
+
+  {/* reason */}
+  {app.reason && (
+    <small style={{ display: "block", marginTop: "8px", opacity: 0.7, fontStyle: "italic", fontSize: "12px" }}>
+      "{app.reason}"
+    </small>
+  )}
+</div>
+                    {/* <div className="superadmin-button-group">
                       <button
                         onClick={() => {
                           setUpgradingId(app.user_id);
@@ -2108,7 +2142,39 @@ console.log("currentAdmins:", currentAdmins);
                       >
                         {t("superadmin.admins.reject")}
                       </button>
-                    </div>
+                    </div> */}
+                    <div className="superadmin-button-group">
+  <button
+    onClick={() => navigate(`/public-profile/${app.userId}`)}
+    className="superadmin-btn superadmin-btn-primary"
+  >
+    {t("superadmin.admins.viewProfile")}
+  </button>
+  {app.actionHistory?.length > 0 && (
+    <button
+      onClick={() => setDrillDown({
+        type: "history",
+        title: `@${app.username} ${t("superadmin.drill.titleHistory")}`,
+        data: app.actionHistory,
+      })}
+      className="superadmin-btn superadmin-btn-primary"
+    >
+      {t("superadmin.drill.history")}
+    </button>
+  )}
+  <button
+    onClick={() => { setUpgradingId(app.userId); setSelectedPermissions([]); setSelectedRooms([]); setEditingAdminId(null); }}
+    className="superadmin-btn superadmin-btn-warning"
+  >
+    {t("superadmin.admins.accept")}
+  </button>
+  <button
+    onClick={() => { setRejectingAppId(app.userId); setRejectAppReason(""); }}
+    className="superadmin-btn superadmin-btn-danger"
+  >
+    {t("superadmin.admins.reject")}
+  </button>
+</div>
                   </div>
 
                   {isUpgrading && (

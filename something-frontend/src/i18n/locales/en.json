@@ -841,7 +841,9 @@
     "saving": "Saving...",
     "noSearchResults": "No admins found.",
      "fieldsRequired": "Please select permissions and assigned rooms.",
-     "rejectReasonRequired": "Please enter a rejection reason."
+     "rejectReasonRequired": "Please enter a rejection reason.",
+     "viewProfile": "View public Profile",
+"interestedIn": "Interested in:"
   },
   "logs": {
     "title": "Platform Action Logs",

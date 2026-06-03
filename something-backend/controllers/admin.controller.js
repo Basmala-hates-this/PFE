@@ -955,36 +955,30 @@ const withdrawApplication = async (req, res) => {
 //   );
 //   res.json(result.rows);
 // };
-const getApplications = async (req, res) => {
-  if (req.user.authorityLevel !== 'superadmin') {
-    return res.status(403).json({ message: 'Only superadmin can view applications' });
-  }
-
-  const result = await pool.query(
-    `SELECT 
-       aa.*,
-       u.profile_pic_url,
-       u.role,
-       u.violation_count,
-       u.created_at AS member_since,
-       (SELECT COUNT(*) FROM posts WHERE user_id = aa.user_id) AS posts_count,
-       (SELECT COUNT(*) FROM comments WHERE user_id = aa.user_id) AS comments_count,
-       COALESCE((
-         SELECT COUNT(*) FROM votes v
-         JOIN posts p ON p.id = v.post_id
-         WHERE p.user_id = aa.user_id AND v.type = 'useful'
-       ), 0) AS useful_received,
-       COALESCE((
-         SELECT COUNT(*) FROM votes v
-         JOIN posts p ON p.id = v.post_id
-         WHERE p.user_id = aa.user_id AND v.type = 'specialized'
-       ), 0) AS specialized_received
-     FROM admin_applications aa
-     JOIN users u ON u.id = aa.user_id
-     ORDER BY aa.applied_at DESC`
-  );
-  res.json(toCamel(result.rows));
-};
+const result = await pool.query(
+  `SELECT 
+     aa.*,
+     u.role,
+     u.violation_count,
+     u.created_at AS member_since,
+     COALESCE(
+       json_agg(
+         json_build_object(
+           'action', ah.action,
+           'by', performer.username,
+           'reason', ah.reason,
+           'date', ah.created_at
+         ) ORDER BY ah.created_at DESC
+       ) FILTER (WHERE ah.id IS NOT NULL),
+       '[]'
+     ) AS action_history
+   FROM admin_applications aa
+   JOIN users u ON u.id = aa.user_id
+   LEFT JOIN action_history ah ON ah.user_id = aa.user_id
+   LEFT JOIN users performer ON performer.id = ah.performed_by
+   GROUP BY aa.id, u.role, u.violation_count, u.created_at
+   ORDER BY aa.applied_at DESC`
+);
 
 const rejectApplication = async (req, res) => {
   if (req.user.authorityLevel !== 'superadmin') {

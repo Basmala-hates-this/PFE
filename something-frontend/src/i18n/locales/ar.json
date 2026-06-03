@@ -834,7 +834,9 @@
     "assignedRooms": "الغرف المعيّنة:",
     "saveChanges": "حفظ التغييرات",
     "saving": "جارٍ الحفظ...",
-    "noSearchResults": "لا يوجد مشرفون يطابقون بحثك."
+    "noSearchResults": "لا يوجد مشرفون يطابقون بحثك.",
+     "viewProfile": "عرض الملف الشخصي العام",
+"interestedIn": "مهتم ب:"
   },
   "logs": {
     "title": "سجل إجراءات المنصة",
