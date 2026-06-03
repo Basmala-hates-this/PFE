@@ -1,0 +1,390 @@
+
+<style>
+/* CSS Variables for quick theme customization */
+:root {
+  --color-bg-main: #f4f5f7;
+  --color-bg-card: #ffffff;
+  --color-text-primary: #172b4d;
+  --color-text-secondary: #5e6c84;
+  --color-text-tertiary: #7a869a;
+  --color-border: #dfe1e6;
+  --border-radius-card: 10px;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.1);
+  --shadow-hover: 0 4px 12px rgba(9, 30, 66, 0.15);
+}
+
+/* Dark mode compatibility boilerplate if you toggle .dark class on body */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg-main: #0f172a;
+    --color-bg-card: #1e293b;
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-text-tertiary: #94a3b8;
+    --color-border: #334155;
+  }
+}
+
+* { 
+  box-sizing: border-box; 
+  margin: 0; 
+  padding: 0; 
+}
+
+body {
+  background-color: var(--color-bg-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  padding: 1.5rem;
+}
+
+/* Outer layout wrapper */
+.wrap { 
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+/* Board columns or major sections */
+.section { 
+  display: flex;
+  flex-direction: column;
+}
+
+/* Column Header Styles */
+.section-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-tertiary);
+  margin-bottom: 1rem;
+  padding-left: 4px;
+  border-left: 3px solid var(--color-text-tertiary);
+}
+
+/* Color coding column markers subtly using your accent tags */
+.section:has(.accent-teal) .section-title { border-color: #5DCAA5; }
+.section:has(.accent-purple) .section-title { border-color: #AFA9EC; }
+.section:has(.accent-amber) .section-title { border-color: #EF9F27; }
+.section:has(.accent-coral) .section-title { border-color: #F0997B; }
+.section:has(.accent-green) .section-title { border-color: #97C459; }
+.section:has(.accent-blue) .section-title { border-color: #85B7EB; }
+
+/* Grid container for cards inside a section */
+.cards { 
+  display: grid; 
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+  gap: 16px; 
+}
+
+/* Individual Card Styling */
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-top: 4px solid var(--color-border); /* Top border accent focus */
+  border-radius: var(--border-radius-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* Card Header Styling */
+.card-title { 
+  font-size: 14px; 
+  font-weight: 600; 
+  color: var(--color-text-primary); 
+  margin-bottom: 12px; 
+  line-height: 1.4;
+}
+
+/* List container adjustments */
+.card-items { 
+  list-style: none; 
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* Individual list entries designed as clean text microcards */
+.card-items li {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  padding: 6px 8px;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 4px;
+  border-left: 2px solid transparent;
+  line-height: 1.4;
+}
+
+/* Add a subtle tint to sub-items when browsing dark mode */
+@media (prefers-color-scheme: dark) {
+  .card-items li {
+    background: rgba(255, 255, 255, 0.03);
+  }
+}
+
+/* Left indicator tint for items to tie them with the parent card */
+.card.accent-purple .card-items li { border-left-color: rgba(175, 169, 236, 0.4); }
+.card.accent-teal .card-items li   { border-left-color: rgba(93, 202, 165, 0.4); }
+.card.accent-amber .card-items li  { border-left-color: rgba(239, 159, 39, 0.4); }
+.card.accent-coral .card-items li  { border-left-color: rgba(240, 153, 123, 0.4); }
+.card.accent-blue .card-items li   { border-left-color: rgba(133, 183, 235, 0.4); }
+.card.accent-green .card-items li  { border-left-color: rgba(151, 196, 89, 0.4); }
+
+/* Color overrides mapping to the top border accent */
+.card.accent-purple { border-top-color: #AFA9EC; }
+.card.accent-teal   { border-top-color: #5DCAA5; }
+.card.accent-amber  { border-top-color: #EF9F27; }
+.card.accent-coral  { border-top-color: #F0997B; }
+.card.accent-blue   { border-top-color: #85B7EB; }
+.card.accent-green  { border-top-color: #97C459; }
+</style>
+<div class="wrap">
+
+<div class="section">
+  <div class="section-title">Entry & Onboarding</div>
+  <div class="cards">
+    <div class="card accent-teal">
+      <div class="card-title">Welcome page</div>
+      <ul class="card-items">
+        <li>Continue as guest</li>
+        <li>Create account</li>
+        <li>Login</li>
+      </ul>
+    </div>
+    <div class="card accent-teal">
+      <div class="card-title">Guest mode</div>
+      <ul class="card-items">
+        <li>Choose up to 5 universities</li>
+        <li>Browse selected uni rooms + public space only</li>
+        <li>Fully read-only — posts & comments visible</li>
+        <li>All actions gated → prompts signup</li>
+      </ul>
+    </div>
+    <div class="card accent-teal">
+      <div class="card-title">Registration (multi-step)</div>
+      <ul class="card-items">
+        <li>Step 1 — full name, birthday, email, role (student/prof), major(s)</li>
+        <li>Step 2 — username, password, confirm password + OTP email verification (60s resend)</li>
+        <li>Step 3 — "Fin" page: go to dashboard / login / home + confetti 🎉</li>
+        <li>University & major from admin-approved DB dropdowns</li>
+      </ul>
+    </div>
+    <div class="card accent-teal">
+      <div class="card-title">Login & password reset</div>
+      <ul class="card-items">
+        <li>Login via username or email + password</li>
+        <li>Request reset → link sent to email</li>
+        <li>Reset password page</li>
+        <li>JWT session expiry checking in App.jsx</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Dashboard — Tab System</div>
+  <div class="cards">
+    <div class="card accent-purple">
+      <div class="card-title">Feed tab</div>
+      <ul class="card-items">
+        <li>Joined rooms filter</li>
+        <li>Search bar → Search page (users tab + posts tab)</li>
+        <li>Write a post → Post modal (room filter, title, description, attachment: link+label / image / PDF)</li>
+        <li>Feed filters: all / most recent / most popular</li>
+        <li>Refresh button</li>
+        <li>3-type voting: Useful / Useless / Specialized</li>
+        <li>Optimistic UI on votes</li>
+      </ul>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-title">Chat tab</div>
+      <ul class="card-items">
+        <li>AI assistant — main space</li>
+      </ul>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-title">Profile tab</div>
+      <ul class="card-items">
+        <li>Header: email, rating, major, role tag</li>
+        <li>6 stat cards: posts, comments, useful / useless / specialized votes, rooms joined</li>
+        <li>Drill-down history on each stat card</li>
+        <li>Saved posts sidebar</li>
+        <li>Connections page (following / followers tabs)</li>
+        <li>Edit profile: email, username, pfp, change password</li>
+        <li>Logout & delete account</li>
+      </ul>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-title">Rooms tab</div>
+      <ul class="card-items">
+        <li>My rooms: public rooms (top) + private rooms (bottom)</li>
+        <li>Create private room / join private room</li>
+        <li>Private rooms: open chat → polling-based real-time chat</li>
+        <li>Browse rooms: major-filtered subject rooms, search + filter</li>
+        <li>Room request modal (if room not found)</li>
+      </ul>
+    </div>
+    <div class="card accent-purple">
+      <div class="card-title">Guide tab</div>
+      <ul class="card-items">
+        <li>Platform helper / onboarding guide</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Admin Panel (permission-gated tabs)</div>
+  <div class="cards">
+    <div class="card accent-amber">
+      <div class="card-title">Announcements</div>
+      <ul class="card-items"><li>Post platform-wide announcements</li></ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-title">Users tab</div>
+      <ul class="card-items">
+        <li>User list management</li>
+      </ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-title">Professors tab</div>
+      <ul class="card-items">
+        <li>Handle professor status requests</li>
+        <li>Accept (after reviewing proof) or refuse</li>
+        <li>Refused → demoted to student + reoriented to valid major on next login</li>
+      </ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-title">Reports</div>
+      <ul class="card-items"><li>Handle reports on posts and comments</li></ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-title">Resources</div>
+      <ul class="card-items"><li>Consult user-published resources</li></ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-title">Hidden content</div>
+      <ul class="card-items">
+        <li>Posts hidden by threshold or by admins</li>
+        <li>Leave hidden or restore</li>
+      </ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-title">Custom input</div>
+      <ul class="card-items">
+        <li>Approve/reject custom major & university submissions</li>
+        <li>Approved → creates room; rejected → user picks valid input on next login</li>
+      </ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-title">Room requests tab</div>
+      <ul class="card-items">
+        <li>Subject room requests from users</li>
+        <li>Accept or reject</li>
+      </ul>
+    </div>
+    <div class="card accent-amber">
+      <div class="card-title">Room moderation</div>
+      <ul class="card-items">
+        <li>Delete specific rooms</li>
+        <li>Suspend users from specific rooms</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">SuperAdmin Panel</div>
+  <div class="cards">
+    <div class="card accent-coral">
+      <div class="card-title">Stats tab</div>
+      <ul class="card-items">
+        <li>Total users, posts, comments, rooms</li>
+        <li>Suspended users, pending professors, reported content</li>
+      </ul>
+    </div>
+    <div class="card accent-coral">
+      <div class="card-title">Admin management tab</div>
+      <ul class="card-items">
+        <li>Admin applications (rating ≥ 3.5)</li>
+        <li>Admin list with search & filter</li>
+        <li> SuperAdmin badge visual distinction</li>
+        <li>Edit/Remove hidden for superadmin entries</li>
+        <li>adminFilter dropdown</li>
+      </ul>
+    </div>
+    <div class="card accent-coral">
+      <div class="card-title">Logs tab</div>
+      <ul class="card-items">
+        <li>Action history per admin</li>
+        <li>Superadmin override on select actions</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Accessibility & Language</div>
+  <div class="cards">
+    <div class="card accent-green">
+      <div class="card-title">i18n system</div>
+      <ul class="card-items">
+        <li>English, French, Arabic with full RTL support</li>
+        <li>react-i18next</li>
+        <li>Covers registration, login, password reset, validation</li>
+        <li>Language dropdown in global toolbar</li>
+      </ul>
+    </div>
+    <div class="card accent-green">
+      <div class="card-title">Accessibility</div>
+      <ul class="card-items">
+        <li>TTS (text-to-speech)</li>
+        <li>STT (speech-to-text)</li>
+        <li>Dark / light theme toggle</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-title">Architecture</div>
+  <div class="cards">
+    <div class="card accent-blue">
+      <div class="card-title">Tech stack</div>
+      <ul class="card-items">
+        <li>Frontend: React 19 + Vite</li>
+        <li>Backend: Node.js / Express</li>
+        <li>DB: PostgreSQL on Supabase (pooler port 6543)</li>
+        <li>Raw SQL via node-postgres + toCamel.js utility</li>
+        <li>Auth: JWT with session expiry</li>
+        <li>Email: Nodemailer (OTP + password reset)</li>
+        <li>Chat: polling-based (private rooms)</li>
+      </ul>
+    </div>
+    <div class="card accent-blue">
+      <div class="card-title">Database</div>
+      <ul class="card-items">
+        <li>27 relational tables</li>
+        <li>DB views for post/comment vote counts</li>
+        <li>otp_verifications table</li>
+        <li>Hierarchical rooms: faculty → department → subject</li>
+        <li>3-type voting system</li>
+        <li>Audit log tables</li>
+        <li>Room-level suspension system</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+</div>

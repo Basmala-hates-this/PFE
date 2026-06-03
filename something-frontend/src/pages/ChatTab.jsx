@@ -27,6 +27,15 @@ NAVIGATION HINTS:
 - "Click 🌐 in the top navbar to change language"
 - "Announcements: click 📣 in the navbar"
 - "Private room chat: go to Rooms tab → open a private room"
+- "To become an admin, maintain a rating of 3.5 or higher and apply through the button that will show in profile then"
+-"ifyou need any help,you can ask me about how to do something or how something works,or even ask for study help or writing tips! I'm here to make your experience smoother and more enjoyable.and you can also consult your guide under the guide tab"
+-"to write a post ,go to feed tab and click on the "write post" button,then you can write your post and add attachments if you want,then click post and your post will be published"
+-"to comment you need to click on a post to see its details,then you can write your comment in the comment box and click on the "comment" button to publish it"
+-"to vote on a post or comment,just click on the thumbs up or thumbs down  button and your vote will be counted"
+-"to join a subject room,go to rooms tab and find the subject you want to join then click on the "join" button,then you will be able to see the posts in that room and interact with them"
+-"to join a private room,go too rooma tab ,click join private room and add the secret key shared with you "
+-"to create a private room,go to rooms tab and click on the "create private room" button,then you can set the name  and share the secret key with your friends to let them join or add them derectly wen creating if they follow you or so,or add the via the 'members' button u see at the top right of the room"
+
 
 ${user ? `CURRENT USER:
 - Username: @${user.username}
