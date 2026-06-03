@@ -867,6 +867,32 @@ const editAdminPermissions = async (req, res) => {
 
 // --- admin applications ---
 
+// const applyForAdmin = async (req, res) => {
+//   const user = await userRepo.findById(req.user.id);
+//   if (!user) return res.status(404).json({ message: 'User not found' });
+
+//   if (parseFloat(user.rating) < 3.5) {
+//     return res.status(403).json({ message: 'Rating too low to apply' });
+//   }
+
+//   if (user.authorityLevel !== 'user') {
+//     return res.status(400).json({ message: 'Already an admin' });
+//   }
+
+//   try {
+//     await pool.query(
+//       `INSERT INTO admin_applications (user_id, username, email, rating)
+//        VALUES ($1,$2,$3,$4)`,
+//       [user.id, user.username, user.email, user.rating]
+//     );
+//     res.json({ message: 'Application submitted!' });
+//   } catch (err) {
+//     if (err.code === '23505') {
+//       return res.status(400).json({ message: 'You already have a pending application' });
+//     }
+//     throw err;
+//   }
+// };
 const applyForAdmin = async (req, res) => {
   const user = await userRepo.findById(req.user.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
@@ -875,15 +901,21 @@ const applyForAdmin = async (req, res) => {
     return res.status(403).json({ message: 'Rating too low to apply' });
   }
 
-  if (user.authorityLevel !== 'user') {
+  if (user.authority_level !== 'user') {
     return res.status(400).json({ message: 'Already an admin' });
+  }
+
+  const { interests = [], reason = null } = req.body;
+
+  if (!interests.length) {
+    return res.status(400).json({ message: 'Please select at least one area of interest' });
   }
 
   try {
     await pool.query(
-      `INSERT INTO admin_applications (user_id, username, email, rating)
-       VALUES ($1,$2,$3,$4)`,
-      [user.id, user.username, user.email, user.rating]
+      `INSERT INTO admin_applications (user_id, username, email, rating, interests, reason)
+       VALUES ($1,$2,$3,$4,$5,$6)`,
+      [user.id, user.username, user.email, user.rating, interests, reason]
     );
     res.json({ message: 'Application submitted!' });
   } catch (err) {
@@ -913,15 +945,45 @@ const withdrawApplication = async (req, res) => {
   res.json({ message: 'Application withdrawn.' });
 };
 
+// const getApplications = async (req, res) => {
+//   if (req.user.authorityLevel !== 'superadmin') {
+//     return res.status(403).json({ message: 'Only superadmin can view applications' });
+//   }
+
+//   const result = await pool.query(
+//     `SELECT * FROM admin_applications ORDER BY applied_at DESC`
+//   );
+//   res.json(result.rows);
+// };
 const getApplications = async (req, res) => {
   if (req.user.authorityLevel !== 'superadmin') {
     return res.status(403).json({ message: 'Only superadmin can view applications' });
   }
 
   const result = await pool.query(
-    `SELECT * FROM admin_applications ORDER BY applied_at DESC`
+    `SELECT 
+       aa.*,
+       u.profile_pic_url,
+       u.role,
+       u.violation_count,
+       u.created_at AS member_since,
+       (SELECT COUNT(*) FROM posts WHERE user_id = aa.user_id) AS posts_count,
+       (SELECT COUNT(*) FROM comments WHERE user_id = aa.user_id) AS comments_count,
+       COALESCE((
+         SELECT COUNT(*) FROM votes v
+         JOIN posts p ON p.id = v.post_id
+         WHERE p.user_id = aa.user_id AND v.type = 'useful'
+       ), 0) AS useful_received,
+       COALESCE((
+         SELECT COUNT(*) FROM votes v
+         JOIN posts p ON p.id = v.post_id
+         WHERE p.user_id = aa.user_id AND v.type = 'specialized'
+       ), 0) AS specialized_received
+     FROM admin_applications aa
+     JOIN users u ON u.id = aa.user_id
+     ORDER BY aa.applied_at DESC`
   );
-  res.json(result.rows);
+  res.json(toCamel(result.rows));
 };
 
 const rejectApplication = async (req, res) => {

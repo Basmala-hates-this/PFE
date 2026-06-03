@@ -70,6 +70,17 @@ const [userMajors, setUserMajors] = useState([]);
 
 const [applicationLoading, setApplicationLoading] = useState(false);
 
+const [showApplyModal, setShowApplyModal] = useState(false);
+const [applyInterests, setApplyInterests] = useState([]);
+const [applyReason, setApplyReason] = useState("");
+const ADMIN_INTERESTS = [
+  "content_moderation",
+  "user_management", 
+  "room_management",
+  "post_review",
+  "report_handling"
+];
+
 
 useEffect(() => {
   const token = localStorage.getItem("token");
@@ -298,15 +309,19 @@ const handleApplyForAdmin = async () => {
   setApplicationLoading(true);
   try {
     const token = localStorage.getItem("token");
-    await axios.post("http://localhost:5000/api/admin/apply", {}, {
+    await axios.post("http://localhost:5000/api/admin/apply", {
+      interests: applyInterests,
+      reason: applyReason.trim() || null
+    }, {
       headers: { Authorization: `Bearer ${token}` }
     });
     alert("Application submitted!");
     setApplication({ appliedAt: new Date().toISOString() });
+    setShowApplyModal(false);
+    setApplyInterests([]);
+    setApplyReason("");
   } catch (err) {
-    console.log("Apply error:", err.response?.data);
     alert(err.response?.data?.message || "Something went wrong.");
-
   } finally {
     setApplicationLoading(false);
   }
@@ -429,7 +444,7 @@ const handleStatClick = async (type) => {
         <p style={{ margin: "0 0 10px", fontSize: "14px", opacity: 0.8 }}>
           {t('profile.admin.qualifies')}
         </p>
-        <button onClick={handleApplyForAdmin} 
+        <button onClick={() => setShowApplyModal(true)}
         disabled={applicationLoading} 
         style={{
           padding: "8px 18px", borderRadius: "8px", background: "#6476af",
@@ -912,7 +927,62 @@ const handleStatClick = async (type) => {
   />
 )}
 
+{/* apply for admin */}
+{showApplyModal && (
+  <div className="modal-overlay" onClick={() => setShowApplyModal(false)}>
+    <div className="modal" onClick={e => e.stopPropagation()}>
+      
+      <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
+        <h3 style={{margin:0}}>Apply for Admin</h3>
+        <button onClick={() => setShowApplyModal(false)} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer"}}>✕</button>
+      </div>
 
+      <p style={{fontSize:"13px", opacity:0.7, marginBottom:"12px"}}>
+        What areas are you interested in handling?
+      </p>
+
+      <div style={{display:"flex", flexDirection:"column", gap:"8px", marginBottom:"16px"}}>
+        {ADMIN_INTERESTS.map(interest => (
+          <label key={interest} style={{display:"flex", alignItems:"center", gap:"10px", cursor:"pointer", fontSize:"14px"}}>
+            <input
+              type="checkbox"
+              checked={applyInterests.includes(interest)}
+              onChange={() => setApplyInterests(prev =>
+                prev.includes(interest)
+                  ? prev.filter(i => i !== interest)
+                  : [...prev, interest]
+              )}
+            />
+            {interest.replace(/_/g, " ")}
+          </label>
+        ))}
+      </div>
+
+      <label style={{fontSize:"13px", opacity:0.7}}>Why do you want to be an admin? (optional)</label>
+      <textarea
+        value={applyReason}
+        onChange={e => setApplyReason(e.target.value)}
+        placeholder="Keep it short..."
+        maxLength={300}
+        rows={3}
+        style={{width:"100%", marginTop:"6px", padding:"8px", borderRadius:"8px", border:"1px solid rgba(255,255,255,0.2)", background:"rgba(255,255,255,0.1)", color:"white", boxSizing:"border-box", resize:"none"}}
+      />
+      <small style={{opacity:0.4, fontSize:"11px"}}>{applyReason.length}/300</small>
+
+      <div style={{display:"flex", justifyContent:"flex-end", gap:"10px", marginTop:"15px"}}>
+        <button onClick={() => setShowApplyModal(false)} style={{padding:"6px", width:"60px", backgroundColor:"#fc0c0ce9", color:"white", borderRadius:"6px"}}>Cancel</button>
+        <button
+          onClick={handleApplyForAdmin}
+          disabled={applyInterests.length === 0 || applicationLoading}
+          style={{padding:"6px", width:"80px", backgroundColor: applyInterests.length === 0 ? "#444" : "#6476af", color:"white", borderRadius:"6px", cursor: applyInterests.length === 0 ? "not-allowed" : "pointer"}}
+        >
+          {applicationLoading ? "Sending..." : "Submit"}
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
 
 {drilldown && (
   <div className="modal-overlay" onClick={() => setDrilldown(null)}>
