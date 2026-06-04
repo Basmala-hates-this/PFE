@@ -272,7 +272,7 @@
   padding: 7px 12px;
   border-radius: 6px;
   border: 1px solid var(--border-soft);
-  background: var(--bg-input);
+  background: var(--bg-main);
   color: var(--text-main);
   width: 45%;
   transition: all 0.2s;

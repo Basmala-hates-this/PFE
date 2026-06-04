@@ -1618,6 +1618,12 @@ export default function SuperAdminPanel() {
   const [actionLoading, setActionLoading] = useState(false);
 
   const [adminFilter, setAdminFilter] = useState("all");
+
+
+  //the logs filtration or something like that
+  const [logSearch, setLogSearch] = useState("");
+const [logStatusFilter, setLogStatusFilter] = useState("all");
+const [logActionFilter, setLogActionFilter] = useState("all");
   //////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////
@@ -1942,10 +1948,34 @@ console.log("currentAdmins:", currentAdmins);
 });
 
 
+const filteredLogs = logs.filter(log => {
+  // status filter
+  const isOverridable = ["suspend_user","hide_post","hide_comment","room_suspend","approve_resource","reject_resource"].includes(log.action);
+  if (logStatusFilter === "overridable" && !(isOverridable && !log.overridden_by)) return false;
+  if (logStatusFilter === "overridden" && !log.overridden_by) return false;
+  if (logStatusFilter === "normal" && isOverridable) return false;
+
+  // action filter
+  if (logActionFilter !== "all" && log.action !== logActionFilter) return false;
+
+  // search
+  if (logSearch.trim()) {
+    const q = logSearch.toLowerCase();
+    return (
+      log.admin_username?.toLowerCase().includes(q) ||
+      log.action?.toLowerCase().includes(q) ||
+      log.details?.toLowerCase().includes(q)
+    );
+  }
+  return true;
+});
+
+
   //////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////
-  //to be or not to be...emojies in all pages or no emojis at all.....
+  //to be or not to be...emojies in all pages or no emojis at all........//////
+  //was this one of my concernes?pathetic of me....how stupid....
 
   return (
     <div className="superadmin-container">
@@ -2538,11 +2568,47 @@ console.log("currentAdmins:", currentAdmins);
       {/* ── LOGS TAB ── */}
       {activeTab === "logs" && (
         <div>
-          <h3 className="superadmin-mb-16">{t("superadmin.logs.title")}</h3>
+          {/* <h3 className="superadmin-mb-16">{t("superadmin.logs.title")}</h3>
           {logs.length === 0 ? (
             <p className="superadmin-loading">{t("superadmin.logs.empty")}</p>
           ) : (
-            logs.map((log) => {
+            logs.map(*/}
+            <h3 className="superadmin-mb-16">{t("superadmin.logs.title")}</h3>
+
+<div style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
+  <input
+    type="text"
+    placeholder="Search by admin, action, details..."
+    value={logSearch}
+    onChange={e => setLogSearch(e.target.value)}
+    className="superadmin-search-input"
+  />
+  <select
+    value={logStatusFilter}
+    onChange={e => setLogStatusFilter(e.target.value)}
+    className="superadmin-search-input"
+  >
+    <option value="all">All</option>
+    <option value="overridable">Pending Override</option>
+    <option value="overridden">Overridden</option>
+    <option value="normal">Normal</option>
+  </select>
+  <select
+    value={logActionFilter}
+    onChange={e => setLogActionFilter(e.target.value)}
+    className="superadmin-search-input"
+  >
+    <option value="all">All Actions</option>
+    {[...new Set(logs.map(l => l.action))].sort().map(action => (
+      <option key={action} value={action}>{action}</option>
+    ))}
+  </select>
+</div>
+
+{filteredLogs.length === 0 ? (
+  <p className="superadmin-loading">{t("superadmin.logs.empty")}</p>
+) : (
+  filteredLogs.map((log) => { 
               const isOverridable = [
                 "suspend_user",
                 "hide_post",

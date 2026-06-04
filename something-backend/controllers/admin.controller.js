@@ -945,17 +945,12 @@ const withdrawApplication = async (req, res) => {
   res.json({ message: 'Application withdrawn.' });
 };
 
-// const getApplications = async (req, res) => {
-//   if (req.user.authorityLevel !== 'superadmin') {
-//     return res.status(403).json({ message: 'Only superadmin can view applications' });
-//   }
+const getApplications = async (req, res) => {
+  if (req.user.authorityLevel !== 'superadmin') {
+    return res.status(403).json({ message: 'Only superadmin can view applications' });
+  }
 
-//   const result = await pool.query(
-//     `SELECT * FROM admin_applications ORDER BY applied_at DESC`
-//   );
-//   res.json(result.rows);
-// };
-const result = await pool.query(
+ const result = await pool.query(
   `SELECT 
      aa.*,
      u.role,
@@ -979,6 +974,9 @@ const result = await pool.query(
    GROUP BY aa.id, u.role, u.violation_count, u.created_at
    ORDER BY aa.applied_at DESC`
 );
+  res.json(toCamel(result.rows));
+};
+
 
 const rejectApplication = async (req, res) => {
   if (req.user.authorityLevel !== 'superadmin') {
