@@ -1009,6 +1009,63 @@ const rejectApplication = async (req, res) => {
 
 // --- room requests ---
 
+// const requestSubjectRoom = async (req, res) => {
+//   const user = await userRepo.findById(req.user.id);
+//   if (!user) return res.status(404).json({ message: 'User not found' });
+
+//   const { majorId, subject } = req.body;
+//   if (!majorId || !subject) return res.status(400).json({ message: 'Major and subject are required' });
+
+//   // verify user is enrolled in this major
+//   const majorCheck = await pool.query(
+//     `SELECT m.name FROM user_majors um
+//      JOIN majors m ON m.id = um.major_id
+//      WHERE um.user_id = $1 AND um.major_id = $2`,
+//     [req.user.id, majorId]
+//   );
+//   if (majorCheck.rows.length === 0) {
+//     return res.status(403).json({ message: 'You can only request rooms for your own majors' });
+//   }
+//   const majorName = majorCheck.rows[0].name;
+
+//   // check for duplicate pending request
+//   const duplicate = await pool.query(
+//     `SELECT * FROM room_requests
+//      WHERE major = $1 AND LOWER(subject) = LOWER($2) AND status = 'pending'`,
+//     [majorName, subject]
+//   );
+
+//   if (duplicate.rows.length > 0) {
+//     const existingRequest = duplicate.rows[0];
+//     // add user to notify list if not already there
+//     await pool.query(
+//       `INSERT INTO room_request_notify (request_id, user_id, email)
+//        VALUES ($1,$2,$3)
+//        ON CONFLICT (request_id, user_id) DO NOTHING`,
+//       [existingRequest.id, req.user.id, user.email]
+//     );
+//     return res.status(200).json({
+//       message: "A request for this room is already pending. You'll be notified when it's approved."
+//     });
+//   }
+
+//   // create new request
+//   const newRequest = await pool.query(
+//     `INSERT INTO room_requests (requested_by, major, subject, email, username)
+//      VALUES ($1,$2,$3,$4,$5) RETURNING *`,
+//     [req.user.id, majorName, subject, user.email, user.username]
+//   );
+
+//   // add requester to notify list
+//   await pool.query(
+//     `INSERT INTO room_request_notify (request_id, user_id, email)
+//      VALUES ($1,$2,$3)`,
+//     [newRequest.rows[0].id, req.user.id, user.email]
+//   );
+
+//   res.json({ message: "Room request submitted! You'll be notified when it's reviewed." });
+// };
+
 const requestSubjectRoom = async (req, res) => {
   const user = await userRepo.findById(req.user.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
@@ -1016,7 +1073,6 @@ const requestSubjectRoom = async (req, res) => {
   const { majorId, subject } = req.body;
   if (!majorId || !subject) return res.status(400).json({ message: 'Major and subject are required' });
 
-  // verify user is enrolled in this major
   const majorCheck = await pool.query(
     `SELECT m.name FROM user_majors um
      JOIN majors m ON m.id = um.major_id
@@ -1028,7 +1084,27 @@ const requestSubjectRoom = async (req, res) => {
   }
   const majorName = majorCheck.rows[0].name;
 
-  // check for duplicate pending request
+  // superadmin skips the queue
+  if (req.user.authorityLevel === 'superadmin') {
+    const room = await roomRepo.createRoom({
+      name: subject,
+      type: 'subject',
+      majorId,
+      createdBy: req.user.id,
+    });
+      await roomRepo.addMember(room.id, req.user.id);
+
+  await addLog(req.user.id, req.user.username, 'create_subject_room', room.id,
+    `Directly created subject room "${subject}" under ${majorName}`);
+  return res.status(201).json({ message: `Room "${subject}" created.`, room });
+
+  
+    await addLog(req.user.id, req.user.username, 'create_subject_room', room.id,
+      `Directly created subject room "${subject}" under ${majorName}`);
+    return res.status(201).json({ message: `Room "${subject}" created.`, room });
+  }
+
+  // everyone else goes through the normal queue below
   const duplicate = await pool.query(
     `SELECT * FROM room_requests
      WHERE major = $1 AND LOWER(subject) = LOWER($2) AND status = 'pending'`,
@@ -1037,7 +1113,6 @@ const requestSubjectRoom = async (req, res) => {
 
   if (duplicate.rows.length > 0) {
     const existingRequest = duplicate.rows[0];
-    // add user to notify list if not already there
     await pool.query(
       `INSERT INTO room_request_notify (request_id, user_id, email)
        VALUES ($1,$2,$3)
@@ -1049,14 +1124,12 @@ const requestSubjectRoom = async (req, res) => {
     });
   }
 
-  // create new request
   const newRequest = await pool.query(
     `INSERT INTO room_requests (requested_by, major, subject, email, username)
      VALUES ($1,$2,$3,$4,$5) RETURNING *`,
     [req.user.id, majorName, subject, user.email, user.username]
   );
 
-  // add requester to notify list
   await pool.query(
     `INSERT INTO room_request_notify (request_id, user_id, email)
      VALUES ($1,$2,$3)`,

@@ -782,7 +782,7 @@ export default function RoomsView({
               style={{ width: "100%", padding: "10px", marginBottom: "10px", borderRadius: "8px", background: "rgba(255,255,255,0.1)", color: "var(--text-main)", border: "1px solid rgba(255,255,255,0.2)" }}
             />
             {requestFeedback && (
-              <p style={{ marginBottom: "10px", color: requestFeedback.includes("notified") ? "#27ae60" : "#e74c3c" }}>
+              <p style={{ marginBottom: "10px", color: requestFeedback.includes("notified") ? "#27ae60" : "var(--text-muted)" }}>
                 {requestFeedback}
               </p>
             )}
@@ -797,7 +797,7 @@ export default function RoomsView({
         </div>
       )}
 
-      {/* --- NEW UPDATED CREATE ROOM MODAL WITH CONNECTIONS LIST --- */}
+      {/* --- NEW UPDATED CREATE ROOM MODAL WITH CONNECTIONS LIST ---yaaaaayyy....i hate everything--- */}
       {showCreateRoom && (
         <div className="modal-overlay" onClick={() => setShowCreateRoom(false)}>
           <div className="modal" onClick={(e) => e.stopPropagation()}>

@@ -731,47 +731,126 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
     }
   };
 
-  const handleCreateAndJoinSubjectRoom = async (major, majorId, subject) => {
-    console.log("handleCreateAndJoinSubjectRoom called", major, subject);
-    const confirm = window.confirm(
-      t("dashboard.browseRooms.joinConfirm", { subject, major }),
-    );
-    if (!confirm) return;
-    try {
-      const token = localStorage.getItem("token");
-      await axios.post(
-        "http://localhost:5000/api/rooms/subject-rooms/create",
-        { majorId, subject },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+  // const handleCreateAndJoinSubjectRoom = async (major, majorId, subject) => {
+  //   console.log("handleCreateAndJoinSubjectRoom called", major, subject);
+  //   const confirm = window.confirm(
+  //     t("dashboard.browseRooms.joinConfirm", { subject, major }),
+  //   );
+  //   if (!confirm) return;
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     await axios.post(
+  //       "http://localhost:5000/api/rooms/subject-rooms/create",
+  //       { majorId, subject },
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
 
+  //     await fetchSubjectRooms();
+  //     await fetchRoomsAndPosts();
+  //   } catch (err) {
+  //     alert(err.response?.data?.message || "Something went wrong.");
+  //   }
+  // };
+
+ const handleCreateAndJoinSubjectRoom = async (major, majorId, subject) => {
+  const confirm = window.confirm(
+    t("dashboard.browseRooms.joinConfirm", { subject, major })
+  );
+  if (!confirm) return;
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      "http://localhost:5000/api/rooms/subject-rooms/create",
+      { majorId, subject },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // check what your backend actually returns
+    console.log("create room response:", res.data);
+
+    const newRoom = res.data.room ?? res.data; // adjust based on console output
+    if (!newRoom?.id) {
+      // backend didn't return a room object, fall back to refetch
       await fetchSubjectRooms();
       await fetchRoomsAndPosts();
-    } catch (err) {
-      alert(err.response?.data?.message || "Something went wrong.");
+      return;
     }
-  };
+
+    setUserRooms(prev => {
+      if (prev.find(r => r.id === newRoom.id)) return prev;
+      return [...prev, newRoom];
+    });
+
+    setSubjectRoomsData(prev =>
+      prev.map(group => {
+        if (group.major !== major) return group;
+        if (group.rooms.find(r => r.id === newRoom.id)) return group;
+        return {
+          ...group,
+          rooms: [...group.rooms, newRoom],
+          available: group.available.filter(
+            s => s.toLowerCase() !== subject.toLowerCase()
+          ),
+        };
+      })
+    );
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
+  // const handleLeaveSubjectRoom = async (roomId) => {
+  //   console.log("handleJoinSubjectRoom called", roomId);
+  //   const confirm = window.confirm(t("dashboard.browseRooms.leaveConfirm"));
+  //   if (!confirm) return;
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     await axios.delete(
+  //       `http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`,
+  //       {
+  //         headers: { Authorization: `Bearer ${token}` },
+  //       },
+  //     );
+  //     await fetchSubjectRooms();
+  //     await fetchRoomsAndPosts();
+  //   } catch (err) {
+  //     console.log("full error:", err);
+  //     console.log("response:", err.response);
+  //     alert(err.response?.data?.message || "Something went wrong.");
+  //   }
+  // };
 
   const handleLeaveSubjectRoom = async (roomId) => {
-    console.log("handleJoinSubjectRoom called", roomId);
-    const confirm = window.confirm(t("dashboard.browseRooms.leaveConfirm"));
-    if (!confirm) return;
-    try {
-      const token = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+  const confirm = window.confirm(t("dashboard.browseRooms.leaveConfirm"));
+  if (!confirm) return;
+  try {
+    const token = localStorage.getItem("token");
+    await axios.delete(
+      `http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // 1. Remove from userRooms
+    const leftRoom = userRooms.find(r => r.id === roomId);
+    setUserRooms(prev => prev.filter(r => r.id !== roomId));
+
+    // 2. Move room back from rooms → available in subjectRoomsData
+    if (leftRoom) {
+      setSubjectRoomsData(prev =>
+        prev.map(group => {
+          const wasInGroup = group.rooms.find(r => r.id === roomId);
+          if (!wasInGroup) return group;
+          return {
+            ...group,
+            rooms: group.rooms.filter(r => r.id !== roomId),
+            available: [...group.available, leftRoom.name],
+          };
+        })
       );
-      await fetchSubjectRooms();
-      await fetchRoomsAndPosts();
-    } catch (err) {
-      console.log("full error:", err);
-      console.log("response:", err.response);
-      alert(err.response?.data?.message || "Something went wrong.");
     }
-  };
+  } catch (err) {
+    alert(err.response?.data?.message || "Something went wrong.");
+  }
+};
 
   const handleSavePost = async (postId) => {
     try {
@@ -808,28 +887,83 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
     }
   };
 
+  // const handleRequestSubjectRoom = async () => {
+  //   if (!requestMajor || !requestSubject.trim()) return;
+  //   setRequestLoading(true);
+  //   try {
+  //     const token = localStorage.getItem("token");
+  //     const res = await axios.post(
+  //       "http://localhost:5000/api/rooms/subject-rooms/request",
+  //       // { major: requestMajor, subject: requestSubject.trim() },
+  //       { majorId: requestMajor, subject: requestSubject.trim() },
+  //       { headers: { Authorization: `Bearer ${token}` } },
+  //     );
+  //     setRequestFeedback(res.data.message);
+  //     setRequestSubject("");
+  //     setRequestMajor("");
+  //   } catch (err) {
+  //     setRequestFeedback(
+  //       err.response?.data?.message || "Something went wrong.",
+  //     );
+  //   } finally {
+  //     setRequestLoading(false);
+  //   }
+  // };
+
   const handleRequestSubjectRoom = async () => {
-    if (!requestMajor || !requestSubject.trim()) return;
-    setRequestLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        "http://localhost:5000/api/rooms/subject-rooms/request",
-        // { major: requestMajor, subject: requestSubject.trim() },
-        { majorId: requestMajor, subject: requestSubject.trim() },
-        { headers: { Authorization: `Bearer ${token}` } },
+  if (!requestMajor || !requestSubject.trim()) return;
+  setRequestLoading(true);
+  try {
+    const token = localStorage.getItem("token");
+    const res = await axios.post(
+      "http://localhost:5000/api/rooms/subject-rooms/request",
+      { majorId: requestMajor, subject: requestSubject.trim() },
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+
+    // superadmin gets room created immediately — res.data.room will exist
+    if (res.data.room) {
+      const newRoom = res.data.room;
+
+      // find the major name from subjectRoomsData to match the group
+      const majorGroup = subjectRoomsData.find(
+        g => String(g.majorId) === String(requestMajor)
       );
-      setRequestFeedback(res.data.message);
-      setRequestSubject("");
-      setRequestMajor("");
-    } catch (err) {
-      setRequestFeedback(
-        err.response?.data?.message || "Something went wrong.",
-      );
-    } finally {
-      setRequestLoading(false);
+      const majorName = majorGroup?.major;
+
+      // 1. Add to userRooms instantly
+      setUserRooms(prev => {
+        if (prev.find(r => r.id === newRoom.id)) return prev;
+        return [...prev, newRoom];
+      });
+
+      // 2. Add to browse list under correct major group
+      if (majorName) {
+        setSubjectRoomsData(prev =>
+          prev.map(group => {
+            if (group.major !== majorName) return group;
+            if (group.rooms.find(r => r.id === newRoom.id)) return group;
+            return {
+              ...group,
+              rooms: [...group.rooms, newRoom],
+              available: group.available.filter(
+                s => s.toLowerCase() !== requestSubject.trim().toLowerCase()
+              ),
+            };
+          })
+        );
+      }
     }
-  };
+
+    setRequestFeedback(res.data.message);
+    setRequestSubject("");
+    setRequestMajor("");
+  } catch (err) {
+    setRequestFeedback(err.response?.data?.message || "Something went wrong.");
+  } finally {
+    setRequestLoading(false);
+  }
+};
 
   const sortedPosts = [...posts].sort((a, b) => {
     if (sortBy === "recent")
@@ -1021,6 +1155,8 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
                 localStorage.removeItem("currentUser");
                 localStorage.removeItem("token");
                 localStorage.removeItem("guestToken");
+                localStorage.removeItem("guestUniversities");
+
               }}
             >
               {t("dashboard.sidebar.create")}
@@ -1041,6 +1177,7 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
                 localStorage.removeItem("currentUser");
                 localStorage.removeItem("token");
                 localStorage.removeItem("guestToken");
+                localStorage.removeItem("guestUniversities");
               }}
             >
               {t("dashboard.sidebar.leave")}
