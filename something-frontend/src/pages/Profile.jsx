@@ -1,4 +1,4 @@
-import cat from "../photos/cat.jpg";
+import cat from "../photos/Cat.jpg";
 import "../styles/profile.css";
 import "../styles/sidebar.css";
  import { useNavigate } from "react-router-dom";

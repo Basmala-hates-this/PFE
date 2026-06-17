@@ -7,7 +7,7 @@ import "../styles/register-login.css"
  import axios from "axios";
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
-import FloatingHelper from "../assets/components/FloatingHelper";
+import FloatingHelper from "../assets/components/Floatinghelper";
 
 //////THE DAMN USERNAME CANNOT BELONG TO ANOTHER USER...IF IT EXISTS ALREADY IT CANNOT BE CHOSEN....fuck...
 
