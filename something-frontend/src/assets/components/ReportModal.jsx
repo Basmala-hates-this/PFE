@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
  import { useTranslation } from 'react-i18next';
 // import i18n from '../i18n/index.js';
-
+import api from "../../api/axios.js";
 
 
 export default function ReportModal({ type, postId, commentId, targetId, onClose }) {
@@ -26,23 +26,27 @@ const REASONS = [
     if (!reason) return setError(t("reportModal.noReasonError"));
     try {
       if (type === "post") {
-        await axios.post(
-          `http://localhost:5000/api/posts/${postId}/report`,
-          { reason, details },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        // await axios.post(
+        //   `http://localhost:5000/api/posts/${postId}/report`,
+        //   { reason, details },
+        //   { headers: { Authorization: `Bearer ${token}` } }
+        // );
+        await api.post(`/posts/${postId}/report`, { reason, details },{ headers: { Authorization: `Bearer ${token}` } });
       } else if (type === "comment") {
-        await axios.post(
-          `http://localhost:5000/api/posts/${postId}/comments/${commentId}/report`,
-          { reason, details },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        // await axios.post(
+        //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}/report`,
+        //   { reason, details },
+        //   { headers: { Authorization: `Bearer ${token}` } }
+        // );
+        await api.post(`/posts/${postId}/comments/${commentId}/report`, { reason, details }, { headers: { Authorization: `Bearer ${token}` } });
+
       } else if (type === "user") {
-        await axios.post(
-          `http://localhost:5000/api/users/${targetId}/report`,
-          { reason, details },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        // await axios.post(
+        //   `http://localhost:5000/api/users/${targetId}/report`,
+        //   { reason, details },
+        //   { headers: { Authorization: `Bearer ${token}` } }
+        // );
+        await api.post(`/users/${targetId}/report`, { reason, details }, { headers: { Authorization: `Bearer ${token}` } });
       }
       setSubmitted(true);
     } catch (err) {

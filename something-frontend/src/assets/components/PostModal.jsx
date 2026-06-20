@@ -3,6 +3,7 @@ import axios from "axios";
 import Cat from "../../photos/Cat.jpg";
 import ReportModal from "./ReportModal.jsx";
  import { useTranslation } from 'react-i18next';
+ import api from "../../api/axios.js";
 // import i18n from '../i18n/index.js';
 //threaded comments are more complicated then i thought
 
@@ -152,10 +153,11 @@ const LIMIT = 251;
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/posts/${postId}`,
-          { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
-        );
+        // const response = await axios.get(
+        //   `http://localhost:5000/api/posts/${postId}`,
+        //   { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
+        // );
+        const response = await api.get(`/posts/${postId}`);
         setPost(response.data);
       } catch (err) {
         console.error("Failed to fetch post:", err);
@@ -167,14 +169,18 @@ const LIMIT = 251;
   
   
 const refetchPost = async () => {
+  // const [postRes, commentsRes] = await Promise.all([
+  //   axios.get(`http://localhost:5000/api/posts/${postId}`, {
+  //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} // 
+  //   }),
+  //   axios.get(`http://localhost:5000/api/posts/${postId}/comments`, {
+  //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+  //   })
+  // ]);
   const [postRes, commentsRes] = await Promise.all([
-    axios.get(`http://localhost:5000/api/posts/${postId}`, {
-      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} // ← fix here
-    }),
-    axios.get(`http://localhost:5000/api/posts/${postId}/comments`, {
-      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
-    })
-  ]);
+  api.get(`/posts/${postId}`),
+  api.get(`/posts/${postId}/comments`)
+]);
   console.log("comment sample:", commentsRes.data[0]);
   setPost(postRes.data);
   setComments(commentsRes.data);
@@ -191,11 +197,12 @@ useEffect(() => {
 
  const handleVote = async (postId, voteType) => {
   try {
-    await axios.patch(
-      `http://localhost:5000/api/posts/${postId}/vote`,
-      { voteType },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    // await axios.patch(
+    //   `http://localhost:5000/api/posts/${postId}/vote`,
+    //   { voteType },
+    //   { headers: { Authorization: `Bearer ${token}` } }
+    // );
+    api.patch(`/posts/${postId}/vote`, { voteType },{ headers: { Authorization: `Bearer ${token}` } });
     refetchPost();
   } catch (err) {
     console.error("Failed to vote:", err);
@@ -213,11 +220,12 @@ const handleAddComment = async () => {
     if (commentResourceLink.trim()) formData.append("resourceLink", commentResourceLink);
     if (commentResourceLabel.trim()) formData.append("resourceLabel", commentResourceLabel);
 
-    await axios.post(
-      `http://localhost:5000/api/posts/${postId}/comments`,
-      formData,
-      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-    );
+    // await axios.post(
+    //   `http://localhost:5000/api/posts/${postId}/comments`,
+    //   formData,
+    //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+    // );
+     api.post(`/posts/${postId}/comments`, formData, { headers: { "Content-Type": "multipart/form-data" } });
     console.log("first comment:", comments[0]);
     setCommentInput("");
     setCommentAttachment(null);
@@ -233,11 +241,13 @@ const handleAddComment = async () => {
   const handleCommentVote = async (commentId, voteType) => {
     if (isGuest) return alert(t('postModal.guestCommentAlert'));
     try {
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/comments/${commentId}/vote`,
-        { voteType },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // await axios.patch(
+      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}/vote`,
+      //   { voteType },
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
+    api.patch(`/posts/${postId}/comments/${commentId}/vote`, { voteType }, { headers: { Authorization: `Bearer ${token}` } });
+
       refetchPost();
     } catch (err) {
       console.error("Failed to vote on comment:", err);
@@ -247,10 +257,11 @@ const handleAddComment = async () => {
   const handleDeleteComment = async (commentId) => {
     if (!window.confirm(t('postModal.deleteCommentConfirm'))) return;
     try {
-      await axios.delete(
-        `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // await axios.delete(
+      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
+      api.delete(`/posts/${postId}/comments/${commentId}`, { headers: { Authorization: `Bearer ${token}` } });
       refetchPost();
     } catch (err) {
       console.error("Failed to delete comment:", err);
@@ -259,11 +270,12 @@ const handleAddComment = async () => {
 
   const handleEditComment = async (commentId) => {
     try {
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
-        { content: editCommentContent },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // await axios.patch(
+      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+      //   { content: editCommentContent },
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
+      api.patch(`/posts/${postId}/comments/${commentId}`, { content: editCommentContent }, { headers: { Authorization: `Bearer ${token}` } });
       setEditingComment(null);
       refetchPost();
     } catch (err) {

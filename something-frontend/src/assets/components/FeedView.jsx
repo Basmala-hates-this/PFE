@@ -1,6 +1,6 @@
 // src/assets/components/FeedView.jsx
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import api from "../axios.js"; // ← changed
 import Select from "react-select";
 import Cat from "../../photos/Cat.jpg";
 import { useTranslation } from "react-i18next";
@@ -27,53 +27,49 @@ export default function FeedView({ user, isGuest, posts, setPosts, userRooms, se
   const [reportTarget, setReportTarget] = useState(null);
   const [savedPostIds, setSavedPostIds] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   const guestToken = localStorage.getItem("guestToken");
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
-
   const [expanded, setExpanded] = useState(false);
-const LIMIT = 251; 
+  const LIMIT = 251;
 
-  // Fetch rooms and posts
   const fetchRoomsAndPosts = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
       let allowedRooms = [];
 
       if (isGuest) {
-        const response = await axios.get("http://localhost:5000/api/rooms/public-rooms");
+        // Guest: no auth header needed, use plain axios or api without token
+        const response = await api.get("/rooms/public-rooms", {
+          headers: { Authorization: guestToken ? `Bearer ${guestToken}` : undefined }
+        });
         const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
         const selectedCodes = guestUniversities.map((u) => u.value);
         allowedRooms = response.data.filter(r => r.type === "public" || selectedCodes.includes(r.universityCode));
       } else {
-        const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const response = await api.get("/rooms/my-rooms"); // ← token auto-attached
         allowedRooms = response.data;
       }
 
       setUserRooms(allowedRooms);
 
-      // Fetch saved posts
       if (!isGuest) {
         try {
-          const savedRes = await axios.get("http://localhost:5000/api/posts/saved", {
-            headers: { Authorization: `Bearer ${token}` }
-          });
+          const savedRes = await api.get("/posts/saved"); // ← token auto-attached
           setSavedPostIds(savedRes.data.map((p) => p.id));
         } catch (err) {
           console.error("Failed to fetch saved posts:", err);
         }
       }
 
-      let url = "http://localhost:5000/api/posts";
+      let url = "/posts";
       if (selectedRooms.length === 1) {
         url += `?roomId=${selectedRooms[0].value}`;
       }
-      const postsResponse = await axios.get(url, {
-        headers: token ? { Authorization: `Bearer ${token}` } : guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
+
+      const postsResponse = await api.get(url, {
+        headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
       });
 
       if (isGuest) {
@@ -98,7 +94,6 @@ const LIMIT = 251;
     fetchRoomsAndPosts();
   }, [selectedRooms]);
 
-  // Handle vote
   const handleVote = async (postId, voteType) => {
     const previousPosts = posts;
     const currentVote = posts.find(p => p.id === postId)?.userVote;
@@ -119,13 +114,8 @@ const LIMIT = 251;
     }));
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.patch(`http://localhost:5000/api/posts/${postId}/vote`, { voteType }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const response = await axios.get(`http://localhost:5000/api/posts/${postId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/posts/${postId}/vote`, { voteType }); // ← token auto-attached
+      const response = await api.get(`/posts/${postId}`);
       setPosts(prev => prev.map(p => p.id === postId ? { ...response.data } : p).filter(p => !p.isHidden));
     } catch (err) {
       console.error("Failed to vote:", err);
@@ -133,12 +123,10 @@ const LIMIT = 251;
     }
   };
 
-  // Handle submit post
   const handleSubmitPost = async () => {
     if (!postContent.trim() || !selectedPostRoom) return;
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem("token");
       const formData = new FormData();
       formData.append("content", postContent);
       formData.append("title", postTitle || "Post");
@@ -147,8 +135,8 @@ const LIMIT = 251;
       if (postResourceLink.trim()) formData.append("resourceLink", postResourceLink);
       if (postResourceLabel.trim()) formData.append("resourceLabel", postResourceLabel);
 
-      const response = await axios.post("http://localhost:5000/api/posts", formData, {
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" }
+      const response = await api.post("/posts", formData, {
+        headers: { "Content-Type": "multipart/form-data" } // ← only need this extra header
       });
 
       setPosts(prev => [response.data, ...prev]);
@@ -166,14 +154,10 @@ const LIMIT = 251;
     }
   };
 
-  // Handle edit post
   const handleEditPost = async (postId) => {
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem("token");
-      await axios.patch(`http://localhost:5000/api/posts/${postId}`, { title: editPostTitle, content: editPostContent }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.patch(`/posts/${postId}`, { title: editPostTitle, content: editPostContent });
       setPosts(prev => prev.map(p => p.id === postId ? { ...p, title: editPostTitle, content: editPostContent, isUpdated: true } : p));
       setEditingPost(null);
     } catch (err) {
@@ -183,34 +167,24 @@ const LIMIT = 251;
     }
   };
 
-  // Handle delete post
   const handleDeletePost = async (postId) => {
     const confirm = window.confirm(t('dashboard.post.deleteConfirm'));
     if (!confirm) return;
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/posts/${postId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      await api.delete(`/posts/${postId}`);
       setPosts(prev => prev.filter(p => p.id !== postId));
     } catch (err) {
       console.error("Failed to delete post:", err);
     }
   };
 
-  // Handle save post
   const handleSavePost = async (postId) => {
     try {
-      const token = localStorage.getItem("token");
       if (savedPostIds.includes(postId)) {
-        await axios.delete(`http://localhost:5000/api/posts/${postId}/save`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.delete(`/posts/${postId}/save`);
         setSavedPostIds(prev => prev.filter(id => id !== postId));
       } else {
-        await axios.post(`http://localhost:5000/api/posts/${postId}/save`, {}, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        await api.post(`/posts/${postId}/save`, {});
         setSavedPostIds(prev => [...prev, postId]);
       }
     } catch (err) {
@@ -218,7 +192,6 @@ const LIMIT = 251;
     }
   };
 
-  // Handle search
   const handleSearch = async (query) => {
     setSearchQuery(query);
     if (!query.trim()) {
@@ -227,11 +200,11 @@ const LIMIT = 251;
       return;
     }
     try {
-      const token = localStorage.getItem("token");
-      const authHeader = token ? { Authorization: `Bearer ${token}` } : guestToken ? { Authorization: `Bearer ${guestToken}` } : {};
-      const requests = [axios.get(`http://localhost:5000/api/posts/search?q=${query}`, { headers: authHeader })];
+      const requests = [api.get(`/posts/search?q=${query}`, {
+        headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
+      })];
       if (!isGuest) {
-        requests.push(axios.get(`http://localhost:5000/api/users/search?q=${query}`, { headers: { Authorization: `Bearer ${token}` } }));
+        requests.push(api.get(`/users/search?q=${query}`));
       }
       const results = await Promise.all(requests);
       setSearchResults({ posts: results[0].data, users: isGuest ? [] : results[1].data });
@@ -240,6 +213,8 @@ const LIMIT = 251;
       console.error("Search failed:", err);
     }
   };
+
+  // ---- everything below this line is unchanged ----
 
   const getRoomName = (roomId) => {
     const room = userRooms.find(r => r.id === roomId);
@@ -275,7 +250,6 @@ const LIMIT = 251;
 
   return (
     <div className="feed-view">
-      {/* Welcome Header */}
       <header className="feed-header">
         <h1>
           {t('dashboard.header.welcome')}{" "}
@@ -288,7 +262,6 @@ const LIMIT = 251;
         </h1>
       </header>
 
-      {/* Controls Row */}
       <section className="feed-controls">
         <div className="room-select-wrapper">
           <Select
@@ -300,7 +273,6 @@ const LIMIT = 251;
             styles={customSelectStyles}
           />
         </div>
-
         <div className="search-wrapper">
           <input
             type="text"
@@ -311,18 +283,14 @@ const LIMIT = 251;
             onBlur={() => setTimeout(() => setShowSearchDropdown(false), 200)}
           />
           {showSearchDropdown && (
-            <div className="search-dropdown">
-              {/* Search results same as before */}
-            </div>
+            <div className="search-dropdown"></div>
           )}
         </div>
-
         <button className="postBtn" onClick={() => isGuest ? alert(t('dashboard.post.guestVoteAlert')) : setIsModalOpen(true)}>
           {t('dashboard.feed.writePost')}
         </button>
       </section>
 
-      {/* Feed */}
       <section className="fyp-container">
         <div className="feed-filters">
           {[
@@ -358,39 +326,22 @@ const LIMIT = 251;
                   <div className="post-body">
                     {post.title && <h3>{post.title}</h3>}
                     <p style={{ margin: "0 0 8px", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-  {!expanded && post.content.length > LIMIT
-    ? post.content.slice(0, LIMIT) + "..."
-    : post.content}
-  {post.content.length > LIMIT && (
-    <span
-      onClick={() => setExpanded(!expanded)}
-      style={{ color: "#8ca4c6", cursor: "pointer", fontSize: "13px", marginLeft: "4px" }}
-    >
-      {expanded ? " see less" : " see more"}
-    </span>
-  )}
-</p>
+                      {!expanded && post.content.length > LIMIT ? post.content.slice(0, LIMIT) + "..." : post.content}
+                      {post.content.length > LIMIT && (
+                        <span onClick={() => setExpanded(!expanded)} style={{ color: "#8ca4c6", cursor: "pointer", fontSize: "13px", marginLeft: "4px" }}>
+                          {expanded ? " see less" : " see more"}
+                        </span>
+                      )}
+                    </p>
                   </div>
-                  {/* Attachments */}
-                  {post.imageUrl && (
-                    <div className="post-attachment">
-                      <img src={post.imageUrl} alt="attachment" />
-                    </div>
-                  )}
-                  {post.pdfUrl && (
-                    <a href={post.pdfUrl} target="_blank" rel="noopener noreferrer" className="pdf-link">
-                      {t('dashboard.post.viewPdf')}
-                    </a>
-                  )}
+                  {post.imageUrl && <div className="post-attachment"><img src={post.imageUrl} alt="attachment" /></div>}
+                  {post.pdfUrl && <a href={post.pdfUrl} target="_blank" rel="noopener noreferrer" className="pdf-link">{t('dashboard.post.viewPdf')}</a>}
                   {post.videoUrl && (
-  <video
-    controls
-    style={{ maxWidth: "50%", borderRadius: "8px", marginBottom: "8px" }}
-  >
-    <source src={post.videoUrl} />
-    Your browser does not support video.
-  </video>
-)}
+                    <video controls style={{ maxWidth: "50%", borderRadius: "8px", marginBottom: "8px" }}>
+                      <source src={post.videoUrl} />
+                      Your browser does not support video.
+                    </video>
+                  )}
                   {post.resourceLink && (
                     <a href={post.resourceLink} target="_blank" rel="noopener noreferrer" className="resource-link">
                       🔗 {post.resourceLabel || "Open Resource"}
@@ -431,8 +382,11 @@ const LIMIT = 251;
         </div>
       </section>
 
-      {/* Modals */}
-      {isModalOpen && <PostCreateModal onClose={() => setIsModalOpen(false)} onSubmit={handleSubmitPost} postTitle={postTitle} setPostTitle={setPostTitle} postContent={postContent} setPostContent={setPostContent} selectedPostRoom={selectedPostRoom} setSelectedPostRoom={setSelectedPostRoom} postAttachment={postAttachment} setPostAttachment={setPostAttachment} postResourceLink={postResourceLink} setPostResourceLink={setPostResourceLink} postResourceLabel={postResourceLabel} setPostResourceLabel={setPostResourceLabel} groupedRoomOptions={groupedRoomOptions} isSubmitting={isSubmitting} t={t} />}
+      {isModalOpen && <PostCreateModal onClose={() => setIsModalOpen(false)} onSubmit={handleSubmitPost} postTitle={postTitle} setPostTitle={setPostTitle} 
+      postContent={postContent} setPostContent={setPostContent} selectedPostRoom={selectedPostRoom} 
+      setSelectedPostRoom={setSelectedPostRoom} postAttachment={postAttachment} setPostAttachment={setPostAttachment} 
+      postResourceLink={postResourceLink} setPostResourceLink={setPostResourceLink} postResourceLabel={postResourceLabel}
+       setPostResourceLabel={setPostResourceLabel} groupedRoomOptions={groupedRoomOptions} isSubmitting={isSubmitting} t={t} />}
       {editingPost && <PostEditModal post={editingPost} onClose={() => setEditingPost(null)} onSave={handleEditPost} editPostTitle={editPostTitle} setEditPostTitle={setEditPostTitle} editPostContent={editPostContent} setEditPostContent={setEditPostContent} isSubmitting={isSubmitting} t={t} />}
       {selectedPost && <PostModal postId={selectedPost.id} onClose={() => setSelectedPost(null)} isGuest={isGuest} />}
       {reportTarget && <ReportModal type={reportTarget.type} postId={reportTarget.postId} onClose={() => setReportTarget(null)} />}
@@ -440,7 +394,6 @@ const LIMIT = 251;
   );
 }
 
-// Helper modal components
 function PostCreateModal({ onClose, onSubmit, postTitle, setPostTitle, postContent, setPostContent, selectedPostRoom, setSelectedPostRoom, postAttachment, setPostAttachment, postResourceLink, setPostResourceLink, postResourceLabel, setPostResourceLabel, groupedRoomOptions, isSubmitting, t }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
