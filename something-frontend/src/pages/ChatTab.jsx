@@ -57,10 +57,11 @@ ${user.authorityLevel === "admin" || user.authorityLevel === "superadmin" ? "- T
 Keep responses concise. You're a study buddy, not a manual. Max 4-5 sentences unless they ask for something detailed.
 `;
 
-// ─── CALL OUR BACKEND PROXY (which calls Gemini) ──────────────────────────────
+// ─── CALL OUR BACKEND PROXY (which calls Gemini) ....screw gemini,groq it is for now──────────────────────────────
 async function callAI(messages, system) {
   const token = localStorage.getItem("token") || localStorage.getItem("guestToken");
-  const response = await fetch("http://localhost:5000/api/ai/chat", {
+  //const response = await fetch("http://localhost:5000/api/ai/chat",
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -221,7 +222,8 @@ const toggleVoice = async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token") || localStorage.getItem("guestToken");
-      const res = await fetch("http://localhost:5000/api/ai/transcribe", {
+      //const res = await fetch("http://localhost:5000/api/ai/transcribe"
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
         method: "POST",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         body: formData,

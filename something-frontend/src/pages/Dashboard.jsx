@@ -27,6 +27,7 @@ import RoomsView from "../assets/components/RoomsView.jsx";
 import logo from "../photos/logo2.png";
 import ChatTab from "./ChatTab";
 import { useTheme } from "../Theme";
+import api from "../api/axios.js";
 
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )

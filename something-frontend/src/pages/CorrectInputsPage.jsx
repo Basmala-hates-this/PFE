@@ -4,7 +4,7 @@ import axios from "axios";
 import Select from "react-select";
 import { customSelect } from "../assets/components/selectStyles";
  import { useTranslation } from 'react-i18next';
-
+import api from "../api/axios.js";
 
 
 export default function CorrectInputsPage() {
@@ -30,10 +30,14 @@ const [availableMajors, setAvailableMajors] = useState([]);
 useEffect(() => {
   const fetchData = async () => {
     try {
+      // const [uniRes, majorRes] = await Promise.all([
+      //   axios.get("http://localhost:5000/api/auth/universities"),
+      //   axios.get("http://localhost:5000/api/auth/majors")
+      // ]);
       const [uniRes, majorRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/auth/universities"),
-        axios.get("http://localhost:5000/api/auth/majors")
-      ]);
+  api.get("/auth/universities"),
+  api.get("/auth/majors")
+]);
       setAvailableUniversities(uniRes.data);
       setAvailableMajors(majorRes.data);
     } catch (err) {
@@ -72,8 +76,10 @@ const majorOptions = availableMajors.map((m) => ({ value: m, label: m }));
 
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/users/select-valid-inputs",
+      // const res = await axios.post(
+      //   "http://localhost:5000/api/users/select-valid-inputs",
+      const res = await api.post(
+  "/users/select-valid-inputs",
         {
           selectedUniversityCode: hasCustomUni
             ? selectedUniversity.value

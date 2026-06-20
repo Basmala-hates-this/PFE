@@ -6,7 +6,7 @@ import Cat from "../photos/Cat.jpg";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n/index.js";
 import "../styles/admin.css"; 
-import api from "../axios.js";
+import api from "../api/axios.js";
 
 const API = "/admin";
 
@@ -72,10 +72,11 @@ export default function AdminPanel() {
   useEffect(() => {
     const fetchPermissions = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:5000/api/users/me/permissions",
-          { headers },
-        );
+        // const res = await axios.get(
+        //   "http://localhost:5000/api/users/me/permissions",
+        //   { headers },
+        // );
+        const res = await api.get("/users/me/permissions");
         setUserPermissions(res.data);
       } catch (err) {
         console.error(err);
@@ -111,7 +112,8 @@ export default function AdminPanel() {
 
   const fetchStats = async () => {
     try {
-      const res = await axios.get(`${API}/stats`, { headers });
+      //const res = await axios.get(`${API}/stats`, { headers });
+      const res = await api.get(`${API}/stats`);
       setStats(res.data);
     } catch (err) {
       console.error(err);
@@ -124,7 +126,8 @@ export default function AdminPanel() {
       if (userSearch) params.append("q", userSearch);
       if (userRoleFilter) params.append("role", userRoleFilter);
       if (userStatusFilter) params.append("status", userStatusFilter);
-      const res = await axios.get(`${API}/users?${params}`, { headers });
+      // const res = await axios.get(`${API}/users?${params}`, { headers });
+      const res = await api.get(`${API}/users?${params}`);
       setUsers(res.data);
       console.log("user sample:", res.data[0]);
     } catch (err) {
@@ -134,7 +137,8 @@ export default function AdminPanel() {
 
   const fetchPendingProfessors = async () => {
     try {
-      const res = await axios.get(`${API}/professors/pending`, { headers });
+      // const res = await axios.get(`${API}/professors/pending`, { headers });
+      const res = await api.get(`${API}/professors/pending`);
       setPendingProfessors(res.data);
       console.log("prof sample:", res.data[0]);
     } catch (err) {
@@ -145,7 +149,8 @@ export default function AdminPanel() {
   //just noting that this might be a problem causer....
   const fetchReports = async () => {
     try {
-      const res = await axios.get(`${API}/reports`, { headers });
+      // const res = await axios.get(`${API}/reports`, { headers });
+      const res = await api.get(`${API}/reports`);
       const flat = [
         ...res.data.posts.map((p) => ({ ...p, type: "post" })),
         ...res.data.comments.map((c) => ({ ...c, type: "comment" })),
@@ -158,7 +163,8 @@ export default function AdminPanel() {
 
   const fetchAnnouncements = async () => {
     try {
-      const res = await axios.get(`${API}/announcements`);
+      // const res = await axios.get(`${API}/announcements`);
+      const res = await api.get(`${API}/announcements`);
       setAnnouncements(res.data);
       console.log("announcements raw:", res.data[0]);
     } catch (err) {
@@ -173,11 +179,12 @@ export default function AdminPanel() {
     if (!reason) return;
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/users/${userId}/suspend`,
-        { days: Number(days), reason },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/users/${userId}/suspend`,
+      //   { days: Number(days), reason },
+      //   { headers },
+      // );
+      await api.patch(`${API}/users/${userId}/suspend`, { days: Number(days), reason });
       alert(t("adminPanel.users.suspendSuccess"))
       fetchUsers();
     } catch (err) {
@@ -190,7 +197,8 @@ export default function AdminPanel() {
   const handleUnsuspend = async (userId) => {
     setActionLoading(true);
     try {
-      await axios.patch(`${API}/users/${userId}/unsuspend`, {}, { headers });
+      // await axios.patch(`${API}/users/${userId}/unsuspend`, {}, { headers });
+      await api.patch(`${API}/users/${userId}/unsuspend`, {});
       alert(t("adminPanel.users.unsuspendSuccess"))
       fetchUsers();
     } catch (err) {
@@ -203,7 +211,8 @@ export default function AdminPanel() {
   const handleVerifyProfessor = async (userId) => {
     setActionLoading(true);
     try {
-      await axios.patch(`${API}/professors/${userId}/verify`, {}, { headers });
+      // await axios.patch(`${API}/professors/${userId}/verify`, {}, { headers });
+      await api.patch(`${API}/professors/${userId}/verify`, {});
       alert(t("adminPanel.professors.verifySuccess"));
       fetchPendingProfessors();
       fetchStats();
@@ -218,11 +227,12 @@ export default function AdminPanel() {
     if (!rejectReason.trim()) return alert(t("adminPanel.professors.rejectReasonRequired"));
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/professors/${userId}/reject`,
-        { reason: rejectReason },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/professors/${userId}/reject`,
+      //   { reason: rejectReason },
+      //   { headers },
+      // );
+      await api.patch(`${API}/professors/${userId}/reject`, { reason: rejectReason });
       alert(t("adminPanel.professors.rejectSuccess"));
       setRejectingId(null);
       setRejectReason("");
@@ -239,11 +249,12 @@ export default function AdminPanel() {
     if (!window.confirm(t("adminPanel.reports.hideContent") + ` this ${type}?`)) return;
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/content/hide`,
-        { type, postId, commentId },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/content/hide`,
+      //   { type, postId, commentId },
+      //   { headers },
+      // );
+      await api.patch(`${API}/content/hide`, { type, postId, commentId });
       alert("Content hidden.");
 
       setReports((prev) =>
@@ -272,11 +283,12 @@ export default function AdminPanel() {
     if (!newAnnouncement.trim()) return;
     setActionLoading(true);
     try {
-      await axios.post(
-        `${API}/announcements`,
-        { message: newAnnouncement },
-        { headers },
-      );
+      // await axios.post(
+      //   `${API}/announcements`,
+      //   { message: newAnnouncement },
+      //   { headers },
+      // );
+      await api.post(`${API}/announcements`, { message: newAnnouncement });
       setNewAnnouncement("");
       fetchAnnouncements();
     } catch (err) {
@@ -289,7 +301,8 @@ export default function AdminPanel() {
   const handleDeleteAnnouncement = async (id) => {
     if (!window.confirm(t("adminPanel.announcements.deleteConfirm"))) return;
     try {
-      await axios.delete(`${API}/announcements/${id}`, { headers });
+      // await axios.delete(`${API}/announcements/${id}`, { headers });
+      await api.delete(`${API}/announcements/${id}`);
       fetchAnnouncements();
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
@@ -299,11 +312,12 @@ export default function AdminPanel() {
   const handleApproveResource = async (postId, approved) => {
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/content/resource`,
-        { postId, approved },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/content/resource`,
+      //   { postId, approved },
+      //   { headers },
+      // );
+      await api.patch(`${API}/content/resource`, { postId, approved });
       fetchPendingResources();
       fetchStats();
     } catch (err) {
@@ -317,11 +331,12 @@ export default function AdminPanel() {
     if (!window.confirm(t("adminPanel.hidden.restore") + ` this ${type}?`)) return;
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/content/restore`,
-        { type, postId, commentId },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/content/restore`,
+      //   { type, postId, commentId },
+      //   { headers },
+      // );
+      await api.patch(`${API}/content/restore`, { type, postId, commentId });
       fetchHiddenContent();
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
@@ -333,11 +348,12 @@ export default function AdminPanel() {
   const handleValidateOtherInput = async (userId, approved) => {
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/other-inputs/validate`,
-        { userId, approved },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/other-inputs/validate`,
+      //   { userId, approved },
+      //   { headers },
+      // );
+      await api.patch(`${API}/other-inputs/validate`, { userId, approved });
       fetchOtherInputs();
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
@@ -390,14 +406,16 @@ export default function AdminPanel() {
     try {
       switch (type) {
         case "users": {
-          const res = await axios.get(`${API}/users`, { headers });
+         // const res = await axios.get(`${API}/users`, { headers });
+         const res = await api.get(`${API}/users`);
           setDrillDown({ type: "users", title: "All Users", data: res.data });
           break;
         }
         case "suspended": {
-          const res = await axios.get(`${API}/users?status=suspended`, {
-            headers,
-          });
+          // const res = await axios.get(`${API}/users?status=suspended`, {
+          //   headers,
+          // });
+          const res = await api.get(`${API}/users?status=suspended`);
           setDrillDown({
             type: "users",
             title: "Suspended Users",
@@ -406,12 +424,15 @@ export default function AdminPanel() {
           break;
         }
         case "posts": {
-          const res = await axios.get(`${API}/posts`, { headers });
+          // const res = await axios.get(`${API}/posts`, { headers });
+          const res = await api.get(`${API}/posts`);
+
           setDrillDown({ type: "posts", title: "All Posts", data: res.data });
           break;
         }
         case "comments": {
-          const res = await axios.get(`${API}/posts`, { headers });
+          // const res = await axios.get(`${API}/posts`, { headers });
+          const res = await api.get(`${API}/posts`);
           const comments = [];
           res.data.forEach((post) => {
             post.comments?.forEach((c) =>
@@ -426,7 +447,8 @@ export default function AdminPanel() {
           break;
         }
         case "rooms": {
-          const res = await axios.get(`${API}/rooms`, { headers });
+          // const res = await axios.get(`${API}/rooms`, { headers });
+          const res = await api.get(`${API}/rooms`);
           setDrillDown({ type: "rooms", title: "All Rooms", data: res.data });
           break;
         }
@@ -440,7 +462,8 @@ export default function AdminPanel() {
 
   const fetchPendingResources = async () => {
     try {
-      const res = await axios.get(`${API}/resources/pending`, { headers });
+      // const res = await axios.get(`${API}/resources/pending`, { headers });
+      const res = await api.get(`${API}/resources/pending`);
       setPendingResources(res.data);
       console.log("resource sample:", res.data[0]);
     } catch (err) {
@@ -450,7 +473,8 @@ export default function AdminPanel() {
 
   const fetchHiddenContent = async () => {
     try {
-      const res = await axios.get(`${API}/content/hidden`, { headers });
+      // const res = await axios.get(`${API}/content/hidden`, { headers });
+      const res = await api.get(`${API}/content/hidden`);
       const flat = [
         ...res.data.posts.map((p) => ({ ...p, type: "post" })),
         ...res.data.comments.map((c) => ({ ...c, type: "comment" })),
@@ -463,7 +487,8 @@ export default function AdminPanel() {
 
   const fetchOtherInputs = async () => {
     try {
-      const res = await axios.get(`${API}/other-inputs`, { headers });
+      // const res = await axios.get(`${API}/other-inputs`, { headers });
+      const res = await api.get(`${API}/other-inputs`);
       console.log("other inputs raw:", res.data);
       setOtherInputs(res.data);
     } catch (err) {
@@ -473,7 +498,8 @@ export default function AdminPanel() {
 
   const fetchRoomRequests = async () => {
     try {
-      const res = await axios.get(`${API}/room-requests`, { headers });
+      // const res = await axios.get(`${API}/room-requests`, { headers });
+      const res = await api.get(`${API}/room-requests`);
       setRoomRequests(res.data);
     } catch (err) {
       console.error(err);
@@ -485,11 +511,12 @@ export default function AdminPanel() {
       return alert(t("adminPanel.roomRequests.rejectReasonRequired"))
     setRoomRequestLoading(requestId);
     try {
-      await axios.post(
-        `${API}/room-requests/handle`,
-        { requestId, approved, reason: rejectRoomReason },
-        { headers },
-      );
+      // await axios.post(
+      //   `${API}/room-requests/handle`,
+      //   { requestId, approved, reason: rejectRoomReason },
+      //   { headers },
+      // );
+      await api.post(`${API}/room-requests/handle`, { requestId, approved, reason: rejectRoomReason });
       setRejectingRoomId(null);
       setRejectRoomReason("");
       fetchRoomRequests();
@@ -502,10 +529,14 @@ export default function AdminPanel() {
 
   const fetchModerationRooms = async () => {
     try {
+      // const [roomsRes, usersRes] = await Promise.all([
+      //   axios.get(`${API}/rooms-moderation`, { headers }),
+      //   axios.get(`${API}/users`, { headers }),
+      // ]);
       const [roomsRes, usersRes] = await Promise.all([
-        axios.get(`${API}/rooms-moderation`, { headers }),
-        axios.get(`${API}/users`, { headers }),
-      ]);
+  api.get(`${API}/rooms-moderation`),
+  api.get(`${API}/users`),
+]);
       console.log("room sample:", roomsRes.data[0]);
       setModerationRooms(roomsRes.data);
       setUsers(usersRes.data);
@@ -519,23 +550,28 @@ export default function AdminPanel() {
       return alert(t("adminPanel.rooms.suspendFieldsRequired"));
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/rooms-moderation/suspend`,
-        {
-          roomId,
-          userId,
-          days: Number(roomSuspendDays),
-          reason: roomSuspendReason,
-        },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/rooms-moderation/suspend`,
+      //   {
+      //     roomId,
+      //     userId,
+      //     days: Number(roomSuspendDays),
+      //     reason: roomSuspendReason,
+      //   },
+      //   { headers },
+      // );
+      await api.patch(`${API}/rooms-moderation/suspend`, { roomId, userId, days: Number(roomSuspendDays), reason: roomSuspendReason });
       setRoomSuspendingId(null);
       setRoomSuspendDays("");
       setRoomSuspendReason("");
+      // const [roomsRes, usersRes] = await Promise.all([
+      //   axios.get(`${API}/rooms-moderation`, { headers }),
+      //   axios.get(`${API}/users`, { headers }),
+      // ]);
       const [roomsRes, usersRes] = await Promise.all([
-        axios.get(`${API}/rooms-moderation`, { headers }),
-        axios.get(`${API}/users`, { headers }),
-      ]);
+  api.get(`${API}/rooms-moderation`),
+  api.get(`${API}/users`),
+]);
       setModerationRooms(roomsRes.data);
       setUsers(usersRes.data);
       setSelectedRoom(roomsRes.data.find((r) => r.id === roomId));
@@ -549,15 +585,19 @@ export default function AdminPanel() {
   const handleRoomUnsuspend = async (roomId, userId) => {
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/rooms-moderation/unsuspend`,
-        { roomId, userId },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/rooms-moderation/unsuspend`,
+      //   { roomId, userId },
+      //   { headers },
+      // );
+      await api.patch(`${API}/rooms-moderation/unsuspend`, { roomId, userId });
       const [roomsRes, usersRes] = await Promise.all([
-        axios.get(`${API}/rooms-moderation`, { headers }),
-        axios.get(`${API}/users`, { headers }),
-      ]);
+      //   axios.get(`${API}/rooms-moderation`, { headers }),
+      //   axios.get(`${API}/users`, { headers }),
+      // ]);
+        api.get(`${API}/rooms-moderation`),
+  api.get(`${API}/users`),
+]);
       setModerationRooms(roomsRes.data);
       setUsers(usersRes.data);
       setSelectedRoom(roomsRes.data.find((r) => r.id === roomId));
@@ -571,7 +611,9 @@ export default function AdminPanel() {
   const handleDeleteRoom = async (roomId) => {
     if (!window.confirm(t("adminPanel.rooms.deleteConfirm"))) return;
     try {
-      await axios.delete(`${API}/rooms-moderation/${roomId}`, { headers });
+      // await axios.delete(`${API}/rooms-moderation/${roomId}`, { headers });
+
+await api.delete(`${API}/rooms-moderation/${roomId}`);
       setSelectedRoom(null);
       fetchModerationRooms();
     } catch (err) {
