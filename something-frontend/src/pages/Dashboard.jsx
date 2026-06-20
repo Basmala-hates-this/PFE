@@ -243,9 +243,10 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
       let allowedRooms = [];
 
       if (isGuest) {
-        const response = await axios.get(
-          "http://localhost:5000/api/rooms/public-rooms",
-        );
+        // const response = await axios.get(
+        //   "http://localhost:5000/api/rooms/public-rooms",
+        // );
+        const response = await api.get("/rooms/public-rooms");
         const guestUniversities =
           JSON.parse(localStorage.getItem("guestUniversities")) || [];
         const selectedCodes = guestUniversities.map((u) => u.value);
@@ -254,12 +255,13 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
             r.type === "public" || selectedCodes.includes(r.universityCode),
         );
       } else {
-        const response = await axios.get(
-          "http://localhost:5000/api/rooms/my-rooms",
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        // const response = await axios.get(
+        //   "http://localhost:5000/api/rooms/my-rooms",
+        //   {
+        //     headers: { Authorization: `Bearer ${token}` },
+        //   },
+        // );
+        const response = await api.get("/rooms/my-rooms");
         allowedRooms = response.data;
       }
 
@@ -268,29 +270,34 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
       //save posts/unsave...u get the idea
       if (!isGuest) {
         try {
-          const savedRes = await axios.get(
-            "http://localhost:5000/api/posts/saved",
-            {
-              headers: { Authorization: `Bearer ${token}` },
-            },
-          );
+          // const savedRes = await axios.get(
+          //   "http://localhost:5000/api/posts/saved",
+          //   {
+          //     headers: { Authorization: `Bearer ${token}` },
+          //   },
+          // );
+          const savedRes = await api.get("/posts/saved");
           setSavedPostIds(savedRes.data.map((p) => p.id));
         } catch (err) {
           console.error("Failed to fetch saved posts:", err);
         }
       }
 
-      let url = "http://localhost:5000/api/posts";
+      // let url = "http://localhost:5000/api/posts";
+      let url = "/posts";
       if (selectedRooms.length === 1) {
         url += `?roomId=${selectedRooms[0].value}`;
       }
-      const postsResponse = await axios.get(url, {
-        headers: token
-          ? { Authorization: `Bearer ${token}` }
-          : guestToken
-            ? { Authorization: `Bearer ${guestToken}` }
-            : {},
-      });
+      // const postsResponse = await axios.get(url, {
+      //   headers: token
+      //     ? { Authorization: `Bearer ${token}` }
+      //     : guestToken
+      //       ? { Authorization: `Bearer ${guestToken}` }
+      //       : {},
+      // });
+      const postsResponse = await api.get(url, {
+  headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
+});
 
       if (isGuest) {
         const allowedRoomIds = allowedRooms.map((r) => r.id);
@@ -358,16 +365,19 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
       if (postResourceLabel.trim())
         formData.append("resourceLabel", postResourceLabel);
 
-      const response = await axios.post(
-        "http://localhost:5000/api/posts",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "multipart/form-data",
-          },
-        },
-      );
+      // const response = await axios.post(
+      //   "http://localhost:5000/api/posts",
+      //   formData,
+      //   {
+      //     headers: {
+      //       Authorization: `Bearer ${token}`,
+      //       "Content-Type": "multipart/form-data",
+      //     },
+      //   },
+      // );
+      const response = await api.post("/posts", formData, {
+  headers: { "Content-Type": "multipart/form-data" }
+});
 
       setPosts((prev) => [response.data, ...prev]);
       setPostContent("");
@@ -475,16 +485,18 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
 
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/vote`,
-        { voteType },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // await axios.patch(
+      //   `http://localhost:5000/api/posts/${postId}/vote`,
+      //   { voteType },
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
+      await api.patch(`/posts/${postId}/vote`, { voteType });
       // sync real counts from backend
-      const response = await axios.get(
-        `http://localhost:5000/api/posts/${postId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // const response = await axios.get(
+      //   `http://localhost:5000/api/posts/${postId}`,
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
+      const response = await api.get(`/posts/${postId}`);
       setPosts((prev) =>
         prev
           .map((p) => (p.id === postId ? { ...response.data } : p))
@@ -512,18 +524,20 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
 
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
-        `http://localhost:5000/api/posts/${postId}/comments`,
-        { content },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // await axios.post(
+      //   `http://localhost:5000/api/posts/${postId}/comments`,
+      //   { content },
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
 
-      // refetch the post to get updated comments
-      const response = await axios.get(
-        `http://localhost:5000/api/posts/${postId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // // refetch the post to get updated comments
+      // const response = await axios.get(
+      //   `http://localhost:5000/api/posts/${postId}`,
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
 
+      await api.post(`/posts/${postId}/comments`, { content });
+const response = await api.get(`/posts/${postId}`);
       // update the post in the feed
       setPosts((prev) =>
         prev.map((p) => (p.id === postId ? response.data : p)),
@@ -539,17 +553,19 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
   const handleCommentVote = async (postId, commentId, voteType) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/comments/${commentId}/vote`,
-        { voteType },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // await axios.patch(
+      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}/vote`,
+      //   { voteType },
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
 
-      // refetch the post to get updated comment votes
-      const response = await axios.get(
-        `http://localhost:5000/api/posts/${postId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // // refetch the post to get updated comment votes
+      // const response = await axios.get(
+      //   `http://localhost:5000/api/posts/${postId}`,
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
+      await api.patch(`/posts/${postId}/comments/${commentId}/vote`, { voteType });
+const response = await api.get(`/posts/${postId}`);
 
       setPosts((prev) =>
         prev.map((p) => (p.id === postId ? response.data : p)),
@@ -567,9 +583,10 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
 
     try {
       const token = localStorage.getItem("token");
-      await axios.delete(`http://localhost:5000/api/posts/${postId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // await axios.delete(`http://localhost:5000/api/posts/${postId}`, {
+      //   headers: { Authorization: `Bearer ${token}` },
+      // });
+      await api.delete(`/posts/${postId}`);
       setPosts((prev) => prev.filter((p) => p.id !== postId));
     } catch (err) {
       console.error("Failed to delete post:", err);
@@ -589,12 +606,15 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
     if (editPostResourceLabel.trim()) formData.append("resourceLabel", editPostResourceLabel);
     if (removeAttachment) formData.append("removeAttachment", "true");
 
-    const response = await axios.patch(
-      `http://localhost:5000/api/posts/${postId}`,
-      formData,
-      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-    );
+    // const response = await axios.patch(
+    //   `http://localhost:5000/api/posts/${postId}`,
+    //   formData,
+    //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+    // );
 
+    const response = await api.patch(`/posts/${postId}`, formData, {
+  headers: { "Content-Type": "multipart/form-data" }
+});
     setPosts(prev => prev.map(p => p.id === postId ? { ...p, ...response.data } : p));
     setEditingPost(null);
     setEditPostAttachment(null);
@@ -612,15 +632,17 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
     if (!confirm) return;
 
     try {
-      const token = localStorage.getItem("token");
-      await axios.delete(
-        `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const response = await axios.get(
-        `http://localhost:5000/api/posts/${postId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+       const token = localStorage.getItem("token");
+      // await axios.delete(
+      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
+      // const response = await axios.get(
+      //   `http://localhost:5000/api/posts/${postId}`,
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
+      await api.delete(`/posts/${postId}/comments/${commentId}`);
+const response = await api.get(`/posts/${postId}`);
       setPosts((prev) =>
         prev.map((p) => (p.id === postId ? response.data : p)),
       );
