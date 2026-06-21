@@ -8,6 +8,7 @@ import "../styles/register-login.css"
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
+import api from "../api/axios.js";
 
 //////THE DAMN USERNAME CANNOT BELONG TO ANOTHER USER...IF IT EXISTS ALREADY IT CANNOT BE CHOSEN....fuck...
 
@@ -67,9 +68,10 @@ const handleUsernameBlur = async () => {
   if (!username) return;
     setIsCheckingUsername(true);
   try {
-    const response = await axios.get(
-      `http://localhost:5000/api/auth/check-username?username=${username}`
-    );
+    // const response = await axios.get(
+    //   `http://localhost:5000/api/auth/check-username?username=${username}`
+    // );
+    const response = await api.get(`/auth/check-username?username=${username}`);
     if (response.data.exists) {
       setError(t("validation.username_already_taken"));
     } else {
@@ -90,10 +92,11 @@ const handleSubmit =async (e) => {
   if (!canSubmit) return;
     setIsSubmitting(true);
  try {
-    await axios.post("http://localhost:5000/api/auth/verify-otp", {
-      email: profile.email,
-      otp
-    });
+    // await axios.post("http://localhost:5000/api/auth/verify-otp", {
+    //   email: profile.email,
+    //   otp
+    // });
+    await api.post("/auth/verify-otp", { email: profile.email, otp });
 setOtpFeedback(t("validation.otp_verified"));
     setOtpColor("green");
     setOtpVerified(true);
@@ -191,9 +194,10 @@ useEffect(() => {
 const handleResendOtp = async () => {
   if (!canResend) return;
   try {
-    await axios.post("http://localhost:5000/api/auth/send-otp", {
-      email: profile.email
-    });
+    // await axios.post("http://localhost:5000/api/auth/send-otp", {
+    //   email: profile.email
+    // });
+    await api.post("/auth/send-otp", { email: profile.email });
     setCanResend(false);
     setResendTimer(60);
 setOtpFeedback(t("validation.otp_resent"));

@@ -16,6 +16,8 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
 
+import api from "../api/axios.js";
+
 
 
 
@@ -145,10 +147,14 @@ const selectedUniversityOption = isOtherUniversity
 useEffect(() => {
   const fetchData = async () => {
     try {
+      // const [uniRes, majorRes] = await Promise.all([
+      //   axios.get("http://localhost:5000/api/auth/universities"),
+      //   axios.get("http://localhost:5000/api/auth/majors")
+      // ]);
       const [uniRes, majorRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/auth/universities"),
-        axios.get("http://localhost:5000/api/auth/majors")
-      ]);
+  api.get("/auth/universities"),
+  api.get("/auth/majors")
+]);
       setAvailableUniversities(uniRes.data);
       setAvailableMajors(majorRes.data);
     } catch (err) {
@@ -173,9 +179,10 @@ const [error, setError] = useState("");
 const handleEmailBlur = async () => {
   if (!email) return;
   try {
-    const response = await axios.get(
-      `http://localhost:5000/api/auth/check-email?email=${email}`
-    );
+    // const response = await axios.get(
+    //   `http://localhost:5000/api/auth/check-email?email=${email}`
+    // );
+    const response = await api.get(`/auth/check-email?email=${email}`);
     if (response.data.exists) {
       setError(t("validation.email_already_exists"));
     } else {
@@ -271,7 +278,8 @@ if (isOtherUniversity && university.name.trim()) {
   }
 // decided on otp verification now....
 try {
-    await axios.post("http://localhost:5000/api/auth/send-otp", { email });
+    // await axios.post("http://localhost:5000/api/auth/send-otp", { email });
+    await api.post("/auth/send-otp", { email });
     setProfile(profile);
     navigate("/register");
   } catch (err) {

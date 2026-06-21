@@ -14,6 +14,8 @@ import {
 } from "../assets/components/Validations.js";
 
 import { useTranslation } from 'react-i18next';
+import api from "../api/axios.js";
+
 //just noting that my brain thinks this page should have and be able to read the profile for somereason....maybe the username display for dashboard later?
 //meh, i'll see later..if not, no big deal.....i hope...
 //also....abut the validations of existing profile...i cant see how anyone would reach here without filling the previos 2 forms
@@ -90,11 +92,16 @@ export default function Fin() {
       formData.append("proofFile", newUser.profProof);
     }
 
-    const response = await axios.post(
-      "http://localhost:5000/api/auth/register",
-      formData,
-      { headers: { "Content-Type": "multipart/form-data" } }
-    );
+    // const response = await axios.post(
+    //   "http://localhost:5000/api/auth/register",
+    //   formData,
+    //   { headers: { "Content-Type": "multipart/form-data" } }
+    // );
+    const response = await api.post(
+  "/auth/register",
+  formData,
+  { headers: { "Content-Type": "multipart/form-data" } }
+);
 
     const data = response.data;
     localStorage.setItem("token", data.token);

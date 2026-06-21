@@ -6,6 +6,7 @@ import "../styles/sidebar.css";
  import axios from "axios";
  import PostModal from "../assets/components/PostModal.jsx";
 import { useTranslation } from 'react-i18next';
+import api from "../api/axios.js";
 
 
 export default function Profile() { 
@@ -84,9 +85,11 @@ const ADMIN_INTERESTS = [
 
 useEffect(() => {
   const token = localStorage.getItem("token");
-  axios.get("http://localhost:5000/api/users/me", {
-    headers: { Authorization: `Bearer ${token}` }
-  }).then((res) => {
+  // axios.get("http://localhost:5000/api/users/me", {
+  //   headers: { Authorization: `Bearer ${token}` }
+  // })
+  api.get("/users/me")
+  .then((res) => {
     setUser(res.data);
   }).catch((err) => {
     console.error("Failed to fetch user:", err);
@@ -122,9 +125,10 @@ const handleDeleteAccount = async () => {
 
   try {
     const token = localStorage.getItem("token");
-    await axios.delete("http://localhost:5000/api/users/me", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    // await axios.delete("http://localhost:5000/api/users/me", {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // });
+    await api.delete("/users/me");
     localStorage.removeItem("token");
     localStorage.removeItem("currentUser");
     alert(t('profile.deleteSuccess'));//yeeeey what most will do if they actually created their accounts...kill me
@@ -149,9 +153,10 @@ useEffect(() => {
   const fetchStats = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/users/me/stats", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // const response = await axios.get("http://localhost:5000/api/users/me/stats", {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      const response = await api.get("/users/me/stats");
       setStats(response.data);
     } catch (err) {
       console.error("Failed to fetch stats:", err);
@@ -165,9 +170,10 @@ useEffect(() => {
   const fetchRooms = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // const response = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      const response = await api.get("/rooms/my-rooms");
       setUserRooms(response.data);
     } catch (err) {
       console.error("Failed to fetch rooms:", err);
@@ -183,9 +189,10 @@ useEffect(() => {
   const fetchFollowing = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(`http://localhost:5000/api/users/${user?.id}/following`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // const res = await axios.get(`http://localhost:5000/api/users/${user?.id}/following`, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      const res = await api.get(`/users/${user?.id}/following`);
       setFollowing(res.data);
     } catch (err) {
       console.error("Failed to fetch following:", err);
@@ -199,9 +206,10 @@ useEffect(() => {
 const fetchApplication = async () => {
   try {
     const token = localStorage.getItem("token");
-    const res = await axios.get("http://localhost:5000/api/users/me/application", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    // const res = await axios.get("http://localhost:5000/api/users/me/application", {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // });
+    const res = await api.get("/users/me/application");
     setApplication(res.data || null);
   } catch (err) {
     console.error("Failed to fetch application:", err);
@@ -216,9 +224,10 @@ useEffect(() => {
   const fetchSubjectRooms = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get("http://localhost:5000/api/rooms/subject-rooms", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // const res = await axios.get("http://localhost:5000/api/rooms/subject-rooms", {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      const res = await api.get("/rooms/subject-rooms");
       setSubjectRoomsByMajor(res.data);
     } catch (err) {
       console.error("Failed to fetch subject rooms:", err);
@@ -231,9 +240,10 @@ useEffect(() => {
 useEffect(() => {
   if (!user) return;
   const token = localStorage.getItem("token");
-  axios.get("http://localhost:5000/api/users/me/majors", {
-    headers: { Authorization: `Bearer ${token}` }
-  }).then(res => setUserMajors(res.data))
+  // axios.get("http://localhost:5000/api/users/me/majors", {
+  //   headers: { Authorization: `Bearer ${token}` }
+  // })
+  api.get("/users/me/majors").then(res => setUserMajors(res.data))
   .catch(err => console.error("Failed to fetch majors:", err));
 }, [user]);
 
@@ -246,16 +256,17 @@ const handleCreateRoom = async () => {
   setRoomLoading(true);
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.post(
-      "http://localhost:5000/api/rooms/private",
-      {
-        name: roomName,
-        passKey: useGeneratedKey ? null : roomPassKey,
-        invitedUsers: invitedUsers,
+    // const response = await axios.post(
+    //   "http://localhost:5000/api/rooms/private",
+    //   {
+    //     name: roomName,
+    //     passKey: useGeneratedKey ? null : roomPassKey,
+    //     invitedUsers: invitedUsers,
 
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    //   },
+    //   { headers: { Authorization: `Bearer ${token}` } }
+    // );
+    const response = await api.post("/rooms/private", { name: roomName, passKey: useGeneratedKey ? null : roomPassKey, invitedUsers });
 
     const createdRoom = response.data;
     setRoomFeedback(`Room created! Your passkey is: ${createdRoom.passKey} — share this with people you want to invite.`);
@@ -276,11 +287,12 @@ const handleCreateRoom = async () => {
 const handleJoinRoom = async () => {
   try {
     const token = localStorage.getItem("token");
-    const response = await axios.post(
-      "http://localhost:5000/api/rooms/private/join",
-      { passKey: joinPassKey },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    // const response = await axios.post(
+    //   "http://localhost:5000/api/rooms/private/join",
+    //   { passKey: joinPassKey },
+    //   { headers: { Authorization: `Bearer ${token}` } }
+    // );
+    const response = await api.post("/rooms/private/join", { passKey: joinPassKey });
     setJoinFeedback(response.data.message);
     setJoinPassKey("");
   } catch (err) {
@@ -294,9 +306,10 @@ const fetchSavedPosts = async () => {
   setSavedPostsLoading(true);
   try {
     const token = localStorage.getItem("token");
-    const res = await axios.get("http://localhost:5000/api/posts/saved", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    // const res = await axios.get("http://localhost:5000/api/posts/saved", {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // });
+    const res = await api.get("/posts/saved");
     setSavedPosts(res.data);
   } catch (err) {
     console.error("Failed to fetch saved posts:", err);
@@ -309,12 +322,13 @@ const handleApplyForAdmin = async () => {
   setApplicationLoading(true);
   try {
     const token = localStorage.getItem("token");
-    await axios.post("http://localhost:5000/api/admin/apply", {
-      interests: applyInterests,
-      reason: applyReason.trim() || null
-    }, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    // await axios.post("http://localhost:5000/api/admin/apply", {
+    //   interests: applyInterests,
+    //   reason: applyReason.trim() || null
+    // }, {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // });
+    await api.post("/admin/apply", { interests: applyInterests, reason: applyReason.trim() || null });
     alert("Application submitted!");
     setApplication({ appliedAt: new Date().toISOString() });
     setShowApplyModal(false);
@@ -332,9 +346,10 @@ const handleWithdrawApplication = async () => {
   setApplicationLoading(true);
   try {
     const token = localStorage.getItem("token");
-    await axios.delete("http://localhost:5000/api/admin/apply", {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+    // await axios.delete("http://localhost:5000/api/admin/apply", {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // });
+    await api.delete("/admin/apply");
     alert("Application withdrawn.");
     setApplication(null);
   } catch (err) {
@@ -351,20 +366,26 @@ const handleStatClick = async (type) => {
   try {
     let data = [];
     if (type === "posts") {
-      const res = await axios.get(`http://localhost:5000/api/posts/user/${user.id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // const res = await axios.get(`http://localhost:5000/api/posts/user/${user.id}`, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      const res = await api.get(`/posts/user/${user.id}`);
+
       data = res.data;
     } else if (type === "comments") {
-      const res = await axios.get("http://localhost:5000/api/users/me/comments", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // const res = await axios.get("http://localhost:5000/api/users/me/comments", {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
       
+      const res = await api.get("/users/me/comments");
+
       data = res.data;
     } else if (["useful", "useless", "specialized"].includes(type)) {
-      const res = await axios.get(`http://localhost:5000/api/users/me/received-votes?type=${type}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // const res = await axios.get(`http://localhost:5000/api/users/me/received-votes?type=${type}`, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      const res = await api.get(`/users/me/received-votes?type=${type}`);
+
       data = res.data;
     } else if (type === "rooms") {
       data = userRooms; // already fetched

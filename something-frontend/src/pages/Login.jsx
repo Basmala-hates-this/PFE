@@ -9,6 +9,7 @@ import "../styles/register-login.css"
  import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
+import api from "../api/axios.js";
 
 
 export default function Login(){
@@ -70,12 +71,13 @@ const handleSubmit =async (e) => {
   // }
 
   try {
+ 
   // const response = await axios.post("http://localhost:5000/api/auth/login", {
-  const response = await axios.post("http://localhost:5000/api/auth/login", {
-   identifier: username,
+  const response = await api.post("/auth/login", {
+  identifier: username,
   password
-  });
-
+});
+ 
   const data = response.data;
   console.log(data);
    // store token
