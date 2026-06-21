@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
  import { useTranslation } from 'react-i18next';
  import i18n from '../i18n/index.js';
- 
+ import api from "../api/axios.js";
 export default function ReorientationPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
@@ -26,12 +26,13 @@ const isRTL = i18n.language === 'ar';
     if (!selectedMajor) return alert(t("reorientation.noMajorError"));
     setLoading(true);
     try {
-      const res = await axios.post(
-        "http://localhost:5000/api/users/select-major",
-        { selectedMajor },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // const res = await axios.post(
+      //   "http://localhost:5000/api/users/select-major",
+      //   { selectedMajor },
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
 
+      const res = await api.post("/users/select-major", { selectedMajor });
       // update currentUser in localStorage
       const updatedUser = {
         ...currentUser,

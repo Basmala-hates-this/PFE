@@ -7,6 +7,7 @@ import i18n from '../i18n/index.js';
 import "../styles/chat.css"; // Import the CSS file
 
 import { Copy } from 'lucide-react';
+import api from "../api/axios.js";
 
 export default function RoomChat() {
   const { roomId } = useParams();
@@ -50,9 +51,10 @@ const [followList, setFollowList] = useState([]);
   useEffect(() => {
     const fetchRoom = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/rooms/${roomId}`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        // const response = await axios.get(`http://localhost:5000/api/rooms/${roomId}`, {
+        //   headers: { Authorization: `Bearer ${token}` }
+        // });
+        const response = await api.get(`/rooms/${roomId}`);
         setRoom(response.data);
         setIsAdmin(response.data.admins?.includes(currentUser?.id));
       } catch (err) {
@@ -67,9 +69,10 @@ const [followList, setFollowList] = useState([]);
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-        const response = await axios.get(`http://localhost:5000/api/rooms/${roomId}/messages`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        // const response = await axios.get(`http://localhost:5000/api/rooms/${roomId}/messages`, {
+        //   headers: { Authorization: `Bearer ${token}` }
+        // });
+        const response = await api.get(`/rooms/${roomId}/messages`);
         setMessages(response.data);
       } catch (err) {
         console.error("Failed to fetch messages:", err);
@@ -92,10 +95,11 @@ const [followList, setFollowList] = useState([]);
     if (!room?.members) return;
     const fetchMembers = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/api/rooms/${roomId}/members`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
+        // const response = await axios.get(
+        //   `http://localhost:5000/api/rooms/${roomId}/members`,
+        //   { headers: { Authorization: `Bearer ${token}` } }
+        // );
+        const response = await api.get(`/rooms/${roomId}/members`);
         setMemberDetails(response.data);
       } catch (err) {
         console.error("Failed to fetch members:", err);
@@ -119,11 +123,12 @@ const [followList, setFollowList] = useState([]);
       if (attachment) formData.append("attachment", attachment);
       if (replyTo) formData.append("replyTo", replyTo.id);
 
-      await axios.post(
-        `http://localhost:5000/api/rooms/${roomId}/messages`,
-        formData,
-        { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-      );
+      // await axios.post(
+      //   `http://localhost:5000/api/rooms/${roomId}/messages`,
+      //   formData,
+      //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+      // );
+      await api.post(`/rooms/${roomId}/messages`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       setNewMessage("");
       setAttachment(null);
       setReplyTo(null);
@@ -134,9 +139,10 @@ const [followList, setFollowList] = useState([]);
 
   const handleDeleteMessage = async (messageId) => {
     try {
-      await axios.delete(`http://localhost:5000/api/rooms/messages/${messageId}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // await axios.delete(`http://localhost:5000/api/rooms/messages/${messageId}`, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      await api.delete(`/rooms/messages/${messageId}`);
       setMessages(prev => prev.filter(m => m.id !== messageId));
     } catch (err) {
       console.error("Failed to delete message:", err);
@@ -145,11 +151,12 @@ const [followList, setFollowList] = useState([]);
 
   const handleEditMessage = async (messageId) => {
     try {
-      const response = await axios.patch(
-        `http://localhost:5000/api/rooms/messages/${messageId}`,
-        { content: editContent },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      // const response = await axios.patch(
+      //   `http://localhost:5000/api/rooms/messages/${messageId}`,
+      //   { content: editContent },
+      //   { headers: { Authorization: `Bearer ${token}` } }
+      // );
+      const response = await api.patch(`/rooms/messages/${messageId}`, { content: editContent });
       setMessages(prev => prev.map(m => m.id === messageId ? response.data : m));
       setEditingMessage(null);
       setEditContent("");
@@ -164,9 +171,10 @@ const [followList, setFollowList] = useState([]);
     if (!confirm) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/rooms/${roomId}/leave`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      // await axios.delete(`http://localhost:5000/api/rooms/${roomId}/leave`, {
+      //   headers: { Authorization: `Bearer ${token}` }
+      // });
+      await api.delete(`/rooms/${roomId}/leave`);
       navigate("/profile");
     } catch (err) {
       alert(err.response?.data?.message || "Something went wrong.");
@@ -204,14 +212,18 @@ const [followList, setFollowList] = useState([]);
 // };
 const openInvite = async () => {
   try {
+    // const [followersRes, followingRes] = await Promise.all([
+    //   axios.get(`http://localhost:5000/api/users/${currentUser.id}/followers`, {
+    //     headers: { Authorization: `Bearer ${token}` }
+    //   }),
+    //   axios.get(`http://localhost:5000/api/users/${currentUser.id}/following`, {
+    //     headers: { Authorization: `Bearer ${token}` }
+    //   })
+    // ]);
     const [followersRes, followingRes] = await Promise.all([
-      axios.get(`http://localhost:5000/api/users/${currentUser.id}/followers`, {
-        headers: { Authorization: `Bearer ${token}` }
-      }),
-      axios.get(`http://localhost:5000/api/users/${currentUser.id}/following`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-    ]);
+  api.get(`/users/${currentUser.id}/followers`),
+  api.get(`/users/${currentUser.id}/following`)
+]);
 
     const merged = [...followersRes.data, ...followingRes.data];
     const unique = merged.filter((u, index, self) => 
@@ -230,11 +242,13 @@ const openInvite = async () => {
 
 const handleInvite = async (inviteeId) => {
   try {
-    await axios.post(
-      `http://localhost:5000/api/rooms/private/${roomId}/invite`,
-      { userId: inviteeId },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    // await axios.post(
+    //   `http://localhost:5000/api/rooms/private/${roomId}/invite`,
+    //   { userId: inviteeId },
+    //   { headers: { Authorization: `Bearer ${token}` } }
+    // );
+    await api.post(`/rooms/private/${roomId}/invite`, { userId: inviteeId });
+
     // move them from invite list to member list
     const invited = followList.find(u => u.id === inviteeId);
     setMemberDetails(prev => [...prev, { ...invited, role: 'member' }]);
@@ -274,18 +288,22 @@ const handleInvite = async (inviteeId) => {
             <button onClick={() => {
               const newName = prompt(t("roomChat.renamePrompt"));
               if (newName) {
-                axios.patch(`http://localhost:5000/api/rooms/private/${roomId}/rename`,
-                  { name: newName },
-                  { headers: { Authorization: `Bearer ${token}` } }
-                ).then(() => setRoom(prev => ({...prev, name: newName})));
+                // axios.patch(`http://localhost:5000/api/rooms/private/${roomId}/rename`,
+                //   { name: newName },
+                //   { headers: { Authorization: `Bearer ${token}` } }
+                // )
+                api.patch(`/rooms/private/${roomId}/rename`, { name: newName })
+                .then(() => setRoom(prev => ({...prev, name: newName})));
               }
             }} className="roomchat-admin-button">{t("roomChat.rename")}</button>
             <button onClick={() => 
               {
                 if (window.confirm(t("roomChat.deleteRoomConfirm"))) {
-                  axios.delete(`http://localhost:5000/api/rooms/private/${roomId}`,
-                    { headers: { Authorization: `Bearer ${token}` } }
-                  ).then(() => navigate("/profile"));
+                  // axios.delete(`http://localhost:5000/api/rooms/private/${roomId}`,
+                  //   { headers: { Authorization: `Bearer ${token}` } }
+                  // )
+                  api.delete(`/rooms/private/${roomId}`)
+                  .then(() => navigate("/profile"));
                 }
               }} className="roomchat-admin-button-danger">{t("roomChat.deleteRoom")}</button>
               {/* <button onClick={openInvite} className="roomchat-admin-button">+ Invite</button> */}
@@ -484,17 +502,20 @@ const handleInvite = async (inviteeId) => {
     <button
       onClick={() => {
         if (window.confirm(t("roomChat.makeAdminConfirm", { username: member.username }))) {
-          axios.patch(
-            `http://localhost:5000/api/rooms/private/${roomId}/admin/${member.id}`,
-            {},
-            { headers: { Authorization: `Bearer ${token}` } }
-          ).then(() => {
-            axios.get(`http://localhost:5000/api/rooms/${roomId}`, {
-              headers: { Authorization: `Bearer ${token}` }
-            }).then(r => setRoom(r.data));
-            axios.get(`http://localhost:5000/api/rooms/${roomId}/members`, {
-              headers: { Authorization: `Bearer ${token}` }
-            }).then(r => setMemberDetails(r.data));
+          // axios.patch(
+          //   `http://localhost:5000/api/rooms/private/${roomId}/admin/${member.id}`,
+          //   {},
+          //   { headers: { Authorization: `Bearer ${token}` } }
+          // )
+          api.patch(`/rooms/private/${roomId}/admin/${member.id}`, {}).then(() => {
+            // axios.get(`http://localhost:5000/api/rooms/${roomId}`, {
+            //   headers: { Authorization: `Bearer ${token}` }
+            // })
+            api.get(`/rooms/${roomId}`).then(r => setRoom(r.data));
+            // axios.get(`http://localhost:5000/api/rooms/${roomId}/members`, {
+            //   headers: { Authorization: `Bearer ${token}` }
+            // })
+            api.get(`/rooms/${roomId}/members`).then(r => setMemberDetails(r.data));
             alert(t("roomChat.makeAdminSuccess", { username: member.username }));
           }).catch(err => alert(err.response?.data?.message || "Something went wrong."));
         }
@@ -508,10 +529,11 @@ const handleInvite = async (inviteeId) => {
     <button
       onClick={() => {
         if (window.confirm(`Remove @${member.username} from the room?`)) {
-          axios.delete(
-            `http://localhost:5000/api/rooms/private/${roomId}/members/${member.id}`,
-            { headers: { Authorization: `Bearer ${token}` } }
-          ).then(() => {
+          // axios.delete(
+          //   `http://localhost:5000/api/rooms/private/${roomId}/members/${member.id}`,
+          //   { headers: { Authorization: `Bearer ${token}` } }
+          // )
+          api.delete(`/rooms/private/${roomId}/members/${member.id}`).then(() => {
             setMemberDetails(prev => prev.filter(m => m.id !== member.id));
             setRoom(prev => ({
               ...prev,

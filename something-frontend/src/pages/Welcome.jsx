@@ -9,6 +9,7 @@ import axios from "axios";
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
+import api from "../api/axios.js"
 
 
 export default function Welcome(){

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { isValidEmail } from "../assets/components/Validations";
 import axios from "axios";
 import { useTranslation } from 'react-i18next';
+import api from "../api/axios.js";
 
 
 export default function RRP() {
@@ -28,7 +29,8 @@ const [email, setEmail] = useState("");
 
   try {
     console.log(email)
-    await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+    // await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+    await api.post("/auth/forgot-password", { email });
     // always show success message — don't reveal if email exists.......damn
 alert(t("rrp.success"));
     navigate("/login");
@@ -41,7 +43,7 @@ setError(t("rrp.error"));  }
     <div className="RRP" id="body4">  
         <form onSubmit={handleSubmit} method="post" id="reset-form">
         <fieldset id="field5">
-            <h2> {t("rrp.title")} 🔒</h2>
+            <h2> {t("rrp.title")} </h2>
             <br/><br/>
             <label htmlFor="reset-email" className="email">{t("rrp.email_label")}</label>
             <br/>

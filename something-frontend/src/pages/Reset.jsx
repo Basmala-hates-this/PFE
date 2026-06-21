@@ -14,6 +14,7 @@ import { useNavigate, useSearchParams } from "react-router-dom"; import { useSta
  import axios from "axios";
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
+import api from "../api/axios.js";
 
 export default function Reset() {
       const navigate = useNavigate();
@@ -110,10 +111,11 @@ const handleSubmit = async (e) => {
 if (token) {
     // case 1: email recovery
     try {
-        await axios.post("http://localhost:5000/api/auth/reset-password", {
-            token,
-            newPassword: password,
-        });
+        // await axios.post("http://localhost:5000/api/auth/reset-password", {
+        //     token,
+        //     newPassword: password,
+        // });
+        await api.post("/auth/reset-password", { token, newPassword: password });
         alert(t("reset.success_recovery"));
         navigate("/login");
     } catch (err) {
@@ -124,11 +126,13 @@ if (token) {
     // case 2: logged in user changing password
     try {
         const authToken = localStorage.getItem("token");
-        await axios.post(
-            "http://localhost:5000/api/auth/reset-password-auth",
-            { newPassword: password },
-            { headers: { Authorization: `Bearer ${authToken}` } }
-        );
+        // await axios.post(
+        //     "http://localhost:5000/api/auth/reset-password-auth",
+        //     { newPassword: password },
+        //     { headers: { Authorization: `Bearer ${authToken}` } }
+        // );
+
+await api.post("/auth/reset-password-auth", { newPassword: password });
         alert(t("reset.success_update"));
         navigate("/profile");
     } catch (err) {
