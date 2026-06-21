@@ -656,15 +656,17 @@ const response = await api.get(`/posts/${postId}`);
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("token");
-      await axios.patch(
-        `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
-        { content: editCommentContent },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      const response = await axios.get(
-        `http://localhost:5000/api/posts/${postId}`,
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
+      // await axios.patch(
+      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
+      //   { content: editCommentContent },
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
+      // const response = await axios.get(
+      //   `http://localhost:5000/api/posts/${postId}`,
+      //   { headers: { Authorization: `Bearer ${token}` } },
+      // );
+      await api.patch(`/posts/${postId}/comments/${commentId}`, { content: editCommentContent });
+const response = await api.get(`/posts/${postId}`);
       setPosts((prev) =>
         prev.map((p) => (p.id === postId ? response.data : p)),
       );
@@ -694,16 +696,22 @@ const response = await api.get(`/posts/${postId}`);
           : {};
 
       const requests = [
-        axios.get(`http://localhost:5000/api/posts/search?q=${query}`, {
-          headers: authHeader,
-        }),
+        // axios.get(`http://localhost:5000/api/posts/search?q=${query}`, {
+        //   headers: authHeader,
+        // }),
+        api.get(`/posts/search?q=${query}`, {
+  headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
+}),
       ];
 
       if (!isGuest) {
         requests.push(
-          axios.get(`http://localhost:5000/api/users/search?q=${query}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
+          // axios.get(`http://localhost:5000/api/users/search?q=${query}`, 
+          //   {
+          //   headers: { Authorization: `Bearer ${token}` },
+          // }),
+          api.get(`/users/search?q=${query}`),
+
         );
       }
 
@@ -722,12 +730,13 @@ const response = await api.get(`/posts/${postId}`);
     setSubjectRoomsLoading(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await axios.get(
-        "http://localhost:5000/api/rooms/subject-rooms",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      // const res = await axios.get(
+      //   "http://localhost:5000/api/rooms/subject-rooms",
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //   },
+      // );
+      const res = await api.get("/rooms/subject-rooms");
       setSubjectRoomsData(res.data);
     } catch (err) {
       console.error("Failed to fetch subject rooms:", err);
@@ -739,13 +748,14 @@ const response = await api.get(`/posts/${postId}`);
   const handleJoinSubjectRoom = async (roomId) => {
     try {
       const token = localStorage.getItem("token");
-      await axios.post(
-        `http://localhost:5000/api/rooms/subject-rooms/${roomId}/join`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      // await axios.post(
+      //   `http://localhost:5000/api/rooms/subject-rooms/${roomId}/join`,
+      //   {},
+      //   {
+      //     headers: { Authorization: `Bearer ${token}` },
+      //   },
+      // );
+      await api.post(`/rooms/subject-rooms/${roomId}/join`, {});
       // refetch both subject rooms and dashboard rooms
       await fetchSubjectRooms();
       await fetchRoomsAndPosts();
@@ -782,11 +792,12 @@ const response = await api.get(`/posts/${postId}`);
   if (!confirm) return;
   try {
     const token = localStorage.getItem("token");
-    const res = await axios.post(
-      "http://localhost:5000/api/rooms/subject-rooms/create",
-      { majorId, subject },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    // const res = await axios.post(
+    //   "http://localhost:5000/api/rooms/subject-rooms/create",
+    //   { majorId, subject },
+    //   { headers: { Authorization: `Bearer ${token}` } }
+    // );
+    const res = await api.post("/rooms/subject-rooms/create", { majorId, subject });
 
     // check what your backend actually returns
     console.log("create room response:", res.data);
@@ -847,10 +858,11 @@ const response = await api.get(`/posts/${postId}`);
   if (!confirm) return;
   try {
     const token = localStorage.getItem("token");
-    await axios.delete(
-      `http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`,
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    // await axios.delete(
+    //   `http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`,
+    //   { headers: { Authorization: `Bearer ${token}` } }
+    // );
+    await api.delete(`/rooms/subject-rooms/${roomId}/leave`);
 
     // 1. Remove from userRooms
     const leftRoom = userRooms.find(r => r.id === roomId);
@@ -879,18 +891,20 @@ const response = await api.get(`/posts/${postId}`);
     try {
       const token = localStorage.getItem("token");
       if (savedPostIds.includes(postId)) {
-        await axios.delete(`http://localhost:5000/api/posts/${postId}/save`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        // await axios.delete(`http://localhost:5000/api/posts/${postId}/save`, {
+        //   headers: { Authorization: `Bearer ${token}` },
+        // });
+        await api.delete(`/posts/${postId}/save`);
         setSavedPostIds((prev) => prev.filter((id) => id !== postId));
       } else {
-        await axios.post(
-          `http://localhost:5000/api/posts/${postId}/save`,
-          {},
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          },
-        );
+        // await axios.post(
+        //   `http://localhost:5000/api/posts/${postId}/save`,
+        //   {},
+        //   {
+        //     headers: { Authorization: `Bearer ${token}` },
+        //   },
+        // );
+        await api.post(`/posts/${postId}/save`, {});
         setSavedPostIds((prev) => [...prev, postId]);
       }
     } catch (err) {
@@ -901,9 +915,10 @@ const response = await api.get(`/posts/${postId}`);
   //announcment shit.....that damn word is long tf?
   const fetchAnnouncements = async () => {
     try {
-      const res = await axios.get(
-        "http://localhost:5000/api/admin/announcements",
-      );
+      // const res = await axios.get(
+      //   "http://localhost:5000/api/admin/announcements",
+      // );
+      const res = await api.get("/admin/announcements");
       setAnnouncements(res.data);
     } catch (err) {
       console.error("Failed to fetch announcements:", err);
@@ -938,11 +953,12 @@ const response = await api.get(`/posts/${postId}`);
   setRequestLoading(true);
   try {
     const token = localStorage.getItem("token");
-    const res = await axios.post(
-      "http://localhost:5000/api/rooms/subject-rooms/request",
-      { majorId: requestMajor, subject: requestSubject.trim() },
-      { headers: { Authorization: `Bearer ${token}` } }
-    );
+    // const res = await axios.post(
+    //   "http://localhost:5000/api/rooms/subject-rooms/request",
+    //   { majorId: requestMajor, subject: requestSubject.trim() },
+    //   { headers: { Authorization: `Bearer ${token}` } }
+    // );
+    const res = await api.post("/rooms/subject-rooms/request", { majorId: requestMajor, subject: requestSubject.trim() });
 
     // superadmin gets room created immediately — res.data.room will exist
     if (res.data.room) {

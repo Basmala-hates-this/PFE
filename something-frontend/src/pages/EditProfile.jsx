@@ -9,6 +9,7 @@ import cat from "../photos/Cat.jpg"
   import {validateUsername, isValidEmail} from "../assets/components/Validations.js";
 //the amount of steeling aand fixer upper from other pages is concerning concidering i'm a "programmer"
 //if i already have it why re-write ir .....right?
+import api from "../api/axios.js";
 
 export default function EditProfile(){
  const navigate = useNavigate();
@@ -25,10 +26,11 @@ export default function EditProfile(){
 const [selectedFile, setSelectedFile] = useState(null);
 
 useEffect(() => {
-  const token = localStorage.getItem("token");
-  axios.get("http://localhost:5000/api/users/me", {
-    headers: { Authorization: `Bearer ${token}` }
-  }).then((res) => {
+  // const token = localStorage.getItem("token");
+  // axios.get("http://localhost:5000/api/users/me", {
+  //   headers: { Authorization: `Bearer ${token}` }
+  // }).
+  api.get("/users/me").then((res) => {
    
     setUsername(res.data.username);
     setEditEmail(res.data.email);
@@ -133,16 +135,21 @@ const handleSubmit = async (e) => {
     if (isChangingEmail) formData.append("email", editEmail);
     if (isChangingPfp) formData.append("profilePic", selectedFile);
 
-    const response = await axios.patch(
-      "http://localhost:5000/api/users/me",
-      formData,
-      { 
-        headers: { 
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data"
-        } 
-      }
-    );
+    // const response = await axios.patch(
+    //   "http://localhost:5000/api/users/me",
+    //   formData,
+    //   { 
+    //     headers: { 
+    //       Authorization: `Bearer ${token}`,
+    //       "Content-Type": "multipart/form-data"
+    //     } 
+    //   }
+    // );
+    const response = await api.patch(
+  "/users/me",
+  formData,
+  { headers: { "Content-Type": "multipart/form-data" } }
+);
 
     localStorage.setItem("currentUser", JSON.stringify(response.data));
     window.dispatchEvent(new Event("storage"));
