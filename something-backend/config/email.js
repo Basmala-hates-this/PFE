@@ -365,15 +365,15 @@
 //   sendRoomRequestRejectedEmail,
 //   sendOtpEmail,
 // };
-const SibApiV3Sdk = require("@getbrevo/brevo");
+const Brevo = require("@getbrevo/brevo");
 
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+const apiInstance = new Brevo.TransactionalEmailsApi();
 apiInstance.authentications["api-key"].apiKey = process.env.BREVO_API_KEY;
 
 const FROM = { email: process.env.EMAIL_USER, name: "Glaukopis Platform" };
 
 const sendMail = async (to, subject, html) => {
-  const email = new SibApiV3Sdk.SendSmtpEmail();
+  const email = new Brevo.SendSmtpEmail();
   email.sender = FROM;
   email.to = [{ email: to }];
   email.subject = subject;
