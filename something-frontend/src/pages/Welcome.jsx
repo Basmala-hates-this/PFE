@@ -26,7 +26,8 @@ const currentLang = i18n.language;
 
 
 useEffect(() => {
-  axios.get("http://localhost:5000/api/auth/universities")
+  // axios.get("http://localhost:5000/api/auth/universities")
+  api.get("/auth/universities")
     .then(res => {
       setUniversityOptions(res.data.map(u => ({ value: u.code, label: u.name })));
     })
@@ -189,9 +190,11 @@ style={{backgroundColor:"green", width:"250px",marginRight:"10px",height:"40px" 
 
         onClick={async () => {
   try {
-    const response = await axios.post("http://localhost:5000/api/auth/guest", {
-      selectedUniversities
-    });
+    // const response = await axios.post("http://localhost:5000/api/auth/guest",
+    //    {
+    //   selectedUniversities
+    // });
+    const response = await api.post("/auth/guest", { selectedUniversities });
     localStorage.setItem("guestToken", response.data.guestToken);
     localStorage.setItem("guestUniversities", JSON.stringify(selectedUniversities));
     localStorage.removeItem("isGuest");

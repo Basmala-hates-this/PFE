@@ -205,7 +205,8 @@ console.log("currentAdmins:", currentAdmins);
     const confirm2 = prompt(`Type "@${username}" to confirm deletion:`);
     if (confirm2 !== `@${username}`) return alert("Confirmation failed.");
     try {
-      await axios.delete(`${API}/users/${userId}`, { headers });
+      // await axios.delete(`${API}/users/${userId}`, { headers });
+      await api.delete(`${API}/users/${userId}`);
       alert("Account deleted.");
       fetchAllUsers();
       fetchStats();
@@ -247,7 +248,9 @@ console.log("currentAdmins:", currentAdmins);
   //aplicats
   const fetchApplications = async () => {
     try {
-      const res = await axios.get(`${API}/applications`, { headers });
+      // const res = await axios.get(`${API}/applications`, { headers });
+      const res = await api.get(`${API}/applications`);
+
       setApplications(res.data);
       console.log("application sample:", res.data[0]);
     } catch (err) {
@@ -260,11 +263,12 @@ console.log("currentAdmins:", currentAdmins);
       return alert("Please enter a rejection reason.");
     setActionLoading(true);
     try {
-      await axios.post(
-        `${API}/applications/reject`,
-        { userId, reason: rejectAppReason },
-        { headers },
-      );
+      // await axios.post(
+      //   `${API}/applications/reject`,
+      //   { userId, reason: rejectAppReason },
+      //   { headers },
+      // );
+      await api.post(`${API}/applications/reject`, { userId, reason: rejectAppReason });
       alert("Application rejected.");
       setRejectingAppId(null);
       setRejectAppReason("");
@@ -278,7 +282,8 @@ console.log("currentAdmins:", currentAdmins);
 
   const fetchAllRooms = async () => {
     try {
-      const res = await axios.get(`${API}/rooms-moderation`, { headers });
+      // const res = await axios.get(`${API}/rooms-moderation`, { headers });
+      const res = await api.get(`${API}/rooms-moderation`);
       setAllRooms(res.data);
     } catch (err) {
       console.error(err);
@@ -288,7 +293,8 @@ console.log("currentAdmins:", currentAdmins);
   const fetchCurrentAdmins = async (search = "") => {
     try {
       const params = search ? `?q=${search}` : "";
-      const res = await axios.get(`${API}/admins${params}`, { headers });
+      // const res = await axios.get(`${API}/admins${params}`, { headers });
+      const res = await api.get(`${API}/admins${params}`);
       setCurrentAdmins(res.data);
       console.log("admin sample:", res.data[0]);
     } catch (err) {
@@ -299,11 +305,12 @@ console.log("currentAdmins:", currentAdmins);
   const handleEditAdminPermissions = async (adminId) => {
     setActionLoading(true);
     try {
-      await axios.patch(
-        `${API}/users/${adminId}/edit-permissions`,
-        { permissions: selectedPermissions, assignedRooms: selectedRooms },
-        { headers },
-      );
+      // await axios.patch(
+      //   `${API}/users/${adminId}/edit-permissions`,
+      //   { permissions: selectedPermissions, assignedRooms: selectedRooms },
+      //   { headers },
+      // );
+      await api.patch(`${API}/users/${adminId}/edit-permissions`, { permissions: selectedPermissions, assignedRooms: selectedRooms });
       alert("Permissions updated!");
       setEditingAdminId(null);
       setSelectedPermissions([]);
@@ -321,15 +328,18 @@ console.log("currentAdmins:", currentAdmins);
     try {
       switch (type) {
         case "users": {
-          const res = await axios.get(`${API}/users`, { headers });
+          // const res = await axios.get(`${API}/users`, { headers });
+const res = await api.get(`${API}/users`);
           setDrillDown({ type: "users", title: t("superadmin.drill.titleUsers"), data: res.data });
 
           break;
         }
         case "suspended": {
-          const res = await axios.get(`${API}/users?status=suspended`, {
-            headers,
-          });
+          // const res = await axios.get(`${API}/users?status=suspended`, {
+          //   headers,
+          // });
+          const res = await api.get(`${API}/users?status=suspended`);
+
           setDrillDown({
             type: "users",
             title: t("superadmin.drill.titleSuspendedUsers"),
@@ -338,14 +348,18 @@ console.log("currentAdmins:", currentAdmins);
           break;
         }
         case "posts": {
-          const res = await axios.get(`${API}/posts`, { headers });
+          // const res = await axios.get(`${API}/posts`, { headers });
+           const res = await api.get(`${API}/posts`);
 
           setDrillDown({ type: "posts", title: t("superadmin.drill.titlePosts"), data: res.data });
           console.log("post sample for drilldown:", res.data[0]);
           break;
         }
         case "comments": {
-          const res = await axios.get(`${API}/comments`, { headers });
+          // const res = await axios.get(`${API}/comments`, { headers });
+         const res = await api.get(`${API}/comments`);
+
+
           console.log("comment sample:", res.data[0]);
           setDrillDown({
             type: "comments",
@@ -355,7 +369,9 @@ console.log("currentAdmins:", currentAdmins);
           break;
         }
         case "rooms": {
-          const res = await axios.get(`${API}/rooms`, { headers });
+          // const res = await axios.get(`${API}/rooms`, { headers });
+          const res = await api.get(`${API}/rooms`);
+
           setDrillDown({ type: "rooms", title: t("superadmin.drill.titleRooms"), data: res.data });
           break;
         }
@@ -372,11 +388,12 @@ console.log("currentAdmins:", currentAdmins);
       return alert("Please enter a reason for the override.");
     setActionLoading(true);
     try {
-      await axios.post(
-        `${API}/logs/${logId}/override`,
-        { reason: overrideReason },
-        { headers },
-      );
+      // await axios.post(
+      //   `${API}/logs/${logId}/override`,
+      //   { reason: overrideReason },
+      //   { headers },
+      // );
+      await api.post(`${API}/logs/${logId}/override`, { reason: overrideReason });
       alert("Action overridden successfully.");
       setOverridingLogId(null);
       setOverrideReason("");
