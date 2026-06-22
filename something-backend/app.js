@@ -60,4 +60,5 @@ app.use((err, req, res, next) => {
   next(err);
 });
 
+// app.get("/health", (req, res) => res.json({ status: "ok" }));
 module.exports = app;
