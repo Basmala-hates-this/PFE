@@ -165,7 +165,7 @@ const handleSelectChange = (event) => {
 
 {/* //guest shit */}
   {showGuestModal && (
-  <div style={{borderRadius:"9px",backgroundColor:"#537a87c5"}} className="modal-overlay-welcome" onClick={() => setShowGuestModal(false)}>
+  <div style={{borderRadius:"9px",backgroundColor:"#537a87c5", size:"100%"}} className="modal-overlay-welcome" onClick={() => setShowGuestModal(false)}>
     <div className="modal-welcome" onClick={(e) => e.stopPropagation()}>
       
       <h3 >{t('welcome.modal_title')}</h3>
