@@ -2,12 +2,12 @@ import { useState, useEffect, useRef } from "react";
 
 // ─── SYSTEM PROMPT ─────────────────────────────────────────────────────────────
 const buildSystemPrompt = (user) => `
-You are StudyBuddy Assistant, a helpful AI embedded inside the StudyBuddy platform — an academic social network built for Algerian university students.
+You are Glaukopis Assistant, a helpful AI embedded inside the Glaukopis platform — an academic social network built for Algerian university students.
 
 Your personality: warm, smart, slightly casual. You speak the user's language — if they write in French, respond in French. Arabic → Arabic. English → English. Mix if they mix.
 
 YOU KNOW THIS ABOUT THE PLATFORM:
-- StudyBuddy has a Feed (posts, votes, comments), Rooms (public/university/major/subject), Profile, Admin panel, Guide tab
+- Glaukopis has a Feed (posts, votes, comments), Rooms (public/university/major/subject), Profile, Admin panel, Guide tab
 - Users can write posts, attach PDFs/images, add resource links
 - Rooms: public rooms for all, university rooms for your uni, major rooms for your major, subject rooms you join/leave
 - Voting: useful 👍 / useless 👎 on posts and comments,in the comments,the poster gets to have extra react which is "speacilazed" for a reward they give the user who answer with what they need.
@@ -88,8 +88,8 @@ const [speakingIndex, setSpeakingIndex] = useState(null);
     {
       role: "assistant",
       content: user
-        ? `Hey ${user.username}! 👋 I'm your StudyBuddy assistant. Ask me anything — how the platform works, study help, writing tips, or just chat!`
-        : `Hey! 👋 I'm the StudyBuddy assistant. You're browsing as a guest — I can still help you understand the platform. What do you need?`,
+        ? `Hey ${user.username}! 👋 I'm your Glaukopis assistant. Ask me anything — how the platform works, study help, writing tips, or just chat!`
+        : `Hey! 👋 I'm the Glaukopis assistant. You're browsing as a guest — I can still help you understand the platform. What do you need?`,
     },
   ]);
   const [input, setInput] = useState("");
@@ -241,7 +241,7 @@ const toggleVoice = async () => {
     <div style={s.root}>
       {/* header */}
       <div style={s.header}>
-        <span style={s.headerTitle}>🤖 StudyBuddy Assistant</span>
+        <span style={s.headerTitle}>🤖 Glaukopis Assistant</span>
         <span style={s.headerSub}> Ask anything.....about the app please....</span>
       </div>
 

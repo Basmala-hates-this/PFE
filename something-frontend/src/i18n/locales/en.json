@@ -473,12 +473,12 @@
   "passkey": "🔑 Pass key:"
   },
   "guide": {
-    "title": "StudyBuddy Guide",
+    "title": "Glaukopis Guide",
     "quote": "Perfection is overrated. Persistence builds better stories. Join us and we can Learn, Teach and Build — Together....",
-    "logoAlt": "StudyBuddy logo",
+    "logoAlt": "Glaukopis logo",
     "back": "← Back To Dashboard",
     "sidebar": {
-      "title": "StudyBuddy Guide"
+      "title": "Glaukopis Guide"
     },
     "nav": {
       "overview": "Overview",
@@ -495,7 +495,7 @@
     "sections": {
       "overview": {
         "title": "Overview",
-        "text1": "StudyBuddy is a platform designed to organize discussions, track actions, and manage structured interactions inside purpose specific rooms.",
+        "text1": "Glaukopis is a platform designed to organize discussions, track actions, and manage structured interactions inside purpose specific rooms.",
         "bullets": [
           "Create or join rooms",
           "Participate in discussions",
@@ -505,7 +505,7 @@
       },
       "dashboard": {
         "title": "Dashboard",
-        "text1": "Your main control center. Use it to navigate across StudyBuddy.",
+        "text1": "Your main control center. Use it to navigate across Glaukopis.",
         "steps": [
           "Use sidebar for navigation and quick actions",
           "Select a feature",
@@ -581,8 +581,8 @@
       },
       "contact": {
         "title": "Contact Us",
-        "studyBuddyLabel": "Study Buddy mail:",
-        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "GlaukopisLabel": "Glaukopis mail:",
+        "GlaukopisEmail": "studdybuddy1403@gmail.com",
         "superAdmin1Label": "SuperAdmin 1:",
         "superAdmin1Email": "laoaribasmala75@gmail.com",
         "superAdmin2Label": "SuperAdmin 2:",
@@ -630,7 +630,7 @@
   "saving": "Saving...",
   "confirm": "Confirm Major",
   "noMajorError": "Please select a major.",
-  "successMessage": "Major selected! Welcome to StudyBuddy."
+  "successMessage": "Major selected! Welcome to Glaukopis."
 },
 "adminPanel": {
   "title": "Admin Panel",
@@ -893,12 +893,12 @@
   "DELETE_INACTIVE": "Delete Inactive Accounts"
 },
 "guide2": {
-    "title": "StudyBuddy Guide",
+    "title": "Glaukopis Guide",
     "quote": "Perfection is overrated. Persistence builds better stories. Join us and we can Learn, Teach and Build — Together....",
-    "logoAlt": "StudyBuddy logo",
+    "logoAlt": "Glaukopis logo",
     "back": "← Back To navigation bar",
     "sidebar": {
-      "title": "StudyBuddy Guide"
+      "title": "Glaukopis Guide"
     },
     "nav": {
       "overview": "Overview",
@@ -916,7 +916,7 @@
     "sections": {
       "overview": {
         "title": "Overview",
-        "text1": "StudyBuddy is a platform designed to organize discussions, track actions, and manage structured interactions inside purpose specific rooms.",
+        "text1": "Glaukopis is a platform designed to organize discussions, track actions, and manage structured interactions inside purpose specific rooms.",
         "bullets": [
           "Create or join rooms",
           "Participate in discussions",
@@ -926,9 +926,9 @@
       },
       "chat": {
         "title": "Chat",
-        "text1": "The StudyBuddy AI Assistant helps you use the platform more easily. Ask questions about features, navigation, rooms, posts, ratings, announcements, and more..",
+        "text1": "The Glaukopis AI Assistant helps you use the platform more easily. Ask questions about features, navigation, rooms, posts, ratings, announcements, and more..",
         "bullets": [
-          "Answers questions about StudyBuddy features and navigation.",
+          "Answers questions about Glaukopis features and navigation.",
           "Helps users find rooms, posts, resources, and announcements.",
           "Provides guidance on ratings, voting, and account features.",
           "Responds in English, French, or Arabic based on the user's language."
@@ -937,7 +937,7 @@
       },
       "navigationbar": {
         "title": "Navigation Bar",
-        "text1": "Your main hub for all StudyBuddy activity. Browse, filter, and interact with posts from your community.",
+        "text1": "Your main hub for all Glaukopis activity. Browse, filter, and interact with posts from your community.",
         "steps": [
           "Use the top navigation bar to access Chat, Profile, Rooms, and more",
           "Select rooms to filter the feed or search for specific content",
@@ -1013,8 +1013,8 @@
       },
       "contact": {
         "title": "Contact Us",
-        "studyBuddyLabel": "Study Buddy mail:",
-        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "GlaukopisLabel": "Glaukopis mail:",
+        "GlaukopisEmail": "studdybuddy1403@gmail.com",
         "superAdmin1Label": "SuperAdmin 1:",
         "superAdmin1Email": "laouaribasmala75@gmail.com",
         "superAdmin2Label": "SuperAdmin 2:",

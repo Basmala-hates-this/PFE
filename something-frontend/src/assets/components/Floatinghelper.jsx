@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 
 const REG_SYSTEM_PROMPT = `
-You are a friendly registration assistant for StudyBuddy, an academic social network for Algerian university students.
+You are a friendly registration assistant for Glaukopis, an academic social network for Algerian university students.
 
 Your ONLY job: help users fill out the registration/login form they are currently looking at.
 

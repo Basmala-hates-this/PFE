@@ -468,12 +468,12 @@
   "passkey": " رمز السري:"
   },
   "guide": {
-    "title": "دليل StudyBuddy",
+    "title": "دليل Glaukopis",
     "quote": "الكمال مبالغ فيه. المثابرة تبني قصصاً أفضل. انضم إلينا ويمكننا التعلم والتعليم والبناء — معاً....",
-    "logoAlt": "شعار StudyBuddy",
+    "logoAlt": "شعار Glaukopis",
     "back": "← العودة إلى لوحة التحكم",
     "sidebar": {
-      "title": "دليل StudyBuddy"
+      "title": "دليل Glaukopis"
     },
     "nav": {
       "overview": "نظرة عامة",
@@ -490,7 +490,7 @@
     "sections": {
       "overview": {
         "title": "نظرة عامة",
-        "text1": "StudyBuddy هي منصة مصممة لتنظيم المناقشات، تتبع الإجراءات، وإدارة التفاعلات المنظمة داخل غرف مخصصة.",
+        "text1": "Glaukopis هي منصة مصممة لتنظيم المناقشات، تتبع الإجراءات، وإدارة التفاعلات المنظمة داخل غرف مخصصة.",
         "bullets": [
           "إنشاء أو الانضمام إلى غرف",
           "المشاركة في المناقشات",
@@ -500,7 +500,7 @@
       },
       "dashboard": {
         "title": "لوحة التحكم",
-        "text1": "مركز التحكم الرئيسي الخاص بك. استخدمه للتنقل في StudyBuddy.",
+        "text1": "مركز التحكم الرئيسي الخاص بك. استخدمه للتنقل في Glaukopis.",
         "steps": [
           "استخدم الشريط الجانبي للتنقل والإجراءات السريعة",
           "اختر ميزة",
@@ -576,8 +576,8 @@
       },
       "contact": {
         "title": "التواصل",
-        "studyBuddyLabel": "بريد Study Buddy:",
-        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "GlaukopisLabel": "بريد Glaukopis:",
+        "GlaukopisEmail": "studdybuddy1403@gmail.com",
         "superAdmin1Label": "سوبر أدمن 1:",
         "superAdmin1Email": "laoaribasmala75@gmail.com",
         "superAdmin2Label": "سوبر أدمن 2:",
@@ -625,7 +625,7 @@
   "saving": "جارٍ الحفظ...",
   "confirm": "تأكيد التخصص",
   "noMajorError": "يرجى اختيار تخصص.",
-  "successMessage": "تم اختيار التخصص! مرحباً بك في StudyBuddy."
+  "successMessage": "تم اختيار التخصص! مرحباً بك في Glaukopis."
 },
 "adminPanel": {
   "title": "لوحة الإدارة",
@@ -886,12 +886,12 @@
   "DELETE_INACTIVE": "حذف الحسابات غير النشطة"
 },
 "guide2": {
-    "title": "دليل StudyBuddy",
+    "title": "دليل Glaukopis",
     "quote": "الكمال مبالغ فيه. المثابرة تبني قصصاً أفضل. انضم إلينا ويمكننا التعلم والتعليم والبناء — معاً....",
-    "logoAlt": "شعار StudyBuddy",
+    "logoAlt": "شعار Glaukopis",
     "back": "← العودة إلى لوحة التحكم",
     "sidebar": {
-      "title": "دليل StudyBuddy"
+      "title": "دليل Glaukopis"
     },
     "nav": {
       "overview": "نظرة عامة",
@@ -909,7 +909,7 @@
     "sections": {
       "overview": {
         "title": "نظرة عامة",
-        "text1": "StudyBuddy هي منصة مصممة لتنظيم المناقشات، تتبع الإجراءات، وإدارة التفاعلات المنظمة داخل غرف مخصصة.",
+        "text1": "Glaukopis هي منصة مصممة لتنظيم المناقشات، تتبع الإجراءات، وإدارة التفاعلات المنظمة داخل غرف مخصصة.",
         "bullets": [
           "إنشاء أو الانضمام إلى غرف",
           "المشاركة في المناقشات",
@@ -919,9 +919,9 @@
       },
       "chat": {
 "title": "المساعد الذكي",
-"text1": "يساعدك المساعد الذكي في StudyBuddy على استخدام المنصة والعثور بسرعة على المعلومات التي تحتاجها.",
+"text1": "يساعدك المساعد الذكي في Glaukopis على استخدام المنصة والعثور بسرعة على المعلومات التي تحتاجها.",
 "bullets": [
-"يجيب عن الأسئلة المتعلقة بميزات منصة StudyBuddy.",
+"يجيب عن الأسئلة المتعلقة بميزات منصة Glaukopis.",
 "يساعد في العثور على الغرف والمنشورات والموارد والإعلانات.",
 "يشرح نظام التقييم والتصويت وخصائص الحساب.",
 "يرد باللغة العربية أو الفرنسية أو الإنجليزية حسب لغة المستخدم."
@@ -930,7 +930,7 @@
 
       "dashboard": {
         "title": "لوحة التحكم",
-        "text1": "مركز التحكم الرئيسي الخاص بك. استخدمه للتنقل في StudyBuddy.",
+        "text1": "مركز التحكم الرئيسي الخاص بك. استخدمه للتنقل في Glaukopis.",
         "steps": [
           "استخدم شريط التنقل العلوي للوصول إلى الدردشة،  الملف الشخصي،  الغرف والمزيد",
           "اختر الغرف لتصفية الخلاصة أو البحث عن محتوى معين",
@@ -1006,8 +1006,8 @@
       },
       "contact": {
         "title": "التواصل",
-        "studyBuddyLabel": "بريد Study Buddy:",
-        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "GlaukopisLabel": "بريد Glaukopis:",
+        "GlaukopisEmail": "studdybuddy1403@gmail.com",
         "superAdmin1Label": "سوبر أدمن 1:",
         "superAdmin1Email": "laouaribasmala75@gmail.com",
         "superAdmin2Label": "سوبر أدمن 2:",

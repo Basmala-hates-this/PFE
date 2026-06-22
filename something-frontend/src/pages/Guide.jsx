@@ -40,7 +40,7 @@
 //     <div className="guide-container">
 //       {/* Sidebar */}
 //       <aside className="guide-nav">
-//         <h2>StudyBuddy Guide</h2>
+//         <h2>Glaukopis Guide</h2>
 //         <ul>
 //           <li  style={{backgroundColor:"#0859d38d",borderColor:"#08d3d38d"}} onClick={() => navigate("/dashboard")}>← Back To Dashboard</li>
 //           <li onClick={() => scrollTo("overview")}>Overview</li>
@@ -69,7 +69,7 @@
 //         {/* Overview */}
 //         <section ref={sections.overview}>
 //           <h1>Overview</h1>
-//           <p>StudyBuddy is a platform designed to organize discussions, track actions, and manage structured interactions inside purpose specific rooms.</p>
+//           <p>Glaukopis is a platform designed to organize discussions, track actions, and manage structured interactions inside purpose specific rooms.</p>
 //           <ul>
 //             <li>Create or join rooms</li>
 //             <li>Participate in discussions</li>
@@ -81,7 +81,7 @@
 //         {/* Dashboard */}
 //         <section ref={sections.dashboard}>
 //           <h1>Dashboard</h1>
-//           <p>Your main control center. Use it to navigate across StudyBuddy.</p>
+//           <p>Your main control center. Use it to navigate across Glaukopis.</p>
 //           <ol>
 //             <li>Use sidebar for navigation and quick actions</li>
 //             <li>Select a feature</li>
@@ -186,7 +186,7 @@
 //           <p><strong>Why can't I do something?</strong> → Role restrictions</p>
 //         </section> */}
 //         <section ref={sections.contact}> <h1>Contact Us</h1>
-//           <p><strong>Study Buddy mail:</strong><a className="mail" href="mailto:studdybuddy1403@gmail.com">studdybuddy1403@gmail.com</a></p>
+//           <p><strong>Glaukopis mail:</strong><a className="mail" href="mailto:studdybuddy1403@gmail.com">studdybuddy1403@gmail.com</a></p>
 //           <p><strong>SuperAdmin 1:</strong>   <a className="mail" href="mailto:laoaribasmala75@gmail.com">laoaribasmala75@gmail.com</a></p>
 //           <p><strong>SuperAdmin 2:</strong>   <a className="mail" href="mailto:sarahbennoura87@gmail.com">sarahbennoura87@gmail.com</a></p>
 
@@ -367,9 +367,9 @@ export default function GuideComponent() {
         <section ref={sections.contact}>
           <h1>{t("guide.sections.contact.title")}</h1>
           <p>
-            <strong>{t("guide.sections.contact.studyBuddyLabel")}</strong>
-            <a className="mail" href={`mailto:${t("guide.sections.contact.studyBuddyEmail")}`}>
-              {t("guide.sections.contact.studyBuddyEmail")}
+            <strong>{t("guide.sections.contact.GlaukopisLabel")}</strong>
+            <a className="mail" href={`mailto:${t("guide.sections.contact.GlaukopisEmail")}`}>
+              {t("guide.sections.contact.GlaukopisEmail")}
             </a>
           </p>
           <p>

@@ -471,12 +471,12 @@
   "passkey": "🔑 Clé d'accès :"
   },
   "guide": {
-    "title": "Guide StudyBuddy",
+    "title": "Guide Glaukopis",
     "quote": "La perfection est surestimée. La persévérance construit de meilleures histoires. Rejoignez-nous et nous pouvons Apprendre, Enseigner et Construire — Ensemble....",
-    "logoAlt": "Logo StudyBuddy",
+    "logoAlt": "Logo Glaukopis",
     "back": "← Retour au tableau de bord",
     "sidebar": {
-      "title": "Guide StudyBuddy"
+      "title": "Guide Glaukopis"
     },
     "nav": {
       "overview": "Aperçu",
@@ -493,7 +493,7 @@
     "sections": {
       "overview": {
         "title": "Aperçu",
-        "text1": "StudyBuddy est une plateforme conçue pour organiser des discussions, suivre des actions et gérer des interactions structurées dans des salles dédiées.",
+        "text1": "Glaukopis est une plateforme conçue pour organiser des discussions, suivre des actions et gérer des interactions structurées dans des salles dédiées.",
         "bullets": [
           "Créer ou rejoindre des salles",
           "Participer aux discussions",
@@ -503,7 +503,7 @@
       },
       "dashboard": {
         "title": "Tableau de bord",
-        "text1": "Votre centre de contrôle principal. Utilisez-le pour naviguer dans StudyBuddy.",
+        "text1": "Votre centre de contrôle principal. Utilisez-le pour naviguer dans Glaukopis.",
         "steps": [
           "Utilisez la barre latérale pour naviguer et accéder rapidement aux actions",
           "Sélectionnez une fonctionnalité",
@@ -579,8 +579,8 @@
       },
       "contact": {
         "title": "Contact",
-        "studyBuddyLabel": "Mail Study Buddy :",
-        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "GlaukopisLabel": "Mail Glaukopis :",
+        "GlaukopisEmail": "studdybuddy1403@gmail.com",
         "superAdmin1Label": "SuperAdmin 1 :",
         "superAdmin1Email": "laoaribasmala75@gmail.com",
         "superAdmin2Label": "SuperAdmin 2 :",
@@ -628,7 +628,7 @@
   "saving": "Enregistrement...",
   "confirm": "Confirmer la spécialité",
   "noMajorError": "Veuillez sélectionner une spécialité.",
-  "successMessage": "Spécialité sélectionnée ! Bienvenue sur StudyBuddy."
+  "successMessage": "Spécialité sélectionnée ! Bienvenue sur Glaukopis."
 },
 "adminPanel": {
   "title": "Panneau d'administration",
@@ -889,12 +889,12 @@
   "DELETE_INACTIVE": "Supprimer les comptes inactifs"
 },
 "guide2": {
-    "title": "Guide StudyBuddy",
+    "title": "Guide Glaukopis",
     "quote": "La perfection est surestimée. La persévérance construit de meilleures histoires. Rejoignez-nous et nous pouvons Apprendre, Enseigner et Construire — Ensemble....",
-    "logoAlt": "Logo StudyBuddy",
+    "logoAlt": "Logo Glaukopis",
     "back": "← Retour au tableau de bord",
     "sidebar": {
-      "title": "Guide StudyBuddy"
+      "title": "Guide Glaukopis"
     },
     "nav": {
       "overview": "Aperçu",
@@ -912,7 +912,7 @@
     "sections": {
       "overview": {
         "title": "Aperçu",
-        "text1": "StudyBuddy est une plateforme conçue pour organiser des discussions, suivre des actions et gérer des interactions structurées dans des salles dédiées.",
+        "text1": "Glaukopis est une plateforme conçue pour organiser des discussions, suivre des actions et gérer des interactions structurées dans des salles dédiées.",
         "bullets": [
           "Créer ou rejoindre des salles",
           "Participer aux discussions",
@@ -922,9 +922,9 @@
       },
    "chat": {
 "title": "Assistant IA",
-"text1": "L'assistant IA StudyBuddy vous aide à utiliser la plateforme et à trouver rapidement les informations dont vous avez besoin.",
+"text1": "L'assistant IA Glaukopis vous aide à utiliser la plateforme et à trouver rapidement les informations dont vous avez besoin.",
 "bullets": [
-"Répond aux questions concernant les fonctionnalités de StudyBuddy.",
+"Répond aux questions concernant les fonctionnalités de Glaukopis.",
 "Aide à trouver des salles, des publications, des ressources et des annonces.",
 "Explique le système de notes, de votes et les fonctionnalités du compte.",
 "Répond en français, anglais ou arabe selon la langue de l'utilisateur."
@@ -933,7 +933,7 @@
       },
       "dashboard": {
         "title": "Tableau de bord",
-        "text1": "Votre centre principal pour toute l'activité StudyBuddy. Parcourez, filtrez et interagissez avec les publications de votre communauté.",
+        "text1": "Votre centre principal pour toute l'activité Glaukopis. Parcourez, filtrez et interagissez avec les publications de votre communauté.",
         "steps": [
           "Utilisez la barre de navigation en haut pour accéder au Chat, Profil, Salles et plus encore",
           "Sélectionnez des salles pour filtrer le fil ou rechercher du contenu spécifique",
@@ -1009,8 +1009,8 @@
       },
       "contact": {
         "title": "Contact",
-        "studyBuddyLabel": "Mail Study Buddy :",
-        "studyBuddyEmail": "studdybuddy1403@gmail.com",
+        "GlaukopisLabel": "Mail Glaukopis :",
+        "GlaukopisEmail": "studdybuddy1403@gmail.com",
         "superAdmin1Label": "SuperAdmin 1 :",
         "superAdmin1Email": "laouaribasmala75@gmail.com",
         "superAdmin2Label": "SuperAdmin 2 :",
