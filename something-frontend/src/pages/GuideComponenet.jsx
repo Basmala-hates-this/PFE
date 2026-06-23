@@ -180,9 +180,9 @@ export default function GuideComponent() {
         <section ref={sections.contact}>
           <h1>{t("guide2.sections.contact.title")}</h1>
           <p>
-            <strong>{t("guide2.sections.contact.studyBuddyLabel")}</strong>
+            <strong>{t("guide2.sections.contact.GlaukopisLabel")}</strong>
             <a className="mail" href={`mailto:${t("guide2.sections.contact.studyBuddyEmail")}`}>
-              {t("guide2.sections.contact.studyBuddyEmail")}
+              {t("guide2.sections.contact.GlaukopisEmail")}
             </a>
           </p>
           <p>
