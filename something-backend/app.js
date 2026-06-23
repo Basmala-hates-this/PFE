@@ -9,12 +9,16 @@ const roomRoutes = require("./routes/room.routes");
 const userRoutes = require("./routes/user.routes");
 const path = require("path");
 const app = express();
+
+app.set("trust proxy", 1);
+
 const rateLimit = require("express-rate-limit");
 const messageRoutes = require("./routes/message.routes");
 
 const adminRoutes = require("./routes/admin.routes");
 
 const aiRouter = require ("./routes/ai.js");
+app.set("trust proxy", 1);
 
 const publicLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
