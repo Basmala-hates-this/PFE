@@ -319,6 +319,7 @@ const fetchSavedPosts = async () => {
 };
 
 const handleApplyForAdmin = async () => {
+    console.log("interests being sent:", applyInterests);
   setApplicationLoading(true);
   try {
     const token = localStorage.getItem("token");

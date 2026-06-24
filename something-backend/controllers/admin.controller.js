@@ -894,6 +894,7 @@ const editAdminPermissions = async (req, res) => {
 //   }
 // };
 const applyForAdmin = async (req, res) => {
+  console.log("applyForAdmin body:", req.body);
   const user = await userRepo.findById(req.user.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
 
