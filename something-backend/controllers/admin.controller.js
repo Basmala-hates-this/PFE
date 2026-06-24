@@ -895,7 +895,7 @@ const editAdminPermissions = async (req, res) => {
 // };
 const applyForAdmin = async (req, res) => {
   console.log("applyForAdmin body:", req.body);
-    console.log("user found:", user?.id, "rating:", user?.rating, "authority:", user?.authority_level, "interests:", req.body.interests);
+   // console.log("user found:", user?.id, "rating:", user?.rating, "authority:", user?.authority_level, "interests:", req.body.interests);
 
   const { interests = [], reason = null } = req.body;
   const user = await userRepo.findById(req.user.id);
