@@ -54,10 +54,12 @@ const register = async (req, res) => {
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
-  const proofFileUrl = req.file
-    ? `http://localhost:5000/uploads/${req.file.filename}`
-    : null;
-
+  // const proofFileUrl = req.file
+  //   ? `http://localhost:5000/uploads/${req.file.filename}`
+  //   : null;
+const proofFileUrl = req.file
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
+  : null;
 
     //u cant insert a uni that desnt exist huh....
    await pool.query(
@@ -251,7 +253,7 @@ const checkUsername = async (req, res) => {
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
-  const user = await userRepo.findByEmail(email);
+  const user = await userRepo.findByEmail(email); 
   if (!user) {
     return res.json({ message: 'If that email exists, a reset link has been sent.' });
   }
@@ -262,7 +264,8 @@ const forgotPassword = async (req, res) => {
     { expiresIn: '15m' }
   );
 
-  const resetLink = `http://localhost:5173/reset?token=${resetToken}`;
+  // const resetLink = `http://localhost:5173/reset?token=${resetToken}`;
+  const resetLink = `${process.env.FRONTEND_URL}/reset?token=${resetToken}`;
 
   try {
     await sendResetEmail(user.email, resetLink);

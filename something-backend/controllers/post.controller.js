@@ -25,13 +25,20 @@ const createPost = async (req, res) => {
     return res.status(403).json({ message: 'You are suspended from posting in this room.' });
   }
 
-  const image = req.file && req.file.mimetype.startsWith('image/')
-    ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+  // const image = req.file && req.file.mimetype.startsWith('image/')
+  //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
 
-  const pdf = req.file && req.file.mimetype === 'application/pdf'
-    ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-    const video = req.file && req.file.mimetype.startsWith('video/')
-  ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+  // const pdf = req.file && req.file.mimetype === 'application/pdf'
+  //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+  //   const video = req.file && req.file.mimetype.startsWith('video/')
+  // ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+  const image = req.file && req.file.mimetype.startsWith('image/')
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+const pdf = req.file && req.file.mimetype === 'application/pdf'
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+const video = req.file && req.file.mimetype.startsWith('video/')
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+
 
 
   const newPost = await postRepo.createPost({
@@ -148,12 +155,18 @@ const updatePost = async (req, res) => {
   if (!existing) return res.status(404).json({ message: 'Post not found' });
   if (existing.userId !== userId) return res.status(403).json({ message: 'Not authorized' });
 
+  // const newImage = req.file && req.file.mimetype.startsWith('image/')
+  //   ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
+  // const newPdf = req.file && req.file.mimetype === 'application/pdf'
+  //   ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
+  // const newVideo = req.file && req.file.mimetype.startsWith('video/')
+  //   ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
   const newImage = req.file && req.file.mimetype.startsWith('image/')
-    ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
-  const newPdf = req.file && req.file.mimetype === 'application/pdf'
-    ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
-  const newVideo = req.file && req.file.mimetype.startsWith('video/')
-    ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
+const newPdf = req.file && req.file.mimetype === 'application/pdf'
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
+const newVideo = req.file && req.file.mimetype.startsWith('video/')
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
 
   const clearAttachment = removeAttachment === "true";
 
@@ -214,14 +227,20 @@ const addComment = async (req, res) => {
     return res.status(403).json({ message: 'You are suspended from commenting in this room.' });
   }
 
+  // const image = req.file && req.file.mimetype.startsWith('image/')
+  //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+
+  // const pdf = req.file && req.file.mimetype === 'application/pdf'
+  //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+
+  //   const video = req.file && req.file.mimetype.startsWith('video/')
+  // ? `http://localhost:5000/uploads/${req.file.filename}` : null;
   const image = req.file && req.file.mimetype.startsWith('image/')
-    ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-
-  const pdf = req.file && req.file.mimetype === 'application/pdf'
-    ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-
-    const video = req.file && req.file.mimetype.startsWith('video/')
-  ? `http://localhost:5000/uploads/${req.file.filename}` : null;
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+const pdf = req.file && req.file.mimetype === 'application/pdf'
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+const video = req.file && req.file.mimetype.startsWith('video/')
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
 
 
   const comment = await commentRepo.createComment({

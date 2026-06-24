@@ -26,9 +26,12 @@ const sendMessage = async (req, res) => {
   const member = await roomRepo.isMember(roomId, userId);
   if (!member) return res.status(403).json({ message: 'You are not a member of this room' });
 
+  // const attachment = req.file
+  //   ? `http://localhost:5000/uploads/${req.file.filename}`
+  //   : null;
   const attachment = req.file
-    ? `http://localhost:5000/uploads/${req.file.filename}`
-    : null;
+  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
+  : null;
 
   const message = await messageRepo.createMessage({
     roomId,

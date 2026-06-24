@@ -225,7 +225,7 @@ const handleAddComment = async () => {
     //   formData,
     //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
     // );
-     api.post(`/posts/${postId}/comments`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+    await api.post(`/posts/${postId}/comments`, formData, { headers: { "Content-Type": "multipart/form-data" } });
     console.log("first comment:", comments[0]);
     setCommentInput("");
     setCommentAttachment(null);
@@ -246,7 +246,7 @@ const handleAddComment = async () => {
       //   { voteType },
       //   { headers: { Authorization: `Bearer ${token}` } }
       // );
-    api.patch(`/posts/${postId}/comments/${commentId}/vote`, { voteType }, { headers: { Authorization: `Bearer ${token}` } });
+    await api.patch(`/posts/${postId}/comments/${commentId}/vote`, { voteType }, { headers: { Authorization: `Bearer ${token}` } });
 
       refetchPost();
     } catch (err) {
@@ -261,7 +261,7 @@ const handleAddComment = async () => {
       //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
       //   { headers: { Authorization: `Bearer ${token}` } }
       // );
-      api.delete(`/posts/${postId}/comments/${commentId}`, { headers: { Authorization: `Bearer ${token}` } });
+      await api.delete(`/posts/${postId}/comments/${commentId}`, { headers: { Authorization: `Bearer ${token}` } });
       refetchPost();
     } catch (err) {
       console.error("Failed to delete comment:", err);
@@ -275,7 +275,7 @@ const handleAddComment = async () => {
       //   { content: editCommentContent },
       //   { headers: { Authorization: `Bearer ${token}` } }
       // );
-      api.patch(`/posts/${postId}/comments/${commentId}`, { content: editCommentContent }, { headers: { Authorization: `Bearer ${token}` } });
+      await api.patch(`/posts/${postId}/comments/${commentId}`, { content: editCommentContent }, { headers: { Authorization: `Bearer ${token}` } });
       setEditingComment(null);
       refetchPost();
     } catch (err) {
