@@ -898,13 +898,14 @@ const applyForAdmin = async (req, res) => {
 
   const { interests = [], reason = null } = req.body;
   const user = await userRepo.findById(req.user.id);
+  console.log("fetched user:", JSON.stringify(user));
   if (!user) return res.status(404).json({ message: 'User not found' });
 
   if (parseFloat(user.rating) < 3.5) {
     return res.status(403).json({ message: 'Rating too low to apply' });
   }
 
-  if (user.authority_level !== 'user') {
+  if (user.authorityLevel !== 'user') {
     return res.status(400).json({ message: 'Already an admin' });
   }
 
