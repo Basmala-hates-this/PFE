@@ -108,7 +108,7 @@ const suspendUser = async (req, res) => {
 
   const user = await userRepo.findById(userId);
   if (!user) return res.status(404).json({ message: 'User not found' });
-  if (user.authority_level !== 'user') return res.status(403).json({ message: 'Cannot suspend admins' });
+  if (user.authorityLevel !== 'user') return res.status(403).json({ message: 'Cannot suspend admins' });
 
   const suspendedUntil = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
 
