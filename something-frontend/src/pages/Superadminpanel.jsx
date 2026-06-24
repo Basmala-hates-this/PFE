@@ -602,11 +602,14 @@ const filteredLogs = logs.filter(log => {
         {t("superadmin.admins.interestedIn")}
       </small>
       <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
-        {app.interests.map(i => (
-          <span key={i} className="superadmin-badge superadmin-badge-primary">
-            {i.replace(/_/g, " ")}
-          </span>
-        ))}
+        {app.interests.map(i => {
+  console.log("interest item:", JSON.stringify(i));
+  return ( 
+    <span key={i} className="superadmin-badge superadmin-badge-primary" >
+      {i.replace(/_/g, " ")}
+    </span>
+  );
+})}
       </div>
     </div>
   )}
@@ -851,7 +854,7 @@ const filteredLogs = logs.filter(log => {
                   <div key={admin.id} className="superadmin-card">
                     <div className="superadmin-item-row">
                       <img
-                        src={admin.profile_pic_url || Cat}
+                        src={admin.profilePicUrl || Cat}
                         alt="pfp"
                         className="superadmin-profile-img"
                       />
@@ -1195,7 +1198,7 @@ const filteredLogs = logs.filter(log => {
                       className="superadmin-card superadmin-drill-item"
                     >
                       <img
-                        src={u.profile_pic_url || Cat}
+                        src={u.profileiPicUrl || Cat}
                         alt="pfp"
                         className="superadmin-profile-img"
                       />
