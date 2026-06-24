@@ -12,13 +12,28 @@ api.interceptors.request.use((config) => {
 });
 
 // catch 401 (expired/invalid token) globally
+// api.interceptors.response.use(
+//   (response) => response,
+//   (error) => {
+//     if (error.response?.status === 401) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("currentUser");
+//       window.location.href = "/login";
+//     }
+//     return Promise.reject(error);
+//   }
+// );
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("currentUser");
-      window.location.href = "/login";
+      const guestToken = localStorage.getItem("guestToken");
+      if (!guestToken) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("currentUser");
+        window.location.href = "/login";
+      }
     }
     return Promise.reject(error);
   }

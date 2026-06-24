@@ -157,6 +157,8 @@ const LIMIT = 120;
                     className="searchpage-post-card"
                   >
                     <div className="searchpage-post-header">
+                      <img src={post.authorProfilePicUrl || Cat} alt="pfp" className="searchpage-user-avatar"/>
+
                       <strong className="searchpage-post-author">@{post.authorUsername}</strong>
                       <small className="searchpage-post-role-badge">{post.authorRole || "user"}</small>
                     </div>

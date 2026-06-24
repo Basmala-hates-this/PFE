@@ -157,8 +157,11 @@ const LIMIT = 251;
         //   `http://localhost:5000/api/posts/${postId}`,
         //   { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
         // );
-        const response = await api.get(`/posts/${postId}`);
-        setPost(response.data);
+const response = await api.get(`/posts/${postId}`, {
+  headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+});
+
+setPost(response.data);
       } catch (err) {
         console.error("Failed to fetch post:", err);
       }
@@ -177,9 +180,9 @@ const refetchPost = async () => {
   //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
   //   })
   // ]);
-  const [postRes, commentsRes] = await Promise.all([
-  api.get(`/posts/${postId}`),
-  api.get(`/posts/${postId}/comments`)
+const [postRes, commentsRes] = await Promise.all([
+  api.get(`/posts/${postId}`, { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }),
+  api.get(`/posts/${postId}/comments`, { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} })
 ]);
   console.log("comment sample:", commentsRes.data[0]);
   setPost(postRes.data);

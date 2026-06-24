@@ -1,5 +1,5 @@
 /* SearchPage Styles */
-/* Matching profile.css styling */
+
 
 .searchpage-container {
   min-height: 100vh;
@@ -85,4 +85,28 @@
   border-radius: 50%;
   object-fit: cover;
   border: 2px solid var(--accent);
+}
+
+.searchpage-post-header{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.searchpage-post-role-badge {
+  background: var(--bg-soft);
+  color: var(--text-main);
+  padding: 2px 6px;
+  border-radius: 12px;
+  font-size: 12px;
+}
+
+.searchpage-user-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+.searchpage-user-info {
+  display: flex;
+  flex-direction: column;
 }
