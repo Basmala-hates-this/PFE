@@ -897,6 +897,7 @@ const applyForAdmin = async (req, res) => {
   console.log("applyForAdmin body:", req.body);
     console.log("user found:", user?.id, "rating:", user?.rating, "authority:", user?.authority_level, "interests:", req.body.interests);
 
+  const { interests = [], reason = null } = req.body;
   const user = await userRepo.findById(req.user.id);
   if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -908,7 +909,6 @@ const applyForAdmin = async (req, res) => {
     return res.status(400).json({ message: 'Already an admin' });
   }
 
-  const { interests = [], reason = null } = req.body;
 
   if (!interests.length) {
     return res.status(400).json({ message: 'Please select at least one area of interest' });
