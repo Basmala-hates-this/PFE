@@ -36,6 +36,11 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
 >
   @{comment.authorUsername}
 </strong>
+{comment.authorRole && (
+  <small style={{background:"#6476af", color:"var(-text--main)", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>
+    {comment.authorRole}
+  </small>
+)}
           {depth > 0 && <small style={{ opacity: 0.4, fontSize: "11px" }}>↩ reply</small>}
           <small style={{ opacity: 0.5, fontSize: "11px" }}>{new Date(comment.createdAt).toLocaleString()}</small>
         </div>

@@ -31,15 +31,16 @@ const getCommentById = async (id) => {
 const getCommentsByPost = async (postId) => {
   const result = await pool.query(
     `SELECT c.*,
-      COALESCE(v.useful, 0)::int as vote_useful,
-      COALESCE(v.useless, 0)::int as vote_useless,
-      COALESCE(v.specialized, 0)::int as vote_specialized,
-      u.profile_pic_url as author_profile_pic
-     FROM comments c
-     LEFT JOIN comment_vote_counts v ON v.comment_id = c.id
-     LEFT JOIN users u ON u.id = c.user_id
-     WHERE c.post_id = $1
-     ORDER BY c.created_at ASC`,
+  COALESCE(v.useful, 0)::int as vote_useful,
+  COALESCE(v.useless, 0)::int as vote_useless,
+  COALESCE(v.specialized, 0)::int as vote_specialized,
+  u.profile_pic_url as author_profile_pic,
+  u.role as author_role
+ FROM comments c
+ LEFT JOIN comment_vote_counts v ON v.comment_id = c.id
+ LEFT JOIN users u ON u.id = c.user_id
+ WHERE c.post_id = $1
+ ORDER BY c.created_at ASC`,
     [postId]
   );
   return toCamel(result.rows);
