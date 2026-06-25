@@ -24,7 +24,7 @@ import SuperadminPanel from "./Superadminpanel";
 import GuidePage from "./GuideComponenet.jsx";
 import Profile from "./Profile";
 import RoomsView from "../assets/components/RoomsView.jsx";
-import logo from "../photos/logo2.png";
+import logo from "../../public/apple-touch-icon.png";
 import ChatTab from "./ChatTab";
 import { useTheme } from "../Theme";
 import api from "../api/axios.js";
