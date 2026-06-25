@@ -52,14 +52,16 @@ const register = async (req, res) => {
   if (role === 'professor' && !req.file) {
     return res.status(400).json({ message: 'Proof of professor status is required' });
   }
-
-  const passwordHash = await bcrypt.hash(password, 10);
-  // const proofFileUrl = req.file
+ // const proofFileUrl = req.file
   //   ? `http://localhost:5000/uploads/${req.file.filename}`
   //   : null;
-const proofFileUrl = req.file
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
-  : null;
+
+  const passwordHash = await bcrypt.hash(password, 10);
+ 
+// const proofFileUrl = req.file
+//   ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
+//   : null;
+const proofFileUrl = req.file ? req.file.path : null;
 
     //u cant insert a uni that desnt exist huh....
    await pool.query(

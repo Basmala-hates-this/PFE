@@ -29,10 +29,12 @@ const sendMessage = async (req, res) => {
   // const attachment = req.file
   //   ? `http://localhost:5000/uploads/${req.file.filename}`
   //   : null;
-  const attachment = req.file
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
-  : null;
+  // const attachment = req.file
+  // ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
+  // : null;
 
+  const attachment = req.file ? req.file.path : null;
+  
   const message = await messageRepo.createMessage({
     roomId,
     authorId: userId,

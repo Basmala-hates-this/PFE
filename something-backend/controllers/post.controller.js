@@ -32,12 +32,15 @@ const createPost = async (req, res) => {
   //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
   //   const video = req.file && req.file.mimetype.startsWith('video/')
   // ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-  const image = req.file && req.file.mimetype.startsWith('image/')
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
-const pdf = req.file && req.file.mimetype === 'application/pdf'
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
-const video = req.file && req.file.mimetype.startsWith('video/')
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+//   const image = req.file && req.file.mimetype.startsWith('image/')
+//   ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+// const pdf = req.file && req.file.mimetype === 'application/pdf'
+//   ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+// const video = req.file && req.file.mimetype.startsWith('video/')
+//   ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
+const image = req.file && req.file.mimetype.startsWith('image/') ? req.file.path : undefined;
+const pdf = req.file && req.file.mimetype === 'application/pdf' ? req.file.path : undefined;
+const video = req.file && req.file.mimetype.startsWith('video/') ? req.file.path : undefined;
 
 
 

@@ -43,9 +43,10 @@ const updateMe = async (req, res) => {
   // const profilePicUrl = req.file
   //   ? `http://localhost:5000/uploads/${req.file.filename}`
   //   : currentUser.profile_pic_url;
-  const profilePicUrl = req.file
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
-  : currentUser.profile_pic_url;
+  // const profilePicUrl = req.file
+  // ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}`
+  // : currentUser.profile_pic_url;
+  const profilePicUrl = req.file ? req.file.path : currentUser.profile_pic_url;
 
   const updatedUser = await userRepo.updateUser(userId, {
     username: username || currentUser.username,
