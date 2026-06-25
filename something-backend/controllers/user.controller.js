@@ -53,6 +53,10 @@ const updateMe = async (req, res) => {
     email: email || currentUser.email,
     profilePicUrl,
   });
+if (username && username !== currentUser.username) {
+  await pool.query(`UPDATE posts SET author_username = $1 WHERE user_id = $2`, [username, userId]);
+  await pool.query(`UPDATE comments SET author_username = $1 WHERE user_id = $2`, [username, userId]);
+}
 
   const { password_hash, ...userWithoutPassword } = updatedUser;
   res.json(userWithoutPassword);
