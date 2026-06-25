@@ -68,22 +68,20 @@ const SUGGESTIONS = [
 
 
 // ─── CALL OUR BACKEND PROXY (which calls Gemini) ....screw gemini,groq it is for now──────────────────────────────
-async function callAI(messages, system) {
-  const token = localStorage.getItem("token") || localStorage.getItem("guestToken");
-  //const response = await fetch("http://localhost:5000/api/ai/chat",
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
+async function callAI(messages, system, conversationId) {
+  const token = localStorage.getItem("token");
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ messages, system }),
+    body: JSON.stringify({ messages, system, conversationId }),
   });
   if (!response.ok) throw new Error("AI request failed");
   const data = await response.json();
   return data.content?.[0]?.text || "Sorry, I didn't get that. Try again?";
 }
-
 
 
 
