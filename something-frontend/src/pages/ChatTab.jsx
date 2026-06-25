@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from "react";
+import api from "../api/axios.js";
+import "../styles/chat.css"
 
 // ─── SYSTEM PROMPT ─────────────────────────────────────────────────────────────
 const buildSystemPrompt = (user) => `
@@ -54,8 +56,16 @@ ${user ? `CURRENT USER:
 ${user.authorityLevel === "admin" || user.authorityLevel === "superadmin" ? "- This user is an admin. Help with admin tasks too." : ""}
 ` : "The user is browsing as a guest."}
 
-Keep responses concise. You're a study buddy, not a manual. Max 4-5 sentences unless they ask for something detailed.
+Keep responses concise. You're a Glaukopis, not a manual. Max 4-5 sentences unless they ask for something detailed.
 `;
+
+const SUGGESTIONS = [
+  "How do I create a post?",
+  "How do I join a subject room?",
+  "What is the rating system?",
+  "How do I become an admin?",
+];
+
 
 // ─── CALL OUR BACKEND PROXY (which calls Gemini) ....screw gemini,groq it is for now──────────────────────────────
 async function callAI(messages, system) {
@@ -79,34 +89,64 @@ async function callAI(messages, system) {
 
 
 // ─── ASSISTANT CHAT ────────────────────────────────────────────────────────────
+
 export default function ChatTab() {
   const user = JSON.parse(localStorage.getItem("currentUser"));
   const mediaRecorderRef = useRef(null);
-const [speakingIndex, setSpeakingIndex] = useState(null);
+  const bottomRef = useRef(null);
 
-  const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: user
-        ? `Hey ${user.username}! 👋 I'm your Glaukopis assistant. Ask me anything — how the platform works, study help, writing tips, or just chat!`
-        : `Hey! 👋 I'm the Glaukopis assistant. You're browsing as a guest — I can still help you understand the platform. What do you need?`,
-    },
-  ]);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [conversations, setConversations] = useState([]);
+  const [activeConvoId, setActiveConvoId] = useState(null);
+  const [messages, setMessages] = useState([{
+    role: "assistant",
+    content: `Hey ${user?.username}! 👋 I'm your Glaukopis assistant. Ask me anything — how the platform works, study help, writing tips, or just chat!`,
+  }]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false);
-  const bottomRef = useRef(null);
-  const recognitionRef = useRef(null);
+  const [speakingIndex, setSpeakingIndex] = useState(null);
 
-  useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  useEffect(() => { fetchConversations(); }, []);
+  useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+  useEffect(() => { return () => { window.speechSynthesis?.cancel(); }; }, []);
 
+  const fetchConversations = async () => {
+    try {
+      const res = await api.get("/ai/conversations");
+      setConversations(res.data);
+    } catch (err) { console.error("Failed to fetch conversations:", err); }
+  };
 
+  const startNewChat = () => {
+    setActiveConvoId(null);
+    setMessages([{
+      role: "assistant",
+      content: `Hey ${user?.username}! 👋 I'm your Glaukopis assistant. Ask me anything!`,
+    }]);
+    setInput("");
+  };
 
-  useEffect(() => {
-  return () => { window.speechSynthesis?.cancel(); };
-}, []);
+  const loadConversation = async (id) => {
+    try {
+      const res = await api.get(`/ai/conversations/${id}`);
+      const loaded = res.data.map(m => ({ role: m.role, content: m.content }));
+      setMessages(loaded.length > 0 ? loaded : [{
+        role: "assistant",
+        content: `Hey ${user?.username}! 👋 I'm your Glaukopis assistant. Ask me anything!`,
+      }]);
+      setActiveConvoId(id);
+    } catch (err) { console.error("Failed to load conversation:", err); }
+  };
+
+  const deleteConversation = async (e, id) => {
+    e.stopPropagation();
+    try {
+      await api.delete(`/ai/conversations/${id}`);
+      if (activeConvoId === id) startNewChat();
+      fetchConversations();
+    } catch (err) { console.error("Failed to delete:", err); }
+  };
 
   const sendMessage = async (text) => {
     const content = (text || input).trim();
@@ -118,344 +158,198 @@ const [speakingIndex, setSpeakingIndex] = useState(null);
     setLoading(true);
 
     try {
+      let convoId = activeConvoId;
+      if (!convoId) {
+        const res = await api.post("/ai/conversations", { title: content.slice(0, 60) });
+        convoId = res.data.id;
+        setActiveConvoId(convoId);
+        fetchConversations();
+      }
       const reply = await callAI(
-        newMessages.map((m) => ({ role: m.role, content: m.content })),
-        buildSystemPrompt(user)
+        newMessages.map(m => ({ role: m.role, content: m.content })),
+        buildSystemPrompt(user),
+        convoId
       );
-      setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+      fetchConversations();
     } catch {
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: "Oops, something went wrong. Check your connection and try again." },
-      ]);
+      setMessages(prev => [...prev, {
+        role: "assistant",
+        content: "Oops, something went wrong. Check your connection and try again.",
+      }]);
     } finally {
-      setLoading(false);
+      setLoading(false); 
     }
   };
 
-  // const toggleVoice = () => {
-  //   if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
-  //     alert("Voice input not supported in this browser. Try Chrome.");
-  //     return;
-  //   }
-  //   if (listening) {
-  //     recognitionRef.current?.stop();
-  //     setListening(false);
-  //     return;
-  //   }
-  //   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  //   const recognition = new SR();
-  //   recognitionRef.current = recognition;
-  //   recognition.lang = "fr-FR";
-  //   recognition.interimResults = false;
-  //   recognition.onresult = (e) => {
-  //     setInput(e.results[0][0].transcript);
-  //     setListening(false);
-  //   };
-  //   recognition.onerror = () => setListening(false);
-  //   recognition.onend = () => setListening(false);
-  //   recognition.start();
-  //   setListening(true);
-  // };
+  function detectFromText(t) {
+    if (/[\u0600-\u06FF]/.test(t)) return "ar";
+    if (/[àâçéèêëîïôùûüœæ]/i.test(t)) return "fr";
+    return "en";
+  }
 
-  const SUGGESTIONS = [
-    "How do I create a post?",
-    "How do I join a subject room?",
-    "What is the rating system?",
-    "How do I become an admin?",
-  ];
-
-
-  
-function detectFromText(t) {
-  if (/[\u0600-\u06FF]/.test(t)) return "ar";
-  if (/[àâçéèêëîïôùûüœæ]/i.test(t)) return "fr";
-  return "en";
-}
-
-const speakText = (text, index) => {
-  if (!window.speechSynthesis) return;
-  if (speakingIndex === index) {
+  const speakText = (text, index) => {
+    if (!window.speechSynthesis) return;
+    if (speakingIndex === index) {
+      window.speechSynthesis.cancel();
+      setSpeakingIndex(null);
+      return;
+    }
     window.speechSynthesis.cancel();
-    setSpeakingIndex(null);
-    return;
-  }
-  window.speechSynthesis.cancel();
-  const PREFERRED = { fr: "Microsoft Julie", en: "Microsoft Zira", ar: "Microsoft Julie" };
-  const speak = (voices) => {
-    const utter = new SpeechSynthesisUtterance(text);
-    const langPrefix = detectFromText(text);
-    const fullLang = langPrefix === "fr" ? "fr-FR" : langPrefix === "ar" ? "ar-DZ" : "en-US";
-    utter.voice = voices.find(v => v.name === PREFERRED[langPrefix])
-      || voices.find(v => v.lang === fullLang)
-      || null;
-    utter.lang = fullLang;
-    utter.rate = 0.95;
-    utter.onstart = () => setSpeakingIndex(index);
-    utter.onend = () => setSpeakingIndex(null);
-    utter.onerror = () => setSpeakingIndex(null);
-    window.speechSynthesis.speak(utter);
+    const PREFERRED = { fr: "Microsoft Julie", en: "Microsoft Zira", ar: "Microsoft Julie" };
+    const speak = (voices) => {
+      const utter = new SpeechSynthesisUtterance(text);
+      const langPrefix = detectFromText(text);
+      const fullLang = langPrefix === "fr" ? "fr-FR" : langPrefix === "ar" ? "ar-DZ" : "en-US";
+      utter.voice = voices.find(v => v.name === PREFERRED[langPrefix]) || voices.find(v => v.lang === fullLang) || null;
+      utter.lang = fullLang;
+      utter.rate = 0.95;
+      utter.onstart = () => setSpeakingIndex(index);
+      utter.onend = () => setSpeakingIndex(null);
+      utter.onerror = () => setSpeakingIndex(null);
+      window.speechSynthesis.speak(utter);
+    };
+    const voices = window.speechSynthesis.getVoices();
+    voices.length > 0 ? speak(voices) : (window.speechSynthesis.onvoiceschanged = () => speak(window.speechSynthesis.getVoices()));
   };
-  const voices = window.speechSynthesis.getVoices();
-  voices.length > 0 ? speak(voices) : (window.speechSynthesis.onvoiceschanged = () => speak(window.speechSynthesis.getVoices()));
-};
 
-const toggleVoice = async () => {
-  if (listening) { mediaRecorderRef.current?.stop(); return; }
-  let stream;
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  } catch {
-    alert("Mic access denied.");
-    return;
-  }
-  const chunks = [];
-  const recorder = new MediaRecorder(stream);
-  mediaRecorderRef.current = recorder;
-  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-  recorder.onstop = async () => {
-    stream.getTracks().forEach(t => t.stop());
-    setListening(false);
-    const blob = new Blob(chunks, { type: "audio/webm" });
-    const formData = new FormData();
-    formData.append("audio", blob, "recording.webm");
+  const toggleVoice = async () => {
+    if (listening) { mediaRecorderRef.current?.stop(); return; }
+    let stream;
     try {
-      setLoading(true);
-      const token = localStorage.getItem("token") || localStorage.getItem("guestToken");
-      //const res = await fetch("http://localhost:5000/api/ai/transcribe"
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
-        method: "POST",
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.text) setInput(data.text);
-    } catch { alert("Transcription failed."); }
-    finally { setLoading(false); }
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch { alert("Mic access denied."); return; }
+    const chunks = [];
+    const recorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = recorder;
+    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      setListening(false);
+      const blob = new Blob(chunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("audio", blob, "recording.webm");
+      try {
+        setLoading(true);
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
+          method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.text) setInput(data.text);
+      } catch { alert("Transcription failed."); }
+      finally { setLoading(false); }
+    };
+    recorder.start();
+    setListening(true);
   };
-  recorder.start();
-  setListening(true);
-};
 
   return (
-    <div style={s.root}>
-      {/* header */}
-      <div style={s.header}>
-        <span style={s.headerTitle}>🤖 Glaukopis Assistant</span>
-        <span style={s.headerSub}> Ask anything.....about the app please....</span>
+    <div className="chat-root">
+
+      {/* ── SIDEBAR ── */}
+      <div className={`chat-sidebar ${sidebarOpen ? "chat-sidebar-open" : "chat-sidebar-closed"}`}>
+        {sidebarOpen && (
+          <>
+            <button onClick={startNewChat} className="chat-new-btn">+ New Chat</button>
+            <div className="chat-convo-list">
+              {conversations.length === 0 ? (
+                <small className="chat-empty-convos">No conversations yet</small>
+              ) : (
+                conversations.map(c => (
+                  <div
+                    key={c.id}
+                    onClick={() => loadConversation(c.id)}
+                    className={`chat-convo-item ${activeConvoId === c.id ? "chat-convo-item-active" : ""}`}
+                  >
+                    <span className="chat-convo-title">{c.title || "Untitled"}</span>
+                    <button onClick={(e) => deleteConversation(e, c.id)} className="chat-convo-delete" title="Delete">
+                      🗑️
+                    </button>
+                  </div>
+                ))
+              )}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* messages */}
-      <div style={s.messageList}>
-        {messages.map((msg, i) => (
-          <div key={i} style={{ ...s.bubbleWrap, justifyContent: msg.role === "user" ? "flex-end" : "flex-start" }}>
-            {msg.role === "assistant" && <span style={s.botAvatar}>🤖</span>}
-            {/* <div style={{ ...s.bubble, ...(msg.role === "user" ? s.userBubble : s.aiBubble) }}>
-              <p style={s.bubbleText}>{msg.content}</p>
-            </div> */}
-            <div style={{ ...s.bubble, ...(msg.role === "user" ? s.userBubble : s.aiBubble) }}>
-  <p style={s.bubbleText}>{msg.content}</p>
-  {msg.role === "assistant" && (
-    <button
-      onClick={() => speakText(msg.content, i)}
-      style={{
-        background: "none", border: "none", cursor: "pointer",
-        fontSize: "12px", color: speakingIndex === i ? "#e74c3c" : "rgba(255,255,255,0.3)",
-        padding: "4px 0 0 0", transition: "color 0.2s",
-      }}
-      title={speakingIndex === i ? "Stop" : "Read aloud"}
-    >
-      {speakingIndex === i ? "⏹" : "🔊"}
-    </button>
-  )}
-</div>
-            {/* {msg.role === "assistant" && (
-  <button
-    onClick={() => speakText(msg.content, i)}
-    style={{
-      background: "none", border: "none", cursor: "pointer",
-      fontSize: "12px", color: speakingIndex === i ? "#e74c3c" : "rgba(255,255,255,0.3)",
-      padding: "4px 0 0 0", transition: "color 0.2s",
-    }}
-    title={speakingIndex === i ? "Stop" : "Read aloud"}
-  >
-    {speakingIndex === i ? "⏹" : "🔊"}
-  </button>
-)} */}
-          </div>
-          
-        ))}
+      {/* ── CHAT AREA ── */}
+      <div className="chat-area">
 
-        {loading && (
-          <div style={{ ...s.bubbleWrap, justifyContent: "flex-start" }}>
-            <span style={s.botAvatar}>🤖</span>
-            <div style={{ ...s.bubble, ...s.aiBubble }}>
-              <p style={{ ...s.bubbleText, opacity: 0.5 }}>thinking...</p>
+        <div className="chat-header">
+          <button onClick={() => setSidebarOpen(p => !p)} className="chat-toggle-btn">
+            {sidebarOpen ? "◀" : "▶"}
+          </button>
+          <span className="chat-header-title">🤖 Glaukopis Assistant</span>
+          <span className="chat-header-sub">Ask anything.....about the app please....</span>
+        </div>
+
+        <div className="chat-message-list">
+          {messages.map((msg, i) => (
+            <div key={i} className={`chat-bubble-wrap ${msg.role === "user" ? "chat-bubble-wrap-right" : "chat-bubble-wrap-left"}`}>
+              {msg.role === "assistant" && <span className="chat-bot-avatar">🤖</span>}
+              <div className={`chat-bubble ${msg.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"}`}>
+                <p className="chat-bubble-text">{msg.content}</p>
+                {msg.role === "assistant" && (
+                  <button
+                    onClick={() => speakText(msg.content, i)}
+                    className={`chat-speak-btn ${speakingIndex === i ? "chat-speak-btn-active" : ""}`}
+                    title={speakingIndex === i ? "Stop" : "Read aloud"}
+                  >
+                    {speakingIndex === i ? "⏹" : "🔊"}
+                  </button>
+                )}
+              </div>
             </div>
+          ))}
+
+          {loading && (
+            <div className="chat-bubble-wrap chat-bubble-wrap-left">
+              <span className="chat-bot-avatar">🤖</span>
+              <div className="chat-bubble chat-bubble-ai">
+                <p className="chat-bubble-text chat-thinking">thinking...</p>
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {messages.length === 1 && (
+          <div className="chat-suggestions">
+            {SUGGESTIONS.map(q => (
+              <button key={q} className="chat-sugg-btn" onClick={() => sendMessage(q)}>{q}</button>
+            ))}
           </div>
         )}
-        <div ref={bottomRef} />
-      </div>
 
-      {/* quick suggestions — only shown at start */}
-      {messages.length === 1 && (
-        <div style={s.suggestions}>
-          {SUGGESTIONS.map((q) => (
-            <button key={q} style={s.suggBtn} onClick={() => sendMessage(q)}>
-              {q}
-            </button>
-          ))}
+        <div className="chat-input-row">
+          <button
+            onClick={toggleVoice}
+            title={listening ? "Stop" : "Voice input"}
+            className={`chat-icon-btn ${listening ? "chat-icon-btn-listening" : ""}`}
+          >
+            {listening ? "⏹" : "🎤"}
+          </button>
+          <textarea
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
+            placeholder="Ask me anything... (Enter to send, Shift+Enter for new line)"
+            className="chat-input"
+            rows={1}
+          />
+          <button
+            onClick={() => sendMessage()}
+            disabled={!input.trim() || loading}
+            className={`chat-icon-btn ${input.trim() && !loading ? "chat-icon-btn-active" : "chat-icon-btn-disabled"}`}
+          >
+            ➤
+          </button>
         </div>
-      )}
-
-      {/* input row */}
-      <div style={s.inputRow}>
-        <button
-          onClick={toggleVoice}
-          title={listening ? "Stop" : "Voice input"}
-          style={{ ...s.iconBtn, background: listening ? "#e74c3c" : "rgba(255,255,255,0.08)" }}
-        >
-          {listening ? "⏹" : "🎤"}
-        </button>
-        <textarea
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); } }}
-          placeholder="Ask me anything... (Enter to send, Shift+Enter for new line)"
-          style={s.input}
-          rows={1}
-        />
-        <button
-          onClick={() => sendMessage()}
-          disabled={!input.trim() || loading}
-          style={{
-            ...s.iconBtn,
-            background: input.trim() && !loading ? "#6476af" : "rgba(255,255,255,0.08)",
-            opacity: !input.trim() || loading ? 0.5 : 1,
-          }}
-        >
-          ➤
-        </button>
       </div>
     </div>
   );
 }
-
-// ─── STYLES ────────────────────────────────────────────────────────────────────
-const s = {
-  root: {
-    display: "flex",
-    flexDirection: "column",
-    height: "calc(100vh - 60px)",
-    maxWidth: "780px",
-    margin: "0 auto",
-    width: "100%",
-    padding: "0 16px",
-    boxSizing: "border-box",
-  },
-  header: {
-    padding: "16px 0 12px",
-    borderBottom: "1px solid rgba(255,255,255,0.08)",
-    display: "flex",
-    flexDirection: "column",
-    gap: "2px",
-  },
-  headerTitle: {
-    fontSize: "16px",
-    fontWeight: "700",
-    color: "white",
-  },
-  headerSub: {
-    fontSize: "11px",
-    opacity: 0.4,
-    color: "white",
-  },
-  messageList: {
-    flex: 1,
-    overflowY: "auto",
-    padding: "16px 0",
-    display: "flex",
-    flexDirection: "column",
-    gap: "12px",
-  },
-  bubbleWrap: {
-    display: "flex",
-    alignItems: "flex-end",
-    gap: "8px",
-  },
-  botAvatar: {
-    fontSize: "20px",
-    flexShrink: 0,
-    marginBottom: "2px",
-  },
-  bubble: {
-    maxWidth: "72%",
-    padding: "11px 15px",
-    borderRadius: "16px",
-    lineHeight: "1.6",
-  },
-  userBubble: {
-    background: "#6476af",
-    borderBottomRightRadius: "4px",
-  },
-  aiBubble: {
-    background: "rgba(255,255,255,0.07)",
-    border: "1px solid rgba(255,255,255,0.09)",
-    borderBottomLeftRadius: "4px",
-  },
-  bubbleText: {
-    margin: 0,
-    fontSize: "14px",
-    color: "white",
-    whiteSpace: "pre-wrap",
-  },
-  suggestions: {
-    display: "flex",
-    flexWrap: "wrap",
-    gap: "8px",
-    paddingBottom: "12px",
-  },
-  suggBtn: {
-    padding: "6px 14px",
-    borderRadius: "20px",
-    border: "1px solid rgba(100,118,175,0.5)",
-    background: "transparent",
-    color: "rgba(255,255,255,0.7)",
-    fontSize: "12px",
-    cursor: "pointer",
-  },
-  inputRow: {
-    display: "flex",
-    gap: "8px",
-    padding: "12px 0",
-    borderTop: "1px solid rgba(255,255,255,0.08)",
-    alignItems: "flex-end",
-  },
-  input: {
-    flex: 1,
-    padding: "10px 14px",
-    borderRadius: "12px",
-    border: "1px solid rgba(255,255,255,0.15)",
-    background: "rgba(255,255,255,0.05)",
-    color: "white",
-    fontSize: "14px",
-    resize: "none",
-    outline: "none",
-    fontFamily: "inherit",
-    lineHeight: "1.5",
-  },
-  iconBtn: {
-    width: "42px",
-    height: "42px",
-    borderRadius: "12px",
-    border: "none",
-    cursor: "pointer",
-    fontSize: "16px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    transition: "all 0.2s",
-    flexShrink: 0,
-    color: "white",
-  },
-};
