@@ -817,15 +817,26 @@ const getCurrentAdmins = async (req, res) => {
   }
 
   const result = await pool.query(
+    // `SELECT u.id, u.username, u.email, u.rating, u.authority_level,
+    //         array_agg(DISTINCT up.permission) FILTER (WHERE up.permission IS NOT NULL) as permissions,
+    //         array_agg(DISTINCT aar.room_id) FILTER (WHERE aar.room_id IS NOT NULL) as assigned_rooms
+    //  FROM users u
+    //  LEFT JOIN user_permissions up ON up.user_id = u.id
+    //  LEFT JOIN admin_assigned_rooms aar ON aar.user_id = u.id
+    //  WHERE u.authority_level IN ('admin', 'superadmin')
+    //  GROUP BY u.id`
     `SELECT u.id, u.username, u.email, u.rating, u.authority_level,
-            array_agg(DISTINCT up.permission) FILTER (WHERE up.permission IS NOT NULL) as permissions,
-            array_agg(DISTINCT aar.room_id) FILTER (WHERE aar.room_id IS NOT NULL) as assigned_rooms
-     FROM users u
-     LEFT JOIN user_permissions up ON up.user_id = u.id
-     LEFT JOIN admin_assigned_rooms aar ON aar.user_id = u.id
-     WHERE u.authority_level IN ('admin', 'superadmin')
-     GROUP BY u.id`
+        u.profile_pic_url,
+        array_agg(DISTINCT up.permission) FILTER (WHERE up.permission IS NOT NULL) as permissions,
+        array_agg(DISTINCT aar.room_id) FILTER (WHERE aar.room_id IS NOT NULL) as assigned_rooms
+ FROM users u
+ LEFT JOIN user_permissions up ON up.user_id = u.id
+ LEFT JOIN admin_assigned_rooms aar ON aar.user_id = u.id
+ WHERE u.authority_level IN ('admin', 'superadmin')
+ GROUP BY u.id`
+ 
   );
+  console.log(result.rows[0])
   res.json(toCamel(result.rows));
 };
 

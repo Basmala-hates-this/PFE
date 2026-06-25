@@ -850,6 +850,7 @@ const filteredLogs = logs.filter(log => {
 ) : (
   filteredAdmins.map((admin) => { 
                 const isEditing = editingAdminId === admin.id;
+                console.log(admin)
                 return (
                   <div key={admin.id} className="superadmin-card">
                     <div className="superadmin-item-row">
@@ -1192,13 +1193,14 @@ const filteredLogs = logs.filter(log => {
                   const isSuspended =
                     u.suspended_until &&
                     new Date(u.suspended_until) > new Date();
+                    console.log(u)
                   return (
                     <div
                       key={u.id}
                       className="superadmin-card superadmin-drill-item"
                     >
                       <img
-                        src={u.profileiPicUrl || Cat}
+                        src={u.profile_pic_url || Cat}
                         alt="pfp"
                         className="superadmin-profile-img"
                       />
