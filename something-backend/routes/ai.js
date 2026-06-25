@@ -71,6 +71,8 @@ async function tryMistral(messages, system) {
 // ─── POST /api/ai/chat — tries each provider in order ────────────────────────
 router.post("/chat", async (req, res) => {
   const { messages, system, conversationId } = req.body;
+   console.log("conversationId received:", conversationId);
+  console.log("messages count:", messages?.length);
   if (!messages || messages.length === 0)
     return res.status(400).json({ error: "No messages provided" });
 
