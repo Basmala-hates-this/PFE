@@ -433,8 +433,9 @@ const handleInvite = async (inviteeId) => {
               <div className={`roomchat-message-bubble ${msg.senderId === currentUser?.id ? "roomchat-message-bubble-right" : "roomchat-message-bubble-left"}`}>
                 <div style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "4px" }}>
   <img
-    src={msg.profile_pic_url || Cat}
+    src={msg.profilePicUrl }
     alt="pfp"
+     onError={(e) => { e.target.src = Cat; }}
     style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover" }}
   />
   <small className="roomchat-message-author">@{msg.authorUsername}</small>
