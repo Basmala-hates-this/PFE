@@ -105,6 +105,8 @@ const [followList, setFollowList] = useState([]);
   socket.emit("join_room", roomId);
 
   socket.on("new_message", (message) => {
+      console.log("socket received new_message:", message);
+
     setMessages(prev => [...prev, message]);
   });
 
