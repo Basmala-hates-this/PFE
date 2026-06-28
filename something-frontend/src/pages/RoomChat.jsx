@@ -88,8 +88,10 @@ const [followList, setFollowList] = useState([]);
   useEffect(() => {
   // initial fetch
   const fetchMessages = async () => {
+    
     try {
       const response = await api.get(`/rooms/${roomId}/messages`);
+       console.log("first message:", response.data[0]);
       setMessages(response.data);
     } catch (err) {
       console.error("Failed to fetch messages:", err);
