@@ -11,7 +11,7 @@ import { useRegistration } from "../assets/components/Context.jsx";
 import "../styles/pallette.css";
 import { useEffect, useState } from "react";
 
-//dashboard too big...+i want it scalable...i'll isolate some things...
+//dashboard too big...+i want it scalable...i'll isolate some things...screw that plan,we make the app work first
 import PostModal from "../assets/components/PostModal.jsx";
 
 import ReportModal from "../assets/components/ReportModal.jsx";
@@ -150,6 +150,15 @@ export default function Dashboard() {
 const [editPostResourceLink, setEditPostResourceLink] = useState("");
 const [editPostResourceLabel, setEditPostResourceLabel] = useState("");
 const [removeAttachment, setRemoveAttachment] = useState(false);
+
+
+//the absurd ammount of conts.....
+//either way,more consts...
+//the notification shit
+const [notifications, setNotifications] = useState([]);
+const [unreadCount, setUnreadCount] = useState(0);
+const [showNotifications, setShowNotifications] = useState(false);
+const notifRef = useRef(null);
 // ....................................i hate me .....
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -328,6 +337,38 @@ const [removeAttachment, setRemoveAttachment] = useState(false);
   useEffect(() => {
     fetchRoomsAndPosts();
   }, [selectedRooms]);
+
+
+  useEffect(() => {
+  if (isGuest) return; // guests have no notifications
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/notifications');
+      setNotifications(res.data.notifications);
+      setUnreadCount(res.data.unreadCount);
+    } catch (err) {
+      console.error('Failed to fetch notifications:', err);
+    }
+  };
+
+  fetchNotifications(); // immediate on mount
+  const interval = setInterval(fetchNotifications, 30000); // then every 30s
+  return () => clearInterval(interval);
+}, [isGuest]);
+
+useEffect(() => {
+  const handleClickOutside = (e) => {
+    if (langPopoverRef.current && !langPopoverRef.current.contains(e.target)) {
+      setLangPopover(false);
+    }
+    if (notifRef.current && !notifRef.current.contains(e.target)) {
+      setShowNotifications(false);
+    }
+  };
+  document.addEventListener("mousedown", handleClickOutside);
+  return () => document.removeEventListener("mousedown", handleClickOutside);
+}, []);
 
   ////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
@@ -1237,6 +1278,105 @@ const response = await api.get(`/posts/${postId}`);
           >
             📣
           </button>
+          {!isGuest && (
+  <div style={{ position: "relative" }} ref={notifRef}>
+    <button
+      className="nav-action-btn"
+      title="Notifications"
+      onClick={() => {
+        setShowNotifications(p => !p);
+        if (!showNotifications && unreadCount > 0) {
+          api.patch('/notifications/read-all').catch(() => {});
+          setUnreadCount(0);
+        }
+      }}
+      style={{ position: "relative" }}
+    >
+      🔔
+      {unreadCount > 0 && (
+        <span style={{
+          position: "absolute",
+          top: "-4px",
+          right: "-4px",
+          background: "#e74c3c",
+          color: "white",
+          borderRadius: "50%",
+          fontSize: "10px",
+          width: "16px",
+          height: "16px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: "bold",
+        }}>
+          {unreadCount > 9 ? '9+' : unreadCount}
+        </span>
+      )}
+    </button>
+
+    {showNotifications && (
+      <div style={{
+        position: "absolute",
+        top: "36px",
+        right: 0,
+        width: "500px",
+        maxHeight: "500px",
+        overflowY: "auto",
+        background: "#1e2a3a",
+        borderRadius: "12px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        zIndex: 200,
+      }}>
+        <div style={{
+          padding: "12px 16px",
+          borderBottom: "1px solid rgba(255,255,255,0.1)",
+          fontSize: "13px",
+          fontWeight: "bold",
+          color: "rgba(255,255,255,0.7)",
+        }}>
+          Notifications
+        </div>
+
+        {notifications.length === 0 ? (
+          <p style={{ padding: "16px", textAlign: "center", opacity: 0.4, fontSize: "13px" }}>
+            Nothing here yet
+          </p>
+        ) : (
+          notifications.map(n => (
+            <div
+              key={n.id}
+              style={{
+                padding: "12px 16px",
+                borderBottom: "1px solid rgba(255,255,255,0.05)",
+                background: n.isRead ? "transparent" : "rgba(100,118,175,0.15)",
+                cursor: "pointer",
+              }}
+              onClick={() => {
+                api.patch(`/notifications/${n.id}/read`).catch(() => {});
+                setNotifications(prev =>
+                  prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
+                );
+                if (n.roomId) setActiveTab("chat"); // or wherever makes sense
+                setShowNotifications(false);
+              }}
+            >
+              <div style={{ fontSize: "13px", color: "white", marginBottom: "4px" }}>
+                <strong>{n.title}</strong>
+              </div>
+              <div style={{ fontSize: "12px", color: "rgba(255,255,255,0.6)" }}>
+                {n.body}
+              </div>
+              <div style={{ fontSize: "11px", color: "rgba(255,255,255,0.3)", marginTop: "4px" }}>
+                {new Date(n.createdAt).toLocaleString()}
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+    )}
+  </div>
+)}
 
           {/* Language popover */}
           <div style={{ position: "relative" }} ref={langPopoverRef}>
