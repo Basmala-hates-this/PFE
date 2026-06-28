@@ -1404,8 +1404,7 @@ const response = await api.get(`/posts/${postId}`);
   setNotifications(prev =>
     prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
   );
-  if (n.type === 'new_message') setActiveTab("chat");
-  else if (n.roomId) setActiveTab("feed");
+   setActiveTab("feed");
   setShowNotifications(false);
 }}
             >
