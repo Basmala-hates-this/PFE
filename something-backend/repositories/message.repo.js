@@ -14,6 +14,21 @@ const getMessagesByRoom = async (roomId) => {
   return toCamel(result.rows);
 };
 
+// const createMessage = async (messageData) => {
+//   const result = await pool.query(
+//     `INSERT INTO messages (room_id, sender_id, content, attachment, reply_to)
+//      VALUES ($1,$2,$3,$4,$5)
+//      RETURNING *`,
+//     [
+//       messageData.roomId,
+//       messageData.authorId,
+//       messageData.content,
+//       messageData.attachment || null,
+//       messageData.replyTo || null,
+//     ]
+//   );
+//   return toCamel(result.rows[0]);
+// };
 const createMessage = async (messageData) => {
   const result = await pool.query(
     `INSERT INTO messages (room_id, sender_id, content, attachment, reply_to)
@@ -27,7 +42,16 @@ const createMessage = async (messageData) => {
       messageData.replyTo || null,
     ]
   );
-  return toCamel(result.rows[0]);
+  
+  // fetch with username and pfp
+  const full = await pool.query(
+    `SELECT m.*, u.username as author_username, u.profile_pic_url
+     FROM messages m
+     LEFT JOIN users u ON u.id = m.sender_id
+     WHERE m.id = $1`,
+    [result.rows[0].id]
+  );
+  return toCamel(full.rows[0]);
 };
 
 // const deleteMessage = async (messageId, userId) => {
