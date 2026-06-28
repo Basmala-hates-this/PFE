@@ -2,9 +2,20 @@ const toCamel = require('../utils/toCamel');
 
 const pool = require('../db');
 
+// const getMessagesByRoom = async (roomId) => {
+//   const result = await pool.query(
+//     `SELECT m.*, u.username as author_username
+//      FROM messages m
+//      LEFT JOIN users u ON u.id = m.sender_id
+//      WHERE m.room_id = $1
+//      ORDER BY m.created_at ASC`,
+//     [roomId]
+//   );
+//   return toCamel(result.rows);
+// };
 const getMessagesByRoom = async (roomId) => {
   const result = await pool.query(
-    `SELECT m.*, u.username as author_username
+    `SELECT m.*, u.username as author_username, u.profile_pic_url as profile_pic_url
      FROM messages m
      LEFT JOIN users u ON u.id = m.sender_id
      WHERE m.room_id = $1
