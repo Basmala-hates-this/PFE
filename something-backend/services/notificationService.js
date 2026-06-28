@@ -1,6 +1,6 @@
 const notifRepo = require('../repositories/notificationRepository');
 const NOTIF_TYPES = require('../constants/notifTypes');
-const db = require('../config/db');
+const db = require('../db');
 
 
 const notifyNewMessage = async (roomId, senderId, senderUsername, roomName, messageId) => {
