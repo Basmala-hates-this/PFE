@@ -50,8 +50,9 @@ const createRoomNotifications = async ({ roomId, excludeUserId, type, title, bod
     `INSERT INTO notifications (user_id, type, title, body, entity_type, entity_id, room_id)
      SELECT rm.user_id, $1, $2, $3, $4, $5, $6
      FROM room_members rm
-     WHERE rm.room_id = $6 AND rm.user_id != $7`,
-    [type, title, body, entityType || null, entityId || null, roomId, excludeUserId]
+     WHERE rm.room_id = $7 AND rm.user_id != $8`,
+    [type, title, body, entityType || null, entityId || null, roomId, roomId, excludeUserId]
+//   $1    $2    $3   $4                   $5                 $6      $7      $8
   );
 };
 
