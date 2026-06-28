@@ -5,6 +5,7 @@ const roomRepo = require('../repositories/room.repo');
 const userRepo = require('../repositories/user.repo');
 const pool = require('../db');
 const toCamel = require('../utils/toCamel');
+const notifService = require('../services/notificationService');
 
 // --- suspension check ---
 const isUserSuspendedInRoom = async (roomId, userId) => {
@@ -51,6 +52,12 @@ const video = req.file && req.file.mimetype.startsWith('video/') ? req.file.path
     resourceLink: resourceLink || null,
     resourceLabel: resourceLabel || null,
   });
+
+  try {
+  await notifService.notifyNewPost(roomId, authorId, authorUsername, newPost.id, title);
+} catch (notifErr) {
+  console.error('Post notification failed:', notifErr);
+}
 
   res.status(201).json(newPost);
 };
@@ -256,6 +263,22 @@ const video = req.file && req.file.mimetype.startsWith('video/')
     resourceLink: resourceLink || null,
     resourceLabel: resourceLabel || null,
   });
+  try {
+  if (parentCommentId) {
+    // reply to a comment — notify the parent comment owner
+    const parentComment = await commentRepo.getCommentById(parentCommentId);
+    if (parentComment && parentComment.userId !== authorId) {
+      await notifService.notifyCommentReply(parentComment.userId, authorUsername, postId, post.roomId);
+    }
+  } else {
+    // reply to a post — notify the post owner
+    if (post.userId !== authorId) {
+      await notifService.notifyPostReply(post.userId, authorUsername, postId, post.roomId);
+    }
+  }
+} catch (notifErr) {
+  console.error('Comment notification failed:', notifErr);
+}
 
   res.status(201).json(comment);
 };

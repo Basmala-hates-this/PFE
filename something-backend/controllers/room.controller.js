@@ -2,6 +2,7 @@ const roomRepo = require('../repositories/room.repo');
 const userRepo = require('../repositories/user.repo');
 const { sendRoomInviteEmail } = require('../config/email');
 const subjectsMap = require('../data/subjectsMap.json');
+const notifService = require('../services/notificationService');
 
 const getMyRooms = async (req, res) => {
   const userId = req.user.id;
@@ -41,12 +42,14 @@ const createPrivateRoom = async (req, res) => {
     if (!invitedUser) continue;
 
     await roomRepo.addMember(room.id, invitedId, 'member');
-
-    try {
+     try {
       await sendRoomInviteEmail(invitedUser.email, invitedUser.username, room.name, username);
+      await notifService.notifyRoomInvite(invitedId, username, room.name, room.id); 
     } catch (err) {
       console.error('Failed to send invite email:', err);
     }
+
+
   }
 
   res.status(201).json(room);
@@ -336,6 +339,11 @@ const inviteMember = async (req, res) => {
   if (count >= room.memberLimit) return res.status(400).json({ message: 'Room is full' });
 
   await roomRepo.addMember(roomId, inviteeId);
+    try {
+    await notifService.notifyRoomInvite(inviteeId, req.user.username, room.name, roomId);
+  } catch (notifErr) {
+    console.error('Room invite notification failed:', notifErr);
+  }
   res.json({ message: 'Member added successfully' });
 };
 

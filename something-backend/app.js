@@ -25,6 +25,7 @@ const publicLimiter = rateLimit({
   max: 200, // max 20 requests per 15 minutes,this is a reasonable amount of guest loging per person...right?200 for testing only for nw
   message: { message: "Too many requests, slow down a little..." }
 });
+const notificationRoutes = require('./routes/notificationRoutes');
 
 app.use("/api/posts", publicLimiter);
 app.use("/api/rooms/public-rooms", publicLimiter);
@@ -52,6 +53,9 @@ app.use("/api/rooms", messageRoutes);
 
 
 app.use("/api/ai", aiRouter);
+
+
+app.use('/api/notifications', notificationRoutes);
 
 //crash catcher
 app.use((err, req, res, next) => {

@@ -1,5 +1,6 @@
 const messageRepo = require('../repositories/message.repo');
 const roomRepo = require('../repositories/room.repo');
+const notifService = require('../services/notificationService'); 
 
 const getMessages = async (req, res) => {
   const { roomId } = req.params;
@@ -42,6 +43,11 @@ const sendMessage = async (req, res) => {
     attachment,
     replyTo: replyTo || null,
   });
+      try {
+      await notifService.notifyNewMessage(roomId, req.user.id, req.user.username, roomName, newMessage.id);
+    } catch (notifErr) {
+      console.error('Notification failed:', notifErr); // silent fail, don't crash the request
+    }
 
   res.status(201).json(message);
 };
