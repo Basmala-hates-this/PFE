@@ -106,7 +106,7 @@ const [followList, setFollowList] = useState([]);
 
   socket.on("new_message", (message) => {
       console.log("socket received new_message:", message);
-
+//adding a commet so i can commit and ignore the .env for front end
     setMessages(prev => [...prev, message]);
   });
 

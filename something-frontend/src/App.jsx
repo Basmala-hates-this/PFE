@@ -18,7 +18,7 @@ import PublicProfile from "./pages/PublicProfile.jsx";
 
 import ConnectionsPage from "./pages/ConnectionsPage.jsx";
 
-import AdminPanel from "./pages/AdminPanel.jsx";
+import AdminPanel from "./pages/AdminPanel.jsx";  
 import SuperAdminPanel from "./pages/Superadminpanel.jsx";
 
 import ReorientationPage from "./pages/ReorientationPage";
