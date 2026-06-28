@@ -416,6 +416,8 @@ const sendFollowEmail = async (toEmail, followerUsername) => {
     <p><strong>@${followerUsername}</strong> started following you on Glaukopis!</p>
     <p>Log in to check out their profile and follow them back.</p>
     <p>Might as well check some other things here....</p>
+          <p>Have a happy life :)</p>
+
   `);
 };
 
@@ -424,7 +426,7 @@ const sendRoomInviteEmail = async (toEmail, username, roomName, inviterUsername)
     <h2>Private Room Invite 🏠</h2>
     <p>Hey <strong>@${username}</strong>!</p>
     <p><strong>@${inviterUsername}</strong> has added you to their private room: <strong>${roomName}</strong>.</p>
-    <p>Log in to Glaukopis to access it from your profile.</p>
+    <p>Log in to Glaukopis to access it.</p>
     <p>Have a happy life :)</p>
   `);
 };
@@ -479,7 +481,7 @@ const sendRoomRequestApprovedEmail = async (to, username, subject, major) => {
     <p>Your request for a subject room has been approved.</p>
     <p><strong>Subject:</strong> ${subject}<br/>
     <strong>Major:</strong> ${major}</p>
-    <p>You've been added to the room. Head to Browse Rooms to find it!</p>
+    <p>You've been added to the room. Head to  Rooms tab to find it!</p>
     <p>Have a happy life :)</p>
   `);
 };

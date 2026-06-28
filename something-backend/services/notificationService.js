@@ -1,5 +1,6 @@
 const notifRepo = require('../repositories/notificationRepository');
 const NOTIF_TYPES = require('../constants/notifTypes');
+const db = require('../config/db');
 
 
 const notifyNewMessage = async (roomId, senderId, senderUsername, roomName, messageId) => {
@@ -57,7 +58,7 @@ const notifyAnnouncement = async (posterId, adminUsername, announcementId, snipp
      SELECT u.id, $1, $2, $3, $4, $5
      FROM users u
      WHERE u.id != $6
-     AND u.suspended_until IS NULL OR u.suspended_until < NOW()`,
+     AND (u.suspended_until IS NULL OR u.suspended_until < NOW())`,
     [
       NOTIF_TYPES.ANNOUNCEMENT,
       'New Announcement',
