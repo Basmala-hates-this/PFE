@@ -1269,7 +1269,60 @@ const response = await api.get(`/posts/${postId}`);
           >
             📣
           </button>
-          {!isGuest && (
+         
+
+          {/* Language popover */}
+          <div style={{ position: "relative" }} ref={langPopoverRef}>
+            <button
+              className="nav-action-btn"
+              title={t("dashboard.nav.language")}
+              onClick={() => setLangPopover((p) => !p)}
+            >
+              🌐
+            </button>
+            {langPopover && (
+              <div className="lang-popover">
+                {[
+                  { code: "en", label: "English" },
+                  { code: "fr", label: "Français" },
+                  { code: "ar", label: "العربية" },
+                ].map(({ code, label }) => (
+                  <div
+                    key={code}
+                    className={`lang-option ${currentLang === code ? "active" : ""}`}
+                    onClick={() => {
+                      changeLanguage(code);
+                      setLangPopover(false);
+                    }}
+                  >
+                    {label}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Theme toggle */}
+          <button
+            className="nav-action-btn"
+            title={
+              isLight
+                ? t("dashboard.sidebar.darkMode")
+                : t("dashboard.sidebar.lightMode")
+            }
+            onClick={() => {
+              document.body.classList.toggle("light-mode");
+              const mode = document.body.classList.contains("light-mode")
+                ? "light"
+                : "dark";
+              localStorage.setItem("theme", mode);
+              setIsLight(mode === "light");
+              setTheme(theme === "dark" ? "light" : "dark")
+            }}
+          >
+            {isLight ? "🌙" : "☀️"}
+          </button>
+           {!isGuest && (
   <div style={{ position: "relative" }} ref={notifRef}>
     <button
       className="nav-action-btn"
@@ -1346,6 +1399,7 @@ const response = await api.get(`/posts/${postId}`);
                 cursor: "pointer",
               }}
              onClick={() => {
+                console.log('notif clicked:', n.type, n.roomId, n); // add this
   api.patch(`/notifications/${n.id}/read`).catch(() => {});
   setNotifications(prev =>
     prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
@@ -1371,58 +1425,6 @@ const response = await api.get(`/posts/${postId}`);
     )}
   </div>
 )}
-
-          {/* Language popover */}
-          <div style={{ position: "relative" }} ref={langPopoverRef}>
-            <button
-              className="nav-action-btn"
-              title={t("dashboard.nav.language")}
-              onClick={() => setLangPopover((p) => !p)}
-            >
-              🌐
-            </button>
-            {langPopover && (
-              <div className="lang-popover">
-                {[
-                  { code: "en", label: "English" },
-                  { code: "fr", label: "Français" },
-                  { code: "ar", label: "العربية" },
-                ].map(({ code, label }) => (
-                  <div
-                    key={code}
-                    className={`lang-option ${currentLang === code ? "active" : ""}`}
-                    onClick={() => {
-                      changeLanguage(code);
-                      setLangPopover(false);
-                    }}
-                  >
-                    {label}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* Theme toggle */}
-          <button
-            className="nav-action-btn"
-            title={
-              isLight
-                ? t("dashboard.sidebar.darkMode")
-                : t("dashboard.sidebar.lightMode")
-            }
-            onClick={() => {
-              document.body.classList.toggle("light-mode");
-              const mode = document.body.classList.contains("light-mode")
-                ? "light"
-                : "dark";
-              localStorage.setItem("theme", mode);
-              setIsLight(mode === "light");
-              setTheme(theme === "dark" ? "light" : "dark")
-            }}
-          >
-            {isLight ? "🌙" : "☀️"}
-          </button>
         </div>
       </nav>
 
