@@ -18,7 +18,7 @@ router.get('/user/:userId/comments', protect, postController.getCommentsByUser);
 
 router.get('/:id', protect, postController.getPostById);
 router.patch('/:id/vote', protect, guestBlock, postController.votePost);
-router.patch('/:id', protect, guestBlock, postController.updatePost);
+router.patch('/:id', protect, guestBlock, upload.single('attachment'), postController.updatePost);
 router.delete('/:id', protect, guestBlock, postController.deletePost);
 
 router.get('/:postId/comments', protect, postController.getCommentsByPost);

@@ -53,8 +53,10 @@ const video = req.file && req.file.mimetype.startsWith('video/') ? req.file.path
     resourceLabel: resourceLabel || null,
   });
 
-  try {
-  await notifService.notifyNewPost(roomId, authorId, authorUsername, newPost.id, title);
+const room = await roomRepo.getRoomById(roomId);
+
+try {
+  await notifService.notifyNewPost(roomId, authorId, authorUsername, room?.name || roomId, newPost.id, title);
 } catch (notifErr) {
   console.error('Post notification failed:', notifErr);
 }

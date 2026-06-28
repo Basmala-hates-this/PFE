@@ -43,11 +43,11 @@ const sendMessage = async (req, res) => {
     attachment,
     replyTo: replyTo || null,
   });
-      try {
-      await notifService.notifyNewMessage(roomId, req.user.id, req.user.username, roomName, newMessage.id);
-    } catch (notifErr) {
-      console.error('Notification failed:', notifErr); // silent fail, don't crash the request
-    }
+    try {
+  await notifService.notifyNewMessage(roomId, userId, req.user.username, room.name, message.id);
+} catch (notifErr) {
+  console.error('Notification failed:', notifErr);
+}
 
   res.status(201).json(message);
 };
