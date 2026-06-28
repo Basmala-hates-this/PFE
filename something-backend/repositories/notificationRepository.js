@@ -1,5 +1,5 @@
 const db = require('../db');
-const { toCamel } = require('../utils/toCamel');
+const  toCamel = require('../utils/toCamel');
 const NOTIF_TYPES = require('../constants/notifTypes');
 
 const createNotification = async ({ userId, type, title, body, entityType, entityId, roomId }) => {
