@@ -166,18 +166,7 @@ const notifRef = useRef(null);
 
   //
 
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (
-        langPopoverRef.current &&
-        !langPopoverRef.current.contains(e.target)
-      ) {
-        setLangPopover(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+
   // If user skipped info/register, send them back
   // +for guests
 
@@ -356,6 +345,7 @@ const notifRef = useRef(null);
   const interval = setInterval(fetchNotifications, 30000); // then every 30s
   return () => clearInterval(interval);
 }, [isGuest]);
+/////////////////////////////////////////////////////////////////////////////
 
 useEffect(() => {
   const handleClickOutside = (e) => {
@@ -369,6 +359,7 @@ useEffect(() => {
   document.addEventListener("mousedown", handleClickOutside);
   return () => document.removeEventListener("mousedown", handleClickOutside);
 }, []);
+////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
@@ -1283,7 +1274,7 @@ const response = await api.get(`/posts/${postId}`);
     <button
       className="nav-action-btn"
       title="Notifications"
-      onClick={() => {
+      onClick={(e) => {e.stopPropagation(); 
         setShowNotifications(p => !p);
         if (!showNotifications && unreadCount > 0) {
           api.patch('/notifications/read-all').catch(() => {});
@@ -1327,7 +1318,9 @@ const response = await api.get(`/posts/${postId}`);
         boxShadow: "0 4px 20px rgba(0,0,0,0.4)",
         border: "1px solid rgba(255,255,255,0.1)",
         zIndex: 200,
-      }}>
+      }}
+       onClick={e => e.stopPropagation()}
+       >
         <div style={{
           padding: "12px 16px",
           borderBottom: "1px solid rgba(255,255,255,0.1)",
@@ -1352,14 +1345,15 @@ const response = await api.get(`/posts/${postId}`);
                 background: n.isRead ? "transparent" : "rgba(100,118,175,0.15)",
                 cursor: "pointer",
               }}
-              onClick={() => {
-                api.patch(`/notifications/${n.id}/read`).catch(() => {});
-                setNotifications(prev =>
-                  prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
-                );
-                if (n.roomId) setActiveTab("chat"); // or wherever makes sense
-                setShowNotifications(false);
-              }}
+             onClick={() => {
+  api.patch(`/notifications/${n.id}/read`).catch(() => {});
+  setNotifications(prev =>
+    prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
+  );
+  if (n.type === 'new_message') setActiveTab("chat");
+  else if (n.roomId) setActiveTab("feed");
+  setShowNotifications(false);
+}}
             >
               <div style={{ fontSize: "13px", color: "white", marginBottom: "4px" }}>
                 <strong>{n.title}</strong>
