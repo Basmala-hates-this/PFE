@@ -30,6 +30,19 @@ const createMessage = async (messageData) => {
   return toCamel(result.rows[0]);
 };
 
+// const deleteMessage = async (messageId, userId) => {
+//   const existing = await pool.query(
+//     `SELECT * FROM messages WHERE id = $1`,
+//     [messageId]
+//   );
+//   const message = existing.rows[0];
+//   if (!message) return null;
+//   if (message.sender_id !== userId) return { error: 'Not authorized' };
+
+//   await pool.query(`DELETE FROM messages WHERE id = $1`, [messageId]);
+//   return true;
+// };
+
 const deleteMessage = async (messageId, userId) => {
   const existing = await pool.query(
     `SELECT * FROM messages WHERE id = $1`,
@@ -40,7 +53,7 @@ const deleteMessage = async (messageId, userId) => {
   if (message.sender_id !== userId) return { error: 'Not authorized' };
 
   await pool.query(`DELETE FROM messages WHERE id = $1`, [messageId]);
-  return true;
+  return { deleted: true, roomId: message.room_id }; // return roomId
 };
 
 const editMessage = async (messageId, userId, newContent) => {
@@ -52,8 +65,13 @@ const editMessage = async (messageId, userId, newContent) => {
   if (!message) return null;
   if (message.sender_id !== userId) return { error: 'Not authorized' };
 
-  const result = await pool.query(
-    `UPDATE messages SET content = $1 WHERE id = $2 RETURNING *`,
+  // const result = await pool.query(
+  //   `UPDATE messages SET content = $1 WHERE id = $2 RETURNING *`,
+  //   [newContent, messageId]
+  // );
+  // return toCamel(result.rows[0]);
+   const result = await pool.query(
+    `UPDATE messages SET content = $1 WHERE id = $2 RETURNING *, room_id as "roomId"`,
     [newContent, messageId]
   );
   return toCamel(result.rows[0]);

@@ -9,6 +9,8 @@ import "../styles/chat.css"; // Import the CSS file
 import { Copy } from 'lucide-react';
 import api from "../api/axios.js";
 
+import { io } from "socket.io-client";
+
 export default function RoomChat() {
   const { roomId } = useParams();
   const navigate = useNavigate();
@@ -66,23 +68,59 @@ const [followList, setFollowList] = useState([]);
   }, [roomId]);
 
   // fetch messages + polling
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        // const response = await axios.get(`http://localhost:5000/api/rooms/${roomId}/messages`, {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
-        const response = await api.get(`/rooms/${roomId}/messages`);
-        setMessages(response.data);
-      } catch (err) {
-        console.error("Failed to fetch messages:", err);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchMessages = async () => {
+  //     try {
+  //       // const response = await axios.get(`http://localhost:5000/api/rooms/${roomId}/messages`, {
+  //       //   headers: { Authorization: `Bearer ${token}` }
+  //       // });
+  //       const response = await api.get(`/rooms/${roomId}/messages`);
+  //       setMessages(response.data);
+  //     } catch (err) {
+  //       console.error("Failed to fetch messages:", err);
+  //     }
+  //   };
 
-    fetchMessages();
-    const interval = setInterval(fetchMessages, 1500);//i dont know why...2 requests per second might get a little too much for the server to handel?
-    return () => clearInterval(interval);
-  }, [roomId]);
+  //   fetchMessages();
+  //   const interval = setInterval(fetchMessages, 1500);//i dont know why...2 requests per second might get a little too much for the server to handel?
+  //   return () => clearInterval(interval);
+  // }, [roomId]);
+  useEffect(() => {
+  // initial fetch
+  const fetchMessages = async () => {
+    try {
+      const response = await api.get(`/rooms/${roomId}/messages`);
+      setMessages(response.data);
+    } catch (err) {
+      console.error("Failed to fetch messages:", err);
+    }
+  };
+  fetchMessages();
+
+  // socket connection
+  const socket = io(import.meta.env.VITE_BACKEND_URL || "http://localhost:5000", {
+    auth: { token: localStorage.getItem("token") }
+  });
+
+  socket.emit("join_room", roomId);
+
+  socket.on("new_message", (message) => {
+    setMessages(prev => [...prev, message]);
+  });
+
+  socket.on("message_deleted", (messageId) => {
+    setMessages(prev => prev.filter(m => m.id !== messageId));
+  });
+
+  socket.on("message_edited", (updated) => {
+    setMessages(prev => prev.map(m => m.id === updated.id ? updated : m));
+  });
+
+  return () => {
+    socket.emit("leave_room", roomId);
+    socket.disconnect();
+  };
+}, [roomId]);
 
   // scroll to bottom when new messages arrive
   useEffect(() => {
@@ -112,30 +150,52 @@ const [followList, setFollowList] = useState([]);
   ///////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////
 
-  const handleSendMessage = async () => {
-    if (!newMessage.trim() && !attachment) return;
-    if (attachment && attachment.size > 20 * 1024 * 1024) {
-      return alert(t("roomChat.fileTooLarge"));
-    }
-    try {
-      const formData = new FormData();
-      if (newMessage.trim()) formData.append("content", newMessage);
-      if (attachment) formData.append("attachment", attachment);
-      if (replyTo) formData.append("replyTo", replyTo.id);
+  // const handleSendMessage = async () => {
+  //   if (!newMessage.trim() && !attachment) return;
+  //   if (attachment && attachment.size > 20 * 1024 * 1024) {
+  //     return alert(t("roomChat.fileTooLarge"));
+  //   }
+  //   try {
+  //     const formData = new FormData();
+  //     if (newMessage.trim()) formData.append("content", newMessage);
+  //     if (attachment) formData.append("attachment", attachment);
+  //     if (replyTo) formData.append("replyTo", replyTo.id);
 
-      // await axios.post(
-      //   `http://localhost:5000/api/rooms/${roomId}/messages`,
-      //   formData,
-      //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-      // );
-      await api.post(`/rooms/${roomId}/messages`, formData, { headers: { "Content-Type": "multipart/form-data" } });
-      setNewMessage("");
-      setAttachment(null);
-      setReplyTo(null);
-    } catch (err) {
-      console.error("Failed to send message:", err);
-    }
-  };
+  //     // await axios.post(
+  //     //   `http://localhost:5000/api/rooms/${roomId}/messages`,
+  //     //   formData,
+  //     //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
+  //     // );
+  //     await api.post(`/rooms/${roomId}/messages`, formData, { headers: { "Content-Type": "multipart/form-data" } });
+  //     setNewMessage("");
+  //     setAttachment(null);
+  //     setReplyTo(null);
+  //   } catch (err) {
+  //     console.error("Failed to send message:", err);
+  //   }
+  // };
+
+  const handleSendMessage = async () => {
+  if (!newMessage.trim() && !attachment) return;
+  if (attachment && attachment.size > 20 * 1024 * 1024) {
+    return alert(t("roomChat.fileTooLarge"));
+  }
+  try {
+    const formData = new FormData();
+    if (newMessage.trim()) formData.append("content", newMessage);
+    if (attachment) formData.append("attachment", attachment);
+    if (replyTo) formData.append("replyTo", replyTo.id);
+
+    await api.post(`/rooms/${roomId}/messages`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+    setNewMessage("");
+    setAttachment(null);
+    setReplyTo(null);
+  } catch (err) {
+    console.error("Failed to send message:", err);
+  }
+};
 
   const handleDeleteMessage = async (messageId) => {
     try {

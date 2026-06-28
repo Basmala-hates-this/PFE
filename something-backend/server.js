@@ -34,13 +34,55 @@
 //   console.log(`Server running on port ${PORT}`);
 // });
 
-require("dotenv").config();
-const app = require("./app");
+// require("dotenv").config();
+// const app = require("./app");
  
+// const PORT = process.env.PORT || 5000;
+// app.get("/health", (req, res) => {
+//   res.status(200).json({ status: "ok" });
+// });
+// app.listen(PORT,"0.0.0.0", () => {
+//   console.log(`Server running on port ${PORT}`);
+// });          
+
+require("dotenv").config();
+const http = require("http");
+const { Server } = require("socket.io");
+const app = require("./app");
+
 const PORT = process.env.PORT || 5000;
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+
+const server = http.createServer(app);
+
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "*",
+    methods: ["GET", "POST"]
+  }
 });
-app.listen(PORT,"0.0.0.0", () => {
+
+// make io accessible in controllers
+app.set("io", io);
+
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  socket.on("join_room", (roomId) => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} joined room ${roomId}`);
+  });
+
+  socket.on("leave_room", (roomId) => {
+    socket.leave(roomId);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
+
+app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
+
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
-});          
+});
