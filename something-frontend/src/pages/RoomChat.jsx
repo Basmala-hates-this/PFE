@@ -64,6 +64,7 @@ const [incomingCall, setIncomingCall] = useState(null); // { hostId, hostName }
 const [guestSocketId, setGuestSocketId] = useState(null);
 const [speakerInvite, setSpeakerInvite] = useState(null); // { roomId, fromHostId }
 const socketRef = useRef(null);
+const [audienceList, setAudienceList] = useState([]); // { userId, displayName, socketId }
 
   ////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
@@ -194,6 +195,18 @@ useEffect(() => {
     setIsInCall(true);
     setCallActive(true);
   });
+
+  socket.on("call:guest_ready", ({ guestSocketId }) => {
+  setGuestSocketId(guestSocketId);
+  setIsInCall(true);
+});
+
+socket.on("call:audience_joined", ({ userId, displayName, socketId }) => {
+  setAudienceList(prev => {
+    if (prev.find(u => u.socketId === socketId)) return prev;
+    return [...prev, { userId, displayName, socketId }];
+  });
+});
 
   return () => {
     socket.emit("leave_room", roomId);

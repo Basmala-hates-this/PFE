@@ -41,12 +41,10 @@
 // server.listen(PORT, "0.0.0.0", () => {
 //   console.log(`Server running on port ${PORT}`);
 // });
-
 require("dotenv").config();
 const http = require("http");
 const { Server } = require("socket.io");
 const app = require("./app");
-const mediasoupManager = require("./services/mediasoup.manager");
 
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
@@ -60,22 +58,16 @@ const io = new Server(server, {
 
 app.set("io", io);
 
-// roomId -> call state
-// { hostId, participants: Set<socketId>, audience: Set<socketId>, active: bool }
 const activeCalls = new Map();
-
-// socketId -> { userId, roomId, displayName }
 const socketMeta = new Map();
 
 io.on("connection", (socket) => {
   console.log("Socket connected:", socket.id);
 
-  // ─── existing chat events ────────────────────────────────────────────
   socket.on("join_room", (roomId) => {
     socket.join(roomId);
     console.log(`Socket ${socket.id} joined room ${roomId}`);
 
-    // if a call is active in this room, notify the joiner
     if (activeCalls.has(roomId)) {
       const call = activeCalls.get(roomId);
       socket.emit("call:active", {
@@ -90,7 +82,7 @@ io.on("connection", (socket) => {
     socket.leave(roomId);
   });
 
-  // ─── call: host starts a call ────────────────────────────────────────
+  // ─── host starts call ─────────────────────────────────────────────────
   socket.on("call:start", ({ roomId, userId, displayName }) => {
     socketMeta.set(socket.id, { userId, roomId, displayName });
 
@@ -102,15 +94,14 @@ io.on("connection", (socket) => {
     activeCalls.set(roomId, {
       hostId: userId,
       hostSocketId: socket.id,
-      participants: new Map([[socket.id, { userId, displayName }]]), // socketId -> meta
+      participants: new Map([[socket.id, { userId, displayName }]]),
       audience: new Set(),
       active: true,
-      mode: "p2p", // starts as p2p, upgrades to sfu when 3rd joins
+      mode: "p2p",
     });
 
     socket.join(`call:${roomId}`);
 
-    // notify everyone else in the room
     socket.to(roomId).emit("call:incoming", {
       roomId,
       hostId: userId,
@@ -121,7 +112,7 @@ io.on("connection", (socket) => {
     console.log(`Call started in room ${roomId} by ${userId}`);
   });
 
-  // ─── call: user joins as audience ────────────────────────────────────
+  // ─── user joins as audience ───────────────────────────────────────────
   socket.on("call:join_audience", ({ roomId, userId, displayName }) => {
     const call = activeCalls.get(roomId);
     if (!call) return;
@@ -130,10 +121,13 @@ io.on("connection", (socket) => {
     call.audience.add(socket.id);
     socket.join(`call:${roomId}`);
 
-    // tell everyone in the call a new audience member joined
-    io.to(`call:${roomId}`).emit("call:audience_joined", { userId, displayName });
+    // ← tell the HOST specifically, with the joiner's socketId
+    io.to(call.hostSocketId).emit("call:audience_joined", {
+      userId,
+      displayName,
+      socketId: socket.id,
+    });
 
-    // send the joiner the current participant list
     const participantList = [...call.participants.values()];
     socket.emit("call:state", {
       roomId,
@@ -143,8 +137,8 @@ io.on("connection", (socket) => {
     });
   });
 
-  // ─── call: host invites someone to speak ─────────────────────────────
-  socket.on("call:invite_speaker", ({ roomId, targetUserId }) => {
+  // ─── host invites someone to speak ───────────────────────────────────
+  socket.on("call:invite_speaker", ({ roomId, targetSocketId }) => {
     const call = activeCalls.get(roomId);
     if (!call) return;
 
@@ -154,22 +148,17 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // find the target's socket id from audience
-    let targetSocketId = null;
-    for (const [sid, m] of socketMeta.entries()) {
-      if (m.userId === targetUserId && m.roomId === roomId) {
-        targetSocketId = sid;
-        break;
-      }
-    }
-
+    // ← use targetSocketId directly instead of searching by userId
     if (targetSocketId) {
-      io.to(targetSocketId).emit("call:speaker_invite", { roomId, fromHostId: call.hostId });
+      io.to(targetSocketId).emit("call:speaker_invite", {
+        roomId,
+        fromHostId: call.hostId,
+      });
     }
   });
 
-  // ─── call: invited user accepts speaking role ─────────────────────────
-  socket.on("call:accept_speaker", async ({ roomId, userId, displayName }) => {
+  // ─── guest accepts speaker invite ─────────────────────────────────────
+  socket.on("call:accept_speaker", ({ roomId, userId, displayName }) => {
     const call = activeCalls.get(roomId);
     if (!call) return;
 
@@ -181,91 +170,34 @@ io.on("connection", (socket) => {
     call.audience.delete(socket.id);
     call.participants.set(socket.id, { userId, displayName });
 
-    // upgrade to SFU mode when 3rd participant joins
-    if (call.participants.size >= 3 && call.mode === "p2p") {
-      call.mode = "sfu";
-      io.to(`call:${roomId}`).emit("call:upgrade_to_sfu", { roomId });
-    }
+    // ← tell the host to initiate WebRTC with this guest's socketId
+    io.to(call.hostSocketId).emit("call:guest_ready", {
+      guestSocketId: socket.id,
+      userId,
+      displayName,
+    });
 
     io.to(`call:${roomId}`).emit("call:speaker_joined", {
       userId,
       displayName,
-      mode: call.mode,
       participantCount: call.participants.size,
     });
 
+    // ← tell the guest they're confirmed as speaker
     socket.emit("call:speaker_accepted", { roomId, mode: call.mode });
   });
 
-  // ─── P2P signaling (used when mode === 'p2p') ────────────────────────
-  socket.on("call:offer", ({ roomId, offer, targetSocketId }) => {
+  // ─── P2P signaling ────────────────────────────────────────────────────
+  socket.on("call:offer", ({ offer, targetSocketId }) => {
     io.to(targetSocketId).emit("call:offer", { offer, fromSocketId: socket.id });
   });
 
-  socket.on("call:answer", ({ roomId, answer, targetSocketId }) => {
+  socket.on("call:answer", ({ answer, targetSocketId }) => {
     io.to(targetSocketId).emit("call:answer", { answer, fromSocketId: socket.id });
   });
 
-  socket.on("call:ice_candidate", ({ roomId, candidate, targetSocketId }) => {
+  socket.on("call:ice_candidate", ({ candidate, targetSocketId }) => {
     io.to(targetSocketId).emit("call:ice_candidate", { candidate, fromSocketId: socket.id });
-  });
-
-  // ─── SFU signaling (mediasoup) ────────────────────────────────────────
-  socket.on("call:sfu_get_rtp_capabilities", async ({ roomId }) => {
-    const router = await mediasoupManager.getOrCreateRouter(roomId);
-    socket.emit("call:sfu_rtp_capabilities", { rtpCapabilities: router.rtpCapabilities });
-  });
-
-  socket.on("call:sfu_create_transport", async ({ roomId, direction }) => {
-    try {
-      const transport = await mediasoupManager.createWebRtcTransport(roomId);
-      socket.emit("call:sfu_transport_created", {
-        direction,
-        id: transport.id,
-        iceParameters: transport.iceParameters,
-        iceCandidates: transport.iceCandidates,
-        dtlsParameters: transport.dtlsParameters,
-      });
-    } catch (err) {
-      socket.emit("call:error", { message: "Transport creation failed." });
-    }
-  });
-
-  socket.on("call:sfu_connect_transport", async ({ transportId, dtlsParameters }) => {
-    const transport = mediasoupManager.transports.get(transportId);
-    if (transport) await transport.connect({ dtlsParameters });
-  });
-
-  socket.on("call:sfu_produce", async ({ transportId, kind, rtpParameters, roomId }) => {
-    const transport = mediasoupManager.transports.get(transportId);
-    if (!transport) return;
-
-    const producer = await transport.produce({ kind, rtpParameters });
-    mediasoupManager.producers.set(producer.id, producer);
-
-    socket.emit("call:sfu_produced", { producerId: producer.id });
-
-    // tell others in the call a new producer is available
-    socket.to(`call:${roomId}`).emit("call:sfu_new_producer", {
-      producerId: producer.id,
-      socketId: socket.id,
-    });
-  });
-
-  socket.on("call:sfu_consume", async ({ transportId, producerId, rtpCapabilities, roomId }) => {
-    const router = await mediasoupManager.getOrCreateRouter(roomId);
-    const transport = mediasoupManager.transports.get(transportId);
-    if (!transport || !router.canConsume({ producerId, rtpCapabilities })) return;
-
-    const consumer = await transport.consume({ producerId, rtpCapabilities, paused: false });
-    mediasoupManager.consumers.set(consumer.id, consumer);
-
-    socket.emit("call:sfu_consumed", {
-      consumerId: consumer.id,
-      producerId,
-      kind: consumer.kind,
-      rtpParameters: consumer.rtpParameters,
-    });
   });
 
   // ─── screen share ─────────────────────────────────────────────────────
@@ -277,7 +209,7 @@ io.on("connection", (socket) => {
     socket.to(`call:${roomId}`).emit("call:screen_share_stopped", { socketId: socket.id });
   });
 
-  // ─── call: end ────────────────────────────────────────────────────────
+  // ─── end call ─────────────────────────────────────────────────────────
   socket.on("call:end", ({ roomId }) => {
     const call = activeCalls.get(roomId);
     if (!call) return;
@@ -289,12 +221,11 @@ io.on("connection", (socket) => {
     }
 
     io.to(`call:${roomId}`).emit("call:ended", { roomId });
-    mediasoupManager.closeRoom(roomId);
     activeCalls.delete(roomId);
     console.log(`Call ended in room ${roomId}`);
   });
 
-  // ─── call: individual leave ───────────────────────────────────────────
+  // ─── individual leave ─────────────────────────────────────────────────
   socket.on("call:leave", ({ roomId }) => {
     _handleCallLeave(socket, roomId);
   });
@@ -307,7 +238,7 @@ io.on("connection", (socket) => {
   });
 });
 
-// ─── helper ──────────────────────────────────────────────────────────────────
+// ─── helper ───────────────────────────────────────────────────────────────────
 function _handleCallLeave(socket, roomId) {
   const call = activeCalls.get(roomId);
   if (!call) return;
@@ -317,32 +248,20 @@ function _handleCallLeave(socket, roomId) {
   call.audience.delete(socket.id);
   socket.leave(`call:${roomId}`);
 
-  // if host left, end the call entirely
   if (meta?.userId === call.hostId) {
     io.to(`call:${roomId}`).emit("call:ended", { roomId });
-    mediasoupManager.closeRoom(roomId);
     activeCalls.delete(roomId);
     return;
   }
 
-  // otherwise just notify others
   io.to(`call:${roomId}`).emit("call:speaker_left", {
     userId: meta?.userId,
     participantCount: call.participants.size,
   });
-
-  // downgrade back to p2p if only 2 left
-  if (call.participants.size <= 2 && call.mode === "sfu") {
-    call.mode = "p2p";
-    io.to(`call:${roomId}`).emit("call:downgrade_to_p2p", { roomId });
-  }
 }
 
 // ─── boot ─────────────────────────────────────────────────────────────────────
-mediasoupManager.createWorker().then(() => {
-  console.log("mediasoup worker ready");
-  app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
-  server.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on port ${PORT}`);
 });
