@@ -73,7 +73,9 @@
     "link_back_home": "Retour à l'accueil",
     "username_already_taken": "Nom d'utilisateur déjà pris... soyez plus créatif ?",
   "otp_invalid": "Code OTP invalide",
-  "otp_resend_failed": "Échec du renvoi du code OTP"
+  "otp_resend_failed": "Échec du renvoi du code OTP",
+  "pass":"le mot de passe doit comporter au moins 8 caractères et inclure au moins 2 des éléments suivants : ",
+  "passreq" : "majuscule, minuscule, chiffre, caractère spécial."
     
   },
   "validation": {

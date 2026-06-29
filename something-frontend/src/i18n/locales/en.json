@@ -73,7 +73,9 @@
     "link_back_home": "Back to Home",
      "username_already_taken": "Username already taken... be more creative?",
   "otp_invalid": "Invalid OTP",
-  "otp_resend_failed": "Failed to resend OTP"
+  "otp_resend_failed": "Failed to resend OTP",
+  "pass":"password should be atleast 8 characters and require at least 2 of the following: ",
+  "passreq" : "upper case,lower case,number,special character."
   },
   "validation": {
     "username_too_short": "Username must be at least {{min}} characters.",
