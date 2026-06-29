@@ -48,13 +48,12 @@ const createMessage = async (messageData) => {
     [
       messageData.roomId,
       messageData.authorId,
-      messageData.content,
-      messageData.content || null,
+      messageData.content || null,   
       messageData.attachment || null,
       messageData.replyTo || null,
     ]
   );
-  
+
   // fetch with username and pfp
   const full = await pool.query(
     `SELECT m.*, u.username as author_username, u.profile_pic_url
