@@ -1047,7 +1047,6 @@ const response = await api.get(`/posts/${postId}`);
 
 //the notificaton click
 const handleNotifClick = (n) => {
-  // mark as read
   api.patch(`/notifications/${n.id}/read`).catch(() => {});
   setNotifications(prev =>
     prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
@@ -1057,8 +1056,7 @@ const handleNotifClick = (n) => {
   switch (n.type) {
     case 'new_message':
     case 'room_invite':
-      // private rooms have their own page
-      if (n.room_id) navigate(`/rooms/${n.room_id}`);
+      if (n.roomId) navigate(`/rooms/${n.roomId}`);
       break;
 
     case 'announcement':
@@ -1069,13 +1067,11 @@ const handleNotifClick = (n) => {
     case 'new_post':
     case 'post_reply':
     case 'comment_reply':
-      // entity_id is always the post id for these three
       setActiveTab('feed');
-      setSelectedPost({ id: n.entity_id });
+      setSelectedPost({ id: n.entityId });
       break;
 
     case 'room_suspended':
-      // nothing to navigate to, just close
       break;
 
     default:
