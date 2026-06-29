@@ -1447,11 +1447,12 @@ const handleNotifClick = (n) => {
 //    setActiveTab("feed");
 //   setShowNotifications(false);
 // }}
-onClick={
-    console.log('keys:', Object.keys(n));
+onClick={() => {
+  console.log('keys:', Object.keys(n));
   console.log('entity_id:', n.entity_id, 'entityId:', n.entityId);
   console.log('room_id:', n.room_id, 'roomId:', n.roomId);
-  () => handleNotifClick(n)}
+  handleNotifClick(n);
+}}
             >
               <div style={{ fontSize: "13px", color: "white", marginBottom: "4px" }}>
                 <strong>{n.title}</strong>
