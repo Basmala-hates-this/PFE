@@ -49,6 +49,7 @@ const createMessage = async (messageData) => {
       messageData.roomId,
       messageData.authorId,
       messageData.content,
+      messageData.content || null,
       messageData.attachment || null,
       messageData.replyTo || null,
     ]
