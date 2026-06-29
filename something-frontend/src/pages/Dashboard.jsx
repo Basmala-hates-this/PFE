@@ -1044,6 +1044,46 @@ const response = await api.get(`/posts/${postId}`);
     return 0; // random = no sort, just as fetched
   });
 
+
+//the notificaton click
+const handleNotifClick = (n) => {
+  // mark as read
+  api.patch(`/notifications/${n.id}/read`).catch(() => {});
+  setNotifications(prev =>
+    prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
+  );
+  setShowNotifications(false);
+
+  switch (n.type) {
+    case 'new_message':
+    case 'room_invite':
+      // private rooms have their own page
+      if (n.room_id) navigate(`/rooms/${n.room_id}`);
+      break;
+
+    case 'announcement':
+      fetchAnnouncements();
+      setShowAnnouncements(true);
+      break;
+
+    case 'new_post':
+    case 'post_reply':
+    case 'comment_reply':
+      // entity_id is always the post id for these three
+      setActiveTab('feed');
+      setSelectedPost({ id: n.entity_id });
+      break;
+
+    case 'room_suspended':
+      // nothing to navigate to, just close
+      break;
+
+    default:
+      break;
+  }
+};
+
+
   const cSelect = {
     control: (provided, state) => ({
       ...provided,
@@ -1398,15 +1438,16 @@ const response = await api.get(`/posts/${postId}`);
                 background: n.isRead ? "transparent" : "rgba(100,118,175,0.15)",
                 cursor: "pointer",
               }}
-             onClick={() => {
-                console.log('notif clicked:', n.type, n.roomId, n); // add this
-  api.patch(`/notifications/${n.id}/read`).catch(() => {});
-  setNotifications(prev =>
-    prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
-  );
-   setActiveTab("feed");
-  setShowNotifications(false);
-}}
+//              onClick={() => {
+//                 console.log('notif clicked:', n.type, n.roomId, n); // add this
+//   api.patch(`/notifications/${n.id}/read`).catch(() => {});
+//   setNotifications(prev =>
+//     prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
+//   );
+//    setActiveTab("feed");
+//   setShowNotifications(false);
+// }}
+onClick={() => handleNotifClick(n)}
             >
               <div style={{ fontSize: "13px", color: "white", marginBottom: "4px" }}>
                 <strong>{n.title}</strong>
