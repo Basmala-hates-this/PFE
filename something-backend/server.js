@@ -244,6 +244,8 @@ function _handleCallLeave(socket, roomId) {
   if (!call) return;
 
   const meta = socketMeta.get(socket.id);
+  const wasAudience = call.audience.has(socket.id); // ← check before deleting
+
   call.participants.delete(socket.id);
   call.audience.delete(socket.id);
   socket.leave(`call:${roomId}`);
@@ -251,6 +253,12 @@ function _handleCallLeave(socket, roomId) {
   if (meta?.userId === call.hostId) {
     io.to(`call:${roomId}`).emit("call:ended", { roomId });
     activeCalls.delete(roomId);
+    return;
+  }
+
+  if (wasAudience) {
+    // ← tell host to remove them from audience panel
+    io.to(call.hostSocketId).emit("call:audience_left", { socketId: socket.id });
     return;
   }
 

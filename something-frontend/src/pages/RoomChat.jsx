@@ -207,6 +207,13 @@ socket.on("call:audience_joined", ({ userId, displayName, socketId }) => {
     return [...prev, { userId, displayName, socketId }];
   });
 });
+socket.on("call:speaker_joined", ({ userId }) => {
+  setAudienceList(prev => prev.filter(u => u.userId !== userId));
+});
+
+socket.on("call:audience_left", ({ socketId }) => {
+  setAudienceList(prev => prev.filter(u => u.socketId !== socketId));
+});
 
   return () => {
     socket.emit("leave_room", roomId);
@@ -543,25 +550,52 @@ return (
     <div className={callActive && isInCall ? "roomchat-body-split" : ""} style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: callActive && isInCall ? "row" : "column" }}>
 
       {/* call panel */}
-      {callActive && isInCall && (
-        <div className="roomchat-call-panel">
-          <CallRoom
-            socket={socketRef.current}
-            roomId={roomId}
-            userId={currentUser.id}
-            displayName={currentUser.username}
-            isHost={isCallHost}
-            guestSocketId={guestSocketId}
-            onEnd={() => {
-              setIsInCall(false);
-              setCallActive(false);
-              setIsCallHost(false);
-              setGuestSocketId(null);
-            }}
-          />
-        </div>
-      )}
-
+    {callActive && isInCall && (
+  <div className="roomchat-call-panel">
+    <CallRoom
+      socket={socketRef.current}
+      roomId={roomId}
+      userId={currentUser.id}
+      displayName={currentUser.username}
+      isHost={isCallHost}
+      guestSocketId={guestSocketId}
+      onEnd={() => {
+        setIsInCall(false);
+        setCallActive(false);
+        setIsCallHost(false);
+        setGuestSocketId(null);
+      }}
+    />
+    {/* audience list below the video panel */}
+    {isCallHost && (
+      <div className="callroom-audience-panel">
+        <small className="callroom-audience-panel-title">
+          👥 Audience {audienceList.length > 0 ? `(${audienceList.length})` : "(empty)"}
+        </small>
+        {audienceList.length === 0 ? (
+          <p className="callroom-audience-empty">No one watching yet</p>
+        ) : (
+          audienceList.map(u => (
+            <div key={u.socketId} className="callroom-audience-item">
+              <span>👤 {u.displayName}</span>
+              <button
+                className="callroom-audience-invite-btn"
+                onClick={() => {
+                  socketRef.current.emit("call:invite_speaker", {
+                    roomId,
+                    targetSocketId: u.socketId,
+                  });
+                }}
+              >
+                🎙️ Invite to speak
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+    )}
+  </div>
+)}
       {/* chat panel */}
       <div className={callActive && isInCall ? "roomchat-chat-panel" : "roomchat-chat-panel-full"}>
 
@@ -713,31 +747,60 @@ return (
     {/* ── end body ── */}
 
     {/* incoming call banner — outside body, fixed position */}
-    {incomingCall && !isInCall && (
-      <div className="callroom-incoming-banner">
-        <span>📞</span>
-        <div className="callroom-incoming-text">
-          <strong>{incomingCall.hostName} started a call</strong>
-          Join as audience or wait to be invited as speaker
-        </div>
-        <button
-          className="callroom-incoming-accept"
-          onClick={() => {
-            socketRef.current.emit("call:join_audience", {
-              roomId,
-              userId: currentUser.id,
-              displayName: currentUser.username,
-            });
-            setIncomingCall(null);
-          }}
-        >
-          Watch
-        </button>
-        <button className="callroom-incoming-decline" onClick={() => setIncomingCall(null)}>
-          Dismiss
-        </button>
-      </div>
-    )}
+   {incomingCall && !isInCall && (
+  <div className="callroom-incoming-banner">
+    <span>📞</span>
+    <div className="callroom-incoming-text">
+      <strong>{incomingCall.hostName} is live</strong>
+      <small>Join the audience to watch</small>
+    </div>
+    <button
+      className="callroom-incoming-accept"
+      onClick={() => {
+        socketRef.current.emit("call:join_audience", {
+          roomId,
+          userId: currentUser.id,
+          displayName: currentUser.username,
+        });
+        setIncomingCall(null);
+      }}
+    >
+      Watch
+    </button>
+    <button className="callroom-incoming-decline" onClick={() => setIncomingCall(null)}>
+      Dismiss
+    </button>
+  </div>
+)}
+{/* Speaker invite popup — appears over everything */}
+{speakerInvite && !isInCall && (
+  <div className="callroom-incoming-banner" style={{ bottom: "80px" }}> {/* stack above the watch banner if both show */}
+    <span>🎙️</span>
+    <div className="callroom-incoming-text">
+      <strong>You've been invited to speak</strong>
+      <small>The host wants to hear you</small>
+    </div>
+    <button
+      className="callroom-incoming-accept"
+      onClick={() => {
+        socketRef.current.emit("call:accept_speaker", {
+          roomId,
+          userId: currentUser.id,
+          displayName: currentUser.username,
+        });
+        setSpeakerInvite(null);
+      }}
+    >
+      Accept
+    </button>
+    <button
+      className="callroom-incoming-decline"
+      onClick={() => setSpeakerInvite(null)}
+    >
+      Decline
+    </button>
+  </div>
+)}
 
     {/* members modal — outside body, fixed overlay */}
     {showMembers && (
