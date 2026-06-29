@@ -38,6 +38,9 @@ export default function RoomChat() {
   const isVideo = (fileUrl) => {
   return /\.(mp4|mov|avi|mkv|webm)$/i.test(fileUrl);
 };
+const isAudio = (fileUrl) => {
+  return /\.(webm|ogg|mp3|wav|m4a)$/i.test(fileUrl);
+};
 
   const { t } = useTranslation();
 
@@ -45,6 +48,11 @@ export default function RoomChat() {
 
   const [showInvite, setShowInvite] = useState(false);
 const [followList, setFollowList] = useState([]);
+
+const [isRecording, setIsRecording] = useState(false);
+const [audioBlob, setAudioBlob] = useState(null);
+const mediaRecorderRef = useRef(null);
+const audioChunksRef = useRef([]);
 
   ////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
@@ -322,6 +330,52 @@ const handleInvite = async (inviteeId) => {
     alert(err.response?.data?.message || "Something went wrong.");
   }
 };
+
+const handleToggleRecording = async () => {
+  if (isRecording) {
+    // stop
+    mediaRecorderRef.current?.stop();
+    setIsRecording(false);
+  } else {
+    // start
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        setAudioBlob(blob);
+        stream.getTracks().forEach(t => t.stop()); // release mic
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      alert("Microphone access denied.");
+      console.error(err);
+    }
+  }
+};
+
+const handleSendAudio = async () => {
+  if (!audioBlob) return;
+  try {
+    const formData = new FormData();
+    formData.append("attachment", audioBlob, "voice-message.webm");
+    await api.post(`/rooms/${roomId}/messages`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+    setAudioBlob(null);
+  } catch (err) {
+    console.error("Failed to send audio:", err);
+  }
+};
   /////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////
@@ -459,7 +513,7 @@ const handleInvite = async (inviteeId) => {
                   <p className="roomchat-message-content">{msg.content}</p>
                 )}
 
-                {msg.attachment && (
+                {/* {msg.attachment && (
                   isImage(msg.attachment) ? (
                     <img
                       src={msg.attachment}
@@ -484,6 +538,24 @@ const handleInvite = async (inviteeId) => {
                     </a>
                   )
                 )}
+                 */}
+                 {msg.attachment && (
+  isImage(msg.attachment) ? (
+    <img src={msg.attachment} alt="attachment" className="roomchat-message-attachment" />
+  ) : isVideo(msg.attachment) ? (
+    <video controls style={{ maxWidth: "200px", borderRadius: "8px", marginTop: "6px" }}>
+      <source src={msg.attachment} />
+    </video>
+  ) : isAudio(msg.attachment) ? (
+    <audio controls style={{ marginTop: "6px", maxWidth: "250px" }}>
+      <source src={msg.attachment} />
+    </audio>
+  ) : (
+    <a href={msg.attachment} target="_blank" rel="noopener noreferrer" className="roomchat-message-file-link">
+      {t("roomChat.openFile")}
+    </a>
+  )
+)}
 
                 <small className="roomchat-message-timestamp">{new Date(msg.createdAt).toLocaleTimeString()}</small>
                 {msg.isEdited && <small className="roomchat-message-edited"> {t("roomChat.edited")}</small>}
@@ -515,7 +587,7 @@ const handleInvite = async (inviteeId) => {
       )}
 
       {/* input area */}
-      <div className="roomchat-input-area">
+      {/* <div className="roomchat-input-area">
         <input
           type="file"
           id="attachmentInput"
@@ -535,6 +607,52 @@ const handleInvite = async (inviteeId) => {
         />
         <button onClick={handleSendMessage} className="roomchat-send-button">{t("roomChat.send")}</button>
       </div>
+       */}
+       <div className="roomchat-input-area">
+  <input
+    type="file"
+    id="attachmentInput"
+    accept="image/*,.pdf,.doc,.docx,.txt,.zip,video/*"
+    className="roomchat-file-input"
+    onChange={(e) => setAttachment(e.target.files[0])}
+  />
+  <button onClick={() => document.getElementById("attachmentInput").click()} className="roomchat-attach-button">📎</button>
+
+  {/* mic toggle */}
+  <button
+    onClick={handleToggleRecording}
+    className="roomchat-attach-button"
+    style={{ color: isRecording ? "#e74c3c" : "inherit" }}
+    title={isRecording ? "Stop recording" : "Record voice message"}
+  >
+    {isRecording ? "⏹️" : "🎤"}
+  </button>
+
+  {/* audio preview + send/discard */}
+  {audioBlob && !isRecording && (
+    <div style={{ display: "flex", alignItems: "center", gap: "6px", flex: 1 }}>
+      <audio controls src={URL.createObjectURL(audioBlob)} style={{ height: "32px", flex: 1 }} />
+      <button onClick={handleSendAudio} className="roomchat-send-button">Send</button>
+      <button onClick={() => setAudioBlob(null)} className="roomchat-action-button-danger">✕</button>
+    </div>
+  )}
+
+  {/* normal text input — hidden while previewing audio */}
+  {!audioBlob && (
+    <>
+      {attachment && <small className="roomchat-attachment-name">{attachment.name}</small>}
+      <input
+        type="text"
+        value={newMessage}
+        onChange={(e) => setNewMessage(e.target.value)}
+        onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+        placeholder={t("roomChat.placeholder")}
+        className="roomchat-message-input"
+      />
+      <button onClick={handleSendMessage} className="roomchat-send-button">{t("roomChat.send")}</button>
+    </>
+  )}
+</div>
        {showMembers && (
     <div className="roomchat-modal-overlay"  onClick={() => { setShowMembers(false); setShowInvite(false); }}>
       <div className="roomchat-modal" onClick={(e) => e.stopPropagation()}>

@@ -53,11 +53,11 @@ const { t, i18n } = useTranslation();
 const isRTL = i18n.language === "ar";
 
 //if someine ever was abale to skip info form....this will atke them back to it
-// useEffect(() => {
-//   if (!profile) {
-//     navigate("/info");
-//   }
-// }, [profile, navigate]);
+useEffect(() => {
+  if (!profile) {
+    navigate("/info");
+  }
+}, [profile, navigate]);
 
 
 
