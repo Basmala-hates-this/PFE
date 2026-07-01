@@ -62,12 +62,12 @@ const majorOptions = availableMajors.map((m) => ({ value: m, label: m }));
 
 
   const handleSubmit = async () => {
-    console.log("handleSubmit fired");
-    console.log("hasCustomUni:", hasCustomUni);
-    console.log("hasCustomMajors:", hasCustomMajors);
-    console.log("selectedUniversity:", selectedUniversity);
-    console.log("selectedMajors:", selectedMajors);
-    console.log("currentUser:", currentUser);
+    // console.log("handleSubmit fired");
+    // console.log("hasCustomUni:", hasCustomUni);
+    // console.log("hasCustomMajors:", hasCustomMajors);
+    // console.log("selectedUniversity:", selectedUniversity);
+    // console.log("selectedMajors:", selectedMajors);
+    // console.log("currentUser:", currentUser);
 
     if (hasCustomUni && !selectedUniversity)
       return alert(t("correction.noUniError"))

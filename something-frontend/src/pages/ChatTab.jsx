@@ -163,7 +163,7 @@ export default function ChatTab() {
         setActiveConvoId(convoId);
         fetchConversations();
       }
-      console.log("sending with convoId:", convoId);
+      // console.log("sending with convoId:", convoId);
 
       const reply = await callAI(
         newMessages.map(m => ({ role: m.role, content: m.content })),

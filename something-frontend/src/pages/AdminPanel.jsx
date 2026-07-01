@@ -129,7 +129,7 @@ export default function AdminPanel() {
       // const res = await axios.get(`${API}/users?${params}`, { headers });
       const res = await api.get(`${API}/users?${params}`);
       setUsers(res.data);
-      console.log("user sample:", res.data[0]);
+      // console.log("user sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -140,7 +140,7 @@ export default function AdminPanel() {
       // const res = await axios.get(`${API}/professors/pending`, { headers });
       const res = await api.get(`${API}/professors/pending`);
       setPendingProfessors(res.data);
-      console.log("prof sample:", res.data[0]);
+      // console.log("prof sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -166,7 +166,7 @@ export default function AdminPanel() {
       // const res = await axios.get(`${API}/announcements`);
       const res = await api.get(`${API}/announcements`);
       setAnnouncements(res.data);
-      console.log("announcements raw:", res.data[0]);
+      // console.log("announcements raw:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -465,7 +465,7 @@ export default function AdminPanel() {
       // const res = await axios.get(`${API}/resources/pending`, { headers });
       const res = await api.get(`${API}/resources/pending`);
       setPendingResources(res.data);
-      console.log("resource sample:", res.data[0]);
+      // console.log("resource sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -489,7 +489,7 @@ export default function AdminPanel() {
     try {
       // const res = await axios.get(`${API}/other-inputs`, { headers });
       const res = await api.get(`${API}/other-inputs`);
-      console.log("other inputs raw:", res.data);
+      // console.log("other inputs raw:", res.data);
       setOtherInputs(res.data);
     } catch (err) {
       console.error(err);
@@ -537,7 +537,7 @@ export default function AdminPanel() {
   api.get(`${API}/rooms-moderation`),
   api.get(`${API}/users`),
 ]);
-      console.log("room sample:", roomsRes.data[0]);
+      // console.log("room sample:", roomsRes.data[0]);
       setModerationRooms(roomsRes.data);
       setUsers(usersRes.data);
     } catch (err) {

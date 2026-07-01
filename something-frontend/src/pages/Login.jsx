@@ -79,7 +79,7 @@ const handleSubmit =async (e) => {
 });
  
   const data = response.data;
-  console.log(data);
+ // console.log(data);
    // store token
   localStorage.setItem("token", data.token);
   // store user

@@ -68,10 +68,10 @@ const LIMIT = 251;
   api.get(`/users/${userId}/majors`),
 ]);
 
-        console.log("user:", userRes.data);
-        console.log("stats:", statsRes.data);
-        console.log("posts sample:", postsRes.data[0]);
-        console.log("followers sample:", followersRes.data[0]);
+        // console.log("user:", userRes.data);
+        // console.log("stats:", statsRes.data);
+        // console.log("posts sample:", postsRes.data[0]);
+        // console.log("followers sample:", followersRes.data[0]);
 
         setUser(userRes.data);
         setStats(statsRes.data);
@@ -97,7 +97,7 @@ const LIMIT = 251;
   /////////////////////////////////////////////////////////////////////
 
   const handleFollow = async () => {
-    console.log("handleFollow called, isFollowing:", isFollowing);
+    // console.log("handleFollow called, isFollowing:", isFollowing);
 
     if (followLoading) return;
     setFollowLoading(true);

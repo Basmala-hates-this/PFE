@@ -72,8 +72,8 @@ if (!isGuest) {
           const allowedRooms = roomsRes.data.filter(r =>
             r.type === "public" || selectedCodes.includes(r.university)
           );
-          console.log("guest allowed rooms sample:", allowedRooms[0]);
-          console.log("post sample:", filteredPosts[0]);
+          // console.log("guest allowed rooms sample:", allowedRooms[0]);
+          // console.log("post sample:", filteredPosts[0]);
           const allowedRoomIds = allowedRooms.map(r => r.id);
           filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
         } else {
@@ -83,8 +83,8 @@ if (!isGuest) {
           // });
           const roomsRes = await api.get("/rooms/my-rooms");
 
-          console.log("rooms sample:", roomsRes.data[0]);
-          console.log("posts sample:", results[0].data[0]);
+          // console.log("rooms sample:", roomsRes.data[0]);
+          // console.log("posts sample:", results[0].data[0]);
 
           const allowedRoomIds = roomsRes.data
             .filter(r => r.type !== "private")

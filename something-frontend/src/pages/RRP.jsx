@@ -28,7 +28,7 @@ const [email, setEmail] = useState("");
   }
 
   try {
-    console.log(email)
+    // console.log(email)
     // await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
     await api.post("/auth/forgot-password", { email });
     // always show success message — don't reveal if email exists.......damn

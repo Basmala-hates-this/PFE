@@ -1557,9 +1557,9 @@ const handleNotifClick = (n) => {
 //   setShowNotifications(false);
 // }}
 onClick={() => {
-  console.log('keys:', Object.keys(n));
-  console.log('entity_id:', n.entity_id, 'entityId:', n.entityId);
-  console.log('room_id:', n.room_id, 'roomId:', n.roomId);
+  // console.log('keys:', Object.keys(n));
+  // console.log('entity_id:', n.entity_id, 'entityId:', n.entityId);
+  // console.log('room_id:', n.room_id, 'roomId:', n.roomId);
   handleNotifClick(n);
 }}
             >

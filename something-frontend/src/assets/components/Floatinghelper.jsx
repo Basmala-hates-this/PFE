@@ -132,7 +132,7 @@ const speakText = (text, index) => {
     utter.lang = fullLang;
     utter.rate = 0.95;
 
-    console.log("VOICE:", utter.voice?.name, "| LANG:", fullLang, "| TEXT:", text.slice(0, 30));
+    // console.log("VOICE:", utter.voice?.name, "| LANG:", fullLang, "| TEXT:", text.slice(0, 30));
 
     utter.onstart = () => setSpeakingIndex(index);
     utter.onend = () => setSpeakingIndex(null);

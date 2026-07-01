@@ -40,7 +40,7 @@ const isRTL = i18n.language === 'ar';
         pendingReorientation: false
       };
       localStorage.setItem("currentUser", JSON.stringify(updatedUser));
-      console.log(currentUser);
+      // console.log(currentUser);
 
       alert(t("reorientation.successMessage"))
       navigate("/dashboard");

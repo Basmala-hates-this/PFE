@@ -34,8 +34,8 @@ useEffect(() => {
    
     setUsername(res.data.username);
     setEditEmail(res.data.email);
-     console.log("me data:", res.data.profile_pic_url);
-    console.log("me full data:", res.data);
+    //  console.log("me data:", res.data.profile_pic_url);
+    // console.log("me full data:", res.data);
     if (res.data.profilePicUrl) {
       setProfilePreview(res.data.profilePicUrl);
     }

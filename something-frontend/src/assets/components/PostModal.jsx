@@ -333,7 +333,7 @@ const handleAddComment = async () => {
     //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
     // );
     await api.post(`/posts/${postId}/comments`, formData, { headers: { "Content-Type": "multipart/form-data" } });
-    console.log("first comment:", comments[0]);
+    // console.log("first comment:", comments[0]);
     setCommentInput("");
     setCommentAttachment(null);
     setCommentResourceLink("");

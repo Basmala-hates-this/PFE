@@ -98,8 +98,8 @@ const [logActionFilter, setLogActionFilter] = useState("all");
   ///////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////
-console.log("adminSearch:", adminSearch);
-console.log("currentAdmins:", currentAdmins);
+// console.log("adminSearch:", adminSearch);
+// console.log("currentAdmins:", currentAdmins);
 // const filteredAdmins = currentAdmins.filter((admin) =>
 //   admin.username.toLowerCase().includes(adminSearch.toLowerCase()) ||
 //   admin.email.toLowerCase().includes(adminSearch.toLowerCase())
@@ -121,7 +121,7 @@ console.log("currentAdmins:", currentAdmins);
       // const res = await axios.get(`${API}/logs`, { headers });
       const res = await api.get(`${API}/logs`);
       setLogs([...res.data].reverse());
-      console.log("log sample:", res.data[0]);
+      // console.log("log sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -139,7 +139,7 @@ console.log("currentAdmins:", currentAdmins);
   };
 
   const handleUpgradeAdmin = async (userId) => {
-    console.log("upgrading userId:", userId);
+    // console.log("upgrading userId:", userId);
     setActionLoading(true);
     try {
       // await axios.patch(
@@ -252,7 +252,7 @@ console.log("currentAdmins:", currentAdmins);
       const res = await api.get(`${API}/applications`);
 
       setApplications(res.data);
-      console.log("application sample:", res.data[0]);
+      // console.log("application sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -296,7 +296,7 @@ console.log("currentAdmins:", currentAdmins);
       // const res = await axios.get(`${API}/admins${params}`, { headers });
       const res = await api.get(`${API}/admins${params}`);
       setCurrentAdmins(res.data);
-      console.log("admin sample:", res.data[0]);
+      // console.log("admin sample:", res.data[0]);
     } catch (err) {
       console.error(err);
     }
@@ -352,7 +352,7 @@ const res = await api.get(`${API}/users`);
            const res = await api.get(`${API}/posts`);
 
           setDrillDown({ type: "posts", title: t("superadmin.drill.titlePosts"), data: res.data });
-          console.log("post sample for drilldown:", res.data[0]);
+          // console.log("post sample for drilldown:", res.data[0]);
           break;
         }
         case "comments": {
@@ -360,7 +360,7 @@ const res = await api.get(`${API}/users`);
          const res = await api.get(`${API}/comments`);
 
 
-          console.log("comment sample:", res.data[0]);
+          // console.log("comment sample:", res.data[0]);
           setDrillDown({
             type: "comments",
             title: t("superadmin.drill.titleComments"),
@@ -603,7 +603,7 @@ const filteredLogs = logs.filter(log => {
       </small>
       <div style={{ display: "flex", gap: "6px", flexWrap: "wrap" }}>
         {app.interests.map(i => {
-  console.log("interest item:", JSON.stringify(i));
+  // console.log("interest item:", JSON.stringify(i));
   return ( 
     <span key={i} className="superadmin-badge superadmin-badge-primary" >
       {i.replace(/_/g, " ")}
@@ -850,7 +850,7 @@ const filteredLogs = logs.filter(log => {
 ) : (
   filteredAdmins.map((admin) => { 
                 const isEditing = editingAdminId === admin.id;
-                console.log(admin)
+                // console.log(admin)
                 return (
                   <div key={admin.id} className="superadmin-card">
                     <div className="superadmin-item-row">
@@ -1193,7 +1193,7 @@ const filteredLogs = logs.filter(log => {
                   const isSuspended =
                     u.suspended_until &&
                     new Date(u.suspended_until) > new Date();
-                    console.log(u)
+                    // console.log(u)
                   return (
                     <div
                       key={u.id}
