@@ -33,10 +33,23 @@ async function tryGemini(messages, system) {
 }
 
 // ─── Groq ─────────────────────────────────────────────────────────────────────
+// async function tryGroq(messages, system) {
+//   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+//   const completion = await groq.chat.completions.create({
+//     model: "llama-3.3-70b-versatile",
+//     max_tokens: 1000,
+//     messages: [
+//       { role: "system", content: system || "You are a helpful assistant." },
+//       ...messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
+//     ],
+//   });
+//   return completion.choices[0]?.message?.content || "No response.";
+// }
+//the old modal going to be deprecated, so we are using the new one below
 async function tryGroq(messages, system) {
   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
   const completion = await groq.chat.completions.create({
-    model: "llama-3.3-70b-versatile",
+    model: "openai/gpt-oss-120b", // was: "llama-3.3-70b-versatile"
     max_tokens: 1000,
     messages: [
       { role: "system", content: system || "You are a helpful assistant." },
