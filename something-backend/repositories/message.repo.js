@@ -13,18 +13,46 @@ const pool = require('../db');
 //   );
 //   return toCamel(result.rows);
 // };
-const getMessagesByRoom = async (roomId) => {
+// const getMessagesByRoom = async (roomId) => {
+//   const result = await pool.query(
+//     `SELECT m.*, u.username as author_username, u.profile_pic_url as profile_pic_url
+//      FROM messages m
+//      LEFT JOIN users u ON u.id = m.sender_id
+//      WHERE m.room_id = $1
+//      ORDER BY m.created_at ASC`,
+//     [roomId]
+//   );
+//   return toCamel(result.rows);
+// };
+
+const getMessagesByRoom = async (roomId, { limit = 20, cursorCreatedAt = null, cursorId = null } = {}) => {
+  const params = [roomId];
+  let cursorClause = "";
+  if (cursorCreatedAt && cursorId) {
+    params.push(cursorCreatedAt, cursorId);
+    cursorClause = `AND (m.created_at, m.id) < ($2, $3)`;
+  }
+  params.push(limit);
+  const limitParamIndex = params.length;
+
   const result = await pool.query(
     `SELECT m.*, u.username as author_username, u.profile_pic_url as profile_pic_url
      FROM messages m
      LEFT JOIN users u ON u.id = m.sender_id
      WHERE m.room_id = $1
-     ORDER BY m.created_at ASC`,
-    [roomId]
+     ${cursorClause}
+     ORDER BY m.created_at DESC, m.id DESC
+     LIMIT $${limitParamIndex}`,
+    params
   );
-  return toCamel(result.rows);
-};
 
+  const messages = toCamel(result.rows).reverse(); // flip back to ASC for display
+  const nextCursor = result.rows.length === Number(limit)
+    ? { createdAt: result.rows[result.rows.length - 1].created_at, id: result.rows[result.rows.length - 1].id }
+    : null;
+
+  return { messages, nextCursor };
+};
 // const createMessage = async (messageData) => {
 //   const result = await pool.query(
 //     `INSERT INTO messages (room_id, sender_id, content, attachment, reply_to)

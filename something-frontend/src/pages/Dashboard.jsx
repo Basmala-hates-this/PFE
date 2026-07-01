@@ -79,6 +79,13 @@ export default function Dashboard() {
   const [editPostContent, setEditPostContent] = useState("");
   const [editPostTitle, setEditPostTitle] = useState("");
 
+
+  //post pagination attempt
+  const [postsCursor, setPostsCursor] = useState(null); // { createdAt, id } | null
+const [hasMorePosts, setHasMorePosts] = useState(true);
+const [loadingMore, setLoadingMore] = useState(false);
+const feedEndRef = useRef(null);
+
   const [editingComment, setEditingComment] = useState(null);
   const [editCommentContent, setEditCommentContent] = useState("");
 
@@ -232,101 +239,207 @@ const notifRef = useRef(null);
     };
   }, []);
 
-  const fetchRoomsAndPosts = async () => {
-    console.log("fetchRoomsAndPosts called");
+//   const fetchRoomsAndPosts = async () => {
+//     console.log("fetchRoomsAndPosts called");
 
-    setLoading(true);
-    try {
-      const token = localStorage.getItem("token");
-      let allowedRooms = [];
+//     setLoading(true);
+//     try {
+//       const token = localStorage.getItem("token");
+//       let allowedRooms = [];
 
-      if (isGuest) {
-        // const response = await axios.get(
-        //   "http://localhost:5000/api/rooms/public-rooms",
-        // );
-        const response = await api.get("/rooms/public-rooms");
-        const guestUniversities =
-          JSON.parse(localStorage.getItem("guestUniversities")) || [];
-        const selectedCodes = guestUniversities.map((u) => u.value);
-        allowedRooms = response.data.filter(
-          (r) =>
-            r.type === "public" || selectedCodes.includes(r.universityCode),
-        );
-      } else {
-        // const response = await axios.get(
-        //   "http://localhost:5000/api/rooms/my-rooms",
-        //   {
-        //     headers: { Authorization: `Bearer ${token}` },
-        //   },
-        // );
-        const response = await api.get("/rooms/my-rooms");
-        allowedRooms = response.data;
-      }
+//       if (isGuest) {
+//         // const response = await axios.get(
+//         //   "http://localhost:5000/api/rooms/public-rooms",
+//         // );
+//         const response = await api.get("/rooms/public-rooms");
+//         const guestUniversities =
+//           JSON.parse(localStorage.getItem("guestUniversities")) || [];
+//         const selectedCodes = guestUniversities.map((u) => u.value);
+//         allowedRooms = response.data.filter(
+//           (r) =>
+//             r.type === "public" || selectedCodes.includes(r.universityCode),
+//         );
+//       } else {
+//         // const response = await axios.get(
+//         //   "http://localhost:5000/api/rooms/my-rooms",
+//         //   {
+//         //     headers: { Authorization: `Bearer ${token}` },
+//         //   },
+//         // );
+//         const response = await api.get("/rooms/my-rooms");
+//         allowedRooms = response.data;
+//       }
 
-      setUserRooms(allowedRooms);
+//       setUserRooms(allowedRooms);
 
-      //save posts/unsave...u get the idea
-      if (!isGuest) {
-        try {
-          // const savedRes = await axios.get(
-          //   "http://localhost:5000/api/posts/saved",
-          //   {
-          //     headers: { Authorization: `Bearer ${token}` },
-          //   },
-          // );
-          const savedRes = await api.get("/posts/saved");
-          setSavedPostIds(savedRes.data.map((p) => p.id));
-        } catch (err) {
-          console.error("Failed to fetch saved posts:", err);
-        }
-      }
+//       //save posts/unsave...u get the idea
+//       if (!isGuest) {
+//         try {
+//           // const savedRes = await axios.get(
+//           //   "http://localhost:5000/api/posts/saved",
+//           //   {
+//           //     headers: { Authorization: `Bearer ${token}` },
+//           //   },
+//           // );
+//           const savedRes = await api.get("/posts/saved");
+//           setSavedPostIds(savedRes.data.map((p) => p.id));
+//         } catch (err) {
+//           console.error("Failed to fetch saved posts:", err);
+//         }
+//       }
 
-      // let url = "http://localhost:5000/api/posts";
-      let url = "/posts";
-      if (selectedRooms.length === 1) {
-        url += `?roomId=${selectedRooms[0].value}`;
-      }
-      // const postsResponse = await axios.get(url, {
-      //   headers: token
-      //     ? { Authorization: `Bearer ${token}` }
-      //     : guestToken
-      //       ? { Authorization: `Bearer ${guestToken}` }
-      //       : {},
-      // });
-      const postsResponse = await api.get(url, {
-  headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
-});
+//       // let url = "http://localhost:5000/api/posts";
+//       let url = "/posts";
+//       if (selectedRooms.length === 1) {
+//         url += `?roomId=${selectedRooms[0].value}`;
+//       }
+//       // const postsResponse = await axios.get(url, {
+//       //   headers: token
+//       //     ? { Authorization: `Bearer ${token}` }
+//       //     : guestToken
+//       //       ? { Authorization: `Bearer ${guestToken}` }
+//       //       : {},
+//       // });
+//       const postsResponse = await api.get(url, {
+//   headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
+// });
 
-      if (isGuest) {
-        const allowedRoomIds = allowedRooms.map((r) => r.id);
-        setPosts(
-          postsResponse.data.filter((p) => allowedRoomIds.includes(p.roomId)),
-        );
-      } else {
-        const publicPosts = postsResponse.data.filter((p) => {
-          if (!p.roomId) return false;
-          const room = allowedRooms.find((r) => r.id === p.roomId);
-          return room ? room.type !== "private" : false;
-        });
+//       if (isGuest) {
+//         const allowedRoomIds = allowedRooms.map((r) => r.id);
+//         setPosts(
+//           postsResponse.data.filter((p) => allowedRoomIds.includes(p.roomId)),
+//         );
+//       } else {
+//         const publicPosts = postsResponse.data.filter((p) => {
+//           if (!p.roomId) return false;
+//           const room = allowedRooms.find((r) => r.id === p.roomId);
+//           return room ? room.type !== "private" : false;
+//         });
 
-        setPosts(publicPosts);
-        console.log(
-          "post sample userVote:",
-          publicPosts[0]?.userVote,
-          publicPosts[0],
-        );
-      }
-    } catch (err) {
-      console.error("Failed to fetch:", err);
-    } finally {
-      setLoading(false);
+//         setPosts(publicPosts);
+//         console.log(
+//           "post sample userVote:",
+//           publicPosts[0]?.userVote,
+//           publicPosts[0],
+//         );
+//       }
+//     } catch (err) {
+//       console.error("Failed to fetch:", err);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+const fetchRoomsAndPosts = async () => {
+  console.log("fetchRoomsAndPosts called");
+  setLoading(true);
+  try {
+    let allowedRooms = [];
+
+    if (isGuest) {
+      const response = await api.get("/rooms/public-rooms");
+      const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
+      const selectedCodes = guestUniversities.map((u) => u.value);
+      allowedRooms = response.data.filter(
+        (r) => r.type === "public" || selectedCodes.includes(r.universityCode),
+      );
+    } else {
+      const response = await api.get("/rooms/my-rooms");
+      allowedRooms = response.data;
     }
-  };
+
+    setUserRooms(allowedRooms);
+
+    if (!isGuest) {
+      try {
+        const savedRes = await api.get("/posts/saved");
+        setSavedPostIds(savedRes.data.map((p) => p.id));
+      } catch (err) {
+        console.error("Failed to fetch saved posts:", err);
+      }
+    }
+
+    // reset pagination and load the first page
+    setPostsCursor(null);
+    setHasMorePosts(true);
+    await fetchPosts(true, allowedRooms);
+  } catch (err) {
+    console.error("Failed to fetch:", err);
+    setLoading(false);
+  }
+};
+
+const fetchPosts = async (reset = false, roomsOverride = null) => {
+  const rooms = roomsOverride || userRooms;
+
+  if (reset) {
+    setLoading(true);
+  } else {
+    if (!hasMorePosts || loadingMore) return;
+    setLoadingMore(true);
+  }
+
+  try {
+    const params = new URLSearchParams();
+    if (selectedRooms.length === 1) params.append("roomId", selectedRooms[0].value);
+    params.append("limit", "20");
+    if (!reset && postsCursor) {
+      params.append("cursorCreatedAt", postsCursor.createdAt);
+      params.append("cursorId", postsCursor.id);
+    }
+
+    const response = await api.get(`/posts?${params.toString()}`, {
+      headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {},
+    });
+
+    const { posts: fetchedPosts, nextCursor, hasMore } = response.data;
+
+    let visiblePosts;
+    if (isGuest) {
+      const allowedRoomIds = rooms.map((r) => r.id);
+      visiblePosts = fetchedPosts.filter((p) => allowedRoomIds.includes(p.roomId));
+    } else {
+      visiblePosts = fetchedPosts.filter((p) => {
+        if (!p.roomId) return false;
+        const room = rooms.find((r) => r.id === p.roomId);
+        return room ? room.type !== "private" : false;
+      });
+    }
+
+    setPosts((prev) => (reset ? visiblePosts : [...prev, ...visiblePosts]));
+    setPostsCursor(nextCursor);
+    setHasMorePosts(hasMore);
+  } catch (err) {
+    console.error("Failed to fetch posts:", err);
+  } finally {
+    setLoading(false);
+    setLoadingMore(false);
+  }
+};
 
   useEffect(() => {
     fetchRoomsAndPosts();
   }, [selectedRooms]);
 
+
+const loadMoreRef = useRef(() => {});
+
+useEffect(() => {
+  loadMoreRef.current = () => fetchPosts(false);
+}); // no deps — runs every render, always fresh
+
+useEffect(() => {
+  const sentinel = feedEndRef.current;
+  if (!sentinel) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) loadMoreRef.current();
+    },
+    { rootMargin: "300px" },
+  );
+  observer.observe(sentinel);
+  return () => observer.disconnect();
+}, []);
 
   useEffect(() => {
   if (isGuest) return; // guests have no notifications
@@ -2185,7 +2298,18 @@ onClick={() => {
                       </div>
                     );
                   })
+                  
                 )}
+                {!loading && hasMorePosts && (
+  <div ref={feedEndRef} style={{ padding: "20px", textAlign: "center", opacity: 0.5, fontSize: "13px" }}>
+    {loadingMore ? "Loading more..." : ""}
+  </div>
+)}
+{!hasMorePosts && posts.length > 0 && (
+  <p style={{ textAlign: "center", opacity: 0.4, fontSize: "12px", padding: "16px" }}>
+    You've reached the end
+  </p>
+)}
               </div>
             </section>
           </main>

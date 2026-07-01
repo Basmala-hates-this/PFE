@@ -2,8 +2,22 @@ const messageRepo = require('../repositories/message.repo');
 const roomRepo = require('../repositories/room.repo');
 const notifService = require('../services/notificationService'); 
 
+// const getMessages = async (req, res) => {
+//   const { roomId } = req.params;
+//   const userId = req.user.id;
+
+//   const room = await roomRepo.getRoomById(roomId);
+//   if (!room) return res.status(404).json({ message: 'Room not found' });
+
+//   const member = await roomRepo.isMember(roomId, userId);
+//   if (!member) return res.status(403).json({ message: 'You are not a member of this room' });
+
+//   const messages = await messageRepo.getMessagesByRoom(roomId);
+//   res.json(messages);
+// };
 const getMessages = async (req, res) => {
   const { roomId } = req.params;
+  const { limit = 20, cursorCreatedAt, cursorId } = req.query;
   const userId = req.user.id;
 
   const room = await roomRepo.getRoomById(roomId);
@@ -12,8 +26,13 @@ const getMessages = async (req, res) => {
   const member = await roomRepo.isMember(roomId, userId);
   if (!member) return res.status(403).json({ message: 'You are not a member of this room' });
 
-  const messages = await messageRepo.getMessagesByRoom(roomId);
-  res.json(messages);
+  const { messages, nextCursor } = await messageRepo.getMessagesByRoom(roomId, {
+    limit: Number(limit),
+    cursorCreatedAt: cursorCreatedAt || null,
+    cursorId: cursorId ? Number(cursorId) : null,
+  });
+
+  res.json({ messages, nextCursor, hasMore: !!nextCursor });
 };
 
 // const sendMessage = async (req, res) => {
