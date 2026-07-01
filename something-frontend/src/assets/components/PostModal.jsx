@@ -7,42 +7,58 @@ import ReportModal from "./ReportModal.jsx";
 // import i18n from '../i18n/index.js';
 //threaded comments are more complicated then i thought
 
-function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, onEdit, onReply, editingComment, editCommentContent, setEditCommentContent, handleEditComment, setEditingComment, depth = 0 }) {
+function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, onEdit, onReply, editingComment, editCommentContent, setEditCommentContent, handleEditComment, setEditingComment, collapsedIds, toggleCollapse, depth = 0 }) {
   const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const LIMIT = 251;
-  
+
+  const isCollapsed = collapsedIds.has(comment.id);
+  const hasReplies = comment.replies?.length > 0;
+
   if (comment.isHidden) return (
     <div style={{ marginLeft: depth > 0 ? "20px" : "0", padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.1)", opacity: 0.4, fontStyle: "italic", fontSize: "13px" }}>
       {t('postModal.hiddenComment')}
     </div>
   );
- 
-  
+
+
   return (
     <div style={{ marginLeft: depth > 0 ? "20px" : "0", borderLeft: depth > 0 ? "2px solid rgba(100,118,175,0.3)" : "none", paddingLeft: depth > 0 ? "10px" : "0" }}>
       <div style={{ padding: "10px", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
-         <img
-    src={comment.authorProfilePic || Cat } 
-    alt="pfp"
-    style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover", cursor: "pointer" }}
-    onClick={() => window.location.href = `/users/${comment.userId}`} 
-  />
+
+        <div
+          style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px", cursor: hasReplies ? "pointer" : "default" }}
+          onClick={() => hasReplies && toggleCollapse(comment.id)}
+        >
+          {hasReplies && (
+            <span style={{ fontSize: "10px", opacity: 0.6, width: "10px" }}>
+              {isCollapsed ? "▶" : "▼"}
+            </span>
+          )}
+          <img
+            src={comment.authorProfilePic || Cat}
+            alt="pfp"
+            style={{ width: "24px", height: "24px", borderRadius: "50%", objectFit: "cover", cursor: "pointer" }}
+            onClick={(e) => { e.stopPropagation(); window.location.href = `/users/${comment.userId}`; }}
+          />
           <strong
-  style={{ fontSize: "13px", cursor: "pointer" }}
-  onClick={() => window.location.href = `/users/${comment.userId}`}
->
-  @{comment.authorUsername}
-</strong>
-{comment.authorRole && (
-  <small style={{background:"#6476af", color:"var(-text--main)", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>
-    {comment.authorRole}
-  </small>
-)}
+            style={{ fontSize: "13px", cursor: "pointer" }}
+            onClick={(e) => { e.stopPropagation(); window.location.href = `/users/${comment.userId}`; }}
+          >
+            @{comment.authorUsername}
+          </strong>
+          {comment.authorRole && (
+            <small style={{background:"#6476af", color:"var(-text--main)", padding:"2px 8px", borderRadius:"10px", fontSize:"11px"}}>
+              {comment.authorRole}
+            </small>
+          )}
           {depth > 0 && <small style={{ opacity: 0.4, fontSize: "11px" }}>↩ reply</small>}
           <small style={{ opacity: 0.5, fontSize: "11px" }}>{new Date(comment.createdAt).toLocaleString()}</small>
+          {hasReplies && isCollapsed && (
+            <small style={{ opacity: 0.5, fontSize: "11px", marginLeft: "auto" }}>
+              {comment.replies.length} {comment.replies.length === 1 ? "reply" : "replies"}
+            </small>
+          )}
         </div>
 
         <p style={{ margin: "0 0 6px", fontSize: "14px" }}>{comment.content}</p>
@@ -65,7 +81,7 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
     <source src={comment.videoUrl} />
   </video>
 )}
-        
+
         {comment.resourceLink && (
           <a href={comment.resourceLink} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "6px", padding: "6px 12px", background: "rgba(100,118,175,0.3)", borderRadius: "6px", color: "white", textDecoration: "none", fontSize: "13px", marginBottom: "6px" }}>
             🔗 {comment.resourceLabel || t('postModal.openResource')}
@@ -109,12 +125,13 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
       </div>
 
       {/* replies */}
-      {comment.replies?.map(reply => (
+      {!isCollapsed && comment.replies?.map(reply => (
         <CommentNode key={reply.id} comment={reply} postId={postId} currentUser={currentUser}
           isGuest={isGuest} onVote={onVote} onDelete={onDelete} onEdit={onEdit} onReply={onReply}
           editingComment={editingComment} editCommentContent={editCommentContent}
           setEditCommentContent={setEditCommentContent} handleEditComment={handleEditComment}
-          setEditingComment={setEditingComment} depth={depth + 1} />
+          setEditingComment={setEditingComment} collapsedIds={collapsedIds} toggleCollapse={toggleCollapse}
+          depth={depth + 1} />
       ))}
     </div>
   );
@@ -151,54 +168,135 @@ const { t } = useTranslation();
 const [expanded, setExpanded] = useState(false);
 const LIMIT = 251;
 
+
+  const [commentsCursor, setCommentsCursor] = useState(null);
+const [commentsHasMore, setCommentsHasMore] = useState(true);
+const [loadingMoreComments, setLoadingMoreComments] = useState(false);
+const commentsScrollRef = useRef(null);
+const loadMoreCommentsRef = useRef(null);
+const COMMENTS_LIMIT = 20;
+
+const [collapsedIds, setCollapsedIds] = useState(new Set());
+
+const toggleCollapse = (commentId) => {
+  setCollapsedIds((prev) => {
+    const next = new Set(prev);
+    if (next.has(commentId)) next.delete(commentId);
+    else next.add(commentId);
+    return next;
+  });
+};
+
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
   // fetch post
-  useEffect(() => {
-    const fetchPost = async () => {
-      try {
-        // const response = await axios.get(
-        //   `http://localhost:5000/api/posts/${postId}`,
-        //   { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
-        // );
-const response = await api.get(`/posts/${postId}`, {
-  headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
-});
+//   useEffect(() => {
+//     const fetchPost = async () => {
+//       try {
+//         // const response = await axios.get(
+//         //   `http://localhost:5000/api/posts/${postId}`,
+//         //   { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
+//         // );
+// const response = await api.get(`/posts/${postId}`, {
+//   headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+// });
 
-setPost(response.data);
-      } catch (err) {
-        console.error("Failed to fetch post:", err);
-      }
-    };
-    fetchPost();
-  }, [postId]);
+// setPost(response.data);
+//       } catch (err) {
+//         console.error("Failed to fetch post:", err);
+//       }
+//     };
+//     fetchPost();
+//   }, [postId]);
 
   
   
-const refetchPost = async () => {
-  // const [postRes, commentsRes] = await Promise.all([
-  //   axios.get(`http://localhost:5000/api/posts/${postId}`, {
-  //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} // 
-  //   }),
-  //   axios.get(`http://localhost:5000/api/posts/${postId}/comments`, {
-  //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
-  //   })
-  // ]);
-const [postRes, commentsRes] = await Promise.all([
-  api.get(`/posts/${postId}`, { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }),
-  api.get(`/posts/${postId}/comments`, { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} })
-]);
-  console.log("comment sample:", commentsRes.data[0]);
-  setPost(postRes.data);
-  setComments(commentsRes.data);
+// const refetchPost = async () => {
+//   // const [postRes, commentsRes] = await Promise.all([
+//   //   axios.get(`http://localhost:5000/api/posts/${postId}`, {
+//   //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} // 
+//   //   }),
+//   //   axios.get(`http://localhost:5000/api/posts/${postId}/comments`, {
+//   //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
+//   //   })
+//   // ]);
+// const [postRes, commentsRes] = await Promise.all([
+//   api.get(`/posts/${postId}`, { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }),
+//   api.get(`/posts/${postId}/comments`, { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} })
+// ]);
+//   console.log("comment sample:", commentsRes.data[0]);
+//   setPost(postRes.data);
+//   setComments(commentsRes.data);
+// };
+const refetchPostOnly = async () => {
+  const res = await api.get(`/posts/${postId}`, {
+    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+  });
+  setPost(res.data);
+};
+
+const fetchComments = async (limit = COMMENTS_LIMIT) => {
+  const res = await api.get(`/posts/${postId}/comments?limit=${limit}`, {
+    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+  });
+  const { comments: fetched, nextCursor } = res.data;
+  setComments(fetched);
+  setCommentsCursor(nextCursor);
+  setCommentsHasMore(!!nextCursor);
+};
+
+const loadMoreComments = async () => {
+  if (!commentsHasMore || loadingMoreComments || !commentsCursor) return;
+  setLoadingMoreComments(true);
+  try {
+    const res = await api.get(
+      `/posts/${postId}/comments?limit=${COMMENTS_LIMIT}&cursorCreatedAt=${encodeURIComponent(commentsCursor.createdAt)}&cursorId=${commentsCursor.id}`,
+      { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
+    );
+    const { comments: fetched, nextCursor } = res.data;
+    setComments((prev) => [...prev, ...fetched]);
+    setCommentsCursor(nextCursor);
+    setCommentsHasMore(!!nextCursor);
+  } catch (err) {
+    console.error("Failed to load more comments:", err);
+  } finally {
+    setLoadingMoreComments(false);
+  }
+};
+
+// resyncs everything currently loaded (used after vote/add/edit/delete)
+const resyncComments = async () => {
+  await fetchComments(Math.max(comments.length, COMMENTS_LIMIT));
 };
 
 useEffect(() => {
-  refetchPost();
+  refetchPostOnly();
+  fetchComments(COMMENTS_LIMIT);
 }, [postId]);
 
+// useEffect(() => {
+//   refetchPost();
+// }, [postId]);
 
+
+
+
+useEffect(() => {
+  if (!loadMoreCommentsRef.current || !commentsScrollRef.current) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        loadMoreComments();
+      }
+    },
+    { root: commentsScrollRef.current, threshold: 0.5 }
+  );
+
+  observer.observe(loadMoreCommentsRef.current);
+  return () => observer.disconnect();
+}, [commentsCursor, commentsHasMore, loadingMoreComments]);
   /////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////
@@ -211,7 +309,8 @@ useEffect(() => {
     //   { headers: { Authorization: `Bearer ${token}` } }
     // );
     api.patch(`/posts/${postId}/vote`, { voteType },{ headers: { Authorization: `Bearer ${token}` } });
-    refetchPost();
+    await refetchPostOnly();
+await resyncComments();
   } catch (err) {
     console.error("Failed to vote:", err);
   }
@@ -240,7 +339,8 @@ const handleAddComment = async () => {
     setCommentResourceLink("");
     setCommentResourceLabel("");
     setReplyingTo(null); 
-    refetchPost();
+   await refetchPostOnly();
+await resyncComments();
   } catch (err) {
     console.error("Failed to add comment:", err);
   }
@@ -256,7 +356,8 @@ const handleAddComment = async () => {
       // );
     await api.patch(`/posts/${postId}/comments/${commentId}/vote`, { voteType }, { headers: { Authorization: `Bearer ${token}` } });
 
-      refetchPost();
+      await refetchPostOnly();
+await resyncComments();
     } catch (err) {
       console.error("Failed to vote on comment:", err);
     }
@@ -270,7 +371,8 @@ const handleAddComment = async () => {
       //   { headers: { Authorization: `Bearer ${token}` } }
       // );
       await api.delete(`/posts/${postId}/comments/${commentId}`, { headers: { Authorization: `Bearer ${token}` } });
-      refetchPost();
+      await refetchPostOnly();
+await resyncComments();
     } catch (err) {
       console.error("Failed to delete comment:", err);
     }
@@ -285,7 +387,8 @@ const handleAddComment = async () => {
       // );
       await api.patch(`/posts/${postId}/comments/${commentId}`, { content: editCommentContent }, { headers: { Authorization: `Bearer ${token}` } });
       setEditingComment(null);
-      refetchPost();
+     await refetchPostOnly();
+await resyncComments();
     } catch (err) {
       console.error("Failed to edit comment:", err);
     }
@@ -464,7 +567,7 @@ const buildCommentTree = (comments) => {
 </div>
 
         {/* comments list */}
-       <div style={{ flex: 1, overflowY: "auto", marginBottom: "15px" }}>
+       <div style={{ flex: 1, overflowY: "auto", marginBottom: "15px" }} ref={commentsScrollRef}>
   {comments.length === 0 ? (
     <p style={{ opacity: 0.5, textAlign: "center" }}>{t('postModal.noComments')}</p>
   ) : (() => {
@@ -494,9 +597,19 @@ const buildCommentTree = (comments) => {
           setEditCommentContent={setEditCommentContent}
           handleEditComment={handleEditComment}
           setEditingComment={setEditingComment}
+           collapsedIds={collapsedIds}
+          toggleCollapse={toggleCollapse}
         />
       ));
   })()}
+  {commentsHasMore && comments.length > 0 && (
+    <div
+      ref={loadMoreCommentsRef}
+      style={{ padding: "14px", textAlign: "center", opacity: 0.5, fontSize: "12px" }}
+    >
+      {loadingMoreComments ? "..." : ""}
+    </div>
+  )}
 </div>
 
         {/* add comment */}
