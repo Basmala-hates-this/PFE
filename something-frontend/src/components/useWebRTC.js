@@ -19,6 +19,8 @@ export default function useWebRTC({ socket, roomId, userId, displayName, isHost 
   const screenTrackRef  = useRef(null);
   const remoteSocketRef = useRef(null); // ← ref instead of state, no re-render needed
 
+  const [screenStream, setScreenStream] = useState(null);
+
   const startMedia = useCallback(async () => {
     if (localStreamRef.current) return localStreamRef.current; // ← guard: don't double-start
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
@@ -96,29 +98,31 @@ export default function useWebRTC({ socket, roomId, userId, displayName, isHost 
     setIsCamOff((prev) => !prev);
   }, []);
 
-  const toggleScreenShare = useCallback(async () => {
-    if (isScreenSharing) {
-      screenTrackRef.current?.stop();
-      const camTrack = localStreamRef.current?.getVideoTracks()[0];
+ const toggleScreenShare = useCallback(async () => {
+  if (isScreenSharing) {
+    screenTrackRef.current?.stop();
+    const camTrack = localStreamRef.current?.getVideoTracks()[0];
+    const sender = pcRef.current?.getSenders().find((s) => s.track?.kind === "video");
+    if (sender && camTrack) await sender.replaceTrack(camTrack);
+    setIsScreenSharing(false);
+    setScreenStream(null);              // ← clear it
+    socket.emit("call:screen_share_stopped", { roomId });
+  } else {
+    try {
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const screenTrack = stream.getVideoTracks()[0];
+      screenTrackRef.current = screenTrack;
       const sender = pcRef.current?.getSenders().find((s) => s.track?.kind === "video");
-      if (sender && camTrack) await sender.replaceTrack(camTrack);
-      setIsScreenSharing(false);
-      socket.emit("call:screen_share_stopped", { roomId });
-    } else {
-      try {
-        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
-        const screenTrack = screenStream.getVideoTracks()[0];
-        screenTrackRef.current = screenTrack;
-        const sender = pcRef.current?.getSenders().find((s) => s.track?.kind === "video");
-        if (sender) await sender.replaceTrack(screenTrack);
-        screenTrack.onended = () => toggleScreenShare();
-        setIsScreenSharing(true);
-        socket.emit("call:screen_share_started", { roomId });
-      } catch (e) {
-        console.error("Screen share failed:", e);
-      }
+      if (sender) await sender.replaceTrack(screenTrack);
+      screenTrack.onended = () => toggleScreenShare();
+      setIsScreenSharing(true);
+      setScreenStream(stream);          // ← store it
+      socket.emit("call:screen_share_started", { roomId });
+    } catch (e) {
+      console.error("Screen share failed:", e);
     }
-  }, [isScreenSharing, socket, roomId]);
+  }
+}, [isScreenSharing, socket, roomId]);
 
   const cleanup = useCallback(() => {
     localStreamRef.current?.getTracks().forEach((t) => t.stop());
@@ -138,6 +142,6 @@ export default function useWebRTC({ socket, roomId, userId, displayName, isHost 
     startMedia, callGuest,
     handleOffer, handleAnswer, handleIceCandidate,
     toggleMute, toggleCam, toggleScreenShare,
-    cleanup,
+    cleanup,screenStream,
   };
 }

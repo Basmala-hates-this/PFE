@@ -15,7 +15,7 @@ export default function CallRoom({
     startMedia, callGuest,
     handleOffer, handleAnswer, handleIceCandidate,
     toggleMute, toggleCam, toggleScreenShare,
-    cleanup,
+    cleanup,screenStream,
   } = useWebRTC({ socket, roomId, userId, displayName, isHost });
 
   // bind streams
@@ -49,6 +49,12 @@ export default function CallRoom({
     initializedRef.current = true;
     startMedia();
   }, []);
+
+useEffect(() => {
+  if (localVideoRef.current) {
+    localVideoRef.current.srcObject = isScreenSharing ? screenStream : localStream;
+  }
+}, [isScreenSharing, screenStream, localStream]);
 
   // host: call the guest once guestSocketId arrives
   useEffect(() => {
