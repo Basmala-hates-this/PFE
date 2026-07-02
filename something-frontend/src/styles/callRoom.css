@@ -1,0 +1,92 @@
+.callroom-videos {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  gap: 4px;
+  background: #000;
+}
+
+/* Solo: single tile fills the space (waiting-for-guest state included) */
+.callroom-videos.solo .callroom-video-wrapper {
+  width: 100%;
+  height: 100%;
+}
+
+/* Duo: side-by-side split (horizontal split, not stacked) */
+.callroom-videos.duo .callroom-video-wrapper {
+  width: 50%;
+  height: 100%;
+}
+
+.callroom-video-wrapper {
+  position: relative;
+  background: #111;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.callroom-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.callroom-video.mirrored {
+  transform: scaleX(-1); /* local self-view feels natural mirrored */
+}
+
+.callroom-avatar {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #2a2a2a;
+}
+
+.callroom-avatar span {
+  font-size: 3rem;
+  font-weight: 600;
+  color: #ccc;
+}
+
+.callroom-video-label {
+  position: absolute;
+  bottom: 8px;
+  left: 8px;
+  padding: 2px 8px;
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 0.85rem;
+  border-radius: 4px;
+}
+
+.callroom-waiting-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.callroom-waiting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: #ccc;
+}
+
+.callroom-waiting span {
+  font-size: 2rem;
+}
+
+/* Stack vertically on narrow viewports so tiles don't get squished too thin */
+@media (max-width: 480px) {
+  .callroom-videos.duo {
+    flex-direction: column;
+  }
+  .callroom-videos.duo .callroom-video-wrapper {
+    width: 100%;
+    height: 50%;
+  }
+}

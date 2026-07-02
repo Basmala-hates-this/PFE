@@ -1,5 +1,110 @@
+// import { useEffect, useRef } from "react";
+// import useWebRTC from "./useWebRTC";
+
+// export default function CallRoom({
+//   socket, roomId, userId, displayName,
+//   isHost, guestSocketId, onEnd,
+// }) {
+//   const localVideoRef  = useRef(null);
+//   const remoteVideoRef = useRef(null);
+//   const initializedRef = useRef(false); // ← guard double-init
+
+//   const {
+//     localStream, remoteStream,
+//     isMuted, isCamOff, isScreenSharing,
+//     startMedia, callGuest,
+//     handleOffer, handleAnswer, handleIceCandidate,
+//     toggleMute, toggleCam, toggleScreenShare,
+//     cleanup,screenStream,
+//   } = useWebRTC({ socket, roomId, userId, displayName, isHost });
+
+//   // bind streams
+//   useEffect(() => {
+//     if (localVideoRef.current && localStream)
+//       localVideoRef.current.srcObject = localStream;
+//   }, [localStream]);
+
+//   useEffect(() => {
+//     if (remoteVideoRef.current && remoteStream)
+//       remoteVideoRef.current.srcObject = remoteStream;
+//   }, [remoteStream]);
+
+//   // register socket listeners ONCE on mount
+//   useEffect(() => {
+//     socket.on("call:offer",         handleOffer);
+//     socket.on("call:answer",        handleAnswer);
+//     socket.on("call:ice_candidate", handleIceCandidate);
+
+//     return () => {
+//       socket.off("call:offer",         handleOffer);
+//       socket.off("call:answer",        handleAnswer);
+//       socket.off("call:ice_candidate", handleIceCandidate);
+//       cleanup();
+//     };
+//   }, []); // ← empty: register once, stable refs from useCallback handle the rest
+
+//   // start media on mount (both host and guest need their camera)
+//   useEffect(() => {
+//     if (initializedRef.current) return;
+//     initializedRef.current = true;
+//     startMedia();
+//   }, []);
+
+// useEffect(() => {
+//   if (localVideoRef.current) {
+//     localVideoRef.current.srcObject = isScreenSharing ? screenStream : localStream;
+//   }
+// }, [isScreenSharing, screenStream, localStream]);
+
+//   // host: call the guest once guestSocketId arrives
+//   useEffect(() => {
+//     if (isHost && guestSocketId) {
+//       callGuest(guestSocketId);
+//     }
+//   }, [guestSocketId]); // ← only re-runs when a new guest is ready
+
+//   const handleEnd = () => {
+//     socket.emit(isHost ? "call:end" : "call:leave", { roomId });
+//     cleanup();
+//     onEnd();
+//   };
+
+//   return (
+//     <div className="callroom-root">
+//       <div className="callroom-videos">
+//         <div className="callroom-video-wrapper">
+//           <video ref={localVideoRef} autoPlay muted playsInline className="callroom-video" />
+//           <span className="callroom-video-label">{displayName} {isHost ? "👑" : ""} (You)</span>
+//         </div>
+//         <div className="callroom-video-wrapper">
+//           {remoteStream ? (
+//             <>
+//               <video ref={remoteVideoRef} autoPlay playsInline className="callroom-video" />
+//               <span className="callroom-video-label">Guest</span>
+//             </>
+//           ) : (
+//             <div className="callroom-waiting">
+//               <span>⏳</span>
+//               <p>{isHost ? "Waiting for guest to join..." : "Connecting..."}</p>
+//             </div>
+//           )}
+//         </div>
+//       </div>
+
+//       <div className="callroom-controls">
+//         <button onClick={toggleMute}        className={`callroom-ctrl-btn ${isMuted        ? "callroom-ctrl-active" : ""}`}>{isMuted        ? "🔇" : "🎙️"}</button>
+//         <button onClick={toggleCam}         className={`callroom-ctrl-btn ${isCamOff       ? "callroom-ctrl-active" : ""}`}>{isCamOff       ? "📵" : "📷"}</button>
+//         <button onClick={toggleScreenShare} className={`callroom-ctrl-btn ${isScreenSharing? "callroom-ctrl-active" : ""}`}>{isScreenSharing? "🖥️✓" : "🖥️"}</button>
+//         <button onClick={handleEnd} className="callroom-ctrl-btn callroom-ctrl-end">
+//           📵 {isHost ? "End" : "Leave"}
+//         </button>
+//       </div>
+//     </div>
+//   );
+// }
 import { useEffect, useRef } from "react";
 import useWebRTC from "./useWebRTC";
+import "../styles/callRoom.css"
 
 export default function CallRoom({
   socket, roomId, userId, displayName,
@@ -10,19 +115,22 @@ export default function CallRoom({
   const initializedRef = useRef(false); // ← guard double-init
 
   const {
-    localStream, remoteStream,
+    localStream, remoteStream, screenStream,
     isMuted, isCamOff, isScreenSharing,
+    remoteCamOff, remoteScreenSharing,
     startMedia, callGuest,
     handleOffer, handleAnswer, handleIceCandidate,
+    handleRemoteCamStatus, handleRemoteScreenStatus,
     toggleMute, toggleCam, toggleScreenShare,
-    cleanup,screenStream,
+    cleanup,
   } = useWebRTC({ socket, roomId, userId, displayName, isHost });
 
-  // bind streams
+  // local preview: camera or screen share, whichever is active
   useEffect(() => {
-    if (localVideoRef.current && localStream)
-      localVideoRef.current.srcObject = localStream;
-  }, [localStream]);
+    if (localVideoRef.current) {
+      localVideoRef.current.srcObject = isScreenSharing ? screenStream : localStream;
+    }
+  }, [isScreenSharing, screenStream, localStream]);
 
   useEffect(() => {
     if (remoteVideoRef.current && remoteStream)
@@ -34,27 +142,31 @@ export default function CallRoom({
     socket.on("call:offer",         handleOffer);
     socket.on("call:answer",        handleAnswer);
     socket.on("call:ice_candidate", handleIceCandidate);
+    socket.on("call:cam_status",    handleRemoteCamStatus);
+    socket.on("call:screen_share_started", () =>
+      handleRemoteScreenStatus({ isScreenSharing: true })
+    );
+    socket.on("call:screen_share_stopped", () =>
+      handleRemoteScreenStatus({ isScreenSharing: false })
+    );
 
     return () => {
       socket.off("call:offer",         handleOffer);
       socket.off("call:answer",        handleAnswer);
       socket.off("call:ice_candidate", handleIceCandidate);
+      socket.off("call:cam_status",    handleRemoteCamStatus);
+      socket.off("call:screen_share_started");
+      socket.off("call:screen_share_stopped");
       cleanup();
     };
   }, []); // ← empty: register once, stable refs from useCallback handle the rest
 
-  // start media on mount (both host and guest need their camera)
+  // start media on mount (both host and guest need their camera — starts off, see hook)
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
     startMedia();
   }, []);
-
-useEffect(() => {
-  if (localVideoRef.current) {
-    localVideoRef.current.srcObject = isScreenSharing ? screenStream : localStream;
-  }
-}, [isScreenSharing, screenStream, localStream]);
 
   // host: call the guest once guestSocketId arrives
   useEffect(() => {
@@ -69,26 +181,45 @@ useEffect(() => {
     onEnd();
   };
 
+  const hasRemote = !!remoteStream && remoteStream.getTracks().length > 0;
+  const showLocalAvatar  = isCamOff && !isScreenSharing;
+  const showRemoteAvatar = remoteCamOff && !remoteScreenSharing;
+
   return (
     <div className="callroom-root">
-      <div className="callroom-videos">
+      <div className={`callroom-videos ${hasRemote ? "duo" : "solo"}`}>
         <div className="callroom-video-wrapper">
-          <video ref={localVideoRef} autoPlay muted playsInline className="callroom-video" />
+          {showLocalAvatar ? (
+            <div className="callroom-avatar">
+              <span>{displayName?.[0]?.toUpperCase()}</span>
+            </div>
+          ) : (
+            <video ref={localVideoRef} autoPlay muted playsInline className="callroom-video mirrored" />
+          )}
           <span className="callroom-video-label">{displayName} {isHost ? "👑" : ""} (You)</span>
         </div>
-        <div className="callroom-video-wrapper">
-          {remoteStream ? (
-            <>
+
+        {hasRemote && (
+          <div className="callroom-video-wrapper">
+            {showRemoteAvatar ? (
+              <div className="callroom-avatar">
+                <span>G</span>
+              </div>
+            ) : (
               <video ref={remoteVideoRef} autoPlay playsInline className="callroom-video" />
-              <span className="callroom-video-label">Guest</span>
-            </>
-          ) : (
+            )}
+            <span className="callroom-video-label">Guest</span>
+          </div>
+        )}
+
+        {!hasRemote && (
+          <div className="callroom-video-wrapper callroom-waiting-wrapper">
             <div className="callroom-waiting">
               <span>⏳</span>
               <p>{isHost ? "Waiting for guest to join..." : "Connecting..."}</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="callroom-controls">
