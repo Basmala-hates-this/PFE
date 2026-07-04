@@ -1,46 +1,3 @@
-       
-
-// require("dotenv").config();
-// const http = require("http");
-// const { Server } = require("socket.io");
-// const app = require("./app");
-
-// const PORT = process.env.PORT || 5000;
-
-// const server = http.createServer(app);
-
-// const io = new Server(server, {
-//   cors: {
-//     origin: process.env.FRONTEND_URL || "*",
-//     methods: ["GET", "POST"]
-//   }
-// });
-
-// // make io accessible in controllers
-// app.set("io", io);
-
-// io.on("connection", (socket) => {
-//   console.log("Socket connected:", socket.id);
-
-//   socket.on("join_room", (roomId) => {
-//     socket.join(roomId);
-//     console.log(`Socket ${socket.id} joined room ${roomId}`);
-//   });
-
-//   socket.on("leave_room", (roomId) => {
-//     socket.leave(roomId);
-//   });
-
-//   socket.on("disconnect", () => {
-//     console.log("Socket disconnected:", socket.id);
-//   });
-// });
-
-// app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
-
-// server.listen(PORT, "0.0.0.0", () => {
-//   console.log(`Server running on port ${PORT}`);
-// });
 require("dotenv").config();
 const http = require("http");
 const { Server } = require("socket.io");
@@ -94,10 +51,12 @@ io.on("connection", (socket) => {
     activeCalls.set(roomId, {
       hostId: userId,
       hostSocketId: socket.id,
+      // participants = everyone who currently PUBLISHES (host + active speakers)
       participants: new Map([[socket.id, { userId, displayName }]]),
+      // audience = everyone who currently only RECEIVES
       audience: new Set(),
       active: true,
-      mode: "p2p",
+      mode: "broadcast",
     });
 
     socket.join(`call:${roomId}`);
@@ -108,7 +67,7 @@ io.on("connection", (socket) => {
       hostName: displayName,
     });
 
-    socket.emit("call:started", { roomId, mode: "p2p" });
+    socket.emit("call:started", { roomId, mode: "broadcast" });
     console.log(`Call started in room ${roomId} by ${userId}`);
   });
 
@@ -121,12 +80,22 @@ io.on("connection", (socket) => {
     call.audience.add(socket.id);
     socket.join(`call:${roomId}`);
 
-    // ← tell the HOST specifically, with the joiner's socketId
+    // tell the HOST specifically (drives the "invite to speak" audience panel UI)
     io.to(call.hostSocketId).emit("call:audience_joined", {
       userId,
       displayName,
       socketId: socket.id,
     });
+
+    // ← NEW: tell EVERY current publisher (host + any active speakers), not just
+    // the host, so each of them opens a connection and publishes to this viewer.
+    for (const publisherSocketId of call.participants.keys()) {
+      io.to(publisherSocketId).emit("call:viewer_joined", {
+        viewerSocketId: socket.id,
+        userId,
+        displayName,
+      });
+    }
 
     const participantList = [...call.participants.values()];
     socket.emit("call:state", {
@@ -148,7 +117,6 @@ io.on("connection", (socket) => {
       return;
     }
 
-    // ← use targetSocketId directly instead of searching by userId
     if (targetSocketId) {
       io.to(targetSocketId).emit("call:speaker_invite", {
         roomId,
@@ -167,27 +135,32 @@ io.on("connection", (socket) => {
       return;
     }
 
+    // snapshot who exists BEFORE we add the new speaker
+    const existingSpeakerSocketIds = [...call.participants.keys()];
+    const existingViewerSocketIds = [...call.audience];
+
     call.audience.delete(socket.id);
     call.participants.set(socket.id, { userId, displayName });
 
-    // ← tell the host to initiate WebRTC with this guest's socketId
-    io.to(call.hostSocketId).emit("call:guest_ready", {
-      guestSocketId: socket.id,
-      userId,
-      displayName,
+    // ← NEW: tell the NEW speaker exactly who they need to connect to.
+    // They will initiate a bidirectional connection to each other speaker,
+    // and a publishing (send-only, from their side) connection to each viewer.
+    socket.emit("call:call_targets", {
+      speakers: existingSpeakerSocketIds,
+      viewers: existingViewerSocketIds,
     });
 
     io.to(`call:${roomId}`).emit("call:speaker_joined", {
       userId,
       displayName,
+      socketId: socket.id,
       participantCount: call.participants.size,
     });
 
-    // ← tell the guest they're confirmed as speaker
     socket.emit("call:speaker_accepted", { roomId, mode: call.mode });
   });
 
-  // ─── P2P signaling ────────────────────────────────────────────────────
+  // ─── P2P signaling (unchanged — already generic by socketId) ──────────
   socket.on("call:offer", ({ offer, targetSocketId }) => {
     io.to(targetSocketId).emit("call:offer", { offer, fromSocketId: socket.id });
   });
@@ -200,7 +173,7 @@ io.on("connection", (socket) => {
     io.to(targetSocketId).emit("call:ice_candidate", { candidate, fromSocketId: socket.id });
   });
 
-  // ─── screen share ─────────────────────────────────────────────────────
+  // ─── screen share (unchanged — already includes socketId) ─────────────
   socket.on("call:screen_share_started", ({ roomId }) => {
     socket.to(`call:${roomId}`).emit("call:screen_share_started", { socketId: socket.id });
   });
@@ -244,7 +217,8 @@ function _handleCallLeave(socket, roomId) {
   if (!call) return;
 
   const meta = socketMeta.get(socket.id);
-  const wasAudience = call.audience.has(socket.id); // ← check before deleting
+  const wasAudience = call.audience.has(socket.id);
+  const wasSpeaker = call.participants.has(socket.id);
 
   call.participants.delete(socket.id);
   call.audience.delete(socket.id);
@@ -257,15 +231,25 @@ function _handleCallLeave(socket, roomId) {
   }
 
   if (wasAudience) {
-    // ← tell host to remove them from audience panel
     io.to(call.hostSocketId).emit("call:audience_left", { socketId: socket.id });
+    // ← NEW: any speaker who had a connection to this viewer needs to tear it down
+    for (const publisherSocketId of call.participants.keys()) {
+      io.to(publisherSocketId).emit("call:peer_left", { socketId: socket.id });
+    }
     return;
   }
 
-  io.to(`call:${roomId}`).emit("call:speaker_left", {
-    userId: meta?.userId,
-    participantCount: call.participants.size,
-  });
+  if (wasSpeaker) {
+    // ← NEW: tell every remaining participant + audience member to close
+    // whatever peer connection they had open to this speaker.
+    io.to(`call:${roomId}`).emit("call:peer_left", { socketId: socket.id });
+
+    io.to(`call:${roomId}`).emit("call:speaker_left", {
+      userId: meta?.userId,
+      socketId: socket.id,
+      participantCount: call.participants.size,
+    });
+  }
 }
 
 // ─── boot ─────────────────────────────────────────────────────────────────────
