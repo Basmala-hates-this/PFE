@@ -75,6 +75,9 @@ export default function RoomChat() {
   const prependingRef = useRef(false);
   const MESSAGES_LIMIT = 30;
 
+
+  const isFetchingRef = useRef(false); // add near your other refs
+
   ////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
@@ -302,7 +305,7 @@ export default function RoomChat() {
 
     observer.observe(loadMoreMessagesRef.current);
     return () => observer.disconnect();
-  }, [messagesCursor, messagesHasMore, loadingMoreMessages]);
+  }, [messagesCursor, messagesHasMore]);
 
   //////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -541,39 +544,40 @@ export default function RoomChat() {
   };
 
   const loadMoreMessages = async () => {
-    if (!messagesHasMore || loadingMoreMessages || !messagesCursor) return;
-    setLoadingMoreMessages(true);
+  if (!messagesHasMore || isFetchingRef.current || !messagesCursor) return;
+  isFetchingRef.current = true;
+  setLoadingMoreMessages(true);
 
-    const container = messagesAreaRef.current;
-    const prevScrollHeight = container?.scrollHeight || 0;
-    const prevScrollTop = container?.scrollTop || 0;
+  const container = messagesAreaRef.current;
+  const prevScrollHeight = container?.scrollHeight || 0;
+  const prevScrollTop = container?.scrollTop || 0;
 
-    try {
-      const res = await api.get(
-        `/rooms/${roomId}/messages?limit=${MESSAGES_LIMIT}&cursorCreatedAt=${encodeURIComponent(messagesCursor.createdAt)}&cursorId=${messagesCursor.id}`,
-      );
-      const { messages: older, nextCursor, hasMore } = res.data;
+  try {
+    const res = await api.get(
+      `/rooms/${roomId}/messages?limit=${MESSAGES_LIMIT}&cursorCreatedAt=${encodeURIComponent(messagesCursor.createdAt)}&cursorId=${messagesCursor.id}`,
+    );
+    const { messages: older, nextCursor, hasMore } = res.data;
 
-      prependingRef.current = true;
-      setMessages((prev) => [...older, ...prev]);
-      setMessagesCursor(nextCursor);
-      setMessagesHasMore(hasMore);
+    prependingRef.current = true;
+    setMessages((prev) => [...older, ...prev]);
+    setMessagesCursor(nextCursor);
+    setMessagesHasMore(hasMore);
 
-      requestAnimationFrame(() => {
-        if (container) {
-          const newScrollHeight = container.scrollHeight;
-          container.scrollTop =
-            newScrollHeight - prevScrollHeight + prevScrollTop;
-        }
-        prependingRef.current = false;
-      });
-    } catch (err) {
-      console.error("Failed to load more messages:", err);
+    requestAnimationFrame(() => {
+      if (container) {
+        const newScrollHeight = container.scrollHeight;
+        container.scrollTop = newScrollHeight - prevScrollHeight + prevScrollTop;
+      }
       prependingRef.current = false;
-    } finally {
-      setLoadingMoreMessages(false);
-    }
-  };
+    });
+  } catch (err) {
+    console.error("Failed to load more messages:", err);
+    prependingRef.current = false;
+  } finally {
+    isFetchingRef.current = false;
+    setLoadingMoreMessages(false);
+  }
+};
   /////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////
