@@ -76,7 +76,9 @@ export default function RoomChat() {
   const MESSAGES_LIMIT = 30;
 
 
-  const isFetchingRef = useRef(false); // add near your other refs
+  const isFetchingRef = useRef(false); 
+  const messagesCursorRef = useRef(null);
+const messagesHasMoreRef = useRef(true);
 
   ////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
@@ -291,21 +293,46 @@ export default function RoomChat() {
     fetchMembers();
   }, [room]);
 
-  useEffect(() => {
-    if (!loadMoreMessagesRef.current || !messagesAreaRef.current) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting) {
-          loadMoreMessages();
-        }
-      },
-      { root: messagesAreaRef.current, threshold: 0.1 },
-    );
 
-    observer.observe(loadMoreMessagesRef.current);
-    return () => observer.disconnect();
-  }, [messagesCursor, messagesHasMore]);
+
+//   useEffect(() => {
+//     if (!loadMoreMessagesRef.current || !messagesAreaRef.current) return;
+
+//     const observer = new IntersectionObserver(
+//       (entries) => {
+//         if (entries[0].isIntersecting) {
+//           loadMoreMessages();
+//         }
+//       },
+//       { root: messagesAreaRef.current, threshold: 0.1 },
+//     );
+
+//     observer.observe(loadMoreMessagesRef.current);
+//     return () => observer.disconnect();
+//   }, [messagesCursor, messagesHasMore]);
+// keep refs in sync with state
+useEffect(() => {
+  messagesCursorRef.current = messagesCursor;
+  messagesHasMoreRef.current = messagesHasMore;
+}, [messagesCursor, messagesHasMore]);
+
+// build the observer ONCE — never tear down/rebuild on cursor change
+useEffect(() => {
+  if (!loadMoreMessagesRef.current || !messagesAreaRef.current) return;
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) {
+        loadMoreMessages();
+      }
+    },
+    { root: messagesAreaRef.current, threshold: 0.1 },
+  );
+
+  observer.observe(loadMoreMessagesRef.current);
+  return () => observer.disconnect();
+}, []);
 
   //////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -543,18 +570,19 @@ export default function RoomChat() {
     });
   };
 
-  const loadMoreMessages = async () => {
-  if (!messagesHasMore || isFetchingRef.current || !messagesCursor) return;
+ const loadMoreMessages = async () => {
+  if (!messagesHasMoreRef.current || isFetchingRef.current || !messagesCursorRef.current) return;
   isFetchingRef.current = true;
   setLoadingMoreMessages(true);
 
+  const cursor = messagesCursorRef.current;
   const container = messagesAreaRef.current;
   const prevScrollHeight = container?.scrollHeight || 0;
   const prevScrollTop = container?.scrollTop || 0;
 
   try {
     const res = await api.get(
-      `/rooms/${roomId}/messages?limit=${MESSAGES_LIMIT}&cursorCreatedAt=${encodeURIComponent(messagesCursor.createdAt)}&cursorId=${messagesCursor.id}`,
+      `/rooms/${roomId}/messages?limit=${MESSAGES_LIMIT}&cursorCreatedAt=${encodeURIComponent(cursor.createdAt)}&cursorId=${cursor.id}`,
     );
     const { messages: older, nextCursor, hasMore } = res.data;
 
