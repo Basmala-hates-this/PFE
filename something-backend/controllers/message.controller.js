@@ -29,7 +29,7 @@ const getMessages = async (req, res) => {
   const { messages, nextCursor } = await messageRepo.getMessagesByRoom(roomId, {
     limit: Number(limit),
     cursorCreatedAt: cursorCreatedAt || null,
-    cursorId: cursorId ? Number(cursorId) : null,
+    cursorId: cursorId || null,
   });
 
   res.json({ messages, nextCursor, hasMore: !!nextCursor });

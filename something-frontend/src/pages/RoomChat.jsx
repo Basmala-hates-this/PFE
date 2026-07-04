@@ -927,9 +927,17 @@ useEffect(() => {
                           {t("roomChat.openFile")}
                         </a>
                       ))}
-                    <small className="roomchat-message-timestamp">
+                    {/* <small className="roomchat-message-timestamp">
                       {new Date(msg.createdAt).toLocaleTimeString()}
-                    </small>
+                    </small> */}
+                    <small className="roomchat-message-timestamp">
+  {new Date(msg.createdAt).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  })}
+</small>
                     {msg.isEdited && (
                       <small className="roomchat-message-edited">
                         {" "}
