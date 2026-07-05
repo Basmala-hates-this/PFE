@@ -207,7 +207,12 @@ const [peerNames, setPeerNames] = useState({});
       setIncomingCall({ hostId, hostName });
       setCallActive(true);
     });
-    socket.on("call:active", () => setCallActive(true));
+    
+    socket.on("call:active", ({ hostId, hostName }) => {
+  setCallActive(true);
+  setIncomingCall({ hostId, hostName });   //  this is what shows the Watch button
+});
+
     socket.on("call:ended", () => {
   setCallActive(false);
   setIsInCall(false);

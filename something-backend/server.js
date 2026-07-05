@@ -30,6 +30,7 @@ io.on("connection", (socket) => {
       socket.emit("call:active", {
         roomId,
         hostId: call.hostId,
+         hostName: call.hostName,
         participantCount: call.participants.size,
       });
     }
@@ -51,6 +52,7 @@ io.on("connection", (socket) => {
     activeCalls.set(roomId, {
       hostId: userId,
       hostSocketId: socket.id,
+      hostName: displayName,
       // participants = everyone who currently PUBLISHES (host + active speakers)
       participants: new Map([[socket.id, { userId, displayName }]]),
       // audience = everyone who currently only RECEIVES
@@ -136,8 +138,10 @@ io.on("connection", (socket) => {
     }
 
     // snapshot who exists BEFORE we add the new speaker
-    const existingSpeakerSocketIds = [...call.participants.keys()];
-    const existingViewerSocketIds = [...call.audience];
+    // const existingSpeakerSocketIds = [...call.participants.keys()];
+    // const existingViewerSocketIds = [...call.audience];
+    const existingSpeakerSocketIds = [...call.participants.keys()].filter((id) => id !== socket.id);
+const existingViewerSocketIds  = [...call.audience].filter((id) => id !== socket.id);
 
     call.audience.delete(socket.id);
     call.participants.set(socket.id, { userId, displayName });

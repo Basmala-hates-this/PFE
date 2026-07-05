@@ -96,27 +96,37 @@ export default function CallRoom({
       <div className="callroom-videos">
         {isPublisher && (
           <div className="callroom-video-wrapper">
-            {showLocalAvatar ? (
+            {/* {showLocalAvatar ? (
               <div className="callroom-avatar">
                 <span>{displayName?.[0]?.toUpperCase()}</span>
               </div>
             ) : (
               <video ref={localVideoRef} autoPlay muted playsInline className="callroom-video mirrored" />
-            )}
+            )} */}
+            <video
+  ref={localVideoRef}
+  autoPlay muted playsInline
+  className="callroom-video mirrored"
+  style={{ display: showLocalAvatar ? "none" : "block" }}
+/>
+{showLocalAvatar && (
+  <div className="callroom-avatar"><span>{displayName?.[0]?.toUpperCase()}</span></div>
+)}
             <span className="callroom-video-label">
               {displayName} {role === "host" ? "👑" : ""} (You)
             </span>
           </div>
         )}
 
-        {peers.map(({ socketId, stream, isCamOff: peerCamOff }) => (
-          <PeerTile
-            key={socketId}
-            stream={stream}
-            isCamOff={peerCamOff}
-            label={peerNames?.[socketId] || "Speaker"}
-          />
-        ))}
+       {peers.map(({ socketId, stream, isCamOff: peerCamOff, isScreenSharing: peerSharing }) => (
+  <PeerTile
+    key={socketId}
+    stream={stream}
+    isCamOff={peerCamOff}
+    isScreenSharing={peerSharing}
+    label={peerNames?.[socketId] || "Speaker"}
+  />
+))}
 
         {peers.length === 0 && (
           <div className="callroom-video-wrapper callroom-waiting-wrapper">
@@ -154,19 +164,18 @@ export default function CallRoom({
 
 // small internal component so remote tiles get their own <video> + ref, since
 // hooks can't be called in a .map() callback directly
-function PeerTile({ stream, isCamOff, label }) {
+function PeerTile({ stream, isCamOff, isScreenSharing, label }) {
   const videoRef = useRef(null);
-
   useEffect(() => {
     if (videoRef.current) videoRef.current.srcObject = stream;
   }, [stream]);
 
+  const showAvatar = isCamOff && !isScreenSharing;
+
   return (
     <div className="callroom-video-wrapper">
-      {isCamOff ? (
-        <div className="callroom-avatar">
-          <span>{label?.[0]?.toUpperCase() || "?"}</span>
-        </div>
+      {showAvatar ? (
+        <div className="callroom-avatar"><span>{label?.[0]?.toUpperCase() || "?"}</span></div>
       ) : (
         <video ref={videoRef} autoPlay playsInline className="callroom-video" />
       )}
