@@ -198,7 +198,9 @@
       "viewPdf": "📄 عرض PDF",
       "guestVoteAlert": "أنشئ حساباً للتصويت! 👋",
       "guestPostAlert": "سجّل دخولك للنشر؟",
-      "deleteConfirm": "هل أنت متأكد من حذف هذا المنشور؟"
+      "deleteConfirm": "هل أنت متأكد من حذف هذا المنشور؟",
+        "answered": "تمت الإجابة",
+      "unanswered": "بدون إجابة"
     },
     "postModal": {
       "title": "اكتب منشوراً",
@@ -217,7 +219,12 @@
       "saving": "جارٍ الحفظ...",
     "createAccount":"إنشاء حساب",
     "login":"تسجيل الدخول",
-    "guestCommentBanner":"مرحباً بالزائر!"
+    "guestCommentBanner":"مرحباً بالزائر!",
+     "isQuestionLabel": "هذا سؤال",
+      "answered": "تمت الإجابة",
+    "unanswered": "بدون إجابة",
+    "markAnswered": "وضع علامة كتمت الإجابة",
+    "markUnanswered": "وضع علامة كبدون إجابة"
     },
     "browseRooms": {
       "title": "تصفح الغرف",
@@ -268,7 +275,11 @@
     "all": "الكل",
     "popular": "الأكثر شعبية",
     "recent": "الأحدث",
-    "specialized": "متخصص"
+    "specialized": "متخصص",
+     "answered": "تمت الإجابة",
+    "unanswered": "بدون إجابة",
+    "markAnswered": "وضع علامة كتمت الإجابة",
+    "markUnanswered": "وضع علامة كبدون إجابة"
   },
   "noComments": "لا توجد تعليقات بعد. كن أول من يعلق!",
   "hiddenComment": "🙈 تم إخفاء هذا التعليق.",

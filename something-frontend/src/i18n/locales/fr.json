@@ -199,7 +199,9 @@
       "viewPdf": "📄 Voir le PDF",
       "guestVoteAlert": "Créez un compte pour voter ! 👋",
       "guestPostAlert": "Connectez-vous pour poster ?",
-      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce post ?"
+      "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce post ?",
+       "answered": "Répondu",
+      "unanswered": "Sans réponse"
     },
     "postModal": {
       "title": "Écrire un post",
@@ -218,7 +220,13 @@
       "saving": "Enregistrement...",
       "createAccount":"Créer un compte",
     "login":"Se connecter",
-    "guestCommentBanner":"bonjour visitieur"
+    "guestCommentBanner":"bonjour visitieur",
+          "isQuestionLabel": "Ceci est une question",
+           "answered": "Répondu",
+    "unanswered": "Sans réponse",
+    "markAnswered": "Marquer comme répondu",
+    "markUnanswered": "Marquer comme sans réponse"
+
     },
     "browseRooms": {
       "title": "Parcourir les salles",
@@ -271,7 +279,11 @@
     "recent": "Plus récent",
     "specialized": "Spécialisé",
     "login":"Se connecter",
-    "guestCommentBanner":"bonjour visitieur"
+    "guestCommentBanner":"bonjour visitieur",
+     "answered": "Répondu",
+    "unanswered": "Sans réponse",
+    "markAnswered": "Marquer comme répondu",
+    "markUnanswered": "Marquer comme sans réponse"
   },
   "noComments": "Aucun commentaire. Soyez le premier !",
   "hiddenComment": " Ce commentaire a été masqué.",
