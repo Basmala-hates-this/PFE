@@ -17,7 +17,7 @@ const isUserSuspendedInRoom = async (roomId, userId) => {
 // --- posts ---
 
 const createPost = async (req, res) => {
-  const { title, content, roomId, resourceLink, resourceLabel } = req.body;
+  const { title, content, roomId, resourceLink, resourceLabel, isQuestion } = req.body;
   const authorId = req.user.id;
   const authorUsername = req.user.username;
   const authorRole = req.user.role;
@@ -26,40 +26,26 @@ const createPost = async (req, res) => {
     return res.status(403).json({ message: 'You are suspended from posting in this room.' });
   }
 
-  // const image = req.file && req.file.mimetype.startsWith('image/')
-  //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-
-  // const pdf = req.file && req.file.mimetype === 'application/pdf'
-  //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-  //   const video = req.file && req.file.mimetype.startsWith('video/')
-  // ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-//   const image = req.file && req.file.mimetype.startsWith('image/')
-//   ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
-// const pdf = req.file && req.file.mimetype === 'application/pdf'
-//   ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
-// const video = req.file && req.file.mimetype.startsWith('video/')
-//   ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
-const image = req.file && req.file.mimetype.startsWith('image/') ? req.file.path : undefined;
-const pdf = req.file && req.file.mimetype === 'application/pdf' ? req.file.path : undefined;
-const video = req.file && req.file.mimetype.startsWith('video/') ? req.file.path : undefined;
-
-
+  const image = req.file && req.file.mimetype.startsWith('image/') ? req.file.path : undefined;
+  const pdf = req.file && req.file.mimetype === 'application/pdf' ? req.file.path : undefined;
+  const video = req.file && req.file.mimetype.startsWith('video/') ? req.file.path : undefined;
 
   const newPost = await postRepo.createPost({
     title, content, roomId,
     authorId, authorUsername, authorRole,
-    image, pdf,video, 
+    image, pdf, video, 
     resourceLink: resourceLink || null,
     resourceLabel: resourceLabel || null,
+    isQuestion: isQuestion === true || isQuestion === 'true',
   });
 
-const room = await roomRepo.getRoomById(roomId);
+  const room = await roomRepo.getRoomById(roomId);
 
-try {
-  await notifService.notifyNewPost(roomId, authorId, authorUsername, room?.name || roomId, newPost.id, title);
-} catch (notifErr) {
-  console.error('Post notification failed:', notifErr);
-}
+  try {
+    await notifService.notifyNewPost(roomId, authorId, authorUsername, room?.name || roomId, newPost.id, title);
+  } catch (notifErr) {
+    console.error('Post notification failed:', notifErr);
+  }
 
   res.status(201).json(newPost);
 };
@@ -209,25 +195,19 @@ const getPostsAll = async (req, res) => {
 
 const updatePost = async (req, res) => {
   const { id } = req.params;
-  const { title, content, resourceLink, resourceLabel, removeAttachment } = req.body;
+  const { title, content, resourceLink, resourceLabel, removeAttachment, isQuestion, isAnswered } = req.body;
   const userId = req.user.id;
 
   const existing = await postRepo.getPostById(id);
   if (!existing) return res.status(404).json({ message: 'Post not found' });
   if (existing.userId !== userId) return res.status(403).json({ message: 'Not authorized' });
 
-  // const newImage = req.file && req.file.mimetype.startsWith('image/')
-  //   ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
-  // const newPdf = req.file && req.file.mimetype === 'application/pdf'
-  //   ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
-  // const newVideo = req.file && req.file.mimetype.startsWith('video/')
-  //   ? `http://localhost:5000/uploads/${req.file.filename}` : undefined;
   const newImage = req.file && req.file.mimetype.startsWith('image/')
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
-const newPdf = req.file && req.file.mimetype === 'application/pdf'
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
-const newVideo = req.file && req.file.mimetype.startsWith('video/')
-  ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
+    ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
+  const newPdf = req.file && req.file.mimetype === 'application/pdf'
+    ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
+  const newVideo = req.file && req.file.mimetype.startsWith('video/')
+    ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : undefined;
 
   const clearAttachment = removeAttachment === "true";
 
@@ -238,6 +218,8 @@ const newVideo = req.file && req.file.mimetype.startsWith('video/')
     image: newImage !== undefined ? newImage : (clearAttachment ? null : existing.imageUrl),
     pdf: newPdf !== undefined ? newPdf : (clearAttachment ? null : existing.pdfUrl),
     video: newVideo !== undefined ? newVideo : (clearAttachment ? null : existing.videoUrl),
+    isQuestion,
+    isAnswered,
   });
 
   res.json(updatedPost);
@@ -501,6 +483,36 @@ const reportComment = async (req, res) => {
   }
 };
 
+
+
+async function toggleAnswered(req, res) {
+  try {
+    const { id: postId } = req.params;
+    const userId = req.user.id;
+
+    const ownerId = await postRepo.getPostOwnerId(postId);
+
+    if (!ownerId) {
+      return res.status(404).json({ error: 'Post not found' });
+    }
+
+    if (ownerId !== userId) {
+      return res.status(403).json({ error: 'Only the post author can update answered status' });
+    }
+
+    const updatedPost = await postRepo.toggleAnswered(postId);
+
+    if (!updatedPost) {
+      return res.status(400).json({ error: 'Post is not marked as a question' });
+    }
+
+    return res.status(200).json({ post: updatedPost });
+  } catch (err) {
+    console.error('toggleAnswered error:', err);
+    return res.status(500).json({ error: 'Something went wrong' });
+  }
+}
+
 module.exports = {
   createPost,
   getPostById,
@@ -521,4 +533,5 @@ module.exports = {
   getSavedPosts,
   reportPost,
   reportComment,
+  toggleAnswered,
 };

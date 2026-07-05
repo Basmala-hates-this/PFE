@@ -166,6 +166,9 @@ const [notifications, setNotifications] = useState([]);
 const [unreadCount, setUnreadCount] = useState(0);
 const [showNotifications, setShowNotifications] = useState(false);
 const notifRef = useRef(null);
+
+const [postIsQuestion, setPostIsQuestion] = useState(false);
+
 // ....................................i hate me .....
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -504,6 +507,7 @@ useEffect(() => {
       formData.append("content", postContent);
       formData.append("title", postTitle || "Post");
       formData.append("roomId", selectedPostRoom.value);
+      formData.append("isQuestion", postIsQuestion);
       if (postAttachment) formData.append("attachment", postAttachment);
       if (postResourceLink.trim())
         formData.append("resourceLink", postResourceLink);
@@ -520,6 +524,7 @@ useEffect(() => {
       //     },
       //   },
       // );
+
       const response = await api.post("/posts", formData, {
   headers: { "Content-Type": "multipart/form-data" }
 });
@@ -532,12 +537,13 @@ useEffect(() => {
       setPostResourceLink("");
       setPostResourceLabel("");
       setIsModalOpen(false);
+      setPostIsQuestion(false);
     } catch (err) {
       console.error("Failed to create post:", err);
     } finally {
       setIsSubmitting(false);
     }
-    console.log(posts[0].createdAt);
+  //  console.log(posts[0].createdAt);
   };
 
   //the ammount of bugs is bugging me.....
@@ -746,6 +752,7 @@ const response = await api.get(`/posts/${postId}`);
     const formData = new FormData();
     formData.append("title", editPostTitle);
     formData.append("content", editPostContent);
+    formData.append("isQuestion", editingPost.isQuestion);
     if (editPostAttachment) formData.append("attachment", editPostAttachment);
     if (editPostResourceLink.trim()) formData.append("resourceLink", editPostResourceLink);
     if (editPostResourceLabel.trim()) formData.append("resourceLabel", editPostResourceLabel);
@@ -2005,6 +2012,21 @@ onClick={() => {
                               {post.title}
                             </h3>
                           )}
+                          {post.isQuestion && (
+  <span style={{
+    display: "inline-block",
+    fontSize: "11px",
+    padding: "2px 10px",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    marginBottom: "8px",
+    background: post.isAnswered ? "rgba(39,174,96,0.2)" : "rgba(240,192,64,0.25)",
+    color: post.isAnswered ? "#27ae60" : "#f0c040",
+    border: `1px solid ${post.isAnswered ? "#27ae60b3" : "#f0c040b3"}`,
+  }}>
+    {post.isAnswered ? `✓ ${t('dashboard.post.answered')}` : `❓ ${t('dashboard.post.unanswered')}`}
+  </span>
+)}
                           <p
                             style={{
                               margin: "0 0 8px",
@@ -2425,6 +2447,14 @@ onClick={() => {
                 resize: "vertical",
               }}
             />
+            <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
+  <input
+    type="checkbox"
+    checked={postIsQuestion}
+    onChange={(e) => setPostIsQuestion(e.target.checked)}
+  />
+  {t("dashboard.postModal.isQuestionLabel")}
+</label>
             <div style={{ marginTop: "10px" }}>
               <label
                 style={{
@@ -2586,6 +2616,14 @@ onClick={() => {
               }}
               
             />
+            <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
+  <input
+    type="checkbox"
+    checked={editingPost.isQuestion || false}
+    onChange={(e) => setEditingPost({ ...editingPost, isQuestion: e.target.checked })}
+  />
+  {t("dashboard.postModal.isQuestionLabel")}
+</label>
             {/* current attachment */}
 {(editingPost.imageUrl || editingPost.pdfUrl || editingPost.videoUrl) && !removeAttachment && (
   <div style={{ marginTop:"10px", padding:"8px", background:"rgba(255,255,255,0.05)", borderRadius:"6px", fontSize:"12px", display:"flex", justifyContent:"space-between", alignItems:"center" }}>

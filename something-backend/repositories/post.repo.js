@@ -4,8 +4,8 @@ const pool = require('../db');
 const createPost = async (postData) => {
   const result = await pool.query(
     `INSERT INTO posts 
-      (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url,video_url, resource_link, resource_label)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+      (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url, video_url, resource_link, resource_label, is_question)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
      RETURNING *`,
     [
       postData.roomId,
@@ -19,11 +19,11 @@ const createPost = async (postData) => {
       postData.video || null, 
       postData.resourceLink || null,
       postData.resourceLabel || null,
+      postData.isQuestion ?? false,
     ]
   );
   return toCamel(result.rows[0]);
 };
-
 const getPostById = async (id, userId = null) => {
   const result = await pool.query(
     `SELECT p.*,
@@ -133,12 +133,19 @@ const updatePost = async (postId, userId, updatedData) => {
   if (!post) return null;
   if (post.userId !== userId) return { error: 'Not authorized to edit this post' };
 
+  // fall back to existing values when a field isn't part of this edit
+  const isQuestion = updatedData.isQuestion ?? post.isQuestion;
+  const isAnswered = isQuestion === false 
+    ? false 
+    : (updatedData.isAnswered ?? post.isAnswered);
+
   const result = await pool.query(
     `UPDATE posts 
      SET title = $1, content = $2, is_updated = true,
          image_url = $3, pdf_url = $4, video_url = $5,
-         resource_link = $6, resource_label = $7
-     WHERE id = $8 RETURNING *`,
+         resource_link = $6, resource_label = $7,
+         is_question = $8, is_answered = $9
+     WHERE id = $10 RETURNING *`,
     [
       updatedData.title,
       updatedData.content,
@@ -147,11 +154,14 @@ const updatePost = async (postId, userId, updatedData) => {
       updatedData.video ?? null,
       updatedData.resourceLink ?? null,
       updatedData.resourceLabel ?? null,
+      isQuestion,
+      isAnswered,
       postId,
     ]
   );
   return toCamel(result.rows[0]);
 };
+
 const deletePost = async (postId, userId) => {
   const post = await getPostById(postId);
   if (!post) return false;
@@ -202,6 +212,38 @@ const approveResource = async (postId, approved) => {
  return toCamel(result.rows[0]);
 };
 
+async function setQuestionFlag(postId, isQuestion) {
+  const result = await db.query(
+    `UPDATE posts 
+     SET is_question = $1 
+     WHERE id = $2 
+     RETURNING *`,
+    [isQuestion, postId]
+  );
+  return result.rows[0] ? toCamel(result.rows[0]) : null;
+}
+
+async function toggleAnswered(postId) {
+  const result = await pool.query(
+    `UPDATE posts 
+     SET is_answered = NOT is_answered 
+     WHERE id = $1 AND is_question = true
+     RETURNING *`,
+    [postId]
+  );
+  return result.rows[0] ? toCamel(result.rows[0]) : null;
+}
+
+async function getPostOwnerId(postId) {
+  const result = await pool.query(
+    `SELECT user_id FROM posts WHERE id = $1`,
+    [postId]
+  );
+  return result.rows[0]?.user_id ?? null;
+}
+
+
+
 module.exports = {
   createPost, 
   getPostById,
@@ -213,4 +255,7 @@ module.exports = {
   unhidePost,
   getSavedPostsByUser,
   approveResource,
+  // setQuestionFlag,
+  toggleAnswered,
+  getPostOwnerId,
 };

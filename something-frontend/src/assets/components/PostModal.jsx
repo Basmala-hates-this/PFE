@@ -187,6 +187,15 @@ const toggleCollapse = (commentId) => {
   });
 };
 
+const handleToggleAnswered = async () => {
+  try {
+    await api.patch(`/posts/${post.id}/answered`, {}, { headers: { Authorization: `Bearer ${token}` } });
+    await refetchPostOnly();
+  } catch (err) {
+    console.error("Failed to toggle answered status:", err);
+  }
+};
+
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
@@ -437,6 +446,19 @@ const buildCommentTree = (comments) => {
         {/* header */}
         <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:"15px"}}>
           <h3 style={{margin:0}}>{post.title || "Post"}</h3>
+          {post.isQuestion && (
+  <span style={{
+    fontSize: "11px",
+    padding: "2px 10px",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    background: post.isAnswered ? "rgba(39,174,96,0.2)" : "rgba(240,192,64,0.25)",
+    color: post.isAnswered ? "#27ae60" : "#f0c040",
+    border: `1px solid ${post.isAnswered ? "#27ae60b3" : "#f0c040b3"}`,
+  }}>
+    {post.isAnswered ? `✓ ${t('postModal.answered')}` : `❓ ${t('postModal.unanswered')}`}
+  </span>
+)}
           <button onClick={onClose} style={{background:"none", border:"none", fontSize:"20px", cursor:"pointer", color:"white"}}>✕</button>
         </div>
 
@@ -537,6 +559,20 @@ const buildCommentTree = (comments) => {
                  {t('postModal.report')}
                  </button>
                 )}
+
+                {post.isQuestion && currentUser?.id === post.userId && (
+  <button
+    onClick={handleToggleAnswered}
+    style={{
+      fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer",
+      color: post.isAnswered ? "#f0c040" : "#27ae60",
+      background: "none",
+      border: `1px solid ${post.isAnswered ? "#f0c040b3" : "#27ae60b3"}`,
+    }}
+  >
+    {post.isAnswered ? t('postModal.markUnanswered') : t('postModal.markAnswered')}
+  </button>
+)}
           </div>
         </div>
 {/* //////////////////////////////////////////////////////// */}

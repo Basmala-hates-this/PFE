@@ -97,7 +97,7 @@ if (data.user.pendingReorientation) {
 } else {
  
   //le legin est successful...i'll add a star emoji to this comment later...
-  alert(t("login.success"));
+  //alert(t("login.success"));feed up with the alert 
   navigate("/dashboard");
 }
   

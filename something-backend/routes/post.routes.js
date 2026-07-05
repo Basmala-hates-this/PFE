@@ -21,6 +21,8 @@ router.patch('/:id/vote', protect, guestBlock, postController.votePost);
 router.patch('/:id', protect, guestBlock, upload.single('attachment'), postController.updatePost);
 router.delete('/:id', protect, guestBlock, postController.deletePost);
 
+router.patch('/:id/answered', protect, postController.toggleAnswered);
+
 router.get('/:postId/comments', protect, postController.getCommentsByPost);
 router.post('/:postId/comments', protect, guestBlock, upload.single('attachment'), postController.addComment);
 router.delete('/:postId/comments/:commentId', protect, guestBlock, postController.deleteComment);
