@@ -141,7 +141,7 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 
-export default function PostModal({ postId, onClose, isGuest }) {
+export default function PostModal({ postId, onClose, isGuest, onPostUpdate }) {
   const token = localStorage.getItem("token");
   const guestToken = localStorage.getItem("guestToken");
   const authToken = token || guestToken;
@@ -238,12 +238,13 @@ const handleToggleAnswered = async () => {
 //   setPost(postRes.data);
 //   setComments(commentsRes.data);
 // };
-const refetchPostOnly = async () => {
-  const res = await api.get(`/posts/${postId}`, {
-    headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
-  });
-  setPost(res.data);
-};
+  const refetchPostOnly = async () => {
+    const res = await api.get(`/posts/${postId}`, {
+      headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
+    });
+    setPost(res.data);
+    if (onPostUpdate) onPostUpdate(res.data);
+  };
 
 const fetchComments = async (limit = COMMENTS_LIMIT) => {
   const res = await api.get(`/posts/${postId}/comments?limit=${limit}`, {
