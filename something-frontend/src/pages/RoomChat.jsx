@@ -80,6 +80,10 @@ export default function RoomChat() {
   const messagesCursorRef = useRef(null);
 const messagesHasMoreRef = useRef(true);
 
+const [isWatching, setIsWatching] = useState(false);
+const [callTargets, setCallTargets] = useState(null);
+const [peerNames, setPeerNames] = useState({});
+
   ////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
@@ -205,13 +209,15 @@ const messagesHasMoreRef = useRef(true);
     });
     socket.on("call:active", () => setCallActive(true));
     socket.on("call:ended", () => {
-      setCallActive(false);
-      setIsInCall(false);
-      setIsCallHost(false);
-      setIncomingCall(null);
-      setGuestSocketId(null);
-      setSpeakerInvite(null);
-    });
+  setCallActive(false);
+  setIsInCall(false);
+  setIsCallHost(false);
+  setIncomingCall(null);
+  setGuestSocketId(null);
+  setSpeakerInvite(null);
+  setIsWatching(false);      
+  setCallTargets(null);      
+});
     socket.on("call:speaker_invite", (data) => setSpeakerInvite(data));
     socket.on("call:speaker_accepted", ({ mode }) => {
       setIsInCall(true);
@@ -232,13 +238,18 @@ const messagesHasMoreRef = useRef(true);
         return [...prev, { userId, displayName, socketId }];
       });
     });
-    socket.on("call:speaker_joined", ({ userId }) => {
-      setAudienceList((prev) => prev.filter((u) => u.userId !== userId));
-    });
+   socket.on("call:speaker_joined", ({ userId, displayName, socketId }) => {
+  setAudienceList((prev) => prev.filter((u) => u.userId !== userId));
+  setPeerNames((prev) => ({ ...prev, [socketId]: displayName }));
+});
 
     socket.on("call:audience_left", ({ socketId }) => {
       setAudienceList((prev) => prev.filter((u) => u.socketId !== socketId));
     });
+
+    socket.on("call:call_targets", (targets) => {
+  setCallTargets(targets);
+});
 
     return () => {
       socket.emit("leave_room", roomId);
@@ -720,31 +731,34 @@ useEffect(() => {
 
       {/* ── body: split when in call, full otherwise ── */}
       <div
-        className={callActive && isInCall ? "roomchat-body-split" : ""}
+        className= {callActive && (isInCall || isWatching) ? "roomchat-body-split" : ""}
         style={{
           flex: 1,
           overflow: "hidden",
           display: "flex",
-          flexDirection: callActive && isInCall ? "row" : "column",
+          flexDirection: callActive && (isInCall || isWatching)? "row" : "column",
         }}
       >
         {/* call panel */}
-        {callActive && isInCall && (
+        {callActive && (isInCall || isWatching) && (
           <div className="roomchat-call-panel">
             <CallRoom
-              socket={socketRef.current}
-              roomId={roomId}
-              userId={currentUser.id}
-              displayName={currentUser.username}
-              isHost={isCallHost}
-              guestSocketId={guestSocketId}
-              onEnd={() => {
-                setIsInCall(false);
-                setCallActive(false);
-                setIsCallHost(false);
-                setGuestSocketId(null);
-              }}
-            />
+  socket={socketRef.current}
+  roomId={roomId}
+  userId={currentUser.id}
+  displayName={currentUser.username}
+  role={isCallHost ? "host" : isInCall ? "speaker" : "audience"}
+  callTargets={callTargets}
+  peerNames={peerNames}
+  onEnd={() => {
+    setIsInCall(false);
+    setCallActive(false);
+    setIsCallHost(false);
+    setGuestSocketId(null);
+    setIsWatching(false);   
+    setCallTargets(null);   
+  }}
+/>
             {/* audience list below the video panel */}
             {isCallHost && (
               <div className="callroom-audience-panel">
@@ -781,13 +795,13 @@ useEffect(() => {
         {/* chat panel */}
         <div
           className={
-            callActive && isInCall
+            callActive && (isInCall || isWatching)
               ? "roomchat-chat-panel"
               : "roomchat-chat-panel-full"
           }
         >
           {/* audience banner */}
-          {callActive && !isInCall && (
+          {callActive && !isInCall && !isWatching &&(
             <div className="callroom-audience-banner">
               <span>📞 A call is live in this room</span>
               {speakerInvite && (
@@ -1123,6 +1137,7 @@ useEffect(() => {
                 userId: currentUser.id,
                 displayName: currentUser.username,
               });
+              setIsWatching(true); 
               setIncomingCall(null);
             }}
           >
