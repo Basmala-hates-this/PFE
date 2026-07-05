@@ -202,6 +202,11 @@ const existingViewerSocketIds  = [...call.audience].filter((id) => id !== socket
     console.log(`Call ended in room ${roomId}`);
   });
 
+  //───ehh...avatar for when cam is off─────────────────────────────────────────────────
+socket.on("call:cam_status", ({ roomId, isCamOff }) => {
+  socket.to(`call:${roomId}`).emit("call:cam_status", { socketId: socket.id, isCamOff });
+});
+
   // ─── individual leave ─────────────────────────────────────────────────
   socket.on("call:leave", ({ roomId }) => {
     _handleCallLeave(socket, roomId);
@@ -216,10 +221,7 @@ const existingViewerSocketIds  = [...call.audience].filter((id) => id !== socket
 });
 
 
-//───ehh...avatar for when cam is off─────────────────────────────────────────────────
-socket.on("call:cam_status", ({ roomId, isCamOff }) => {
-  socket.to(`call:${roomId}`).emit("call:cam_status", { socketId: socket.id, isCamOff });
-});
+
 // ─── helper ───────────────────────────────────────────────────────────────────
 function _handleCallLeave(socket, roomId) {
   const call = activeCalls.get(roomId);
