@@ -166,6 +166,7 @@ export default function CallRoom({
 // hooks can't be called in a .map() callback directly
 function PeerTile({ stream, isCamOff, isScreenSharing, label }) {
   const videoRef = useRef(null);
+
   useEffect(() => {
     if (videoRef.current) videoRef.current.srcObject = stream;
   }, [stream]);
@@ -174,10 +175,17 @@ function PeerTile({ stream, isCamOff, isScreenSharing, label }) {
 
   return (
     <div className="callroom-video-wrapper">
-      {showAvatar ? (
-        <div className="callroom-avatar"><span>{label?.[0]?.toUpperCase() || "?"}</span></div>
-      ) : (
-        <video ref={videoRef} autoPlay playsInline className="callroom-video" />
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className="callroom-video"
+        style={{ display: showAvatar ? "none" : "block" }}
+      />
+      {showAvatar && (
+        <div className="callroom-avatar">
+          <span>{label?.[0]?.toUpperCase() || "?"}</span>
+        </div>
       )}
       <span className="callroom-video-label">{label}</span>
     </div>
