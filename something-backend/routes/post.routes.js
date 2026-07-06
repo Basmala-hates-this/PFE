@@ -5,6 +5,8 @@ const protect = require('../middleware/authMiddleware');
 const { guestBlock, optionalAuth } = require('../middleware/authMiddleware');
 const upload = require('../middleware/upload');
 
+const endorsementController = require('../controllers/peerEndorsement.controller');
+
 router.post('/', protect, guestBlock, upload.single('attachment'), postController.createPost);
 router.get('/', optionalAuth, postController.getPostsAll);
 router.get('/search', postController.searchPosts);
@@ -32,6 +34,9 @@ router.patch('/:postId/comments/:commentId', protect, guestBlock, postController
 router.post('/:postId/report', protect, guestBlock, postController.reportPost);
 router.post('/:postId/comments/:commentId/report', protect, guestBlock, postController.reportComment);
 
+
+router.post('/comments/:commentId/endorse', protect, endorsementController.createEndorsement);
+router.get('/users/:userId/endorsements', endorsementController.getEndorsementsForUser);
 
 module.exports = router;
 //something to keep in mind,all routes should come befre IDs because things will break and u wont knw why.....

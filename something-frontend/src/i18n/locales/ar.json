@@ -224,7 +224,9 @@
       "answered": "تمت الإجابة",
     "unanswered": "بدون إجابة",
     "markAnswered": "وضع علامة كتمت الإجابة",
-    "markUnanswered": "وضع علامة كبدون إجابة"
+    "markUnanswered": "وضع علامة كبدون إجابة",
+     "endorse": "توصية",
+    "endorsed": "تمت التوصية"
     },
     "browseRooms": {
       "title": "تصفح الغرف",
@@ -279,7 +281,9 @@
      "answered": "تمت الإجابة",
     "unanswered": "بدون إجابة",
     "markAnswered": "وضع علامة كتمت الإجابة",
-    "markUnanswered": "وضع علامة كبدون إجابة"
+    "markUnanswered": "وضع علامة كبدون إجابة",
+     "endorse": "توصية",
+    "endorsed": "تمت التوصية"
   },
   "noComments": "لا توجد تعليقات بعد. كن أول من يعلق!",
   "hiddenComment": "🙈 تم إخفاء هذا التعليق.",
@@ -301,7 +305,9 @@
   "report": "🚩 إبلاغ",
   "guestCommentAlert": "أنشئ حساباً للمساهمة....",
   "guestVoteAlert": "أنشئ حساباً للتصويت! 👋",
-  "deleteCommentConfirm": "حذف هذا التعليق؟"
+  "deleteCommentConfirm": "حذف هذا التعليق؟",
+     "endorse": "توصية",
+    "endorsed": "تمت التوصية"
 },
 "profile": {
     "title": "الملف الشخصي",

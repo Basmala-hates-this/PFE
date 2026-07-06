@@ -225,7 +225,9 @@
            "answered": "Répondu",
     "unanswered": "Sans réponse",
     "markAnswered": "Marquer comme répondu",
-    "markUnanswered": "Marquer comme sans réponse"
+    "markUnanswered": "Marquer comme sans réponse",
+     "endorse": "Recommander",
+    "endorsed": "Recommandé"
 
     },
     "browseRooms": {
@@ -283,7 +285,9 @@
      "answered": "Répondu",
     "unanswered": "Sans réponse",
     "markAnswered": "Marquer comme répondu",
-    "markUnanswered": "Marquer comme sans réponse"
+    "markUnanswered": "Marquer comme sans réponse",
+     "endorse": "Recommander",
+    "endorsed": "Recommandé"
   },
   "noComments": "Aucun commentaire. Soyez le premier !",
   "hiddenComment": " Ce commentaire a été masqué.",
@@ -305,7 +309,9 @@
   "report": "🚩 Signaler",
   "guestCommentAlert": "Créez un compte pour contribuer....",
   "guestVoteAlert": "Créez un compte pour voter ! 👋",
-  "deleteCommentConfirm": "Supprimer ce commentaire ?"
+  "deleteCommentConfirm": "Supprimer ce commentaire ?",
+  "endorse": "Recommander",
+    "endorsed": "Recommandé"
 },
  "profile": {
     "title": "Profil",

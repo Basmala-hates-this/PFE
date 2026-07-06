@@ -221,7 +221,9 @@
       "createAccount":"Create Account",
     "login":"Login",
     "guestCommentBanner":"hello guest",
-     "isQuestionLabel": "This is a question"
+     "isQuestionLabel": "This is a question",
+      "endorse": "Endorse",
+    "endorsed": "Endorsed"
 
     },
     "browseRooms": {
@@ -305,7 +307,9 @@
   "answered": "Answered",
     "unanswered": "Unanswered",
     "markAnswered": "Mark as answered",
-    "markUnanswered": "Mark as unanswered"
+    "markUnanswered": "Mark as unanswered",
+     "endorse": "Endorse",
+    "endorsed": "Endorsed"
 },
  "profile": {
     "title": "Profile",

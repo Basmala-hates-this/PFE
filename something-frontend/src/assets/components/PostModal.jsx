@@ -7,8 +7,7 @@ import ReportModal from "./ReportModal.jsx";
 // import i18n from '../i18n/index.js';
 //threaded comments are more complicated then i thought
 
-function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, onEdit, onReply, editingComment, editCommentContent, setEditCommentContent, handleEditComment, setEditingComment, collapsedIds, toggleCollapse, depth = 0 }) {
-  const { t } = useTranslation();
+function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, onEdit, onReply, editingComment, editCommentContent, setEditCommentContent, handleEditComment, setEditingComment, collapsedIds, toggleCollapse, depth = 0, isPostOwner, onEndorse }) {  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const LIMIT = 251;
 
@@ -109,6 +108,22 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
                 ✨ {comment.voteSpecialized}
               </button>
             )}
+            {isPostOwner && currentUser?.id !== comment.userId && (
+  <button
+    onClick={() => !comment.alreadyEndorsedByOp && onEndorse(comment.id)}
+    disabled={comment.alreadyEndorsedByOp}
+    style={{
+      fontSize: "11px", padding: "2px 8px", borderRadius: "6px",
+      cursor: comment.alreadyEndorsedByOp ? "default" : "pointer",
+      background: comment.alreadyEndorsedByOp ? "rgba(155,89,182,0.15)" : "#9b59b6",
+      color: "white",
+      border: "none",
+      opacity: comment.alreadyEndorsedByOp ? 0.6 : 1,
+    }}
+  >
+    🏅 {comment.endorsementCount} {comment.alreadyEndorsedByOp ? t('postModal.endorsed') : t('postModal.endorse')}
+  </button>
+)}
             {!isGuest && (
               <button onClick={() => onReply(comment)} style={{ fontSize: "11px", padding: "2px 8px", borderRadius: "6px", cursor: "pointer", background: "rgba(100,118,175,0.3)", border: "none", color: "white" }}>
                   {t('postModal.reply')}    
@@ -125,14 +140,14 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
       </div>
 
       {/* replies */}
-      {!isCollapsed && comment.replies?.map(reply => (
-        <CommentNode key={reply.id} comment={reply} postId={postId} currentUser={currentUser}
-          isGuest={isGuest} onVote={onVote} onDelete={onDelete} onEdit={onEdit} onReply={onReply}
-          editingComment={editingComment} editCommentContent={editCommentContent}
-          setEditCommentContent={setEditCommentContent} handleEditComment={handleEditComment}
-          setEditingComment={setEditingComment} collapsedIds={collapsedIds} toggleCollapse={toggleCollapse}
-          depth={depth + 1} />
-      ))}
+     {!isCollapsed && comment.replies?.map(reply => (
+  <CommentNode key={reply.id} comment={reply} postId={postId} currentUser={currentUser}
+    isGuest={isGuest} onVote={onVote} onDelete={onDelete} onEdit={onEdit} onReply={onReply}
+    editingComment={editingComment} editCommentContent={editCommentContent}
+    setEditCommentContent={setEditCommentContent} handleEditComment={handleEditComment}
+    setEditingComment={setEditingComment} collapsedIds={collapsedIds} toggleCollapse={toggleCollapse}
+    depth={depth + 1} isPostOwner={isPostOwner} onEndorse={onEndorse} />
+))}
     </div>
   );
 }
@@ -196,48 +211,19 @@ const handleToggleAnswered = async () => {
   }
 };
 
+const handleEndorse = async (commentId) => {
+  try {
+    await api.post(`/comments/${commentId}/endorse`, {}, { headers: { Authorization: `Bearer ${token}` } });
+    await resyncComments();
+  } catch (err) {
+    console.error("Failed to endorse:", err);
+    alert(err.response?.data?.message || "Failed to endorse");
+  }
+};
 //////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////
-  // fetch post
-//   useEffect(() => {
-//     const fetchPost = async () => {
-//       try {
-//         // const response = await axios.get(
-//         //   `http://localhost:5000/api/posts/${postId}`,
-//         //   { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }
-//         // );
-// const response = await api.get(`/posts/${postId}`, {
-//   headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
-// });
 
-// setPost(response.data);
-//       } catch (err) {
-//         console.error("Failed to fetch post:", err);
-//       }
-//     };
-//     fetchPost();
-//   }, [postId]);
-
-  
-  
-// const refetchPost = async () => {
-//   // const [postRes, commentsRes] = await Promise.all([
-//   //   axios.get(`http://localhost:5000/api/posts/${postId}`, {
-//   //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} // 
-//   //   }),
-//   //   axios.get(`http://localhost:5000/api/posts/${postId}/comments`, {
-//   //     headers: authToken ? { Authorization: `Bearer ${authToken}` } : {}
-//   //   })
-//   // ]);
-// const [postRes, commentsRes] = await Promise.all([
-//   api.get(`/posts/${postId}`, { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} }),
-//   api.get(`/posts/${postId}/comments`, { headers: authToken ? { Authorization: `Bearer ${authToken}` } : {} })
-// ]);
-//   console.log("comment sample:", commentsRes.data[0]);
-//   setPost(postRes.data);
-//   setComments(commentsRes.data);
-// };
   const refetchPostOnly = async () => {
     const res = await api.get(`/posts/${postId}`, {
       headers: authToken ? { Authorization: `Bearer ${authToken}` } : {},
@@ -620,23 +606,25 @@ const buildCommentTree = (comments) => {
 };
 
       return sortRoots(buildCommentTree(comments)).map(comment => (
-        <CommentNode
-          key={comment.id}
-          comment={comment}
-          postId={postId}
-          currentUser={currentUser}
-          isGuest={isGuest}
-          onVote={handleCommentVote}
-          onDelete={handleDeleteComment}
-          onReply={(c) => setReplyingTo({ id: c.id, username: c.authorUsername })}
-          editingComment={editingComment}
-          editCommentContent={editCommentContent}
-          setEditCommentContent={setEditCommentContent}
-          handleEditComment={handleEditComment}
-          setEditingComment={setEditingComment}
-           collapsedIds={collapsedIds}
-          toggleCollapse={toggleCollapse}
-        />
+      <CommentNode
+  key={comment.id}
+  comment={comment}
+  postId={postId}
+  currentUser={currentUser}
+  isGuest={isGuest}
+  onVote={handleCommentVote}
+  onDelete={handleDeleteComment}
+  onReply={(c) => setReplyingTo({ id: c.id, username: c.authorUsername })}
+  editingComment={editingComment}
+  editCommentContent={editCommentContent}
+  setEditCommentContent={setEditCommentContent}
+  handleEditComment={handleEditComment}
+  setEditingComment={setEditingComment}
+  collapsedIds={collapsedIds}
+  toggleCollapse={toggleCollapse}
+  isPostOwner={currentUser?.id === post.userId}
+  onEndorse={handleEndorse}
+/>
       ));
   })()}
   {commentsHasMore && comments.length > 0 && (
