@@ -142,20 +142,18 @@ const leaveRoom = async (req, res) => {
 const getSubjectRoomsForUser = async (req, res) => {
   const userId = req.user.id;
 
-  // get user's majors from user_majors table
   const result = await require('../db').query(
     `SELECT m.id, m.name FROM user_majors um
      JOIN majors m ON m.id = um.major_id
      WHERE um.user_id = $1`,
     [userId]
   );
-  const userMajors = result.rows; // [{ id, name }]
+  const userMajors = result.rows;
 
   if (userMajors.length === 0) return res.json([]);
 
   const majorIds = userMajors.map(m => m.id);
 
-  // get all subject rooms for those majors
   const roomsResult = await require('../db').query(
     `SELECT r.*, rm.user_id as joined_by FROM rooms r
      LEFT JOIN room_members rm ON rm.room_id = r.id AND rm.user_id = $1
@@ -167,9 +165,10 @@ const getSubjectRoomsForUser = async (req, res) => {
   const response = userMajors.map(major => {
     const majorRooms = subjectRooms.filter(r => r.major_id === major.id);
     const joinedRooms = majorRooms.filter(r => r.joined_by !== null);
-    const existingSubjects = majorRooms.map(r => r.name);
+    // only exclude subjects the CURRENT USER has already joined
+    const joinedSubjectNames = joinedRooms.map(r => r.name);
     const allSubjects = subjectsMap[major.name] || [];
-    const availableSubjects = allSubjects.filter(s => !existingSubjects.includes(s));
+    const availableSubjects = allSubjects.filter(s => !joinedSubjectNames.includes(s));
 
     return {
       major: major.name,
