@@ -213,7 +213,7 @@ const handleToggleAnswered = async () => {
 
 const handleEndorse = async (commentId) => {
   try {
-    await api.post(`/comments/${commentId}/endorse`, {}, { headers: { Authorization: `Bearer ${token}` } });
+    await api.post(`/posts/comments/${commentId}/endorse`, {}, { headers: { Authorization: `Bearer ${token}` } });
     await resyncComments();
   } catch (err) {
     console.error("Failed to endorse:", err);
