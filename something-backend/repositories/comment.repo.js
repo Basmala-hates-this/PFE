@@ -62,7 +62,6 @@ const getCommentById = async (id) => {
 
 //   return { comments, nextCursor };
 // };
-
 const getCommentsByPost = async (postId, { limit = 20, cursorCreatedAt = null, cursorId = null } = {}) => {
   const params = [postId];
   let cursorClause = "";
@@ -80,6 +79,7 @@ const getCommentsByPost = async (postId, { limit = 20, cursorCreatedAt = null, c
       COALESCE(v.specialized, 0)::int as vote_specialized,
       u.profile_pic_url as author_profile_pic,
       u.role as author_role,
+      u.rating as author_rating,
       (
         SELECT COUNT(*)::int FROM peer_endorsements pe
         WHERE pe.endorsee_id = c.user_id AND pe.room_id = po.room_id
