@@ -62,6 +62,51 @@ const getCommentById = async (id) => {
 
 //   return { comments, nextCursor };
 // };
+// const getCommentsByPost = async (postId, { limit = 20, cursorCreatedAt = null, cursorId = null } = {}) => {
+//   const params = [postId];
+//   let cursorClause = "";
+//   if (cursorCreatedAt && cursorId) {
+//     params.push(cursorCreatedAt, cursorId);
+//     cursorClause = `AND (c.created_at, c.id) > ($2, $3)`;
+//   }
+//   params.push(limit);
+//   const limitParamIndex = params.length;
+
+//   const result = await pool.query(
+//     `SELECT c.*,
+//       COALESCE(v.useful, 0)::int as vote_useful,
+//       COALESCE(v.useless, 0)::int as vote_useless,
+//       COALESCE(v.specialized, 0)::int as vote_specialized,
+//       u.profile_pic_url as author_profile_pic,
+//       u.role as author_role,
+//       u.rating as author_rating,
+//       (
+//         SELECT COUNT(*)::int FROM peer_endorsements pe
+//         WHERE pe.endorsee_id = c.user_id AND pe.room_id = po.room_id
+//       ) as endorsement_count,
+//       EXISTS (
+//         SELECT 1 FROM peer_endorsements pe
+//         WHERE pe.endorser_id = po.user_id AND pe.endorsee_id = c.user_id AND pe.room_id = po.room_id
+//       ) as already_endorsed_by_op
+//      FROM comments c
+//      LEFT JOIN comment_vote_counts v ON v.comment_id = c.id
+//      LEFT JOIN users u ON u.id = c.user_id
+//      JOIN posts po ON po.id = c.post_id
+//      WHERE c.post_id = $1
+//      ${cursorClause}
+//      ORDER BY c.created_at ASC, c.id ASC
+//      LIMIT $${limitParamIndex}`,
+//     params
+//   );
+
+//   const comments = toCamel(result.rows);
+//   const nextCursor = result.rows.length === Number(limit)
+//     ? { createdAt: result.rows[result.rows.length - 1].created_at, id: result.rows[result.rows.length - 1].id }
+//     : null;
+
+//   return { comments, nextCursor };
+// };
+
 const getCommentsByPost = async (postId, { limit = 20, cursorCreatedAt = null, cursorId = null } = {}) => {
   const params = [postId];
   let cursorClause = "";
