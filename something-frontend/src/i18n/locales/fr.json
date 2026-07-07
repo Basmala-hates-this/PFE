@@ -343,12 +343,13 @@
       "windowPassed": "La fenêtre de retrait est passée. Contactez un super-admin pour supprimer votre candidature."
     },
     "stats": {
-      "posts": "Publications 📝",
-      "comments": "Commentaires 🗨️",
-      "useful": "Votes Utiles 👍",
-      "useless": "Votes Inutiles ❌",
-      "specialized": "Spécialisé ✨",
-      "rooms": "Salles Rejointes 🏠"
+      "posts": "Publications ",
+      "comments": "Commentaires ",
+      "useful": "Votes Utiles ",
+      "useless": "Votes Inutiles ",
+      "specialized": "Spécialisé ",
+      "rooms": "Salles Rejointes ",
+      "endorsements": "Recommandations"
     },
     "specialtyMajors": "Spécialités",
     "noSubjectRooms": "Aucune salle de matière rejointe pour l'instant",
@@ -389,17 +390,18 @@
       "nothingHere": "Rien ici pour l'instant."
     },
     "drilldown": {
-      "posts": "📝 Mes Publications",
-      "comments": "🗨️ Mes Commentaires",
-      "useful": "👍 Publications/Commentaires avec votes Utiles",
-      "useless": "❌ Publications avec votes Inutiles",
-      "specialized": "✨ Commentaires avec votes Spécialisés",
-      "rooms": "🏠 Mes Salles",
+      "posts": "Mes Publications",
+      "comments": " Mes Commentaires",
+      "useful": " Publications/Commentaires avec votes Utiles",
+      "useless": "Publications avec votes Inutiles",
+      "specialized": "Commentaires avec votes Spécialisés",
+      "rooms": "Mes Salles",
       "loading": "Chargement...",
       "nothingHere": "Rien ici pour l'instant.",
       "openChat": "Ouvrir le Chat",
       "comment": "commentaire",
-      "post": "publication"
+      "post": "publication",
+       "endorsements": "Recommandations"
     },
     "deleteConfirm": "Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.",
     "deleteUsernamePrompt": "Entrez votre nom d'utilisateur pour confirmer la suppression :",

@@ -82,6 +82,9 @@ const ADMIN_INTERESTS = [
   "report_handling"
 ];
 
+const [endorsements, setEndorsements] = useState([]);
+
+
 
 useEffect(() => {
   const token = localStorage.getItem("token");
@@ -247,6 +250,20 @@ useEffect(() => {
   .catch(err => console.error("Failed to fetch majors:", err));
 }, [user]);
 
+
+useEffect(() => {
+  if (!user) return;
+  const fetchEndorsements = async () => {
+    try {
+      const res = await api.get(`/posts/users/${user.id}/endorsements`);
+      setEndorsements(res.data);
+    } catch (err) {
+      console.error("Failed to fetch endorsements:", err);
+    }
+  };
+  fetchEndorsements();
+}, [user]);
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////// 
@@ -255,7 +272,7 @@ useEffect(() => {
 const handleCreateRoom = async () => {
   setRoomLoading(true);
   try {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token"); 
     // const response = await axios.post(
     //   "http://localhost:5000/api/rooms/private",
     //   {
@@ -388,7 +405,9 @@ const handleStatClick = async (type) => {
       const res = await api.get(`/users/me/received-votes?type=${type}`);
 
       data = res.data;
-    } else if (type === "rooms") {
+    } else if (type === "endorsements") {
+  data = endorsements;
+}else if (type === "rooms") {
       data = userRooms; // already fetched
     }
     setDrilldown({ type, data, loading: false });
@@ -512,6 +531,7 @@ const handleStatClick = async (type) => {
     { type: "useful", label: (t('profile.stats.useful')), value: stats?.usefulReceived || 0 },
     { type: "useless", label:( t('profile.stats.useless')), value: stats?.uselessReceived || 0 },
     { type: "specialized", label: t('profile.stats.specialized'), value: stats?.specializedReceived || 0 },
+    { type: "endorsements", label: t('profile.stats.endorsements'), value: endorsements?.length || 0 },
     { type: "rooms", label: t('profile.stats.rooms'), value: userRooms?.length || 0 },
   ].map(({ type, label, value }) => (
     <div
@@ -1018,6 +1038,7 @@ const handleStatClick = async (type) => {
             useful: t('profile.drilldown.useful'),
             useless: t('profile.drilldown.useless'),
             specialized: t('profile.drilldown.specialized'),
+            endorsements: t('profile.drilldown.endorsements'),
             rooms: t('profile.drilldown.rooms')
           }[drilldown.type]}
         </h3>
@@ -1043,7 +1064,19 @@ const handleStatClick = async (type) => {
             )}
           </div>
         ))
-      ) : (
+      ) : drilldown.type === "endorsements" ? (
+  drilldown.data.map(e => (
+    <div key={e.id} style={{ padding: "12px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", marginBottom: "10px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+        <small style={{ background: "#9b59b6", color: "white", padding: "2px 8px", borderRadius: "10px", fontSize: "11px" }}>
+          🏅 {e.roomName}
+        </small>
+        <small style={{ opacity: 0.4, fontSize: "11px" }}>{new Date(e.createdAt).toLocaleString()}</small>
+      </div>
+      <p style={{ margin: 0, fontSize: "13px", opacity: 0.8 }}>{e.postTitle || "Post"}</p>
+    </div>
+  ))
+) : (
         drilldown.data.map(item => (
           <div
             key={item.id}

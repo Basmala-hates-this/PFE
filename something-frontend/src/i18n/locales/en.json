@@ -341,12 +341,13 @@
       "windowPassed": "Withdrawal window passed. Contact a superadmin to remove your application."
     },
     "stats": {
-      "posts": "Posts 📝",
-      "comments": "Comments 🗨️",
-      "useful": "Useful Count 👍",
-      "useless": "Useless Count ❌",
-      "specialized": "Specialized ✨",
-      "rooms": "Rooms Joined 🏠"
+      "posts": "Posts ",
+      "comments": "Comments ",
+      "useful": "Useful Count ",
+      "useless": "Useless Count ",
+      "specialized": "Specialized ",
+      "rooms": "Rooms Joined ",
+       "endorsements": "Endorsements"
     },
     "specialtyMajors": "Specialty Majors",
     "noSubjectRooms": "No subject rooms joined yet",
@@ -387,17 +388,18 @@
       "nothingHere": "Nothing here yet."
     },
     "drilldown": {
-      "posts": "📝 My Posts",
-      "comments": "🗨️ My Comments",
-      "useful": "👍 Posts/Comments that got Useful votes",
-      "useless": "❌ Posts that got Useless votes",
-      "specialized": "✨ Comments that got Specialized votes",
-      "rooms": "🏠 My Rooms",
+      "posts": " My Posts",
+      "comments": "My Comments",
+      "useful": "Posts/Comments that got Useful votes",
+      "useless": " Posts that got Useless votes",
+      "specialized": "Comments that got Specialized votes",
+      "rooms": " My Rooms",
       "loading": "Loading...",
       "nothingHere": "Nothing here yet.",
       "openChat": "Open Chat",
       "comment": "comment",
-      "post": "post"
+      "post": "post",
+      "endorsements": "Endorsements"
     },
     "deleteConfirm": "Are you sure you want to delete your account? This action is irreversible.",
     "deleteUsernamePrompt": "Enter your username to confirm deletion:",
