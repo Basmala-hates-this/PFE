@@ -51,9 +51,9 @@ function CommentNode({ comment, postId, currentUser, isGuest, onVote, onDelete, 
     {comment.authorRole}
   </small>
 )}
-{typeof comment.authorRating === "number" && (
+{comment.authorRating != null && (
   <small style={{ fontSize: "11px", opacity: 0.8, display: "flex", alignItems: "center", gap: "2px" }}>
-    ⭐ {comment.authorRating.toFixed(1)}
+    ⭐ {Number(comment.authorRating).toFixed(1)}
   </small>
 )}
 {comment.endorsementCount > 0 && (

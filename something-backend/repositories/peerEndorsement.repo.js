@@ -30,17 +30,18 @@ const getEndorsementCountForUserInRoom = async (userId, roomId) => {
 
 const getEndorsementsForUser = async (userId) => {
   const result = await pool.query(
-    `SELECT pe.*, r.name as room_name, p.title as post_title
+    `SELECT pe.*, r.name as room_name, p.title as post_title,
+            u.username as endorser_username
      FROM peer_endorsements pe
      JOIN rooms r ON r.id = pe.room_id
      JOIN posts p ON p.id = pe.post_id
+     JOIN users u ON u.id = pe.endorser_id
      WHERE pe.endorsee_id = $1
      ORDER BY pe.created_at DESC`,
     [userId]
   );
   return toCamel(result.rows);
 };
-
 const getCommentWithPostContext = async (commentId) => {
   const result = await pool.query(
     `SELECT c.id as comment_id, c.user_id as comment_author_id, c.post_id,

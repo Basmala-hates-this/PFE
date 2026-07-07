@@ -1064,7 +1064,7 @@ const handleStatClick = async (type) => {
             )}
           </div>
         ))
-      ) : drilldown.type === "endorsements" ? (
+    ) : drilldown.type === "endorsements" ? (
   drilldown.data.map(e => (
     <div key={e.id} style={{ padding: "12px", background: "rgba(255,255,255,0.05)", borderRadius: "8px", marginBottom: "10px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
@@ -1073,7 +1073,8 @@ const handleStatClick = async (type) => {
         </small>
         <small style={{ opacity: 0.4, fontSize: "11px" }}>{new Date(e.createdAt).toLocaleString()}</small>
       </div>
-      <p style={{ margin: 0, fontSize: "13px", opacity: 0.8 }}>{e.postTitle || "Post"}</p>
+      <p style={{ margin: "0 0 2px", fontSize: "13px", opacity: 0.8 }}>{e.postTitle || "Post"}</p>
+      <p style={{ margin: 0, fontSize: "12px", opacity: 0.6 }}>Endorsed by @{e.endorserUsername}</p>
     </div>
   ))
 ) : (
