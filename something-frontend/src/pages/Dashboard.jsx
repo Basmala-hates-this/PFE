@@ -333,7 +333,7 @@ const [postIsQuestion, setPostIsQuestion] = useState(false);
 //     }
 //   };
 const fetchRoomsAndPosts = async () => {
-  console.log("fetchRoomsAndPosts called");
+  //console.log("fetchRoomsAndPosts called");
   setLoading(true);
   try {
     let allowedRooms = [];
@@ -382,13 +382,14 @@ const fetchPosts = async (reset = false, roomsOverride = null) => {
   }
 
   try {
-    const params = new URLSearchParams();
-    if (selectedRooms.length === 1) params.append("roomId", selectedRooms[0].value);
-    params.append("limit", "20");
-    if (!reset && postsCursor) {
-      params.append("cursorCreatedAt", postsCursor.createdAt);
-      params.append("cursorId", postsCursor.id);
-    }
+   const params = new URLSearchParams();
+if (selectedRooms.length === 1) params.append("roomId", selectedRooms[0].value);
+params.append("limit", "20");
+if (sortBy === "questions") params.append("onlyQuestions", "true");
+if (!reset && postsCursor) {
+  params.append("cursorCreatedAt", postsCursor.createdAt);
+  params.append("cursorId", postsCursor.id);
+}
 
     const response = await api.get(`/posts?${params.toString()}`, {
       headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {},
@@ -422,6 +423,13 @@ const fetchPosts = async (reset = false, roomsOverride = null) => {
   useEffect(() => {
     fetchRoomsAndPosts();
   }, [selectedRooms]);
+
+  
+  useEffect(() => {
+  setPostsCursor(null);
+  setHasMorePosts(true);
+  fetchPosts(true);
+}, [sortBy === "questions"]);
 
 
 const loadMoreRef = useRef(() => {});
@@ -1902,6 +1910,7 @@ onClick={() => {
                   { key: "random", label: t("dashboard.feed.sortAll") },
                   { key: "recent", label: t("dashboard.feed.sortRecent") },
                   { key: "popular", label: t("dashboard.feed.sortPopular") },
+                  { key: "questions", label: t("dashboard.feed.sortQuestions") },
                 ].map(({ key, label }) => (
                   <button
                     key={key}

@@ -59,58 +59,29 @@ const getPostById = async (req, res) => {
 };
 
 // const getPostsAll = async (req, res) => {
-//   const { roomId, sort } = req.query;
-
-//   let posts;
-//   if (roomId) {
-//     if (sort === 'top') {
-//       const result = await pool.query(
-//         `SELECT p.*,
-//   COALESCE(v.useful, 0) as vote_useful,
-//   COALESCE(v.useless, 0) as vote_useless,
-//   COUNT(DISTINCT c.id) as comment_count,
-//   u.profile_pic_url as author_profile_pic
-//  FROM posts p
-//  LEFT JOIN post_vote_counts v ON v.post_id = p.id
-//  LEFT JOIN comments c ON c.post_id = p.id
-//  LEFT JOIN users u ON u.id = p.user_id
-//  WHERE p.room_id = $1
-//  GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
-//  ORDER BY vote_useful DESC`,
-//         [roomId]
-//       );
-//       posts = toCamel(result.rows);
-//     } else {
-//       posts = await postRepo.getPostsByRoom(roomId);
-//     }
-//   } else {
-//     const result = await pool.query(
-//   `SELECT p.*,
-//     COALESCE(v.useful, 0) as vote_useful,
-//     COALESCE(v.useless, 0) as vote_useless,
-//     COUNT(DISTINCT c.id) as comment_count,
-//     u.profile_pic_url as author_profile_pic
-//    FROM posts p
-//    LEFT JOIN post_vote_counts v ON v.post_id = p.id
-//    LEFT JOIN comments c ON c.post_id = p.id
-//    LEFT JOIN users u ON u.id = p.user_id
-//    GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
-//    ORDER BY p.created_at DESC`
-// );
-//     posts = toCamel(result.rows);
-//   }
-
-//   res.json(posts);
-// };
-// const getPostsAll = async (req, res) => {
-//   const { roomId, sort } = req.query;
+//   const { roomId, sort, limit = 20, cursorCreatedAt, cursorId } = req.query;
 //   const userId = req.user?.id || null;
-//  // console.log("getPostsAll userId:", userId);
 
-//   let posts;
+//   let posts, nextCursor;
+
 //   if (roomId) {
-//     posts = await postRepo.getPostsByRoom(roomId, userId);
+//     const result = await postRepo.getPostsByRoom(roomId, userId, {
+//       limit: Number(limit),
+//       cursorCreatedAt: cursorCreatedAt || null,
+//       cursorId: cursorId ? Number(cursorId) : null,
+//     });
+//     posts = result.posts;
+//     nextCursor = result.nextCursor;
 //   } else {
+//     const params = [userId];
+//     let cursorClause = "";
+//     if (cursorCreatedAt && cursorId) {
+//       params.push(cursorCreatedAt, cursorId);
+//       cursorClause = `WHERE (p.created_at, p.id) < ($2, $3)`;
+//     }
+//     params.push(Number(limit));
+//     const limitParamIndex = params.length;
+
 //     const result = await pool.query(
 //       `SELECT p.*,
 //         COALESCE(v.useful, 0) as vote_useful,
@@ -122,18 +93,26 @@ const getPostById = async (req, res) => {
 //        LEFT JOIN post_vote_counts v ON v.post_id = p.id
 //        LEFT JOIN comments c ON c.post_id = p.id
 //        LEFT JOIN users u ON u.id = p.user_id
+//        ${cursorClause}
 //        GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
-//        ORDER BY p.created_at DESC`,
-//       [userId]
+//        ORDER BY p.created_at DESC, p.id DESC
+//        LIMIT $${limitParamIndex}`,
+//       params
 //     );
 //     posts = toCamel(result.rows);
+//     nextCursor = result.rows.length === Number(limit)
+//       ? { createdAt: result.rows[result.rows.length - 1].created_at, id: result.rows[result.rows.length - 1].id }
+//       : null;
 //   }
 
-//   res.json(posts);
+//   res.json({ posts, nextCursor, hasMore: !!nextCursor });
 // };
+
+
 const getPostsAll = async (req, res) => {
-  const { roomId, sort, limit = 20, cursorCreatedAt, cursorId } = req.query;
+  const { roomId, sort, limit = 20, cursorCreatedAt, cursorId, onlyQuestions } = req.query;
   const userId = req.user?.id || null;
+  const wantsQuestionsOnly = onlyQuestions === "true";
 
   let posts, nextCursor;
 
@@ -142,6 +121,7 @@ const getPostsAll = async (req, res) => {
       limit: Number(limit),
       cursorCreatedAt: cursorCreatedAt || null,
       cursorId: cursorId ? Number(cursorId) : null,
+      onlyQuestions: wantsQuestionsOnly,
     });
     posts = result.posts;
     nextCursor = result.nextCursor;
@@ -152,6 +132,9 @@ const getPostsAll = async (req, res) => {
       params.push(cursorCreatedAt, cursorId);
       cursorClause = `WHERE (p.created_at, p.id) < ($2, $3)`;
     }
+    const questionClause = wantsQuestionsOnly
+      ? (cursorClause ? `AND p.is_question = true` : `WHERE p.is_question = true`)
+      : "";
     params.push(Number(limit));
     const limitParamIndex = params.length;
 
@@ -167,6 +150,7 @@ const getPostsAll = async (req, res) => {
        LEFT JOIN comments c ON c.post_id = p.id
        LEFT JOIN users u ON u.id = p.user_id
        ${cursorClause}
+       ${questionClause}
        GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
        ORDER BY p.created_at DESC, p.id DESC
        LIMIT $${limitParamIndex}`,
@@ -180,7 +164,6 @@ const getPostsAll = async (req, res) => {
 
   res.json({ posts, nextCursor, hasMore: !!nextCursor });
 };
-
 // const updatePost = async (req, res) => {
 //   const { id } = req.params;
 //   const { title, content } = req.body;

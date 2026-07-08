@@ -176,7 +176,8 @@
       "empty": "لا توجد منشورات بعد. حاول كتابة واحدة ✨",
       "writePost": "اكتب منشوراً 📝",
       "selectRooms": "اختر الغرف للعرض...",
-      "searchPlaceholder": "🔍 تبحث عن شيء؟"
+      "searchPlaceholder": "🔍 تبحث عن شيء؟",
+      "sortQuestions": "الأسئلة"
     },
     "search": {
       "posts": "المنشورات",

@@ -43,32 +43,52 @@ const getPostById = async (id, userId = null) => {
   return toCamel(result.rows[0]) || null;
 };
 
-// const getPostsByRoom = async (roomId, userId = null) => {
+
+// const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreatedAt = null, cursorId = null } = {}) => {
+//   const params = [roomId, userId];
+//   let cursorClause = "";
+//   if (cursorCreatedAt && cursorId) {
+//     params.push(cursorCreatedAt, cursorId);
+//     cursorClause = `AND (p.created_at, p.id) < ($3, $4)`;
+//   }
+//   params.push(limit);
+//   const limitParamIndex = params.length;
+
 //   const result = await pool.query(
 //     `SELECT p.*,
 //       COALESCE(v.useful, 0) as vote_useful,
 //       COALESCE(v.useless, 0) as vote_useless,
 //       COUNT(DISTINCT c.id) as comment_count,
 //       u.profile_pic_url as author_profile_pic,
-// (SELECT type FROM votes WHERE post_id = p.id AND user_id = $2) as user_vote
+//       (SELECT type FROM votes WHERE post_id = p.id AND user_id = $2) as user_vote
 //      FROM posts p
 //      LEFT JOIN post_vote_counts v ON v.post_id = p.id
 //      LEFT JOIN comments c ON c.post_id = p.id
 //      LEFT JOIN users u ON u.id = p.user_id
 //      WHERE p.room_id = $1
+//      ${cursorClause}
 //      GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
-//      ORDER BY p.created_at DESC`,
-//     [roomId, userId]
+//      ORDER BY p.created_at DESC, p.id DESC
+//      LIMIT $${limitParamIndex}`,
+//     params
 //   );
-//   return toCamel(result.rows);
+
+//   const posts = toCamel(result.rows);
+//   const nextCursor = result.rows.length === Number(limit)
+//     ? { createdAt: result.rows[result.rows.length - 1].created_at, id: result.rows[result.rows.length - 1].id }
+//     : null;
+
+//   return { posts, nextCursor };
 // };
-const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreatedAt = null, cursorId = null } = {}) => {
+
+const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreatedAt = null, cursorId = null, onlyQuestions = false } = {}) => {
   const params = [roomId, userId];
   let cursorClause = "";
   if (cursorCreatedAt && cursorId) {
     params.push(cursorCreatedAt, cursorId);
     cursorClause = `AND (p.created_at, p.id) < ($3, $4)`;
   }
+  const questionClause = onlyQuestions ? `AND p.is_question = true` : "";
   params.push(limit);
   const limitParamIndex = params.length;
 
@@ -85,6 +105,7 @@ const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreated
      LEFT JOIN users u ON u.id = p.user_id
      WHERE p.room_id = $1
      ${cursorClause}
+     ${questionClause}
      GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
      ORDER BY p.created_at DESC, p.id DESC
      LIMIT $${limitParamIndex}`,

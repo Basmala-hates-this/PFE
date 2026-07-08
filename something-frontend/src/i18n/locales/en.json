@@ -177,7 +177,8 @@
       "empty": "No posts yet. Try writing one ✨",
       "writePost": "Write A Post 📝",
       "selectRooms": "Select rooms to view...",
-      "searchPlaceholder": "🔍 searching for something?"
+      "searchPlaceholder": "🔍 searching for something?",
+      "sortQuestions": "Questions"
     },
     "search": {
       "posts": "POSTS",

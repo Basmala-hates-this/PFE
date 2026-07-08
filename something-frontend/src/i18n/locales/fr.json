@@ -177,7 +177,8 @@
       "empty": "Aucune publication. Essayez d'en écrire une ✨",
       "writePost": "Écrire un post ",
       "selectRooms": "Sélectionner des salles...",
-      "searchPlaceholder": "🔍 Vous cherchez quelque chose ?"
+      "searchPlaceholder": "🔍 Vous cherchez quelque chose ?",
+      "sortQuestions": "Questions"
     },
     "search": {
       "posts": "PUBLICATIONS",
