@@ -14,6 +14,7 @@ didnt use most of them...+the namings are bad...idc*/
   --dark: #568db4;
   --light: #ECF0F1;
   --dark2: #103047;
+  --chat-bg:rgba(130, 188, 255, 0.473);
 
 
   /* === Text === */
@@ -21,6 +22,7 @@ didnt use most of them...+the namings are bad...idc*/
   --text-muted: #9ca3af;  
   --text-soft: #b4bac6;
   --text-postTitle: #ffffff;
+  --text-main-inv: #020617;
 
   /* === Accent  === */
   --accent: #38bdf8;        
@@ -48,15 +50,17 @@ didnt use most of them...+the namings are bad...idc*/
   --bg-panel: #ffffff;
   --bg-card: #ffffff;
   --bg-soft: #6bb5df79;
-  --blue-dark: #e2e3e7d2;
+  --blue-dark: #e2e3e7a8;
   --dark2: #8fbedf;
   --dark: #79c5fc;
+  --chat-bg:rgba(48, 103, 165, 0.473);
 
   /* === Text === */
   --text-main: #020617;
   --text-muted: #030f21;
   --text-soft: #64748b;
   --text-postTitle: #000000;
+  --text-main-inv: #ffffff;
 
   /* === Accent === */
   --accent: #253396;
