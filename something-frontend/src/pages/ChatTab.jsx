@@ -66,9 +66,28 @@ const SUGGESTIONS = [
   "How do I become an admin?",
 ];
 
+const MAX_FILE_MB = 15;
 
-// ─── CALL OUR BACKEND PROXY (which calls Gemini) ....screw gemini,groq it is for now──────────────────────────────
-async function callAI(messages, system, conversationId) {
+// ─── Cloudinary upload ──────────────────────────────────────────────────────
+async function uploadToCloudinary(file) {
+  const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
+  const preset = import.meta.env.CLOUDINARY_UPLOAD_PRESET;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", preset);
+
+  const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/upload`, {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) throw new Error("Cloudinary upload failed");
+  const data = await res.json();
+  return data.secure_url;
+}
+
+// ─── CALL OUR BACKEND PROXY ──────────────────────────────────────────────
+async function callAI(messages, system, conversationId, attachment) {
   const token = localStorage.getItem("token");
   const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
     method: "POST",
@@ -76,15 +95,12 @@ async function callAI(messages, system, conversationId) {
       "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    body: JSON.stringify({ messages, system, conversationId }),
+    body: JSON.stringify({ messages, system, conversationId, attachment }),
   });
   if (!response.ok) throw new Error("AI request failed");
   const data = await response.json();
   return data.content?.[0]?.text || "Sorry, I didn't get that. Try again?";
 }
-
-
-
 
 // ─── ASSISTANT CHAT ────────────────────────────────────────────────────────────
 
@@ -92,6 +108,7 @@ export default function ChatTab() {
   const user = JSON.parse(localStorage.getItem("currentUser"));
   const mediaRecorderRef = useRef(null);
   const bottomRef = useRef(null);
+  const fileInputRef = useRef(null);
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [conversations, setConversations] = useState([]);
@@ -105,9 +122,17 @@ export default function ChatTab() {
   const [listening, setListening] = useState(false);
   const [speakingIndex, setSpeakingIndex] = useState(null);
 
+  // ── attachment state ──
+  const [pendingFile, setPendingFile] = useState(null);       // raw File object
+  const [pendingPreview, setPendingPreview] = useState(null); // local object URL, images only
+  const [uploading, setUploading] = useState(false);
+
   useEffect(() => { fetchConversations(); }, []);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { return () => { window.speechSynthesis?.cancel(); }; }, []);
+  useEffect(() => {
+    return () => { if (pendingPreview) URL.revokeObjectURL(pendingPreview); };
+  }, [pendingPreview]);
 
   const fetchConversations = async () => {
     try {
@@ -123,6 +148,7 @@ export default function ChatTab() {
       content: `Hey ${user?.username}! 👋 I'm your Glaukopis assistant. Ask me anything!`,
     }]);
     setInput("");
+    clearAttachment();
   };
 
   const loadConversation = async (id) => {
@@ -146,39 +172,81 @@ export default function ChatTab() {
     } catch (err) { console.error("Failed to delete:", err); }
   };
 
+  // ── attachment handlers ──
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-selecting the same file later
+    if (!file) return;
+
+    const isImage = file.type.startsWith("image/");
+    const isPdf = file.type === "application/pdf";
+    if (!isImage && !isPdf) {
+      alert("Only images or PDFs are supported right now.");
+      return;
+    }
+    if (file.size > MAX_FILE_MB * 1024 * 1024) {
+      alert(`File too big — keep it under ${MAX_FILE_MB}MB.`);
+      return;
+    }
+
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(file);
+    setPendingPreview(isImage ? URL.createObjectURL(file) : null);
+  };
+
+  const clearAttachment = () => {
+    if (pendingPreview) URL.revokeObjectURL(pendingPreview);
+    setPendingFile(null);
+    setPendingPreview(null);
+  };
+
   const sendMessage = async (text) => {
     const content = (text || input).trim();
-    if (!content || loading) return;
+    if ((!content && !pendingFile) || loading || uploading) return;
     setInput("");
 
-    const newMessages = [...messages, { role: "user", content }];
+    const displayContent = content || (pendingFile?.type.startsWith("image/") ? "📷 Image attached" : "📄 Document attached");
+    const newMessages = [...messages, { role: "user", content: displayContent }];
     setMessages(newMessages);
     setLoading(true);
 
+    let attachment = null;
+    const fileToSend = pendingFile;
+    clearAttachment();
+
     try {
+      if (fileToSend) {
+        setUploading(true);
+        const url = await uploadToCloudinary(fileToSend);
+        attachment = { url, type: fileToSend.type.startsWith("image/") ? "image" : "pdf" };
+        setUploading(false);
+      }
+
       let convoId = activeConvoId;
       if (!convoId) {
-        const res = await api.post("/ai/conversations", { title: content.slice(0, 60) });
+        const res = await api.post("/ai/conversations", { title: (content || "New attachment").slice(0, 60) });
         convoId = res.data.id;
         setActiveConvoId(convoId);
         fetchConversations();
       }
-      // console.log("sending with convoId:", convoId);
 
       const reply = await callAI(
         newMessages.map(m => ({ role: m.role, content: m.content })),
         buildSystemPrompt(user),
-        convoId
+        convoId,
+        attachment
       );
       setMessages(prev => [...prev, { role: "assistant", content: reply }]);
       fetchConversations();
-    } catch {
+    } catch (err) {
+      console.error(err);
+      setUploading(false);
       setMessages(prev => [...prev, {
         role: "assistant",
         content: "Oops, something went wrong. Check your connection and try again.",
       }]);
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -310,7 +378,9 @@ export default function ChatTab() {
             <div className="chat-bubble-wrap chat-bubble-wrap-left">
               <span className="chat-bot-avatar">🤖</span>
               <div className="chat-bubble chat-bubble-ai">
-                <p className="chat-bubble-text chat-thinking">thinking...</p>
+                <p className="chat-bubble-text chat-thinking">
+                  {uploading ? "uploading file..." : "thinking..."}
+                </p>
               </div>
             </div>
           )}
@@ -325,7 +395,34 @@ export default function ChatTab() {
           </div>
         )}
 
+        {pendingFile && (
+          <div className="chat-attachment-preview">
+            {pendingPreview ? (
+              <img src={pendingPreview} alt="attachment preview" className="chat-attachment-thumb" />
+            ) : (
+              <span className="chat-attachment-icon">📄</span>
+            )}
+            <span className="chat-attachment-name">{pendingFile.name}</span>
+            <button onClick={clearAttachment} className="chat-attachment-remove" title="Remove">✕</button>
+          </div>
+        )}
+
         <div className="chat-input-row">
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*,application/pdf"
+            onChange={handleFileSelect}
+            style={{ display: "none" }}
+          />
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            title="Attach image or PDF"
+            className="chat-icon-btn"
+            disabled={loading || uploading}
+          >
+            📎
+          </button>
           <button
             onClick={toggleVoice}
             title={listening ? "Stop" : "Voice input"}
@@ -343,8 +440,8 @@ export default function ChatTab() {
           />
           <button
             onClick={() => sendMessage()}
-            disabled={!input.trim() || loading}
-            className={`chat-icon-btn ${input.trim() && !loading ? "chat-icon-btn-active" : "chat-icon-btn-disabled"}`}
+            disabled={(!input.trim() && !pendingFile) || loading || uploading}
+            className={`chat-icon-btn ${(input.trim() || pendingFile) && !loading && !uploading ? "chat-icon-btn-active" : "chat-icon-btn-disabled"}`}
           >
             ➤
           </button>

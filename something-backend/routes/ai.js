@@ -10,33 +10,46 @@ const authMiddleware = require("../middleware/authMiddleware");
 const pool = require("../db");
 
 
-// ─── Gemini ───────────────────────────────────────────────────────────────────
-function toGeminiHistory(messages) {
-  const history = messages.slice(0, -1);
-  const firstUserIdx = history.findIndex((m) => m.role === "user");
-  if (firstUserIdx === -1) return [];
-  return history.slice(firstUserIdx).map((m) => ({
-    role: m.role === "assistant" ? "model" : "user",
-    parts: [{ text: m.content }],
-  }));
-}
+// // ─── Gemini ───────────────────────────────────────────────────────────────────
+// function toGeminiHistory(messages) {
+//   const history = messages.slice(0, -1);
+//   const firstUserIdx = history.findIndex((m) => m.role === "user");
+//   if (firstUserIdx === -1) return [];
+//   return history.slice(firstUserIdx).map((m) => ({
+//     role: m.role === "assistant" ? "model" : "user",
+//     parts: [{ text: m.content }],
+//   }));
+// }
 
-async function tryGemini(messages, system) {
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-  const model = genAI.getGenerativeModel({
-    model: "gemini-2.0-flash",
-    systemInstruction: system || "You are a helpful assistant.",
-  });
-  const chat = model.startChat({ history: toGeminiHistory(messages) });
-  const result = await chat.sendMessage(messages[messages.length - 1].content);
-  return result.response.text();
-}
+// async function tryGemini(messages, system) {
+//   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+//   const model = genAI.getGenerativeModel({
+//     model: "gemini-2.0-flash",
+//     systemInstruction: system || "You are a helpful assistant.",
+//   });
+//   const chat = model.startChat({ history: toGeminiHistory(messages) });
+//   const result = await chat.sendMessage(messages[messages.length - 1].content);
+//   return result.response.text();
+// }
 
-// ─── Groq ─────────────────────────────────────────────────────────────────────
+// // ─── Groq ─────────────────────────────────────────────────────────────────────
+// // async function tryGroq(messages, system) {
+// //   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// //   const completion = await groq.chat.completions.create({
+// //     model: "llama-3.3-70b-versatile",
+// //     max_tokens: 1000,
+// //     messages: [
+// //       { role: "system", content: system || "You are a helpful assistant." },
+// //       ...messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
+// //     ],
+// //   });
+// //   return completion.choices[0]?.message?.content || "No response."; 
+// // }
+// //the old modal going to be deprecated, so we are using the new one below
 // async function tryGroq(messages, system) {
 //   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 //   const completion = await groq.chat.completions.create({
-//     model: "llama-3.3-70b-versatile",
+//     model: "openai/gpt-oss-120b", // was: "llama-3.3-70b-versatile"
 //     max_tokens: 1000,
 //     messages: [
 //       { role: "system", content: system || "You are a helpful assistant." },
@@ -45,22 +58,98 @@ async function tryGemini(messages, system) {
 //   });
 //   return completion.choices[0]?.message?.content || "No response.";
 // }
-//the old modal going to be deprecated, so we are using the new one below
-async function tryGroq(messages, system) {
-  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// // ─── Mistral ──────────────────────────────────────────────────────────────────
+// async function tryMistral(messages, system) {
+//   const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       "Authorization": `Bearer ${process.env.MISTRAL_API_KEY}`,
+//     },
+//     body: JSON.stringify({
+//       model: "mistral-small-latest",
+//       max_tokens: 1000,
+//       messages: [
+//         { role: "system", content: system || "You are a helpful assistant." },
+//         ...messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
+//       ],
+//     }),
+//   });
+//   if (!response.ok) throw new Error(`Mistral ${response.status}`);
+//   const data = await response.json();
+//   return data.choices[0]?.message?.content || "No response.";
+// }
+
+// const express = require("express");
+// const Groq = require("groq-sdk");
+const pdfParse = require("pdf-parse");
+
+// const router = express.Router();
+// const multer = require("multer");
+// const upload = multer({ storage: multer.memoryStorage() });
+// const authMiddleware = require("../middleware/authMiddleware");
+// const pool = require("../db");
+
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+
+// ─── helpers to build message arrays ──────────────────────────────────────
+function buildTextMessages(messages, system) {
+  return [
+    { role: "system", content: system || "You are a helpful assistant." },
+    ...messages.map((m) => ({
+      role: m.role === "assistant" ? "assistant" : "user",
+      content: m.content,
+    })),
+  ];
+}
+
+function buildVisionMessages(messages, system, imageUrl) {
+  const base = buildTextMessages(messages.slice(0, -1), system);
+  const lastUserMsg = messages[messages.length - 1];
+  return [
+    ...base,
+    {
+      role: "user",
+      content: [
+        { type: "text", text: lastUserMsg.content },
+        { type: "image_url", image_url: { url: imageUrl } },
+      ],
+    },
+  ];
+}
+
+// ─── Groq ──────────────────────────────────────────────────────────────────
+async function groqChat(messages, system) {
   const completion = await groq.chat.completions.create({
-    model: "openai/gpt-oss-120b", // was: "llama-3.3-70b-versatile"
+    model: "openai/gpt-oss-120b",
     max_tokens: 1000,
-    messages: [
-      { role: "system", content: system || "You are a helpful assistant." },
-      ...messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
-    ],
+    messages: buildTextMessages(messages, system),
   });
   return completion.choices[0]?.message?.content || "No response.";
 }
 
-// ─── Mistral ──────────────────────────────────────────────────────────────────
-async function tryMistral(messages, system) {
+async function groqVision(messages, system, imageUrl) {
+  const completion = await groq.chat.completions.create({
+    model: "meta-llama/llama-4-scout-17b-16e-instruct",
+    max_tokens: 1000,
+    messages: buildVisionMessages(messages, system, imageUrl),
+  });
+  return completion.choices[0]?.message?.content || "No response.";
+}
+
+async function groqJSON(messages, system) {
+  const completion = await groq.chat.completions.create({
+    model: "openai/gpt-oss-120b",
+    max_tokens: 1500,
+    response_format: { type: "json_object" },
+    messages: buildTextMessages(messages, system),
+  });
+  return completion.choices[0]?.message?.content || "{}";
+}
+
+// ─── Mistral ───────────────────────────────────────────────────────────────
+async function mistralChat(messages, system) {
   const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -70,10 +159,7 @@ async function tryMistral(messages, system) {
     body: JSON.stringify({
       model: "mistral-small-latest",
       max_tokens: 1000,
-      messages: [
-        { role: "system", content: system || "You are a helpful assistant." },
-        ...messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
-      ],
+      messages: buildTextMessages(messages, system),
     }),
   });
   if (!response.ok) throw new Error(`Mistral ${response.status}`);
@@ -81,63 +167,116 @@ async function tryMistral(messages, system) {
   return data.choices[0]?.message?.content || "No response.";
 }
 
+// ─── OpenRouter ────────────────────────────────────────────────────────────
+async function openRouterCall({ messages, system, imageUrl, json }) {
+  const body = {
+    model: imageUrl
+      ? "meta-llama/llama-4-scout"       // vision-capable on OR
+      : "meta-llama/llama-3.3-70b-instruct:free",
+    max_tokens: json ? 1500 : 1000,
+    messages: imageUrl
+      ? buildVisionMessages(messages, system, imageUrl)
+      : buildTextMessages(messages, system),
+  };
+  if (json) body.response_format = { type: "json_object" };
+
+  const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
+    },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error(`OpenRouter ${response.status}`);
+  const data = await response.json();
+  return data.choices[0]?.message?.content || "No response.";
+}
+
+const openRouterChat = (messages, system) => openRouterCall({ messages, system });
+const openRouterVision = (messages, system, imageUrl) => openRouterCall({ messages, system, imageUrl });
+const openRouterJSON = (messages, system) => openRouterCall({ messages, system, json: true });
+
+// ─── task-based router ─────────────────────────────────────────────────────
+const routingTable = {
+  chat:   [{ name: "Groq", fn: groqChat },   { name: "Mistral", fn: mistralChat }, { name: "OpenRouter", fn: openRouterChat }],
+  vision: [{ name: "Groq", fn: groqVision }, { name: "OpenRouter", fn: openRouterVision }],
+  json:   [{ name: "Groq", fn: groqJSON },   { name: "OpenRouter", fn: openRouterJSON }],
+};
+
+async function runTask(taskType, messages, system, imageUrl) {
+  for (const provider of routingTable[taskType]) {
+    try {
+      const result = await provider.fn(messages, system, imageUrl);
+      console.log(`[${taskType}] responded via ${provider.name}`);
+      return result;
+    } catch (err) {
+      console.warn(`[${taskType}] ${provider.name} failed: ${err.message} — trying next...`);
+    }
+  }
+  throw new Error(`All providers failed for task: ${taskType}`);
+}
+
 // ─── POST /api/ai/chat — tries each provider in order ────────────────────────
 router.post("/chat", async (req, res) => {
-  const { messages, system, conversationId } = req.body;
-   console.log("conversationId received:", conversationId);
-  console.log("messages count:", messages?.length);
+  const { messages, system, conversationId, attachment } = req.body;
+  // attachment: { url, type: 'image' | 'pdf' } — optional
+
   if (!messages || messages.length === 0)
     return res.status(400).json({ error: "No messages provided" });
 
-  // save user message
   if (conversationId) {
     const userMsg = messages[messages.length - 1];
     try {
       await pool.query(
-        `INSERT INTO ai_messages (conversation_id, role, content) VALUES ($1, $2, $3)`,
-        [conversationId, userMsg.role, userMsg.content]
+        `INSERT INTO ai_messages (conversation_id, role, content, attachment_url, attachment_type)
+         VALUES ($1, $2, $3, $4, $5)`,
+        [conversationId, userMsg.role, userMsg.content, attachment?.url || null, attachment?.type || null]
       );
     } catch (err) {
       console.error("Failed to save user message:", err);
     }
   }
 
-  const providers = [
-    { name: "Gemini",  fn: tryGemini,  key: process.env.GEMINI_API_KEY  },
-    { name: "Groq",    fn: tryGroq,    key: process.env.GROQ_API_KEY    },
-    { name: "Mistral", fn: tryMistral, key: process.env.MISTRAL_API_KEY },
-  ];
-
   let text;
-  for (const provider of providers) {
-    if (!provider.key) continue;
-    try {
-      text = await provider.fn(messages, system);
-      console.log(`Responded via ${provider.name}`);
-      break;
-    } catch (err) {
-      console.warn(`${provider.name} failed: ${err.message} — trying next...`);
-    }
-  }
+  let taskMessages = messages;
+  let taskType = "chat";
+  let imageUrl = null;
 
-  if (!text) {
+  try {
+    if (attachment?.type === "image") {
+      taskType = "vision";
+      imageUrl = attachment.url;
+    } else if (attachment?.type === "pdf") {
+      const pdfRes = await fetch(attachment.url);
+      const buffer = Buffer.from(await pdfRes.arrayBuffer());
+      const parsed = await pdfParse(buffer);
+      const extractedText = parsed.text.slice(0, 12000); // keep context sane
+
+      taskMessages = [
+        ...messages.slice(0, -1),
+        {
+          role: "user",
+          content: `${messages[messages.length - 1].content}\n\n--- Uploaded document content ---\n${extractedText}`,
+        },
+      ];
+    }
+
+    text = await runTask(taskType, taskMessages, system, imageUrl);
+  } catch (err) {
+    console.error("AI task failed completely:", err.message);
     return res.status(503).json({
       content: [{ text: "I'm having trouble connecting right now. Try again in a few seconds!" }],
     });
   }
 
-  // save assistant reply
   if (conversationId) {
     try {
       await pool.query(
         `INSERT INTO ai_messages (conversation_id, role, content) VALUES ($1, $2, $3)`,
         [conversationId, "assistant", text]
       );
-      // update conversation timestamp
-      await pool.query(
-        `UPDATE ai_conversations SET updated_at = NOW() WHERE id = $1`,
-        [conversationId]
-      );
+      await pool.query(`UPDATE ai_conversations SET updated_at = NOW() WHERE id = $1`, [conversationId]);
     } catch (err) {
       console.error("Failed to save assistant message:", err);
     }
@@ -244,6 +383,38 @@ router.delete("/conversations/:id", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to delete conversation" });
+  }
+});
+
+router.post("/study-material", authMiddleware, async (req, res) => {
+  const userId = req.user.id;
+  const { conversationId, sourceText, type } = req.body;
+  // type: 'summary' | 'flashcards' | 'quiz'
+
+  if (!sourceText) return res.status(400).json({ error: "No source text provided" });
+
+  const prompts = {
+    summary: `Summarize the following study material into key points as JSON: {"title": string, "points": string[]}.\n\n${sourceText}`,
+    flashcards: `Generate 8-12 flashcards from the following study material as JSON: {"cards": [{"front": string, "back": string}]}.\n\n${sourceText}`,
+    quiz: `Generate a 5-question multiple choice quiz from the following study material as JSON: {"questions": [{"question": string, "options": string[], "correctIndex": number}]}.\n\n${sourceText}`,
+  };
+
+  if (!prompts[type]) return res.status(400).json({ error: "Invalid material type" });
+
+  try {
+    const raw = await runTask("json", [{ role: "user", content: prompts[type] }], "You output only valid JSON, no prose.");
+    const content = JSON.parse(raw);
+
+    const result = await pool.query(
+      `INSERT INTO study_materials (user_id, conversation_id, type, content)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [userId, conversationId || null, type, content]
+    );
+
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error("Study material generation failed:", err.message);
+    res.status(503).json({ error: "Couldn't generate study material, try again in a bit" });
   }
 });
 

@@ -785,7 +785,7 @@
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.05);
-  color: white;
+  color: var(--text-main);
   font-size: 14px;
   resize: none;
   outline: none;
