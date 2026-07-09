@@ -70,8 +70,8 @@ const MAX_FILE_MB = 15;
 
 // ─── Cloudinary upload ──────────────────────────────────────────────────────
 async function uploadToCloudinary(file) {
-  const cloudName = import.meta.env.CLOUDINARY_CLOUD_NAME;
-  const preset = import.meta.env.CLOUDINARY_UPLOAD_PRESET;
+  const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+  const preset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
   const formData = new FormData();
   formData.append("file", file);
