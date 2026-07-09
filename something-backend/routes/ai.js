@@ -46,6 +46,15 @@ function buildVisionMessages(messages, system, imageUrl) {
   ];
 }
 
+
+async function extractPdfText(url) {
+  const pdfRes = await fetch(url);
+  const buffer = Buffer.from(await pdfRes.arrayBuffer());
+  const parser = new PDFParse({ data: buffer });
+  const result = await parser.getText();
+  await parser.destroy();
+  return result.text;
+}
 // ─── Groq ──────────────────────────────────────────────────────────────────
 async function groqChat(messages, system) {
   const completion = await groq.chat.completions.create({
@@ -174,21 +183,28 @@ router.post("/chat", async (req, res) => {
     if (attachment?.type === "image") {
       taskType = "vision";
       imageUrl = attachment.url;
-   } else if (attachment?.type === "pdf") {
-  const pdfRes = await fetch(attachment.url);
-  const buffer = Buffer.from(await pdfRes.arrayBuffer());
+//    } else if (attachment?.type === "pdf") {
+//   const pdfRes = await fetch(attachment.url);
+//   const buffer = Buffer.from(await pdfRes.arrayBuffer());
 
-  const parser = new PDFParse({ data: buffer });
-  const result = await parser.getText();
-  await parser.destroy();
-  const extractedText = result.text.slice(0, 12000);
+//   const parser = new PDFParse({ data: buffer });
+//   const result = await parser.getText();
+//   await parser.destroy();
+//   const extractedText = result.text.slice(0, 12000);
 
+//   taskMessages = [
+//     ...messages.slice(0, -1),
+//     {
+//       role: "user",
+//       content: `${messages[messages.length - 1].content}\n\n--- Uploaded document content ---\n${extractedText}`,
+//     },
+//   ];
+// }
+} else if (attachment?.type === "pdf") {
+  const extractedText = (await extractPdfText(attachment.url)).slice(0, 12000);
   taskMessages = [
     ...messages.slice(0, -1),
-    {
-      role: "user",
-      content: `${messages[messages.length - 1].content}\n\n--- Uploaded document content ---\n${extractedText}`,
-    },
+    { role: "user", content: `${messages[messages.length - 1].content}\n\n--- Uploaded document content ---\n${extractedText}` },
   ];
 }
     text = await runTask(taskType, taskMessages, system, imageUrl);
@@ -285,13 +301,13 @@ router.get("/conversations/:id", authMiddleware, async (req, res) => {
     );
     if (convo.rows.length === 0) return res.status(404).json({ error: "Not found" });
 
-    const messages = await pool.query(
-      `SELECT role, content, created_at 
-       FROM ai_messages 
-       WHERE conversation_id = $1 
-       ORDER BY created_at ASC`,
-      [id]
-    );
+  const messages = await pool.query(
+  `SELECT role, content, created_at, attachment_url, attachment_type
+   FROM ai_messages
+   WHERE conversation_id = $1
+   ORDER BY created_at ASC`,
+  [id]
+);
     res.json(messages.rows);
   } catch (err) {
     console.error(err);
@@ -314,23 +330,28 @@ router.delete("/conversations/:id", authMiddleware, async (req, res) => {
     res.status(500).json({ error: "Failed to delete conversation" });
   }
 });
-
 router.post("/study-material", authMiddleware, async (req, res) => {
   const userId = req.user.id;
-  const { conversationId, sourceText, type } = req.body;
-  // type: 'summary' | 'flashcards' | 'quiz'
+  const { conversationId, sourceText, attachment, type } = req.body;
 
-  if (!sourceText) return res.status(400).json({ error: "No source text provided" });
-
-  const prompts = {
-    summary: `Summarize the following study material into key points as JSON: {"title": string, "points": string[]}.\n\n${sourceText}`,
-    flashcards: `Generate 8-12 flashcards from the following study material as JSON: {"cards": [{"front": string, "back": string}]}.\n\n${sourceText}`,
-    quiz: `Generate a 5-question multiple choice quiz from the following study material as JSON: {"questions": [{"question": string, "options": string[], "correctIndex": number}]}.\n\n${sourceText}`,
-  };
-
-  if (!prompts[type]) return res.status(400).json({ error: "Invalid material type" });
+  const validTypes = ["summary", "flashcards", "quiz"];
+  if (!validTypes.includes(type)) return res.status(400).json({ error: "Invalid material type" });
+  if (!sourceText && !attachment) return res.status(400).json({ error: "No source provided" });
 
   try {
+    let text = sourceText;
+    if (!text && attachment?.type === "pdf") {
+      text = await extractPdfText(attachment.url);
+    }
+    if (!text) return res.status(400).json({ error: "Couldn't extract content from that source" });
+    text = text.slice(0, 12000);
+
+    const prompts = {
+      summary: `Summarize the following study material into key points as JSON: {"title": string, "points": string[]}.\n\n${text}`,
+      flashcards: `Generate 8-12 flashcards from the following study material as JSON: {"cards": [{"front": string, "back": string}]}.\n\n${text}`,
+      quiz: `Generate a 5-question multiple choice quiz from the following study material as JSON: {"questions": [{"question": string, "options": string[], "correctIndex": number}]}.\n\n${text}`,
+    };
+
     const raw = await runTask("json", [{ role: "user", content: prompts[type] }], "You output only valid JSON, no prose.");
     const content = JSON.parse(raw);
 
@@ -344,6 +365,36 @@ router.post("/study-material", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error("Study material generation failed:", err.message);
     res.status(503).json({ error: "Couldn't generate study material, try again in a bit" });
+  }
+});
+
+// ─── GET /api/ai/study-materials ───────────────────────────────────────────
+router.get("/study-materials", authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, conversation_id, type, content, created_at
+       FROM study_materials WHERE user_id = $1 ORDER BY created_at DESC`,
+      [req.user.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch study materials" });
+  }
+});
+
+// ─── GET /api/ai/study-materials/:id ────────────────────────────────────────
+router.get("/study-materials/:id", authMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM study_materials WHERE id = $1 AND user_id = $2`,
+      [req.params.id, req.user.id]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: "Not found" });
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch study material" });
   }
 });
 

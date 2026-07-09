@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from "react";
 import api from "../api/axios.js";
 import "../styles/chat.css"
 
+import StudyMaterialModal from "../components/StudyMaterialModal.jsx";
+
 // ─── SYSTEM PROMPT ─────────────────────────────────────────────────────────────
 const buildSystemPrompt = (user) => `
 You are Glaukopis Assistant, a helpful AI embedded inside the Glaukopis platform — an academic social network built for Algerian university students.
@@ -86,6 +88,7 @@ async function uploadToCloudinary(file) {
   return data.secure_url;
 }
 
+
 // ─── CALL OUR BACKEND PROXY ──────────────────────────────────────────────
 async function callAI(messages, system, conversationId, attachment) {
   const token = localStorage.getItem("token");
@@ -127,12 +130,48 @@ export default function ChatTab() {
   const [pendingPreview, setPendingPreview] = useState(null); // local object URL, images only
   const [uploading, setUploading] = useState(false);
 
+
+
+const [studyMenuFor, setStudyMenuFor] = useState(null);   // index of message showing the menu
+const [generatingType, setGeneratingType] = useState(null);
+const [activeMaterial, setActiveMaterial] = useState(null);
+const [savedMaterials, setSavedMaterials] = useState([]);
+const [sidebarTab, setSidebarTab] = useState("chats"); // "chats" | "materials"
+
   useEffect(() => { fetchConversations(); }, []);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
   useEffect(() => { return () => { window.speechSynthesis?.cancel(); }; }, []);
   useEffect(() => {
     return () => { if (pendingPreview) URL.revokeObjectURL(pendingPreview); };
   }, [pendingPreview]);
+
+  useEffect(() => { fetchSavedMaterials(); }, []);
+
+const fetchSavedMaterials = async () => {
+  try {
+    const res = await api.get("/ai/study-materials");
+    setSavedMaterials(res.data);
+  } catch (err) { console.error("Failed to fetch study materials:", err); }
+};
+
+const generateStudyMaterial = async (msg, type) => {
+  setStudyMenuFor(null);
+  setGeneratingType(type);
+  try {
+    const res = await api.post("/ai/study-material", {
+      conversationId: activeConvoId,
+      attachment: { url: msg.attachment_url, type: msg.attachment_type },
+      type,
+    });
+    setActiveMaterial(res.data);
+    fetchSavedMaterials();
+  } catch (err) {
+    console.error("Study material generation failed:", err);
+    alert("Couldn't generate that right now — try again in a bit.");
+  } finally {
+    setGeneratingType(null);
+  }
+};
 
   const fetchConversations = async () => {
     try {
@@ -154,7 +193,12 @@ export default function ChatTab() {
   const loadConversation = async (id) => {
     try {
       const res = await api.get(`/ai/conversations/${id}`);
-      const loaded = res.data.map(m => ({ role: m.role, content: m.content }));
+      const loaded = res.data.map(m => ({
+  role: m.role,
+  content: m.content,
+  attachment_url: m.attachment_url,
+  attachment_type: m.attachment_type,
+}));
       setMessages(loaded.length > 0 ? loaded : [{
         role: "assistant",
         content: `Hey ${user?.username}! 👋 I'm your Glaukopis assistant. Ask me anything!`,
@@ -319,7 +363,7 @@ export default function ChatTab() {
 
       {/* ── SIDEBAR ── */}
       <div className={`chat-sidebar ${sidebarOpen ? "chat-sidebar-open" : "chat-sidebar-closed"}`}>
-        {sidebarOpen && (
+        {sidebarOpen ? (
           <>
             <button onClick={startNewChat} className="chat-new-btn">+ New Chat</button>
             <div className="chat-convo-list">
@@ -341,6 +385,20 @@ export default function ChatTab() {
               )}
             </div>
           </>
+        ) : (
+          <div className="chat-convo-list">
+            {savedMaterials.length === 0 ? (
+              <small className="chat-empty-convos">No study materials yet</small>
+            ) : (
+              savedMaterials.map(m => (
+                <div key={m.id} className="chat-convo-item" onClick={() => setActiveMaterial(m)}>
+                  <span className="chat-convo-title">
+                    {m.type === "summary" ? "📝" : m.type === "flashcards" ? "🗂️" : "❓"} {m.type} — {new Date(m.created_at).toLocaleDateString()}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
         )}
       </div>
 
@@ -370,9 +428,25 @@ export default function ChatTab() {
                     {speakingIndex === i ? "⏹" : "🔊"}
                   </button>
                 )}
+                {msg.role === "user" && msg.attachment_url && (
+  <div className="chat-study-trigger">
+    <button onClick={() => setStudyMenuFor(studyMenuFor === i ? null : i)} className="chat-study-btn">
+      📚 Study Material ▾
+    </button>
+    {studyMenuFor === i && (
+      <div className="chat-study-menu">
+        <button onClick={() => generateStudyMaterial(msg, "summary")}>Summary</button>
+        <button onClick={() => generateStudyMaterial(msg, "flashcards")}>Flashcards</button>
+        <button onClick={() => generateStudyMaterial(msg, "quiz")}>Quiz</button>
+      </div>
+    )}
+    {generatingType && studyMenuFor === null && <span className="chat-study-loading">Generating {generatingType}...</span>}
+  </div>
+)}
               </div>
             </div>
           ))}
+          
 
           {loading && (
             <div className="chat-bubble-wrap chat-bubble-wrap-left">
@@ -447,6 +521,7 @@ export default function ChatTab() {
           </button>
         </div>
       </div>
+      <StudyMaterialModal material={activeMaterial} onClose={() => setActiveMaterial(null)} />
     </div>
   );
 }
