@@ -10,86 +10,13 @@ const authMiddleware = require("../middleware/authMiddleware");
 const pool = require("../db");
 
 
-// // ─── Gemini ───────────────────────────────────────────────────────────────────
-// function toGeminiHistory(messages) {
-//   const history = messages.slice(0, -1);
-//   const firstUserIdx = history.findIndex((m) => m.role === "user");
-//   if (firstUserIdx === -1) return [];
-//   return history.slice(firstUserIdx).map((m) => ({
-//     role: m.role === "assistant" ? "model" : "user",
-//     parts: [{ text: m.content }],
-//   }));
-// }
+// const pdfParse = require("pdf-parse");
+// const pdfParseModule = require("pdf-parse");
+// const pdfParse = typeof pdfParseModule === "function" ? pdfParseModule : pdfParseModule.default;
 
-// async function tryGemini(messages, system) {
-//   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-//   const model = genAI.getGenerativeModel({
-//     model: "gemini-2.0-flash",
-//     systemInstruction: system || "You are a helpful assistant.",
-//   });
-//   const chat = model.startChat({ history: toGeminiHistory(messages) });
-//   const result = await chat.sendMessage(messages[messages.length - 1].content);
-//   return result.response.text();
-// }
+const { PDFParse } = require("pdf-parse");
 
-// // ─── Groq ─────────────────────────────────────────────────────────────────────
-// // async function tryGroq(messages, system) {
-// //   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-// //   const completion = await groq.chat.completions.create({
-// //     model: "llama-3.3-70b-versatile",
-// //     max_tokens: 1000,
-// //     messages: [
-// //       { role: "system", content: system || "You are a helpful assistant." },
-// //       ...messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
-// //     ],
-// //   });
-// //   return completion.choices[0]?.message?.content || "No response."; 
-// // }
-// //the old modal going to be deprecated, so we are using the new one below
-// async function tryGroq(messages, system) {
-//   const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-//   const completion = await groq.chat.completions.create({
-//     model: "openai/gpt-oss-120b", // was: "llama-3.3-70b-versatile"
-//     max_tokens: 1000,
-//     messages: [
-//       { role: "system", content: system || "You are a helpful assistant." },
-//       ...messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
-//     ],
-//   });
-//   return completion.choices[0]?.message?.content || "No response.";
-// }
 
-// // ─── Mistral ──────────────────────────────────────────────────────────────────
-// async function tryMistral(messages, system) {
-//   const response = await fetch("https://api.mistral.ai/v1/chat/completions", {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       "Authorization": `Bearer ${process.env.MISTRAL_API_KEY}`,
-//     },
-//     body: JSON.stringify({
-//       model: "mistral-small-latest",
-//       max_tokens: 1000,
-//       messages: [
-//         { role: "system", content: system || "You are a helpful assistant." },
-//         ...messages.map((m) => ({ role: m.role === "assistant" ? "assistant" : "user", content: m.content })),
-//       ],
-//     }),
-//   });
-//   if (!response.ok) throw new Error(`Mistral ${response.status}`);
-//   const data = await response.json();
-//   return data.choices[0]?.message?.content || "No response.";
-// }
-
-// const express = require("express");
-// const Groq = require("groq-sdk");
-const pdfParse = require("pdf-parse");
-
-// const router = express.Router();
-// const multer = require("multer");
-// const upload = multer({ storage: multer.memoryStorage() });
-// const authMiddleware = require("../middleware/authMiddleware");
-// const pool = require("../db");
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -247,21 +174,23 @@ router.post("/chat", async (req, res) => {
     if (attachment?.type === "image") {
       taskType = "vision";
       imageUrl = attachment.url;
-    } else if (attachment?.type === "pdf") {
-      const pdfRes = await fetch(attachment.url);
-      const buffer = Buffer.from(await pdfRes.arrayBuffer());
-      const parsed = await pdfParse(buffer);
-      const extractedText = parsed.text.slice(0, 12000); // keep context sane
+   } else if (attachment?.type === "pdf") {
+  const pdfRes = await fetch(attachment.url);
+  const buffer = Buffer.from(await pdfRes.arrayBuffer());
 
-      taskMessages = [
-        ...messages.slice(0, -1),
-        {
-          role: "user",
-          content: `${messages[messages.length - 1].content}\n\n--- Uploaded document content ---\n${extractedText}`,
-        },
-      ];
-    }
+  const parser = new PDFParse({ data: buffer });
+  const result = await parser.getText();
+  await parser.destroy();
+  const extractedText = result.text.slice(0, 12000);
 
+  taskMessages = [
+    ...messages.slice(0, -1),
+    {
+      role: "user",
+      content: `${messages[messages.length - 1].content}\n\n--- Uploaded document content ---\n${extractedText}`,
+    },
+  ];
+}
     text = await runTask(taskType, taskMessages, system, imageUrl);
   } catch (err) {
     console.error("AI task failed completely:", err.message);

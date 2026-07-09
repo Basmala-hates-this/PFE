@@ -82,7 +82,7 @@ async function uploadToCloudinary(file) {
     body: formData,
   });
   if (!res.ok) throw new Error("Cloudinary upload failed");
-  const data = await res.json();
+  const data = await res.json(); 
   return data.secure_url;
 }
 

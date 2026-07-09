@@ -759,6 +759,14 @@
   transition: opacity 0.2s;
 }
 
+.chat-attachment-thumb{
+  max-width: 200px;
+  border-radius: 8px;
+  margin-top: 6px;
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
 /* ── SUGGESTIONS ── */
 .chat-suggestions {
   display: flex;
