@@ -2,7 +2,7 @@
 .sm-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.55);
+  background: var(--chat-bg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -12,7 +12,7 @@
 }
 
 .sm-modal {
-  background: var(--bg-primary, #1e1e2e);
+  background: var(--bg-primary);
   color: var(--text-primary, #eaeaea);
   border-radius: 16px;
   padding: 28px;
@@ -31,9 +31,9 @@
   right: 14px;
   background: transparent;
   border: none;
-  font-size: 18px;
+  font-size: 20px;
   cursor: pointer;
-  color: var(--text-secondary, #999);
+  color: var(--danger);
   width: 32px;
   height: 32px;
   border-radius: 50%;

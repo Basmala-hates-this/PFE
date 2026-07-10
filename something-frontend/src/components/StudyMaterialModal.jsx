@@ -1,5 +1,5 @@
 import { useState } from "react";
-// import "../styles/studyMaterial.css";
+import "../styles/studyMaterial.css";
 
 export default function StudyMaterialModal({ material, onClose }) {
   if (!material) return null;

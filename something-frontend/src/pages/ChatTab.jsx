@@ -244,55 +244,62 @@ const generateStudyMaterial = async (msg, type) => {
     setPendingPreview(null);
   };
 
-  const sendMessage = async (text) => {
-    const content = (text || input).trim();
-    if ((!content && !pendingFile) || loading || uploading) return;
-    setInput("");
+ 
+ const sendMessage = async (text) => {
+  const content = (text || input).trim();
+  if ((!content && !pendingFile) || loading || uploading) return;
+  setInput("");
 
-    const displayContent = content || (pendingFile?.type.startsWith("image/") ? "📷 Image attached" : "📄 Document attached");
-    const newMessages = [...messages, { role: "user", content: displayContent }];
-    setMessages(newMessages);
-    setLoading(true);
+  const displayContent = content || (pendingFile?.type.startsWith("image/") ? "📷 Image attached" : "📄 Document attached");
+  const newMessages = [...messages, { role: "user", content: displayContent }];
+  const userMsgIndex = newMessages.length - 1; // track which message this is
+  setMessages(newMessages);
+  setLoading(true);
 
-    let attachment = null;
-    const fileToSend = pendingFile;
-    clearAttachment();
+  let attachment = null;
+  const fileToSend = pendingFile;
+  clearAttachment();
 
-    try {
-      if (fileToSend) {
-        setUploading(true);
-        const url = await uploadToCloudinary(fileToSend);
-        attachment = { url, type: fileToSend.type.startsWith("image/") ? "image" : "pdf" };
-        setUploading(false);
-      }
-
-      let convoId = activeConvoId;
-      if (!convoId) {
-        const res = await api.post("/ai/conversations", { title: (content || "New attachment").slice(0, 60) });
-        convoId = res.data.id;
-        setActiveConvoId(convoId);
-        fetchConversations();
-      }
-
-      const reply = await callAI(
-        newMessages.map(m => ({ role: m.role, content: m.content })),
-        buildSystemPrompt(user),
-        convoId,
-        attachment
-      );
-      setMessages(prev => [...prev, { role: "assistant", content: reply }]);
-      fetchConversations();
-    } catch (err) {
-      console.error(err);
+  try {
+    if (fileToSend) {
+      setUploading(true);
+      const url = await uploadToCloudinary(fileToSend);
+      attachment = { url, type: fileToSend.type.startsWith("image/") ? "image" : "pdf" };
       setUploading(false);
-      setMessages(prev => [...prev, {
-        role: "assistant",
-        content: "Oops, something went wrong. Check your connection and try again.",
-      }]);
-    } finally {
-      setLoading(false);
+
+      // patch the message we already rendered so the trigger button shows immediately
+      setMessages(prev => prev.map((m, i) =>
+        i === userMsgIndex ? { ...m, attachment_url: attachment.url, attachment_type: attachment.type } : m
+      ));
     }
-  };
+
+    let convoId = activeConvoId;
+    if (!convoId) {
+      const res = await api.post("/ai/conversations", { title: (content || "New attachment").slice(0, 60) });
+      convoId = res.data.id;
+      setActiveConvoId(convoId);
+      fetchConversations();
+    }
+
+    const reply = await callAI(
+      newMessages.map(m => ({ role: m.role, content: m.content })),
+      buildSystemPrompt(user),
+      convoId,
+      attachment
+    );
+    setMessages(prev => [...prev, { role: "assistant", content: reply }]);
+    fetchConversations();
+  } catch (err) {
+    console.error(err);
+    setUploading(false);
+    setMessages(prev => [...prev, {
+      role: "assistant",
+      content: "Oops, something went wrong. Check your connection and try again.",
+    }]);
+  } finally {
+    setLoading(false);
+  }
+};
 
   function detectFromText(t) {
     if (/[\u0600-\u06FF]/.test(t)) return "ar";

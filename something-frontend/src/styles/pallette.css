@@ -15,6 +15,7 @@ didnt use most of them...+the namings are bad...idc*/
   --light: #ECF0F1;
   --dark2: #103047;
   --chat-bg:rgba(130, 188, 255, 0.473);
+  --bg-primary: #0e1642;
 
 
   /* === Text === */
@@ -54,7 +55,7 @@ didnt use most of them...+the namings are bad...idc*/
   --dark2: #8fbedf;
   --dark: #79c5fc;
   --chat-bg:rgba(48, 103, 165, 0.473);
-
+  --bg-primary: #b0b8c0d8;
   /* === Text === */
   --text-main: #020617;
   --text-muted: #030f21;
