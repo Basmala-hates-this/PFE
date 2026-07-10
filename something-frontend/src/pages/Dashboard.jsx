@@ -169,6 +169,9 @@ const notifRef = useRef(null);
 
 const [postIsQuestion, setPostIsQuestion] = useState(false);
 
+const [similarPost, setSimilarPost] = useState(null);
+const similarCheckRef = useRef(null);
+
 // ....................................i hate me .....
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -192,41 +195,7 @@ const [postIsQuestion, setPostIsQuestion] = useState(false);
     if (storedUser) setUser(storedUser);
   }, [navigate]);
 
-  // useEffect(() => {
-  //   //maybe if this caused problems...change with useRef of react...only if necessary...which for now..it isnt..
-  //   const lgm = document.getElementById("lgm");
-  //   const body = document.body;
 
-  //   if (!lgm) return;
-
-  //   let savedTheme = localStorage.getItem("theme");
-
-  //   if (!savedTheme) {
-  //     const prefersLight = window.matchMedia(
-  //       "(prefers-color-scheme: light)",
-  //     ).matches;
-  //     savedTheme = prefersLight ? "light" : "dark";
-  //     localStorage.setItem("theme", savedTheme);
-  //   }
-
-  //   if (savedTheme === "light") {
-  //     body.classList.add("light-mode");
-  //     lgm.textContent = t('dashboard.sidebar.darkMode');
-  //   } else {
-  //     lgm.textContent = t('dashboard.sidebar.lightMode');
-  //   }
-
-  //   const toggleTheme = () => {
-  //     body.classList.toggle("light-mode");
-  //     const mode = body.classList.contains("light-mode") ? "light" : "dark";
-  //     localStorage.setItem("theme", mode);
-  //     lgm.textContent = mode === "light" ? t('dashboard.sidebar.darkMode') : t('dashboard.sidebar.lightMode');
-  //   };
-
-  //   lgm.addEventListener("click", toggleTheme);
-
-  //   return () => lgm.removeEventListener("click", toggleTheme);
-  // }, []);
 
   //listener to the update from editprofile page
   useEffect(() => {
@@ -242,96 +211,7 @@ const [postIsQuestion, setPostIsQuestion] = useState(false);
     };
   }, []);
 
-//   const fetchRoomsAndPosts = async () => {
-//     console.log("fetchRoomsAndPosts called");
 
-//     setLoading(true);
-//     try {
-//       const token = localStorage.getItem("token");
-//       let allowedRooms = [];
-
-//       if (isGuest) {
-//         // const response = await axios.get(
-//         //   "http://localhost:5000/api/rooms/public-rooms",
-//         // );
-//         const response = await api.get("/rooms/public-rooms");
-//         const guestUniversities =
-//           JSON.parse(localStorage.getItem("guestUniversities")) || [];
-//         const selectedCodes = guestUniversities.map((u) => u.value);
-//         allowedRooms = response.data.filter(
-//           (r) =>
-//             r.type === "public" || selectedCodes.includes(r.universityCode),
-//         );
-//       } else {
-//         // const response = await axios.get(
-//         //   "http://localhost:5000/api/rooms/my-rooms",
-//         //   {
-//         //     headers: { Authorization: `Bearer ${token}` },
-//         //   },
-//         // );
-//         const response = await api.get("/rooms/my-rooms");
-//         allowedRooms = response.data;
-//       }
-
-//       setUserRooms(allowedRooms);
-
-//       //save posts/unsave...u get the idea
-//       if (!isGuest) {
-//         try {
-//           // const savedRes = await axios.get(
-//           //   "http://localhost:5000/api/posts/saved",
-//           //   {
-//           //     headers: { Authorization: `Bearer ${token}` },
-//           //   },
-//           // );
-//           const savedRes = await api.get("/posts/saved");
-//           setSavedPostIds(savedRes.data.map((p) => p.id));
-//         } catch (err) {
-//           console.error("Failed to fetch saved posts:", err);
-//         }
-//       }
-
-//       // let url = "http://localhost:5000/api/posts";
-//       let url = "/posts";
-//       if (selectedRooms.length === 1) {
-//         url += `?roomId=${selectedRooms[0].value}`;
-//       }
-//       // const postsResponse = await axios.get(url, {
-//       //   headers: token
-//       //     ? { Authorization: `Bearer ${token}` }
-//       //     : guestToken
-//       //       ? { Authorization: `Bearer ${guestToken}` }
-//       //       : {},
-//       // });
-//       const postsResponse = await api.get(url, {
-//   headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
-// });
-
-//       if (isGuest) {
-//         const allowedRoomIds = allowedRooms.map((r) => r.id);
-//         setPosts(
-//           postsResponse.data.filter((p) => allowedRoomIds.includes(p.roomId)),
-//         );
-//       } else {
-//         const publicPosts = postsResponse.data.filter((p) => {
-//           if (!p.roomId) return false;
-//           const room = allowedRooms.find((r) => r.id === p.roomId);
-//           return room ? room.type !== "private" : false;
-//         });
-
-//         setPosts(publicPosts);
-//         console.log(
-//           "post sample userVote:",
-//           publicPosts[0]?.userVote,
-//           publicPosts[0],
-//         );
-//       }
-//     } catch (err) {
-//       console.error("Failed to fetch:", err);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
 const fetchRoomsAndPosts = async () => {
   //console.log("fetchRoomsAndPosts called");
   setLoading(true);
@@ -483,6 +363,38 @@ useEffect(() => {
   document.addEventListener("mousedown", handleClickOutside);
   return () => document.removeEventListener("mousedown", handleClickOutside);
 }, []);
+
+
+
+useEffect(() => {
+  if (similarCheckRef.current) clearTimeout(similarCheckRef.current);
+
+  if (!isModalOpen || !postContent || postContent.trim().length < 20 || !selectedPostRoom) {
+    setSimilarPost(null);
+    return;
+  }
+
+  const room = userRooms.find((r) => r.id === selectedPostRoom.value);
+  if (!room || !["major", "subject"].includes(room.type)) {
+    setSimilarPost(null);
+    return;
+  }
+
+  similarCheckRef.current = setTimeout(async () => {
+    try {
+      const res = await api.post("/posts/check-similar", {
+        content: postContent,
+        roomId: room.id,
+        roomType: room.type,
+      });
+      setSimilarPost(res.data.match);
+    } catch {
+      setSimilarPost(null);
+    }
+  }, 900);
+
+  return () => clearTimeout(similarCheckRef.current);
+}, [postContent, selectedPostRoom, isModalOpen]);
 ////////////////////////////////////////////////////////////////////
 
   ////////////////////////////////////////////////////////////////////////
@@ -522,17 +434,7 @@ useEffect(() => {
       if (postResourceLabel.trim())
         formData.append("resourceLabel", postResourceLabel);
 
-      // const response = await axios.post(
-      //   "http://localhost:5000/api/posts",
-      //   formData,
-      //   {
-      //     headers: {
-      //       Authorization: `Bearer ${token}`,
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   },
-      // );
-
+   
       const response = await api.post("/posts", formData, {
   headers: { "Content-Type": "multipart/form-data" }
 });
@@ -546,6 +448,7 @@ useEffect(() => {
       setPostResourceLabel("");
       setIsModalOpen(false);
       setPostIsQuestion(false);
+      setSimilarPost(null);
     } catch (err) {
       console.error("Failed to create post:", err);
     } finally {
@@ -594,28 +497,7 @@ useEffect(() => {
       }, []),
   ].filter((group) => group.options.length > 0); // remove empty groups
 
-  //ladies and gentemen.....the votes
-  // const handleVote = async (postId, voteType) => {
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     await axios.patch(
-  //       `http://localhost:5000/api/posts/${postId}/vote`,
-  //       { voteType },
-  //       { headers: { Authorization: `Bearer ${token}` } },
-  //     );
-  //     const response = await axios.get(
-  //       `http://localhost:5000/api/posts/${postId}`,
-  //       { headers: { Authorization: `Bearer ${token}` } },
-  //     );
-  //     setPosts((prev) =>
-  //       prev
-  //         .map((post) => (post.id === postId ? response.data : post))
-  //         .filter((post) => !post.isHidden),
-  //     );
-  //   } catch (err) {
-  //     console.error("Failed to vote:", err);
-  //   }
-  // };
+
 
   const handleVote = async (postId, voteType) => {
     const previousPosts = posts;
@@ -644,17 +526,9 @@ useEffect(() => {
 
     try {
       const token = localStorage.getItem("token");
-      // await axios.patch(
-      //   `http://localhost:5000/api/posts/${postId}/vote`,
-      //   { voteType },
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
+   
       await api.patch(`/posts/${postId}/vote`, { voteType });
-      // sync real counts from backend
-      // const response = await axios.get(
-      //   `http://localhost:5000/api/posts/${postId}`,
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
+    
       const response = await api.get(`/posts/${postId}`);
       setPosts((prev) =>
         prev
@@ -683,17 +557,7 @@ useEffect(() => {
 
     try {
       const token = localStorage.getItem("token");
-      // await axios.post(
-      //   `http://localhost:5000/api/posts/${postId}/comments`,
-      //   { content },
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
-
-      // // refetch the post to get updated comments
-      // const response = await axios.get(
-      //   `http://localhost:5000/api/posts/${postId}`,
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
+  
 
       await api.post(`/posts/${postId}/comments`, { content });
 const response = await api.get(`/posts/${postId}`);
@@ -712,17 +576,7 @@ const response = await api.get(`/posts/${postId}`);
   const handleCommentVote = async (postId, commentId, voteType) => {
     try {
       const token = localStorage.getItem("token");
-      // await axios.patch(
-      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}/vote`,
-      //   { voteType },
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
-
-      // // refetch the post to get updated comment votes
-      // const response = await axios.get(
-      //   `http://localhost:5000/api/posts/${postId}`,
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
+   
       await api.patch(`/posts/${postId}/comments/${commentId}/vote`, { voteType });
 const response = await api.get(`/posts/${postId}`);
 
@@ -742,9 +596,7 @@ const response = await api.get(`/posts/${postId}`);
 
     try {
       const token = localStorage.getItem("token");
-      // await axios.delete(`http://localhost:5000/api/posts/${postId}`, {
-      //   headers: { Authorization: `Bearer ${token}` },
-      // });
+     
       await api.delete(`/posts/${postId}`);
       setPosts((prev) => prev.filter((p) => p.id !== postId));
     } catch (err) {
@@ -766,11 +618,7 @@ const response = await api.get(`/posts/${postId}`);
     if (editPostResourceLabel.trim()) formData.append("resourceLabel", editPostResourceLabel);
     if (removeAttachment) formData.append("removeAttachment", "true");
 
-    // const response = await axios.patch(
-    //   `http://localhost:5000/api/posts/${postId}`,
-    //   formData,
-    //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-    // );
+
 
     const response = await api.patch(`/posts/${postId}`, formData, {
   headers: { "Content-Type": "multipart/form-data" }
@@ -793,14 +641,7 @@ const response = await api.get(`/posts/${postId}`);
 
     try {
        const token = localStorage.getItem("token");
-      // await axios.delete(
-      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
-      // const response = await axios.get(
-      //   `http://localhost:5000/api/posts/${postId}`,
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
+    
       await api.delete(`/posts/${postId}/comments/${commentId}`);
 const response = await api.get(`/posts/${postId}`);
       setPosts((prev) =>
@@ -816,15 +657,7 @@ const response = await api.get(`/posts/${postId}`);
     setIsSubmitting(true);
     try {
       const token = localStorage.getItem("token");
-      // await axios.patch(
-      //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}`,
-      //   { content: editCommentContent },
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
-      // const response = await axios.get(
-      //   `http://localhost:5000/api/posts/${postId}`,
-      //   { headers: { Authorization: `Bearer ${token}` } },
-      // );
+   
       await api.patch(`/posts/${postId}/comments/${commentId}`, { content: editCommentContent });
 const response = await api.get(`/posts/${postId}`);
       setPosts((prev) =>
@@ -924,26 +757,7 @@ const response = await api.get(`/posts/${postId}`);
     }
   };
 
-  // const handleCreateAndJoinSubjectRoom = async (major, majorId, subject) => {
-  //   console.log("handleCreateAndJoinSubjectRoom called", major, subject);
-  //   const confirm = window.confirm(
-  //     t("dashboard.browseRooms.joinConfirm", { subject, major }),
-  //   );
-  //   if (!confirm) return;
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     await axios.post(
-  //       "http://localhost:5000/api/rooms/subject-rooms/create",
-  //       { majorId, subject },
-  //       { headers: { Authorization: `Bearer ${token}` } },
-  //     );
 
-  //     await fetchSubjectRooms();
-  //     await fetchRoomsAndPosts();
-  //   } catch (err) {
-  //     alert(err.response?.data?.message || "Something went wrong.");
-  //   }
-  // };
 
  const handleCreateAndJoinSubjectRoom = async (major, majorId, subject) => {
   const confirm = window.confirm(
@@ -1085,28 +899,6 @@ const response = await api.get(`/posts/${postId}`);
     }
   };
 
-  // const handleRequestSubjectRoom = async () => {
-  //   if (!requestMajor || !requestSubject.trim()) return;
-  //   setRequestLoading(true);
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     const res = await axios.post(
-  //       "http://localhost:5000/api/rooms/subject-rooms/request",
-  //       // { major: requestMajor, subject: requestSubject.trim() },
-  //       { majorId: requestMajor, subject: requestSubject.trim() },
-  //       { headers: { Authorization: `Bearer ${token}` } },
-  //     );
-  //     setRequestFeedback(res.data.message);
-  //     setRequestSubject("");
-  //     setRequestMajor("");
-  //   } catch (err) {
-  //     setRequestFeedback(
-  //       err.response?.data?.message || "Something went wrong.",
-  //     );
-  //   } finally {
-  //     setRequestLoading(false);
-  //   }
-  // };
 
   const handleRequestSubjectRoom = async () => {
   if (!requestMajor || !requestSubject.trim()) return;
@@ -1569,15 +1361,7 @@ const handleNotifClick = (n) => {
                 background: n.isRead ? "transparent" : "rgba(100,118,175,0.15)",
                 cursor: "pointer",
               }}
-//              onClick={() => {
-//                 console.log('notif clicked:', n.type, n.roomId, n); // add this
-//   api.patch(`/notifications/${n.id}/read`).catch(() => {});
-//   setNotifications(prev =>
-//     prev.map(x => x.id === n.id ? { ...x, isRead: true } : x)
-//   );
-//    setActiveTab("feed");
-//   setShowNotifications(false);
-// }}
+
 onClick={() => {
   // console.log('keys:', Object.keys(n));
   // console.log('entity_id:', n.entity_id, 'entityId:', n.entityId);
@@ -2463,6 +2247,60 @@ onClick={() => {
                 resize: "vertical",
               }}
             />
+            {similarPost && (
+  <div
+    style={{
+      marginTop: "10px",
+      padding: "10px 12px",
+      background: "rgba(240,192,64,0.12)",
+      border: "1px solid #f0c040b3",
+      borderRadius: "8px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: "10px",
+      fontSize: "13px",
+    }}
+  >
+    <span>
+      💡 Similar post found: <strong>{similarPost.title}</strong>
+    </span>
+    <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+      <button
+        onClick={() => {
+          setSelectedPost({ id: similarPost.id });
+          setIsModalOpen(false);
+          setSimilarPost(null);
+        }}
+        style={{
+          fontSize: "12px",
+          padding: "3px 10px",
+          borderRadius: "6px",
+          background: "#f0c040",
+          border: "none",
+          color: "#000",
+          cursor: "pointer",
+        }}
+      >
+        View
+      </button>
+      <button
+        onClick={() => setSimilarPost(null)}
+        style={{
+          fontSize: "12px",
+          padding: "3px 10px",
+          borderRadius: "6px",
+          background: "transparent",
+          border: "1px solid rgba(255,255,255,0.3)",
+          color: "inherit",
+          cursor: "pointer",
+        }}
+      >
+        Dismiss
+      </button>
+    </div>
+  </div>
+)}
             <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
   <input
     type="checkbox"
@@ -2559,7 +2397,7 @@ onClick={() => {
                 gap: "10px",
               }}
             >
-              <button onClick={() => setIsModalOpen(false)}>
+              <button onClick={() => { setIsModalOpen(false); setSimilarPost(null); }}>
                 {t("dashboard.postModal.cancel")}
               </button>
               <button

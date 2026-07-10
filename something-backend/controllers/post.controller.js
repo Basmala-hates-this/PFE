@@ -46,6 +46,7 @@ const createPost = async (req, res) => {
   } catch (notifErr) {
     console.error('Post notification failed:', notifErr);
   }
+  
 
   res.status(201).json(newPost);
 };
@@ -57,56 +58,6 @@ const getPostById = async (req, res) => {
   if (!post) return res.status(404).json({ message: 'Post not found' });
   res.json(post);
 };
-
-// const getPostsAll = async (req, res) => {
-//   const { roomId, sort, limit = 20, cursorCreatedAt, cursorId } = req.query;
-//   const userId = req.user?.id || null;
-
-//   let posts, nextCursor;
-
-//   if (roomId) {
-//     const result = await postRepo.getPostsByRoom(roomId, userId, {
-//       limit: Number(limit),
-//       cursorCreatedAt: cursorCreatedAt || null,
-//       cursorId: cursorId ? Number(cursorId) : null,
-//     });
-//     posts = result.posts;
-//     nextCursor = result.nextCursor;
-//   } else {
-//     const params = [userId];
-//     let cursorClause = "";
-//     if (cursorCreatedAt && cursorId) {
-//       params.push(cursorCreatedAt, cursorId);
-//       cursorClause = `WHERE (p.created_at, p.id) < ($2, $3)`;
-//     }
-//     params.push(Number(limit));
-//     const limitParamIndex = params.length;
-
-//     const result = await pool.query(
-//       `SELECT p.*,
-//         COALESCE(v.useful, 0) as vote_useful,
-//         COALESCE(v.useless, 0) as vote_useless,
-//         COUNT(DISTINCT c.id) as comment_count,
-//         u.profile_pic_url as author_profile_pic,
-//         (SELECT type FROM votes WHERE post_id = p.id AND user_id = $1) as user_vote
-//        FROM posts p
-//        LEFT JOIN post_vote_counts v ON v.post_id = p.id
-//        LEFT JOIN comments c ON c.post_id = p.id
-//        LEFT JOIN users u ON u.id = p.user_id
-//        ${cursorClause}
-//        GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
-//        ORDER BY p.created_at DESC, p.id DESC
-//        LIMIT $${limitParamIndex}`,
-//       params
-//     );
-//     posts = toCamel(result.rows);
-//     nextCursor = result.rows.length === Number(limit)
-//       ? { createdAt: result.rows[result.rows.length - 1].created_at, id: result.rows[result.rows.length - 1].id }
-//       : null;
-//   }
-
-//   res.json({ posts, nextCursor, hasMore: !!nextCursor });
-// };
 
 
 const getPostsAll = async (req, res) => {
