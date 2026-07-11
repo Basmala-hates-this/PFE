@@ -2344,14 +2344,14 @@ onClick={() => {
   {t("dashboard.postModal.isQuestionLabel")}
 </label>
 
-<label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
+{/* <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
   <input
     type="checkbox"
     checked={postIsQuestion}
     onChange={(e) => setPostIsQuestion(e.target.checked)}
   />
   {t("dashboard.postModal.isQuestionLabel")}
-</label>
+</label> */}
 
 {selectedPostRoomIsSubject && (
   <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
