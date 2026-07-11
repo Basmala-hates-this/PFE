@@ -8,23 +8,7 @@ const upload = require('../middleware/upload');
 const endorsementController = require('../controllers/peerEndorsement.controller');
 const { getEmbedding, toVectorLiteral } = require("../utils/embeddings");
 
-router.post('/', protect, guestBlock, upload.single('attachment'), postController.createPost,async (req, res) => {
-
-
-  const result = await pool.query(`INSERT INTO posts (...) VALUES (...) RETURNING *`);
-  const newPost = result.rows[0];
-
-  res.json(newPost); 
-
-  // ↓↓↓ NEW — goes right here, after the response is sent
-  getEmbedding(`${newPost.title}\n${newPost.content}`)
-    .then(embedding => pool.query(
-      `UPDATE posts SET embedding = $1::vector WHERE id = $2`,
-      [toVectorLiteral(embedding), newPost.id]
-    ))
-    .catch(err => console.error(`Embedding generation failed for post ${newPost.id}:`, err.message));
-});
-
+router.post('/', protect, guestBlock, upload.single('attachment'), postController.createPost);
 
 
 

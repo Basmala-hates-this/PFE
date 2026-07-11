@@ -6,6 +6,7 @@ const userRepo = require('../repositories/user.repo');
 const pool = require('../db');
 const toCamel = require('../utils/toCamel');
 const notifService = require('../services/notificationService');
+const { getEmbedding, toVectorLiteral } = require('../utils/embeddings');
 
 // --- suspension check ---
 const isUserSuspendedInRoom = async (roomId, userId) => {
@@ -33,7 +34,7 @@ const createPost = async (req, res) => {
   const newPost = await postRepo.createPost({
     title, content, roomId,
     authorId, authorUsername, authorRole,
-    image, pdf, video, 
+    image, pdf, video,
     resourceLink: resourceLink || null,
     resourceLabel: resourceLabel || null,
     isQuestion: isQuestion === true || isQuestion === 'true',
@@ -46,9 +47,16 @@ const createPost = async (req, res) => {
   } catch (notifErr) {
     console.error('Post notification failed:', notifErr);
   }
-  
 
-  res.status(201).json(newPost);
+  res.status(201).json(newPost); // unchanged, user gets their response now
+
+  //  fire-and-forget, runs after the response, never blocks the user
+  getEmbedding(`${title}\n${content}`)
+    .then(embedding => pool.query(
+      `UPDATE posts SET embedding = $1::vector WHERE id = $2`,
+      [toVectorLiteral(embedding), newPost.id]
+    ))
+    .catch(err => console.error(`Embedding generation failed for post ${newPost.id}:`, err.message));
 };
 
 const getPostById = async (req, res) => {
