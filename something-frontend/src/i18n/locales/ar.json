@@ -201,7 +201,9 @@
       "guestPostAlert": "سجّل دخولك للنشر؟",
       "deleteConfirm": "هل أنت متأكد من حذف هذا المنشور؟",
         "answered": "تمت الإجابة",
-      "unanswered": "بدون إجابة"
+      "unanswered": "بدون إجابة",
+    "isStudyPartnerLabel": "بحث عن شركاء دراسة",
+    "studyPartner": "شريك دراسة"
     },
     "postModal": {
       "title": "اكتب منشوراً",

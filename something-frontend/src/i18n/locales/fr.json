@@ -202,7 +202,9 @@
       "guestPostAlert": "Connectez-vous pour poster ?",
       "deleteConfirm": "Êtes-vous sûr de vouloir supprimer ce post ?",
        "answered": "Répondu",
-      "unanswered": "Sans réponse"
+      "unanswered": "Sans réponse",
+    "isStudyPartnerLabel": "À la recherche de partenaires d'étude",
+    "studyPartner": "Partenaire d'étude"
     },
     "postModal": {
       "title": "Écrire un post",

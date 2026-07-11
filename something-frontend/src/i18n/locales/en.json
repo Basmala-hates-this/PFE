@@ -202,7 +202,9 @@
       "guestPostAlert": "Login to post?",
       "deleteConfirm": "Are you sure you want to delete this post?",
       "answered": "Answered",
-      "unanswered": "Unanswered"
+      "unanswered": "Unanswered",
+    "isStudyPartnerLabel": "Looking for study partners",
+    "studyPartner": "Study Partner"
     },
     "postModal": {
       "title": "Write a Post",
