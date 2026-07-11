@@ -39,6 +39,11 @@ didnt use most of them...+the namings are bad...idc*/
   --success: #22c55e;
   --warning: #facc15;
   --danger: #ef4444;
+
+  /* ===not proud of this=== */
+   --study-partner-bg: rgba(76, 47, 88, 0.747);
+  --study-partner-text: #20ec7c;
+  --study-partner-border: rgba(32, 236, 124, 0.795);
 }
 
 
@@ -76,4 +81,8 @@ didnt use most of them...+the namings are bad...idc*/
   --success: #22c55e;
   --warning: #facc15;
   --danger: #ef4444;
+
+   --study-partner-bg: rgba(155, 89, 182, 0.12);
+  --study-partner-text: #8e44ad;
+  --study-partner-border: rgba(155, 89, 182, 0.5);
 }

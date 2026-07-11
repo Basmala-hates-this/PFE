@@ -1848,9 +1848,9 @@ onClick={() => {
     fontWeight: "bold",
     marginBottom: "8px",
     marginLeft: post.isQuestion ? "6px" : "0",
-    background: "rgba(155,89,182,0.2)",
-    color: "#9b59b6",
-    border: "1px solid #9b59b6b3",
+    background: "var(--study-partner-bg)",
+    color: "var(--study-partner-text)",
+    border: "1px solid var(--study-partner-border)",
   }}>
     🤝 {t('dashboard.post.studyPartner')}
   </span>
