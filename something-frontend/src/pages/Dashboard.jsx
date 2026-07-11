@@ -172,6 +172,8 @@ const [postIsQuestion, setPostIsQuestion] = useState(false);
 const [similarPost, setSimilarPost] = useState(null);
 const similarCheckRef = useRef(null);
 
+const [postIsStudyPartner, setPostIsStudyPartner] = useState(false);
+
 // ....................................i hate me .....
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -401,6 +403,8 @@ useEffect(() => {
   /////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////
 
+  
+
   //ze function to(can i call it function? or component? this entire page is a compenent though...anyhow finish the comment)create mock
   const handleMockPost = () => {
     setMockPosts((prev) => [
@@ -428,6 +432,8 @@ useEffect(() => {
       formData.append("title", postTitle || "Post");
       formData.append("roomId", selectedPostRoom.value);
       formData.append("isQuestion", postIsQuestion);
+      formData.append("isQuestion", postIsQuestion);
+formData.append("isStudyPartner", postIsStudyPartner);
       if (postAttachment) formData.append("attachment", postAttachment);
       if (postResourceLink.trim())
         formData.append("resourceLink", postResourceLink);
@@ -449,6 +455,8 @@ useEffect(() => {
       setIsModalOpen(false);
       setPostIsQuestion(false);
       setSimilarPost(null);
+      setPostIsQuestion(false);
+setPostIsStudyPartner(false);
     } catch (err) {
       console.error("Failed to create post:", err);
     } finally {
@@ -497,6 +505,10 @@ useEffect(() => {
       }, []),
   ].filter((group) => group.options.length > 0); // remove empty groups
 
+
+  const selectedPostRoomIsSubject =
+  selectedPostRoom &&
+  userRooms.find((r) => r.id === selectedPostRoom.value)?.type === "subject";
 
 
   const handleVote = async (postId, voteType) => {
@@ -1827,6 +1839,22 @@ onClick={() => {
     {post.isAnswered ? `✓ ${t('dashboard.post.answered')}` : `❓ ${t('dashboard.post.unanswered')}`}
   </span>
 )}
+{post.isStudyPartner && (
+  <span style={{
+    display: "inline-block",
+    fontSize: "11px",
+    padding: "2px 10px",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    marginBottom: "8px",
+    marginLeft: post.isQuestion ? "6px" : "0",
+    background: "rgba(155,89,182,0.2)",
+    color: "#9b59b6",
+    border: "1px solid #9b59b6b3",
+  }}>
+    🤝 {t('dashboard.post.studyPartner')}
+  </span>
+)}
                           <p
                             style={{
                               margin: "0 0 8px",
@@ -2185,7 +2213,7 @@ onClick={() => {
         {activeTab === "guide" && <GuidePage embedded />}
       </div>
 
-      {/* ── ALL MODALS STAY HERE (unchanged) ── */}
+      {/* ── ALL MODALS STAY HERE (unchanged) ── this is mostly what i need*/}
 
       {isModalOpen && (
         <div className="modal-overlay" onClick={() => setIsModalOpen(false)}>
@@ -2228,7 +2256,11 @@ onClick={() => {
             <Select
               options={groupedRoomOptions}
               value={selectedPostRoom}
-              onChange={(selected) => setSelectedPostRoom(selected)}
+               onChange={(selected) => {
+    setSelectedPostRoom(selected);
+    const isSubject = userRooms.find((r) => r.id === selected?.value)?.type === "subject";
+    if (!isSubject) setPostIsStudyPartner(false);
+  }}
               placeholder={t("dashboard.postModal.selectRoom")}
               styles={customSelect}
             />
@@ -2301,6 +2333,8 @@ onClick={() => {
     </div>
   </div>
 )}
+
+
             <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
   <input
     type="checkbox"
@@ -2309,6 +2343,28 @@ onClick={() => {
   />
   {t("dashboard.postModal.isQuestionLabel")}
 </label>
+
+<label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
+  <input
+    type="checkbox"
+    checked={postIsQuestion}
+    onChange={(e) => setPostIsQuestion(e.target.checked)}
+  />
+  {t("dashboard.postModal.isQuestionLabel")}
+</label>
+
+{selectedPostRoomIsSubject && (
+  <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
+    <input
+      type="checkbox"
+      checked={postIsStudyPartner}
+      onChange={(e) => setPostIsStudyPartner(e.target.checked)}
+    />
+    {t("dashboard.postModal.isStudyPartnerLabel")}
+  </label>
+)}
+
+
             <div style={{ marginTop: "10px" }}>
               <label
                 style={{

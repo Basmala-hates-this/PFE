@@ -224,7 +224,9 @@
     "guestCommentBanner":"hello guest",
      "isQuestionLabel": "This is a question",
       "endorse": "Endorse",
-    "endorsed": "Endorsed"
+    "endorsed": "Endorsed",
+    "isStudyPartnerLabel": "Looking for study partners",
+    "studyPartner": "Study Partner"
 
     },
     "browseRooms": {
@@ -281,7 +283,9 @@
     "createAccount":"Create Account",
     "login":"Login",
     "guestCommentBanner":"hello guest",
-     "isQuestionLabel": "This is a question"
+     "isQuestionLabel": "This is a question",
+    "isStudyPartnerLabel": "Looking for study partners",
+    "studyPartner": "Study Partner"
 
   },
   "noComments": "No comments yet. Be the first!",

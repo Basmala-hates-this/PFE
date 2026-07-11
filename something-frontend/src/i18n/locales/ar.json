@@ -227,7 +227,9 @@
     "markAnswered": "وضع علامة كتمت الإجابة",
     "markUnanswered": "وضع علامة كبدون إجابة",
      "endorse": "توصية",
-    "endorsed": "تمت التوصية"
+    "endorsed": "تمت التوصية",
+    "isStudyPartnerLabel": "بحث عن شركاء دراسة",
+    "studyPartner": "شريك دراسة"
     },
     "browseRooms": {
       "title": "تصفح الغرف",
@@ -284,7 +286,9 @@
     "markAnswered": "وضع علامة كتمت الإجابة",
     "markUnanswered": "وضع علامة كبدون إجابة",
      "endorse": "توصية",
-    "endorsed": "تمت التوصية"
+    "endorsed": "تمت التوصية",
+    "isStudyPartnerLabel": "بحث عن شركاء دراسة",
+    "studyPartner": "شريك دراسة"
   },
   "noComments": "لا توجد تعليقات بعد. كن أول من يعلق!",
   "hiddenComment": "🙈 تم إخفاء هذا التعليق.",

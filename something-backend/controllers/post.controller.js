@@ -17,8 +17,50 @@ const isUserSuspendedInRoom = async (roomId, userId) => {
 
 // --- posts ---
 
+// const createPost = async (req, res) => {
+//   const { title, content, roomId, resourceLink, resourceLabel, isQuestion } = req.body;
+//   const authorId = req.user.id;
+//   const authorUsername = req.user.username;
+//   const authorRole = req.user.role;
+
+//   if (await isUserSuspendedInRoom(roomId, authorId)) {
+//     return res.status(403).json({ message: 'You are suspended from posting in this room.' });
+//   }
+
+//   const image = req.file && req.file.mimetype.startsWith('image/') ? req.file.path : undefined;
+//   const pdf = req.file && req.file.mimetype === 'application/pdf' ? req.file.path : undefined;
+//   const video = req.file && req.file.mimetype.startsWith('video/') ? req.file.path : undefined;
+
+//   const newPost = await postRepo.createPost({
+//     title, content, roomId,
+//     authorId, authorUsername, authorRole,
+//     image, pdf, video,
+//     resourceLink: resourceLink || null,
+//     resourceLabel: resourceLabel || null,
+//     isQuestion: isQuestion === true || isQuestion === 'true',
+//   });
+
+//   const room = await roomRepo.getRoomById(roomId);
+
+//   try {
+//     await notifService.notifyNewPost(roomId, authorId, authorUsername, room?.name || roomId, newPost.id, title);
+//   } catch (notifErr) {
+//     console.error('Post notification failed:', notifErr);
+//   }
+
+//   res.status(201).json(newPost); // unchanged, user gets their response now
+
+//   //  fire-and-forget, runs after the response, never blocks the user
+//   getEmbedding(`${title}\n${content}`)
+//     .then(embedding => pool.query(
+//       `UPDATE posts SET embedding = $1::vector WHERE id = $2`,
+//       [toVectorLiteral(embedding), newPost.id]
+//     ))
+//     .catch(err => console.error(`Embedding generation failed for post ${newPost.id}:`, err.message));
+// };
+
 const createPost = async (req, res) => {
-  const { title, content, roomId, resourceLink, resourceLabel, isQuestion } = req.body;
+  const { title, content, roomId, resourceLink, resourceLabel, isQuestion, isStudyPartner } = req.body;
   const authorId = req.user.id;
   const authorUsername = req.user.username;
   const authorRole = req.user.role;
@@ -26,6 +68,11 @@ const createPost = async (req, res) => {
   if (await isUserSuspendedInRoom(roomId, authorId)) {
     return res.status(403).json({ message: 'You are suspended from posting in this room.' });
   }
+
+  const room = await roomRepo.getRoomById(roomId);
+
+  // only subject rooms can have study-partner posts — server-side gate, don't trust the client alone
+  const isStudyPartnerFlag = room?.type === 'subject' && (isStudyPartner === true || isStudyPartner === 'true');
 
   const image = req.file && req.file.mimetype.startsWith('image/') ? req.file.path : undefined;
   const pdf = req.file && req.file.mimetype === 'application/pdf' ? req.file.path : undefined;
@@ -38,9 +85,8 @@ const createPost = async (req, res) => {
     resourceLink: resourceLink || null,
     resourceLabel: resourceLabel || null,
     isQuestion: isQuestion === true || isQuestion === 'true',
+    isStudyPartner: isStudyPartnerFlag,
   });
-
-  const room = await roomRepo.getRoomById(roomId);
 
   try {
     await notifService.notifyNewPost(roomId, authorId, authorUsername, room?.name || roomId, newPost.id, title);
@@ -123,17 +169,6 @@ const getPostsAll = async (req, res) => {
 
   res.json({ posts, nextCursor, hasMore: !!nextCursor });
 };
-// const updatePost = async (req, res) => {
-//   const { id } = req.params;
-//   const { title, content } = req.body;
-//   const userId = req.user.id;
-
-//   const updatedPost = await postRepo.updatePost(id, userId, { title, content });
-//   if (!updatedPost) return res.status(404).json({ message: 'Post not found' });
-//   if (updatedPost.error) return res.status(403).json({ message: updatedPost.error });
-
-//   res.json(updatedPost);
-// };
 
 const updatePost = async (req, res) => {
   const { id } = req.params;

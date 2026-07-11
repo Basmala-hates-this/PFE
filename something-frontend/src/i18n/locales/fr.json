@@ -228,7 +228,9 @@
     "markAnswered": "Marquer comme répondu",
     "markUnanswered": "Marquer comme sans réponse",
      "endorse": "Recommander",
-    "endorsed": "Recommandé"
+    "endorsed": "Recommandé",
+    "isStudyPartnerLabel": "À la recherche de partenaires d'étude",
+    "studyPartner": "Partenaire d'étude"
 
     },
     "browseRooms": {
@@ -288,7 +290,9 @@
     "markAnswered": "Marquer comme répondu",
     "markUnanswered": "Marquer comme sans réponse",
      "endorse": "Recommander",
-    "endorsed": "Recommandé"
+    "endorsed": "Recommandé",
+    "isStudyPartnerLabel": "À la recherche de partenaires d'étude",
+    "studyPartner": "Partenaire d'étude"
   },
   "noComments": "Aucun commentaire. Soyez le premier !",
   "hiddenComment": " Ce commentaire a été masqué.",
