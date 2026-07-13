@@ -105,64 +105,7 @@ const [peerNames, setPeerNames] = useState({});
     fetchRoom();
   }, [roomId]);
 
-  // fetch messages + polling
-  // useEffect(() => {
-  //   const fetchMessages = async () => {
-  //     try {
-  //       // const response = await axios.get(`http://localhost:5000/api/rooms/${roomId}/messages`, {
-  //       //   headers: { Authorization: `Bearer ${token}` }
-  //       // });
-  //       const response = await api.get(`/rooms/${roomId}/messages`);
-  //       setMessages(response.data);
-  //     } catch (err) {
-  //       console.error("Failed to fetch messages:", err);
-  //     }
-  //   };
 
-  //   fetchMessages();
-  //   const interval = setInterval(fetchMessages, 1500);//i dont know why...2 requests per second might get a little too much for the server to handel?
-  //   return () => clearInterval(interval);
-  // }, [roomId]);
-  //   useEffect(() => {
-  //   // initial fetch
-  //   const fetchMessages = async () => {
-
-  //     try {
-  //       const response = await api.get(`/rooms/${roomId}/messages`);
-  //        console.log("first message:", response.data[0]);
-  //       setMessages(response.data);
-  //     } catch (err) {
-  //       console.error("Failed to fetch messages:", err);
-  //     }
-  //   };
-  //   fetchMessages();
-
-  //   // socket connection
-  //   const socket = io(import.meta.env.VITE_BACKEND_URL || "http://localhost:5000", {
-  //     auth: { token: localStorage.getItem("token") }
-  //   });
-
-  //   socket.emit("join_room", roomId);
-
-  //   socket.on("new_message", (message) => {
-  //       console.log("socket received new_message:", message);
-  // //adding a commet so i can commit and ignore the .env for front end
-  //     setMessages(prev => [...prev, message]);
-  //   });
-
-  //   socket.on("message_deleted", (messageId) => {
-  //     setMessages(prev => prev.filter(m => m.id !== messageId));
-  //   });
-
-  //   socket.on("message_edited", (updated) => {
-  //     setMessages(prev => prev.map(m => m.id === updated.id ? updated : m));
-  //   });
-
-  //   return () => {
-  //     socket.emit("leave_room", roomId);
-  //     socket.disconnect();
-  //   };
-  // }, [roomId]);
   useEffect(() => {
     const fetchMessages = async () => {
       try {

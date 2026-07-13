@@ -29,6 +29,11 @@ import ChatTab from "./ChatTab";
 import { useTheme } from "../Theme";
 import api from "../api/axios.js";
 
+
+import { io } from "socket.io-client";
+
+//mosntrus amount of import...
+
 //sooooooooooo
 //i'm too lazy to keep creating an account each time i want ot test something(refresh delets saved data )
 //sooo why not work with both,context and localstorge?
@@ -174,12 +179,35 @@ const similarCheckRef = useRef(null);
 
 const [postIsStudyPartner, setPostIsStudyPartner] = useState(false);
 
+const dashSocketRef = useRef(null);
+
 // ....................................i hate me .....
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
 
-  //
+  //useeffect just for difficulty tag.....bruh what is wrong with me?
+  useEffect(() => {
+  if (isGuest || userRooms.length === 0) return;
+
+  const socket = io(
+    import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
+    { auth: { token: localStorage.getItem("token") } },
+  );
+  dashSocketRef.current = socket;
+
+  userRooms.forEach((room) => socket.emit("join_room", room.id));
+
+  socket.on("post_difficulty_set", ({ postId, difficulty }) => {
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, difficulty } : p))
+    );
+  });
+
+  return () => {
+    socket.disconnect();
+  };
+}, [userRooms, isGuest]);
 
 
   // If user skipped info/register, send them back
