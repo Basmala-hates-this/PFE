@@ -432,7 +432,6 @@ useEffect(() => {
       formData.append("title", postTitle || "Post");
       formData.append("roomId", selectedPostRoom.value);
       formData.append("isQuestion", postIsQuestion);
-      formData.append("isQuestion", postIsQuestion);
 formData.append("isStudyPartner", postIsStudyPartner);
       if (postAttachment) formData.append("attachment", postAttachment);
       if (postResourceLink.trim())
@@ -1939,11 +1938,13 @@ onClick={() => {
                                 src={post.imageUrl}
                                 alt="attachment"
                                 style={{
-                                  maxWidth: "100%",
+                                  maxWidth: "400px",
                                   width: "40%",
                                   borderRadius: "8px",
                                   display: "block",
                                   cursor: "pointer",
+                                  maxHeight:"400px",
+                                  height:"60%"
                                 }}
                               />
                             </a>
