@@ -1115,6 +1115,17 @@ const handleNotifClick = (n) => {
   );
 };
 
+
+const handleDifficultyChange = async (postId, difficulty) => {
+  if (!difficulty) return;
+  try {
+    const response = await api.patch(`/posts/${postId}/difficulty`, { difficulty });
+    setPosts((prev) => prev.map((p) => (p.id === postId ? { ...p, difficulty: response.data.difficulty } : p)));
+  } catch (err) {
+    console.error("Failed to update difficulty:", err);
+  }
+};
+
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1855,6 +1866,42 @@ onClick={() => {
     🤝 {t('dashboard.post.studyPartner')}
   </span>
 )}
+{post.difficulty && (
+  <span style={{
+    display: "inline-block",
+    fontSize: "11px",
+    padding: "2px 10px",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    marginBottom: "8px",
+    marginLeft: "6px",
+    background: "rgba(255,255,255,0.08)",
+    color: "var(--text-muted)",
+    border: "1px solid rgba(255,255,255,0.2)",
+    textTransform: "capitalize",
+  }}>
+    {post.difficulty}
+  </span>
+)}
+{/* admins and superadmins can control difficulty of this....i need to work on "admin" part...permissions and all */}
+{post.isQuestion && (currentUser?.id === post.userId || isAdmin) && (
+  <select
+    value={post.difficulty || ""}
+    onChange={(e) => handleDifficultyChange(post.id, e.target.value)}
+    style={{ marginLeft: "8px", fontSize: "12px", padding: "2px 6px", borderRadius: "6px" , display: "inline-block",
+    fontWeight: "bold",
+    marginBottom: "8px",
+    background: "rgba(255,255,255,0.08)",
+    color: "var(--text-main)",
+    border: "1px solid rgba(50, 77, 110, 0.75)",
+    textTransform: "capitalize",}}
+  >
+    <option  style={{backgroundColor:"rgba(50, 77, 110, 0.75)",border: "1px solid rgba(50, 77, 110, 0.75)"}} value="">—</option>
+    <option value="beginner" style={{backgroundColor:"rgba(50, 77, 110, 0.75)",border: "1px solid rgba(50, 77, 110, 0.75)"}}>Beginner</option>
+    <option value="intermediate" style={{backgroundColor:"rgba(50, 77, 110, 0.75)",border: "1px solid rgba(50, 77, 110, 0.75)"}}>Intermediate</option>
+    <option value="advanced" style={{backgroundColor:"rgba(50, 77, 110, 0.75)",border: "1px solid rgba(50, 77, 110, 0.75)"}}>Advanced</option>
+  </select>
+)}
                           <p
                             style={{
                               margin: "0 0 8px",
@@ -2363,6 +2410,8 @@ onClick={() => {
     {t("dashboard.postModal.isStudyPartnerLabel")}
   </label>
 )}
+
+
 
 
             <div style={{ marginTop: "10px" }}>

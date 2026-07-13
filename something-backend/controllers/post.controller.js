@@ -7,6 +7,7 @@ const pool = require('../db');
 const toCamel = require('../utils/toCamel');
 const notifService = require('../services/notificationService');
 const { getEmbedding, toVectorLiteral } = require('../utils/embeddings');
+const { classifyDifficulty } = require("../routes/ai");
 
 // --- suspension check ---
 const isUserSuspendedInRoom = async (roomId, userId) => {
@@ -17,47 +18,6 @@ const isUserSuspendedInRoom = async (roomId, userId) => {
 
 // --- posts ---
 
-// const createPost = async (req, res) => {
-//   const { title, content, roomId, resourceLink, resourceLabel, isQuestion } = req.body;
-//   const authorId = req.user.id;
-//   const authorUsername = req.user.username;
-//   const authorRole = req.user.role;
-
-//   if (await isUserSuspendedInRoom(roomId, authorId)) {
-//     return res.status(403).json({ message: 'You are suspended from posting in this room.' });
-//   }
-
-//   const image = req.file && req.file.mimetype.startsWith('image/') ? req.file.path : undefined;
-//   const pdf = req.file && req.file.mimetype === 'application/pdf' ? req.file.path : undefined;
-//   const video = req.file && req.file.mimetype.startsWith('video/') ? req.file.path : undefined;
-
-//   const newPost = await postRepo.createPost({
-//     title, content, roomId,
-//     authorId, authorUsername, authorRole,
-//     image, pdf, video,
-//     resourceLink: resourceLink || null,
-//     resourceLabel: resourceLabel || null,
-//     isQuestion: isQuestion === true || isQuestion === 'true',
-//   });
-
-//   const room = await roomRepo.getRoomById(roomId);
-
-//   try {
-//     await notifService.notifyNewPost(roomId, authorId, authorUsername, room?.name || roomId, newPost.id, title);
-//   } catch (notifErr) {
-//     console.error('Post notification failed:', notifErr);
-//   }
-
-//   res.status(201).json(newPost); // unchanged, user gets their response now
-
-//   //  fire-and-forget, runs after the response, never blocks the user
-//   getEmbedding(`${title}\n${content}`)
-//     .then(embedding => pool.query(
-//       `UPDATE posts SET embedding = $1::vector WHERE id = $2`,
-//       [toVectorLiteral(embedding), newPost.id]
-//     ))
-//     .catch(err => console.error(`Embedding generation failed for post ${newPost.id}:`, err.message));
-// };
 
 const createPost = async (req, res) => {
   const { title, content, roomId, resourceLink, resourceLabel, isQuestion, isStudyPartner } = req.body;
@@ -103,6 +63,18 @@ const createPost = async (req, res) => {
       [toVectorLiteral(embedding), newPost.id]
     ))
     .catch(err => console.error(`Embedding generation failed for post ${newPost.id}:`, err.message));
+//ze ai difficulty badge....m a m a  b o y mama's boy mama's boy......lost it again
+    if (newPost.isQuestion) {
+  classifyDifficulty(title, content)
+    .then(difficulty => {
+      if (difficulty) {
+        return pool.query(`UPDATE posts SET difficulty = $1 WHERE id = $2`, [difficulty, newPost.id]);
+      }
+    })
+    .catch(err => console.error(`Difficulty classification failed for post ${newPost.id}:`, err.message));
+}
+
+
 };
 
 const getPostById = async (req, res) => {
@@ -522,6 +494,36 @@ const checkSimilarPost = async (req, res) => {
   }
 };
 
+
+
+
+const updateDifficulty = async (req, res) => {
+  const { id } = req.params;
+  const { difficulty } = req.body;
+  const validDifficulties = ["beginner", "intermediate", "advanced"];
+
+  if (!validDifficulties.includes(difficulty)) {
+    return res.status(400).json({ message: "Invalid difficulty value." });
+  }
+
+  const post = await postRepo.getPostById(id);
+  if (!post) return res.status(404).json({ message: "Post not found." });
+
+  const isOwner = post.userId === req.user.id;
+  const isPrivileged = req.user.authorityLevel === "admin" || req.user.authorityLevel === "superadmin";
+
+  if (!isOwner && !isPrivileged) {
+    return res.status(403).json({ message: "Not authorized to edit this post's difficulty." });
+  }
+
+  const result = await pool.query(
+    `UPDATE posts SET difficulty = $1 WHERE id = $2 RETURNING *`,
+    [difficulty, id]
+  );
+
+  res.json(toCamel(result.rows[0]));
+};
+
 module.exports = {
   createPost,
   getPostById,
@@ -544,4 +546,5 @@ module.exports = {
   reportComment,
   toggleAnswered,
   checkSimilarPost,
+  updateDifficulty,
 };

@@ -29,6 +29,7 @@ router.patch('/:id', protect, guestBlock, upload.single('attachment'), postContr
 router.delete('/:id', protect, guestBlock, postController.deletePost);
 
 router.patch('/:id/answered', protect, postController.toggleAnswered);
+router.patch("/:id/difficulty", protect,postController.updateDifficulty);
 
 router.get('/:postId/comments', protect, postController.getCommentsByPost);
 router.post('/:postId/comments', protect, guestBlock, upload.single('attachment'), postController.addComment);

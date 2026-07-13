@@ -140,6 +140,22 @@ const routingTable = {
   json:   [{ name: "Groq", fn: groqJSON },   { name: "OpenRouter", fn: openRouterJSON }],
 };
 
+// ─── difficulty classification ──────────────────────────────────────────────
+async function classifyDifficulty(title, content) {
+  const prompt = `Classify the difficulty level of this student question as one of exactly these three values: "beginner", "intermediate", or "advanced". Respond as JSON: {"difficulty": string}.\n\nTitle: ${title || ""}\nContent: ${content}`;
+
+  const raw = await runTask(
+    "json",
+    [{ role: "user", content: prompt }],
+    "You classify academic question difficulty. Output only valid JSON, no prose."
+  );
+
+  const parsed = JSON.parse(raw);
+  const valid = ["beginner", "intermediate", "advanced"];
+  return valid.includes(parsed.difficulty) ? parsed.difficulty : null;
+}
+
+
 async function runTask(taskType, messages, system, imageUrl) {
   for (const provider of routingTable[taskType]) {
     try {
@@ -183,23 +199,7 @@ router.post("/chat", async (req, res) => {
     if (attachment?.type === "image") {
       taskType = "vision";
       imageUrl = attachment.url;
-//    } else if (attachment?.type === "pdf") {
-//   const pdfRes = await fetch(attachment.url);
-//   const buffer = Buffer.from(await pdfRes.arrayBuffer());
 
-//   const parser = new PDFParse({ data: buffer });
-//   const result = await parser.getText();
-//   await parser.destroy();
-//   const extractedText = result.text.slice(0, 12000);
-
-//   taskMessages = [
-//     ...messages.slice(0, -1),
-//     {
-//       role: "user",
-//       content: `${messages[messages.length - 1].content}\n\n--- Uploaded document content ---\n${extractedText}`,
-//     },
-//   ];
-// }
 } else if (attachment?.type === "pdf") {
   const extractedText = (await extractPdfText(attachment.url)).slice(0, 12000);
   taskMessages = [
@@ -399,3 +399,4 @@ router.get("/study-materials/:id", authMiddleware, async (req, res) => {
 });
 
 module.exports = router;
+module.exports.classifyDifficulty = classifyDifficulty;
