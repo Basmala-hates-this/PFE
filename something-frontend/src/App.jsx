@@ -27,35 +27,39 @@ import CorrectInputsPage from "./pages/CorrectInputsPage";
 import Guide from "./pages/Guide.jsx";
 import { useEffect } from "react";
 import Guide2 from "./pages/GuideComponenet.jsx";
+import api from "./api/axios.js";
 
 
 
 function App() {
 
   useEffect(() => {
-  const interval = setInterval(() => {
-    const token = localStorage.getItem("token");
-    const currentuser = localStorage.getItem("currentUser");
-    const guest = localStorage.getItem("guestToken");
-    if (!token) return;
+ const interval = setInterval(async () => {
+      const currentUser = localStorage.getItem("currentUser");
+      const guest = localStorage.getItem("guestToken");
 
-    try {
-      const payload = JSON.parse(atob(token.split(".")[1]));
-      if (payload.exp * 1000 < Date.now()) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("currentUser");
-        localStorage.removeItem("guestToken");
-        alert("Your session has expired. Please log in again.");
-        window.location.href = "/login";
-      }
-    } catch (err) {
-      // malformed token
-      localStorage.removeItem("token");
-      localStorage.removeItem("currentUser");
-      localStorage.removeItem("guestToken");
-      window.location.href = "/login";
-    }
-  }, 60000); // checks every 60 seconds
+      // nothing to check if there's no logged-in user tracked locally
+      if (!currentUser) return;
+
+      try {
+        await api.get("/auth/me"); // cookie sent automatically; throws on 401 if expired/invalid
+      } catch (err) {
+        if (err.response?.status === 401) {
+          localStorage.removeItem("currentUser");
+          localStorage.removeItem("guestToken");
+          alert("Your session has expired. Please log in again.");
+          window.location.href = "/login";
+        }
+      } 
+    //   catch (err) {
+    //   // malformed token
+    //   localStorage.removeItem("token");
+    //   localStorage.removeItem("currentUser");
+    //   localStorage.removeItem("guestToken");
+    //   window.location.href = "/login";
+    // }
+    },
+  60000); // checks every 60 seconds
 
   return () => clearInterval(interval);
 }, []);

@@ -9,7 +9,7 @@ import api from "../api/axios.js";
 
 export default function CorrectInputsPage() {
   const navigate = useNavigate(); 
-  const token = localStorage.getItem("token");
+  
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
   const [selectedUniversity, setSelectedUniversity] = useState(null);
@@ -76,21 +76,17 @@ const majorOptions = availableMajors.map((m) => ({ value: m, label: m }));
 
     setLoading(true);
     try {
-      // const res = await axios.post(
-      //   "http://localhost:5000/api/users/select-valid-inputs",
-      const res = await api.post(
+    const res = await api.post(
   "/users/select-valid-inputs",
-        {
-          selectedUniversityCode: hasCustomUni
-            ? selectedUniversity.value
-            : null,
-          selectedMajorNames: hasCustomMajors
-            ? selectedMajors.map((m) => m.value)
-            : null,
-        },
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-
+  {
+    selectedUniversityCode: hasCustomUni
+      ? selectedUniversity.value
+      : null,
+    selectedMajorNames: hasCustomMajors
+      ? selectedMajors.map((m) => m.value)
+      : null,
+  }
+);
       // use fresh data from backend instead of building it manually
       localStorage.setItem("currentUser", JSON.stringify(res.data.user));
 

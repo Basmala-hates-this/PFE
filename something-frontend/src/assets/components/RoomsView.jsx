@@ -78,10 +78,7 @@ export default function RoomsView({
     if (!showCreateRoom || !user?.id) return;
     const fetchFollowing = async () => {
       try {
-        const token = localStorage.getItem("token");
-        // const res = await axios.get(`http://localhost:5000/api/users/${user?.id}/following`, {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
+        
         const res = await api.get(`/users/${user?.id}/following`);
         setFollowing(res.data);
       } catch (err) {
@@ -95,12 +92,7 @@ export default function RoomsView({
   const handleCreatePrivateRoom = async () => {
     setRoomLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      // const response = await axios.post("http://localhost:5000/api/rooms/private", {
-      //   name: roomName, 
-      //   passKey: useGeneratedKey ? null : roomPassKey, 
-      //   invitedUsers: invitedUsers // Sending the chosen connections array
-      // }, { headers: { Authorization: `Bearer ${token}` } });
+     
       const response = await api.post("/rooms/private", {
   name: roomName, passKey: useGeneratedKey ? null : roomPassKey, invitedUsers
 });
@@ -133,11 +125,7 @@ export default function RoomsView({
 
   const handleJoinPrivateRoom = async () => {
     try {
-      const token = localStorage.getItem("token");
-      // const response = await axios.post("http://localhost:5000/api/rooms/private/join", 
-      //   { passKey: joinPassKey }, 
-      //   { headers: { Authorization: `Bearer ${token}` } }
-      // );
+     
       const response = await api.post("/rooms/private/join", { passKey: joinPassKey });
       const roomsRes = await api.get("/rooms/my-rooms");
       setJoinFeedback(response.data.message);

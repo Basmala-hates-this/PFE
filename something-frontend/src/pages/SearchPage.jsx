@@ -3,8 +3,8 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Cat from "../photos/Cat.jpg";
 import PostModal from "../assets/components/PostModal.jsx";
-import { useTranslation } from 'react-i18next';
-import i18n from '../i18n/index.js';
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n/index.js";
 import "../styles/search.css"; // Import the CSS file
 import api from "../api/axios.js";
 
@@ -12,7 +12,7 @@ export default function SearchPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
-  const token = localStorage.getItem("token");
+  
 
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
@@ -23,7 +23,8 @@ export default function SearchPage() {
 
   const guestToken = localStorage.getItem("guestToken");
   const isGuest = !!guestToken;
-  const guestUniversities = JSON.parse(localStorage.getItem("guestUniversities")) || [];
+  const guestUniversities =
+    JSON.parse(localStorage.getItem("guestUniversities")) || [];
 
   const { t } = useTranslation();
 
@@ -36,30 +37,14 @@ export default function SearchPage() {
     const fetchResults = async () => {
       setLoading(true);
       try {
-        const authHeader = token ? { Authorization: `Bearer ${token}` } : 
-                           guestToken ? { Authorization: `Bearer ${guestToken}` } : {};
+       
 
-        // const requests = [
-        //   axios.get(`http://localhost:5000/api/posts/search?q=${query}`, {
-        //     headers: authHeader
-        //   })
-        // ];
-
-        // if (!isGuest) {
-        //   requests.push(
-        //     axios.get(`http://localhost:5000/api/users/search?q=${query}`, {
-        //       headers: { Authorization: `Bearer ${token}` }
-        //     })
-        //   );
-        // }
         const requests = [
-  api.get(`/posts/search?q=${query}`, {
-    headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
-  })
-];
-if (!isGuest) {
-  requests.push(api.get(`/users/search?q=${query}`));
-}
+          api.get(`/posts/search?q=${query}`,),
+        ];
+        if (!isGuest) {
+          requests.push(api.get(`/users/search?q=${query}`));
+        }
 
         const results = await Promise.all(requests);
         let filteredPosts = results[0].data;
@@ -68,34 +53,40 @@ if (!isGuest) {
           // const roomsRes = await axios.get("http://localhost:5000/api/rooms/public-rooms");
           const roomsRes = await api.get("/rooms/public-rooms");
 
-          const selectedCodes = guestUniversities.map(u => u.value);
-          const allowedRooms = roomsRes.data.filter(r =>
-            r.type === "public" || selectedCodes.includes(r.university)
+          const selectedCodes = guestUniversities.map((u) => u.value);
+          const allowedRooms = roomsRes.data.filter(
+            (r) => r.type === "public" || selectedCodes.includes(r.university),
           );
           // console.log("guest allowed rooms sample:", allowedRooms[0]);
           // console.log("post sample:", filteredPosts[0]);
-          const allowedRoomIds = allowedRooms.map(r => r.id);
-          filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
+          const allowedRoomIds = allowedRooms.map((r) => r.id);
+          filteredPosts = filteredPosts.filter((p) =>
+            allowedRoomIds.includes(p.roomId),
+          );
         } else {
           // filter by user's own rooms
-          // const roomsRes = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
-          //   headers: { Authorization: `Bearer ${token}` }
-          // });
+
           const roomsRes = await api.get("/rooms/my-rooms");
 
           // console.log("rooms sample:", roomsRes.data[0]);
           // console.log("posts sample:", results[0].data[0]);
 
           const allowedRoomIds = roomsRes.data
-            .filter(r => r.type !== "private")
-            .map(r => r.id);
+            .filter((r) => r.type !== "private")
+            .map((r) => r.id);
 
-          filteredPosts = filteredPosts.filter(p => allowedRoomIds.includes(p.roomId));
+          filteredPosts = filteredPosts.filter((p) =>
+            allowedRoomIds.includes(p.roomId),
+          );
         }
 
         setPosts(filteredPosts);
-        const currentUser = JSON.parse(localStorage.getItem("currentUser") || "{}");
-        setUsers(isGuest ? [] : results[1].data.filter(u => u.id !== currentUser.id));
+        const currentUser = JSON.parse(
+          localStorage.getItem("currentUser") || "{}",
+        );
+        setUsers(
+          isGuest ? [] : results[1].data.filter((u) => u.id !== currentUser.id),
+        );
       } catch (err) {
         console.error("Search failed:", err);
       } finally {
@@ -105,9 +96,8 @@ if (!isGuest) {
     fetchResults();
   }, [query]);
 
-
   const [expanded, setExpanded] = useState(false);
-const LIMIT = 120;
+  const LIMIT = 120;
 
   //////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,10 +105,14 @@ const LIMIT = 120;
 
   return (
     <div className="searchpage-container">
-      
       {/* header */}
       <div className="searchpage-header">
-        <button onClick={() => navigate("/dashboard")} className="searchpage-back-button">←</button>
+        <button
+          onClick={() => navigate("/dashboard")}
+          className="searchpage-back-button"
+        >
+          ←
+        </button>
         <h2 className="searchpage-title">{`${t("searchPage.resultsFor")} "${query}"`}</h2>
       </div>
 
@@ -150,31 +144,38 @@ const LIMIT = 120;
               {posts.length === 0 ? (
                 <p className="searchpage-empty">{`${t("searchPage.noPostsFound")} "${query}"`}</p>
               ) : (
-                posts.map(post => (
-                  <div 
-                    key={post.id} 
+                posts.map((post) => (
+                  <div
+                    key={post.id}
                     onClick={() => setSelectedPost(post)}
                     className="searchpage-post-card"
                   >
                     <div className="searchpage-post-header">
-                      <img src={post.authorProfilePicUrl || Cat} alt="pfp" className="searchpage-user-avatar"/>
+                      <img
+                        src={post.authorProfilePicUrl || Cat}
+                        alt="pfp"
+                        className="searchpage-user-avatar"
+                      />
 
-                      <strong className="searchpage-post-author">@{post.authorUsername}</strong>
-                      <small className="searchpage-post-role-badge">{post.authorRole || "user"}</small>
+                      <strong className="searchpage-post-author">
+                        @{post.authorUsername}
+                      </strong>
+                      <small className="searchpage-post-role-badge">
+                        {post.authorRole || "user"}
+                      </small>
                     </div>
-                    {post.title && <h3 className="searchpage-post-title">{post.title}</h3>}
-                    <p className="searchpage-post-content"> {!expanded && post.content.length > LIMIT
-    ? post.content.slice(0, LIMIT) + "..."
-    : post.content}
-  {/* {post.content.length > LIMIT && (
-    <span
-      onClick={() => setExpanded(!expanded)}
-      style={{ color: "#8ca4c6", cursor: "pointer", fontSize: "13px", marginLeft: "4px" }}
-    >
-      {expanded ? " see less" : " see more"}
-    </span>
-  )}*/}</p> 
-                    <small className="searchpage-post-date">{new Date(post.createdAt).toLocaleString()}</small>
+                    {post.title && (
+                      <h3 className="searchpage-post-title">{post.title}</h3>
+                    )}
+                    <p className="searchpage-post-content">
+                      {" "}
+                      {!expanded && post.content.length > LIMIT
+                        ? post.content.slice(0, LIMIT) + "..."
+                        : post.content}
+                    </p>
+                    <small className="searchpage-post-date">
+                      {new Date(post.createdAt).toLocaleString()}
+                    </small>
                   </div>
                 ))
               )}
@@ -187,16 +188,25 @@ const LIMIT = 120;
               {users.length === 0 ? (
                 <p className="searchpage-empty">{`${t("searchPage.noUsersFound")} "${query}"`}</p>
               ) : (
-                users.map(user => (
-                  <div 
-                    key={user.id} 
+                users.map((user) => (
+                  <div
+                    key={user.id}
                     onClick={() => navigate(`/users/${user.id}`)}
                     className="searchpage-user-card"
                   >
-                    <img src={user.profile_pic_url || Cat} alt="pfp" className="searchpage-user-avatar"/>
+                    <img
+                      src={user.profile_pic_url || Cat}
+                      alt="pfp"
+                      className="searchpage-user-avatar"
+                    />
                     <div className="searchpage-user-info">
-                      <strong className="searchpage-username">@{user.username}</strong>
-                      <small className="searchpage-user-details">{user.role} • {`${t("searchPage.rating")}: ${user.rating ?? 1} / 5`}</small>
+                      <strong className="searchpage-username">
+                        @{user.username}
+                      </strong>
+                      <small className="searchpage-user-details">
+                        {user.role} •{" "}
+                        {`${t("searchPage.rating")}: ${user.rating ?? 1} / 5`}
+                      </small>
                     </div>
                   </div>
                 ))
@@ -213,7 +223,6 @@ const LIMIT = 120;
           isGuest={isGuest}
         />
       )}
-
     </div>
   );
 }

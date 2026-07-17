@@ -1,7 +1,7 @@
 import { Navigate, useLocation } from "react-router-dom";
 
 export default function ProtectedRoute({ children }) {
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("currentUser");
   const guestToken = localStorage.getItem("guestToken");
   const location = useLocation();
 
@@ -14,5 +14,5 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to="/dashboard" />;
   }
 
-  return children;
+  return children; 
 }

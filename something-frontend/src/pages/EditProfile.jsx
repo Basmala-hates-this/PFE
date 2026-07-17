@@ -26,10 +26,7 @@ export default function EditProfile(){
 const [selectedFile, setSelectedFile] = useState(null);
 
 useEffect(() => {
-  // const token = localStorage.getItem("token");
-  // axios.get("http://localhost:5000/api/users/me", {
-  //   headers: { Authorization: `Bearer ${token}` }
-  // }).
+
   api.get("/users/me").then((res) => {
    
     setUsername(res.data.username);
@@ -127,8 +124,7 @@ const handleSubmit = async (e) => {
   }
 
   try {
-    const token = localStorage.getItem("token");
-    
+        
     // use FormData instead of JSON for file uploads
     const formData = new FormData();
     if (isChangingUsername) formData.append("username", username);

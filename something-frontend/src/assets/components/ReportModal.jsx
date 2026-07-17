@@ -15,7 +15,7 @@ const REASONS = [
   { key: "other",         label: t("reportModal.reasons.other") },
 ];
 
-  const token = localStorage.getItem("token");
+  // const token = localStorage.getItem("token");
   const [reason, setReason] = useState("");
   const [details, setDetails] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -25,29 +25,24 @@ const REASONS = [
   const handleSubmit = async () => {
     if (!reason) return setError(t("reportModal.noReasonError"));
     try {
-      if (type === "post") {
-        // await axios.post(
-        //   `http://localhost:5000/api/posts/${postId}/report`,
-        //   { reason, details },
-        //   { headers: { Authorization: `Bearer ${token}` } }
-        // );
-        await api.post(`/posts/${postId}/report`, { reason, details },{ headers: { Authorization: `Bearer ${token}` } });
-      } else if (type === "comment") {
-        // await axios.post(
-        //   `http://localhost:5000/api/posts/${postId}/comments/${commentId}/report`,
-        //   { reason, details },
-        //   { headers: { Authorization: `Bearer ${token}` } }
-        // );
-        await api.post(`/posts/${postId}/comments/${commentId}/report`, { reason, details }, { headers: { Authorization: `Bearer ${token}` } });
+      // if (type === "post") {
+      
+      //   await api.post(`/posts/${postId}/report`, { reason, details },{ headers: { Authorization: `Bearer ${token}` } });
+      // } else if (type === "comment") {
+      
+      //   await api.post(`/posts/${postId}/comments/${commentId}/report`, { reason, details }, { headers: { Authorization: `Bearer ${token}` } });
 
-      } else if (type === "user") {
-        // await axios.post(
-        //   `http://localhost:5000/api/users/${targetId}/report`,
-        //   { reason, details },
-        //   { headers: { Authorization: `Bearer ${token}` } }
-        // );
-        await api.post(`/users/${targetId}/report`, { reason, details }, { headers: { Authorization: `Bearer ${token}` } });
-      }
+      // } else if (type === "user") {
+      
+      //   await api.post(`/users/${targetId}/report`, { reason, details }, { headers: { Authorization: `Bearer ${token}` } });
+      // }
+      if (type === "post") {
+  await api.post(`/posts/${postId}/report`, { reason, details });
+} else if (type === "comment") {
+  await api.post(`/posts/${postId}/comments/${commentId}/report`, { reason, details });
+} else if (type === "user") {
+  await api.post(`/users/${targetId}/report`, { reason, details });
+}
       setSubmitted(true);
     } catch (err) {
       setError(err.response?.data?.message || "Something went wrong.");

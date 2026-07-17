@@ -104,7 +104,7 @@ export default function Fin() {
 );
 
     const data = response.data;
-    localStorage.setItem("token", data.token);
+   // localStorage.setItem("token", data.token);
     localStorage.setItem("currentUser", JSON.stringify(data.user));
     setLoading(false);
   //  handleConfetti();

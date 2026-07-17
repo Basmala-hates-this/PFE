@@ -10,7 +10,7 @@ import api from "../api/axios.js";
 export default function ConnectionsPage() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+ 
 
   const [followers, setFollowers] = useState([]);
   const [following, setFollowing] = useState([]);
@@ -21,14 +21,7 @@ export default function ConnectionsPage() {
   useEffect(() => {
     const fetchConnections = async () => {
       try {
-        // const [followersRes, followingRes] = await Promise.all([
-        //   axios.get(`http://localhost:5000/api/users/${userId}/followers`, {
-        //     headers: { Authorization: `Bearer ${token}` }
-        //   }),
-        //   axios.get(`http://localhost:5000/api/users/${userId}/following`, {
-        //     headers: { Authorization: `Bearer ${token}` }
-        //   })
-        // ]);
+     
         const [followersRes, followingRes] = await Promise.all([
   api.get(`/users/${userId}/followers`),
   api.get(`/users/${userId}/following`)

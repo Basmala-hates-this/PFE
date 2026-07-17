@@ -82,7 +82,7 @@ const handleSubmit =async (e) => {
   const data = response.data;
  // console.log(data);
    // store token
-  localStorage.setItem("token", data.token);
+  //localStorage.setItem("token", data.token);
   // store user
   localStorage.setItem("currentUser", JSON.stringify(data.user));
   //remove any guests from earlier testing....humor me...

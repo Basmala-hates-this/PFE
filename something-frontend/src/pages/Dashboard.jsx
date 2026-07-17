@@ -192,7 +192,7 @@ const dashSocketRef = useRef(null);
 
   const socket = io(
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
-    { auth: { token: localStorage.getItem("token") } },
+    
   );
   dashSocketRef.current = socket;
 
@@ -453,7 +453,7 @@ useEffect(() => {
     if (!postContent.trim() || !selectedPostRoom) return;
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem("token");
+     
 
       const formData = new FormData();
       formData.append("content", postContent);
@@ -564,7 +564,7 @@ setPostIsStudyPartner(false);
     );
 
     try {
-      const token = localStorage.getItem("token");
+     
    
       await api.patch(`/posts/${postId}/vote`, { voteType });
     
@@ -595,7 +595,7 @@ setPostIsStudyPartner(false);
     if (!content) return;
 
     try {
-      const token = localStorage.getItem("token");
+      
   
 
       await api.post(`/posts/${postId}/comments`, { content });
@@ -614,7 +614,7 @@ const response = await api.get(`/posts/${postId}`);
   //i friking got lost in my own code....
   const handleCommentVote = async (postId, commentId, voteType) => {
     try {
-      const token = localStorage.getItem("token");
+   
    
       await api.patch(`/posts/${postId}/comments/${commentId}/vote`, { voteType });
 const response = await api.get(`/posts/${postId}`);
@@ -634,7 +634,7 @@ const response = await api.get(`/posts/${postId}`);
     if (!confirm) return;
 
     try {
-      const token = localStorage.getItem("token");
+    
      
       await api.delete(`/posts/${postId}`);
       setPosts((prev) => prev.filter((p) => p.id !== postId));
@@ -646,7 +646,7 @@ const response = await api.get(`/posts/${postId}`);
  const handleEditPost = async (postId) => {
   setIsSubmitting(true);
   try {
-    const token = localStorage.getItem("token");
+  
 
     const formData = new FormData();
     formData.append("title", editPostTitle);
@@ -679,7 +679,7 @@ const response = await api.get(`/posts/${postId}`);
     if (!confirm) return;
 
     try {
-       const token = localStorage.getItem("token");
+    
     
       await api.delete(`/posts/${postId}/comments/${commentId}`);
 const response = await api.get(`/posts/${postId}`);
@@ -695,7 +695,7 @@ const response = await api.get(`/posts/${postId}`);
   const handleEditComment = async (postId, commentId) => {
     setIsSubmitting(true);
     try {
-      const token = localStorage.getItem("token");
+     
    
       await api.patch(`/posts/${postId}/comments/${commentId}`, { content: editCommentContent });
 const response = await api.get(`/posts/${postId}`);
@@ -720,21 +720,17 @@ const response = await api.get(`/posts/${postId}`);
     }
 
     try {
-      const token = localStorage.getItem("token");
-      const authHeader = token
-        ? { Authorization: `Bearer ${token}` }
-        : guestToken
-          ? { Authorization: `Bearer ${guestToken}` }
-          : {};
+   
 
-      const requests = [
-        // axios.get(`http://localhost:5000/api/posts/search?q=${query}`, {
-        //   headers: authHeader,
-        // }),
-        api.get(`/posts/search?q=${query}`, {
-  headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
-}),
-      ];
+//       const requests = [
+//         
+//         api.get(`/posts/search?q=${query}`, {
+//   headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
+// }),
+//       ];
+const requests = [
+  api.get(`/posts/search?q=${query}`),
+];
 
       if (!isGuest) {
         requests.push(
@@ -761,13 +757,7 @@ const response = await api.get(`/posts/${postId}`);
   const fetchSubjectRooms = async () => {
     setSubjectRoomsLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      // const res = await axios.get(
-      //   "http://localhost:5000/api/rooms/subject-rooms",
-      //   {
-      //     headers: { Authorization: `Bearer ${token}` },
-      //   },
-      // );
+    
       const res = await api.get("/rooms/subject-rooms");
       setSubjectRoomsData(res.data);
     } catch (err) {
@@ -779,14 +769,7 @@ const response = await api.get(`/posts/${postId}`);
 
   const handleJoinSubjectRoom = async (roomId) => {
     try {
-      const token = localStorage.getItem("token");
-      // await axios.post(
-      //   `http://localhost:5000/api/rooms/subject-rooms/${roomId}/join`,
-      //   {},
-      //   {
-      //     headers: { Authorization: `Bearer ${token}` },
-      //   },
-      // );
+     
       await api.post(`/rooms/subject-rooms/${roomId}/join`, {});
       // refetch both subject rooms and dashboard rooms
       await fetchSubjectRooms();
@@ -804,12 +787,7 @@ const response = await api.get(`/posts/${postId}`);
   );
   if (!confirm) return;
   try {
-    const token = localStorage.getItem("token");
-    // const res = await axios.post(
-    //   "http://localhost:5000/api/rooms/subject-rooms/create",
-    //   { majorId, subject },
-    //   { headers: { Authorization: `Bearer ${token}` } }
-    // );
+   
     const res = await api.post("/rooms/subject-rooms/create", { majorId, subject });
 
     // check what your backend actually returns
@@ -845,36 +823,12 @@ const response = await api.get(`/posts/${postId}`);
     alert(err.response?.data?.message || "Something went wrong.");
   }
 };
-  // const handleLeaveSubjectRoom = async (roomId) => {
-  //   console.log("handleJoinSubjectRoom called", roomId);
-  //   const confirm = window.confirm(t("dashboard.browseRooms.leaveConfirm"));
-  //   if (!confirm) return;
-  //   try {
-  //     const token = localStorage.getItem("token");
-  //     await axios.delete(
-  //       `http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`,
-  //       {
-  //         headers: { Authorization: `Bearer ${token}` },
-  //       },
-  //     );
-  //     await fetchSubjectRooms();
-  //     await fetchRoomsAndPosts();
-  //   } catch (err) {
-  //     console.log("full error:", err);
-  //     console.log("response:", err.response);
-  //     alert(err.response?.data?.message || "Something went wrong.");
-  //   }
-  // };
-
+ 
   const handleLeaveSubjectRoom = async (roomId) => {
   const confirm = window.confirm(t("dashboard.browseRooms.leaveConfirm"));
   if (!confirm) return;
   try {
-    const token = localStorage.getItem("token");
-    // await axios.delete(
-    //   `http://localhost:5000/api/rooms/subject-rooms/${roomId}/leave`,
-    //   { headers: { Authorization: `Bearer ${token}` } }
-    // );
+ 
     await api.delete(`/rooms/subject-rooms/${roomId}/leave`);
 
     // 1. Remove from userRooms
@@ -902,21 +856,12 @@ const response = await api.get(`/posts/${postId}`);
 
   const handleSavePost = async (postId) => {
     try {
-      const token = localStorage.getItem("token");
       if (savedPostIds.includes(postId)) {
-        // await axios.delete(`http://localhost:5000/api/posts/${postId}/save`, {
-        //   headers: { Authorization: `Bearer ${token}` },
-        // });
+        
         await api.delete(`/posts/${postId}/save`);
         setSavedPostIds((prev) => prev.filter((id) => id !== postId));
       } else {
-        // await axios.post(
-        //   `http://localhost:5000/api/posts/${postId}/save`,
-        //   {},
-        //   {
-        //     headers: { Authorization: `Bearer ${token}` },
-        //   },
-        // );
+     
         await api.post(`/posts/${postId}/save`, {});
         setSavedPostIds((prev) => [...prev, postId]);
       }
@@ -943,12 +888,7 @@ const response = await api.get(`/posts/${postId}`);
   if (!requestMajor || !requestSubject.trim()) return;
   setRequestLoading(true);
   try {
-    const token = localStorage.getItem("token");
-    // const res = await axios.post(
-    //   "http://localhost:5000/api/rooms/subject-rooms/request",
-    //   { majorId: requestMajor, subject: requestSubject.trim() },
-    //   { headers: { Authorization: `Bearer ${token}` } }
-    // );
+  
     const res = await api.post("/rooms/subject-rooms/request", { majorId: requestMajor, subject: requestSubject.trim() });
 
     // superadmin gets room created immediately — res.data.room will exist

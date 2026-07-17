@@ -15,7 +15,7 @@ import api from "../api/axios.js";
 export default function PublicProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  
 
   const [user, setUser] = useState(null);
   const [stats, setStats] = useState(null);
@@ -105,26 +105,19 @@ const LIMIT = 251;
     if (followLoading) return;
     setFollowLoading(true);
     try {
-      const token = localStorage.getItem("token");
+    
       if (isFollowing) {
-        // await axios.delete(`http://localhost:5000/api/users/${userId}/unfollow`, {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
+       
         await api.delete(`/users/${userId}/unfollow`);
         setIsFollowing(false);
       } else {
-        // await axios.post(`http://localhost:5000/api/users/${userId}/follow`, {}, {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
+       
         await api.post(`/users/${userId}/follow`, {});
         setIsFollowing(true);
       }
 
       // refetch user to get updated followers//nodemon cuased timing isseu with reading and updating....
-      // const userRes = await axios.get(`http://localhost:5000/api/users/${userId}`, {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
-      // setUser(userRes.data);
+    
 
     } catch (err) {
       const msg = err.response?.data?.message || "Something went wrong";

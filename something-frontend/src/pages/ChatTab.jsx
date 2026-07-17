@@ -90,13 +90,26 @@ async function uploadToCloudinary(file) {
 
 
 // ─── CALL OUR BACKEND PROXY ──────────────────────────────────────────────
+// async function callAI(messages, system, conversationId, attachment) {
+//   const token = localStorage.getItem("token");
+//   const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
+//     method: "POST",
+//     headers: {
+//       "Content-Type": "application/json",
+//       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//     },
+//     body: JSON.stringify({ messages, system, conversationId, attachment }),
+//   });
+//   if (!response.ok) throw new Error("AI request failed");
+//   const data = await response.json();
+//   return data.content?.[0]?.text || "Sorry, I didn't get that. Try again?";
+// }
 async function callAI(messages, system, conversationId, attachment) {
-  const token = localStorage.getItem("token");
   const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
     method: "POST",
+    credentials: "include", // sends the httpOnly cookie
     headers: {
       "Content-Type": "application/json",
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({ messages, system, conversationId, attachment }),
   });
@@ -350,12 +363,17 @@ const generateStudyMaterial = async (msg, type) => {
       formData.append("audio", blob, "recording.webm");
       try {
         setLoading(true);
-        const token = localStorage.getItem("token");
+        // const token = localStorage.getItem("token");
+        // const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
+        //   method: "POST",
+        //   headers: token ? { Authorization: `Bearer ${token}` } : {},
+        //   body: formData,
+        // });
         const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
-          method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-          body: formData,
-        });
+  method: "POST",
+  credentials: "include",
+  body: formData,
+});
         const data = await res.json();
         if (data.text) setInput(data.text);
       } catch { alert("Transcription failed."); }

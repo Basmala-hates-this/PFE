@@ -6,7 +6,7 @@ import axios from "axios";
  import api from "../api/axios.js";
 export default function ReorientationPage() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+ 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [selectedMajor, setSelectedMajor] = useState("");
   const [loading, setLoading] = useState(false);

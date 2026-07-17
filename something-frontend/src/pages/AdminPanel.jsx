@@ -15,7 +15,7 @@ export default function AdminPanel() {
   const isRTL = i18n.language === "ar";
 
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [activeTab, setActiveTab] = useState("announcements");
 
@@ -40,7 +40,7 @@ export default function AdminPanel() {
 
   const isSuperAdmin = currentUser?.authorityLevel === "superadmin";
 
-  const headers = { Authorization: `Bearer ${token}` };
+  
 
   const [pendingResources, setPendingResources] = useState([]);
   const [hiddenContent, setHiddenContent] = useState([]);

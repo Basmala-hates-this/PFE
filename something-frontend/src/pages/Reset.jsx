@@ -45,8 +45,8 @@ const targetEmail = resetEmail || currentUser?.email;
   //as much as i hate this security...i need it 
   //but is login the correct page here?welp couldnt care less each page has links to navigate......
   useEffect(() => {
-  const authToken = localStorage.getItem("token");
-  if (!token && !authToken) {
+  // const authToken = localStorage.getItem("token");
+  if (!token && !currentUser) {
     navigate("/login");
   }
 }, []); 
@@ -111,10 +111,7 @@ const handleSubmit = async (e) => {
 if (token) {
     // case 1: email recovery
     try {
-        // await axios.post("http://localhost:5000/api/auth/reset-password", {
-        //     token,
-        //     newPassword: password,
-        // });
+      
         await api.post("/auth/reset-password", { token, newPassword: password });
         alert(t("reset.success_recovery"));
         navigate("/login");
@@ -125,12 +122,7 @@ if (token) {
 } else {
     // case 2: logged in user changing password
     try {
-        const authToken = localStorage.getItem("token");
-        // await axios.post(
-        //     "http://localhost:5000/api/auth/reset-password-auth",
-        //     { newPassword: password },
-        //     { headers: { Authorization: `Bearer ${authToken}` } }
-        // );
+   
 
 await api.post("/auth/reset-password-auth", { newPassword: password });
         alert(t("reset.success_update"));

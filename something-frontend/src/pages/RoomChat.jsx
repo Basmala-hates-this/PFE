@@ -15,7 +15,7 @@ import CallRoom from "../components/CallRoom";
 export default function RoomChat() {
   const { roomId } = useParams();
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+ 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
 
   const [room, setRoom] = useState(null);
@@ -125,9 +125,11 @@ const [peerNames, setPeerNames] = useState({});
 
     const socket = io(
       import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
-      {
-        auth: { token: localStorage.getItem("token") },
-      },
+      // {
+      //   auth: { token: localStorage.getItem("token") },
+      // },
+      //todo: discover locking the emit call to user id rather then blind trust
+      //this damn segment is never ending.....why on earth did i want roomchats ?
     );
     socketRef.current = socket; // ← save ref
 

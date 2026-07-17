@@ -28,7 +28,7 @@ export default function SuperAdminPanel() {
   const isRTL = i18n.language === "ar";
 
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+ 
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
   const [activeTab, setActiveTab] = useState("stats");
 
@@ -41,7 +41,6 @@ export default function SuperAdminPanel() {
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [upgradingId, setUpgradingId] = useState(null);
 
-  const headers = { Authorization: `Bearer ${token}` };
 
   const [applications, setApplications] = useState([]);
   const [rejectingAppId, setRejectingAppId] = useState(null);
@@ -79,7 +78,7 @@ const [logActionFilter, setLogActionFilter] = useState("all");
 // }, [adminSearch]);  
 
   useEffect(() => {
-    if (currentUser?.authorityLevel !== "superadmin") {
+    if (currentUser?.authorityLevel !== "superadmin") { 
       navigate("/dashboard");
     }
   }, []);
@@ -182,11 +181,7 @@ const [logActionFilter, setLogActionFilter] = useState("all");
     )
       return;
     try {
-      // await axios.patch(
-      //   `${API}/users/${userId}/upgrade-superadmin`,
-      //   {},
-      //   { headers },
-      // );
+   
       await api.patch(`${API}/users/${userId}/upgrade-superadmin`, {});
       alert("User upgraded to SuperAdmin!");
       fetchAllUsers();
