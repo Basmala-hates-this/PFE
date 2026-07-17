@@ -5,23 +5,23 @@
 const jwt = require("jsonwebtoken");
 
 const protect = (req, res, next) => {
-    if (!req.headers.authorization) {
+  const cookieToken = req.cookies?.token;
+  const headerToken = req.headers.authorization?.split(" ")[1];
+  const token = cookieToken || headerToken; // cookie = real user, header = guest
+
+  if (!token) {
     return res.status(401).json({ message: "No token provided" });
-}
-    const token = req.headers.authorization.split(" ")[1];
-    if (!token) {
-        return res.status(401).json({ message: "No token provided" });
-    }
-    
-   try {
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
-  req.user = decoded;
-  next();
-} catch (err) {
-  return res.status(401).json({ message: "Token is not valid" });
-}
-  
-}
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Token is not valid" });
+  }
+};
+
 const guestBlock = (req, res, next) => {
   if (req.user?.role === "guest") {
     return res.status(403).json({ message: "Guests cannot perform this action" });
@@ -29,23 +29,34 @@ const guestBlock = (req, res, next) => {
   next();
 };
 
-
-
 const optionalAuth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return next();
-  
-  const token = authHeader.split(' ')[1];
+  const token = req.cookies?.token || req.headers.authorization?.split(" ")[1];
   if (!token) return next();
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
   } catch (err) {
     // invalid token, continue as guest
   }
   next();
 };
+
+
+// const optionalAuth = (req, res, next) => {
+//   const authHeader = req.headers.authorization;
+//   if (!authHeader) return next();
+  
+//   const token = authHeader.split(' ')[1];
+//   if (!token) return next();
+
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
+//     req.user = decoded;
+//   } catch (err) {
+//     // invalid token, continue as guest
+//   }
+//   next();
+// };
 
 module.exports = protect;
 module.exports.guestBlock = guestBlock;

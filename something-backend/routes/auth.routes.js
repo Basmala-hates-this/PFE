@@ -8,13 +8,11 @@ router.post("/login", authController.login);
 
 const protect = require("../middleware/authMiddleware");
 
-router.get("/me", protect, (req, res) => {
-  res.json({ user: req.user });
-});
 router.get("/check-email", authController.checkEmail);
 router.get("/check-username", authController.checkUsername);
 
-
+router.post("/logout", authController.logout);
+router.get("/me", protect, authController.getMe);
 
 
 router.post("/forgot-password", authController.forgotPassword);

@@ -7,6 +7,7 @@ const authRoutes = require("./routes/auth.routes");
 const postRoutes = require("./routes/post.routes");
 const roomRoutes = require("./routes/room.routes");
 const userRoutes = require("./routes/user.routes");
+const cookieParser = require("cookie-parser");
 const path = require("path");
 const app = express();
 
@@ -30,8 +31,14 @@ const notificationRoutes = require('./routes/notificationRoutes');
 app.use("/api/posts", publicLimiter);
 app.use("/api/rooms/public-rooms", publicLimiter);
 
-app.use(cors());//thiss so the damn browser dont block the 2 diffrent ports call(aka frontend aand backend)
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL, // must be exact origin, no wildcard, when using credentials
+  credentials: true,
+}));//thiss so the damn browser dont block the 2 diffrent ports call(aka frontend aand backend)
+app.use(cookieParser());
 app.use(express.json());
+
 
 
 app.use("/api/rooms", roomRoutes);

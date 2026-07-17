@@ -9,6 +9,9 @@ import { useTranslation } from 'react-i18next';
 import "../styles/pub.css"; // Import the CSS file
 import api from "../api/axios.js";
 
+
+//todo : add a number display of followers and followings......
+//bruh u stupid or somth?u have a view connections button already......STUUUUUUPID
 export default function PublicProfile() {
   const { userId } = useParams();
   const navigate = useNavigate();

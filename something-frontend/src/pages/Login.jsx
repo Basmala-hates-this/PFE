@@ -10,7 +10,7 @@ import "../styles/register-login.css"
 import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js";
-
+//todo : add "remember me box" and add faulty login limiter to alert the user that they have been locked out for 5 minutes after 3 failed attempts and send email to the email associated to the targeted login
 
 export default function Login(){
 
@@ -33,6 +33,7 @@ const [error, setError] = useState("");
   const { t } = useTranslation();
 
 //huumm...the browser is playing with me and adding data i didint input ....i want it crispy clean soooo.....didnt work....
+//ahhh the local stogare days and the cookies fights.....when life was simple and without AI
 useEffect(() => {
   setUsername("");
   setPassword("");

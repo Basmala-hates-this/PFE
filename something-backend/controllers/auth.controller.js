@@ -6,7 +6,14 @@ const pool = require('../db');
 const { sendResetEmail, sendOtpEmail } = require('../config/email');
 const toCamel = require('../utils/toCamel');
 
+const isProd = process.env.NODE_ENV === "production";
 
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProd,           // must be true in prod (Vercel/Render are HTTPS)
+  sameSite: isProd ? "None" : "Lax", // None required for cross-domain in prod
+  maxAge: 24 * 60 * 60 * 1000, // 24h, matches current JWT expiry
+};
 
 const getUserMajors = async (userId) => {
   const result = await pool.query(
@@ -235,9 +242,12 @@ const login = async (req, res) => {
   { expiresIn: '24h' }
 );
 
+res.cookie("token", token, cookieOptions);
 const { passwordHash: _pw, ...userWithoutPassword } = user;
 const majors = await getUserMajors(user.id);
-res.json({ token, user: { ...userWithoutPassword, majors } });
+res.json({ user: { ...userWithoutPassword, majors } }); 
+
+
 };
 
 const checkEmail = async (req, res) => {
@@ -404,6 +414,22 @@ const verifyOtp = async (req, res) => {
   res.json({ message: 'OTP verified successfully' });
 };
 
+
+const logout = (req, res) => {
+  res.clearCookie("token", { ...cookieOptions, maxAge: undefined });
+  res.json({ message: "Logged out" });
+};
+
+const getMe = async (req, res) => {
+  // protect middleware already verified the cookie and set req.user
+  const user = await userRepo.findByEmail(req.user.email);
+  if (!user) return res.status(404).json({ message: "User not found" });
+  const { passwordHash: _pw, ...userWithoutPassword } = user;
+  const majors = await getUserMajors(user.id);
+  res.json({ user: { ...userWithoutPassword, majors } });
+};
+
+
 module.exports = {
   register,
   login,
@@ -417,4 +443,6 @@ module.exports = {
   getApprovedMajors,
   sendOtp,
   verifyOtp,
+  getMe,
+  logout,
 };
