@@ -20,4 +20,63 @@ for the override.....i have a table to explain what can be overridden
 python ahh comments.....either way just clearing this read me because i actually read what it had
 
 ############################################################
-Back to being solo.....maybe for the best?time would tell
+Back to being solo.....maybe for the best?time would tell. ...i was always solo. ...
+I need to get back to the ovrride and add the prof status override at some point. ...
+Right now, it happens that I don't have much to do in the improve list, but what is left is quite heavy and time consuming. ...
+##################################################################################
+<strong>Future improvs</strong>
+
+
+More Collaborative Features:
+
+
+Answered/Unanswered filtering — community can see what questions still need
+help, encourages people to contribute(this,I think op should have control over)(DONE)
+
+• Peer endorsements — users can endorse each other's expertise in a subject (like
+LinkedIn skills but academic)(DONE)
+
+• "Looking for study partner" posts — a specific post type for finding someone to
+study with(DONE)
+
+• Room chat improvs --- migrate from polling to WebSockets to support actual real(DONE---mostly functional)
+time chats and future video and audio calls.
+
+
+AI Features:
+• full voice navigation and action for hands free experience
+
+• the ai in the chat tab would support files and generate study material (resumes/
+summaries,flashcards,quizzes….)(DONE)
+
+• ai will be integrated more in the platform that it supports smart search and such.
+
+• AI question suggestions — when you're typing a question, AI checks if a similar one
+was already asked(DONE)
+
+• Smart study plan — AI generates a weekly study schedule based on your major and
+upcoming exams
+
+• AI-powered room summaries — weekly digest of the most useful content in your
+subject room
+
+• Difficulty tagging — AI auto-tags posts as beginner/intermediate/advanced(DONE)
+
+
+Cross-speciality room(this could be the SHIT)
+A room for inter communication between different majors….auto joined for everyone
+A special room type — not owned by any one specialty — called something like an
+"Interdisciplinary Space" or just "Cross-Specialty" zone.
+The key difference from normal rooms is the post tagging system — when you post there,
+you tag it with both the domain you're coming FROM and the domain you're asking INTO.
+so,when you tag your major and the major you want to ask into,that post appears in both
+feeds only instead of everywhere for everyone like public space do…..
+this way, the og architecture stands and we get a clean cross-major collaboration without
+contaminating each individual space….
+AI angle to it:
+AI suggests which specialty to tag based on your question content. So the interdisciplinary
+space becomes one of the first places AI is deeply integrated.
+
+
+##########################################################
+And I still need to fix my stupidity in build
