@@ -3,14 +3,43 @@ const http = require("http");
 const { Server } = require("socket.io");
 const app = require("./app");
 
+const jwt = require("jsonwebtoken");
+const cookie = require("cookie");
+
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
+
+// const io = new Server(server, {
+//   cors: {
+//     origin: process.env.FRONTEND_URL || "*",
+//     methods: ["GET", "POST"],
+//   },
+// });
 
 const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || "*",
     methods: ["GET", "POST"],
+    credentials: true, // needed so the cookie actually gets sent on the handshake
   },
+});
+
+// ─── auth middleware: runs once per connection, before "connection" fires ───
+io.use((socket, next) => {
+  try {
+    const rawCookie = socket.handshake.headers.cookie;
+    if (!rawCookie) return next(new Error("unauthorized"));
+
+    const parsed = cookie.parse(rawCookie);
+    const token = parsed.token; // whatever name your httpOnly cookie uses — check your /auth/logout or /auth/me route to confirm the cookie name
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); // reuse the same secret/logic as your REST auth middleware
+    socket.data.userId = decoded.userId; // or decoded.id — match whatever your JWT payload actually calls it
+    socket.data.displayName = decoded.displayName || decoded.name;
+    next();
+  } catch (err) {
+    next(new Error("unauthorized"));
+  }
 });
 
 app.set("io", io);
@@ -41,8 +70,13 @@ io.on("connection", (socket) => {
   });
 
   // ─── host starts call ─────────────────────────────────────────────────
-  socket.on("call:start", ({ roomId, userId, displayName }) => {
-    socketMeta.set(socket.id, { userId, roomId, displayName });
+  // socket.on("call:start", ({ roomId, userId, displayName }) => {
+  //socketMeta.set(socket.id, { userId, roomId, displayName });
+  
+  socket.on("call:start", ({ roomId }) => {
+  const userId = socket.data.userId;
+  const displayName = socket.data.displayName;
+  socketMeta.set(socket.id, { userId, roomId, displayName });
 
     if (activeCalls.has(roomId)) {
       socket.emit("call:error", { message: "A call is already active in this room." });
@@ -74,7 +108,9 @@ io.on("connection", (socket) => {
   });
 
   // ─── user joins as audience ───────────────────────────────────────────
-  socket.on("call:join_audience", ({ roomId, userId, displayName }) => {
+  socket.on("call:join_audience", ({ roomId, 
+    //userId,
+     displayName }) => {
     const call = activeCalls.get(roomId);
     if (!call) return;
 
@@ -128,7 +164,9 @@ io.on("connection", (socket) => {
   });
 
   // ─── guest accepts speaker invite ─────────────────────────────────────
-  socket.on("call:accept_speaker", ({ roomId, userId, displayName }) => {
+  socket.on("call:accept_speaker", ({ roomId,
+    // userId,
+      displayName }) => {
     const call = activeCalls.get(roomId);
     if (!call) return;
 

@@ -4,7 +4,7 @@ import axios from "axios";
 import Cat from "../photos/Cat.jpg";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n/index.js";
-import "../styles/chat.css"; // Import the CSS file
+import "../styles/chat.css"; // Import the CSS file....hehehehehehehehehehehehehehehehehehehe
 
 import { Copy } from "lucide-react";
 import api from "../api/axios.js";
@@ -91,9 +91,7 @@ const [peerNames, setPeerNames] = useState({});
   useEffect(() => {
     const fetchRoom = async () => {
       try {
-        // const response = await axios.get(`http://localhost:5000/api/rooms/${roomId}`, {
-        //   headers: { Authorization: `Bearer ${token}` }
-        // });
+       
         const response = await api.get(`/rooms/${roomId}`);
         setRoom(response.data);
         setIsAdmin(response.data.admins?.includes(currentUser?.id));
@@ -241,10 +239,7 @@ const [peerNames, setPeerNames] = useState({});
     if (!room?.members) return;
     const fetchMembers = async () => {
       try {
-        // const response = await axios.get(
-        //   `http://localhost:5000/api/rooms/${roomId}/members`,
-        //   { headers: { Authorization: `Bearer ${token}` } }
-        // );
+       
         const response = await api.get(`/rooms/${roomId}/members`);
         setMemberDetails(response.data);
       } catch (err) {
@@ -256,22 +251,6 @@ const [peerNames, setPeerNames] = useState({});
 
 
 
-
-//   useEffect(() => {
-//     if (!loadMoreMessagesRef.current || !messagesAreaRef.current) return;
-
-//     const observer = new IntersectionObserver(
-//       (entries) => {
-//         if (entries[0].isIntersecting) {
-//           loadMoreMessages();
-//         }
-//       },
-//       { root: messagesAreaRef.current, threshold: 0.1 },
-//     );
-
-//     observer.observe(loadMoreMessagesRef.current);
-//     return () => observer.disconnect();
-//   }, [messagesCursor, messagesHasMore]);
 // keep refs in sync with state
 useEffect(() => {
   messagesCursorRef.current = messagesCursor;
@@ -299,30 +278,7 @@ useEffect(() => {
   ///////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////
 
-  // const handleSendMessage = async () => {
-  //   if (!newMessage.trim() && !attachment) return;
-  //   if (attachment && attachment.size > 20 * 1024 * 1024) {
-  //     return alert(t("roomChat.fileTooLarge"));
-  //   }
-  //   try {
-  //     const formData = new FormData();
-  //     if (newMessage.trim()) formData.append("content", newMessage);
-  //     if (attachment) formData.append("attachment", attachment);
-  //     if (replyTo) formData.append("replyTo", replyTo.id);
-
-  //     // await axios.post(
-  //     //   `http://localhost:5000/api/rooms/${roomId}/messages`,
-  //     //   formData,
-  //     //   { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } }
-  //     // );
-  //     await api.post(`/rooms/${roomId}/messages`, formData, { headers: { "Content-Type": "multipart/form-data" } });
-  //     setNewMessage("");
-  //     setAttachment(null);
-  //     setReplyTo(null);
-  //   } catch (err) {
-  //     console.error("Failed to send message:", err);
-  //   }
-  // };
+  
 
   const handleSendMessage = async () => {
     if (!newMessage.trim() && !attachment) return;
@@ -348,9 +304,7 @@ useEffect(() => {
 
   const handleDeleteMessage = async (messageId) => {
     try {
-      // await axios.delete(`http://localhost:5000/api/rooms/messages/${messageId}`, {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
+     
       await api.delete(`/rooms/messages/${messageId}`);
       setMessages((prev) => prev.filter((m) => m.id !== messageId));
     } catch (err) {
@@ -360,11 +314,7 @@ useEffect(() => {
 
   const handleEditMessage = async (messageId) => {
     try {
-      // const response = await axios.patch(
-      //   `http://localhost:5000/api/rooms/messages/${messageId}`,
-      //   { content: editContent },
-      //   { headers: { Authorization: `Bearer ${token}` } }
-      // );
+   
       const response = await api.patch(`/rooms/messages/${messageId}`, {
         content: editContent,
       });
@@ -383,9 +333,7 @@ useEffect(() => {
     if (!confirm) return;
 
     try {
-      // await axios.delete(`http://localhost:5000/api/rooms/${roomId}/leave`, {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
+     
       await api.delete(`/rooms/${roomId}/leave`);
       navigate("/profile");
     } catch (err) {
@@ -393,43 +341,10 @@ useEffect(() => {
     }
   };
 
-  // const openInvite = async () => {
-  //   try {
-  //     const [followersRes, followingRes] = await Promise.all([
-  //       axios.get(`http://localhost:5000/api/users/${currentUser.id}/followers`, {
-  //         headers: { Authorization: `Bearer ${token}` }
-  //       }),
-  //       axios.get(`http://localhost:5000/api/users/${currentUser.id}/following`, {
-  //         headers: { Authorization: `Bearer ${token}` }
-  //       })
-  //     ]);
-
-  //     const merged = [...followersRes.data, ...followingRes.data];
-  //     const unique = merged.filter((u, index, self) =>
-  //       index === self.findIndex(x => x.id === u.id)
-  //     );
-
-  //     const notYetMembers = unique.filter(
-  //       u => !memberDetails.some(m => m.id === u.id)
-  //     );
-
-  //     setFollowList(notYetMembers);
-  //     setShowMembers(true);
-  //     setShowInvite(true);
-  //   } catch (err) {
-  //     console.error("Failed to fetch connections:", err);
-  //   }
-  // };
+ 
   const openInvite = async () => {
     try {
-      // const [followersRes, followingRes] = await Promise.all([
-      //   axios.get(`http://localhost:5000/api/users/${currentUser.id}/followers`, {
-      //     headers: { Authorization: `Bearer ${token}` }
-      //   }),
-      //   axios.get(`http://localhost:5000/api/users/${currentUser.id}/following`, {
-      //     headers: { Authorization: `Bearer ${token}` }
-      //   })
-      // ]);
+   
       const [followersRes, followingRes] = await Promise.all([
         api.get(`/users/${currentUser.id}/followers`),
         api.get(`/users/${currentUser.id}/following`),
@@ -452,11 +367,7 @@ useEffect(() => {
 
   const handleInvite = async (inviteeId) => {
     try {
-      // await axios.post(
-      //   `http://localhost:5000/api/rooms/private/${roomId}/invite`,
-      //   { userId: inviteeId },
-      //   { headers: { Authorization: `Bearer ${token}` } }
-      // );
+     
       await api.post(`/rooms/private/${roomId}/invite`, { userId: inviteeId });
 
       // move them from invite list to member list
@@ -570,7 +481,7 @@ useEffect(() => {
   /////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////
-  //i dont want another style sheEt nor another fight with other pages style...inline that is..if anything else..i'll add it as object here
+  //i dont want another style sheEt nor another fight with other pages style...inline that is..if anything else..i'll add it as object here......about that.....fuck me,i made one css file for 2 pages and i also said i wouldnt do that anymore.....
   return (
     <div className="roomchat-container">
       {/* header */}

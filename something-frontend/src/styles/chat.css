@@ -170,7 +170,7 @@
 
 .roomchat-message-content {
   margin: 4px 0 0;
-  color: var(--text-main);
+  color: var(--text-main-inv);
   word-wrap: break-word;
 }
 
@@ -1216,7 +1216,7 @@
 .chat-study-menu button {
   padding: 9px 14px;
   border: none;
-  background: transparent;
+  background: transparent; 
   color: var(--text-primary, #eaeaea);
   text-align: left;
   font-size: 0.85rem;
