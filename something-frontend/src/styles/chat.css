@@ -156,6 +156,12 @@
   border-radius: 12px 12px 4px 12px;
 }
 
+
+.roomchat-message-content {
+  margin: 4px 0 0;
+  color: var(--text-main-inv);
+  word-wrap: break-word;
+}
 .roomchat-message-bubble-left {
   background: var(--bg-card);
   border-radius: 12px 12px 12px 4px;
@@ -170,11 +176,6 @@
   color: var(--text-main);
 }
 
-.roomchat-message-content {
-  margin: 4px 0 0;
-  color: var(--text-main-inv);
-  word-wrap: break-word;
-}
 
 /* Attachments */
 .roomchat-message-attachment {
