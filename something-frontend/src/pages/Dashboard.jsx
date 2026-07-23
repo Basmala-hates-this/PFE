@@ -193,7 +193,7 @@ const dashSocketRef = useRef(null);
   const socket = io(
     import.meta.env.VITE_BACKEND_URL || "http://localhost:5000",
     //this might be necessary,we'll see later
-     { withCredentials: true }
+     { withCredentials: true , transports: ["polling"],}
     
   );
   dashSocketRef.current = socket;
