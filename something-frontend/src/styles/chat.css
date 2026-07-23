@@ -160,6 +160,7 @@
   background: var(--bg-card);
   border-radius: 12px 12px 12px 4px;
   border-left: 3px solid var(--accent);
+  color: var(--text-main);
 }
 
 .roomchat-message-author {
