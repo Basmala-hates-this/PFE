@@ -129,14 +129,20 @@ const [peerNames, setPeerNames] = useState({});
     );
     socketRef.current = socket; // save ref
 
-    
+
     socket.on("connect_error", (err) => {
   console.error("Socket connection failed:", err.message);
+
 });
 
+
     socket.emit("join_room", roomId);
+    socket.on("disconnect", (reason) => {
+  console.log("Socket disconnected. Reason:", reason);
+});
 
     socket.on("new_message", (message) => {
+      console.log("Received new_message:", message); 
       setMessages((prev) => [...prev, message]);
     });
     socket.on("message_deleted", (messageId) => {
