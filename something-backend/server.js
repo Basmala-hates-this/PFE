@@ -9,12 +9,7 @@ const cookie = require("cookie");
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
-// const io = new Server(server, {
-//   cors: {
-//     origin: process.env.FRONTEND_URL || "*",
-//     methods: ["GET", "POST"],
-//   },
-// });
+
 
 const io = new Server(server, {
   cors: {
@@ -29,13 +24,15 @@ io.use((socket, next) => {
   try {
     const rawCookie = socket.handshake.headers.cookie;
     if (!rawCookie) return next(new Error("unauthorized"));
+    console.log("Handshake cookie header:", socket.handshake.headers.cookie);
 
     const parsed = cookie.parse(rawCookie);
-    const token = parsed.token; // whatever name your httpOnly cookie uses — check your /auth/logout or /auth/me route to confirm the cookie name
+    const token = parsed.token; // whatever name httpOnly cookie uses —
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); // reuse the same secret/logic as your REST auth middleware
-    socket.data.userId = decoded.userId; // or decoded.id — match whatever your JWT payload actually calls it
-    socket.data.displayName = decoded.displayName || decoded.name;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+    socket.data.userId = decoded.id;
+    socket.data.displayName = decoded.username; // also — payload has "username", not "displayName"
+   // socket.data.displayName = decoded.displayName || decoded.name;
     next();
   } catch (err) {
     next(new Error("unauthorized"));
