@@ -154,12 +154,13 @@
 .roomchat-message-bubble-right {
   background: var(--accent);
   border-radius: 12px 12px 4px 12px;
+  color: var(--text-main-inv);
 }
 
 
 .roomchat-message-content {
   margin: 4px 0 0;
-  color: var(--text-main-inv);
+  color: inherit;
   word-wrap: break-word;
 }
 .roomchat-message-bubble-left {
