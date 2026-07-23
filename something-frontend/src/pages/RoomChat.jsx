@@ -130,8 +130,15 @@ const [peerNames, setPeerNames] = useState({});
     socketRef.current = socket; // save ref
 
 
+socket.on("connect", () => {
+  console.log("Socket (re)connected:", socket.id);
+  socket.emit("join_room", roomId);
+});
+
+
     socket.on("connect_error", (err) => {
   console.error("Socket connection failed:", err.message);
+  
 
 });
 
@@ -139,6 +146,10 @@ const [peerNames, setPeerNames] = useState({});
     socket.emit("join_room", roomId);
     socket.on("disconnect", (reason) => {
   console.log("Socket disconnected. Reason:", reason);
+});
+
+socket.io.on("reconnect_attempt", (attempt) => {
+  console.log("Reconnect attempt:", attempt);
 });
 
     socket.on("new_message", (message) => {
