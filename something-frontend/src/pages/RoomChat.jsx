@@ -122,9 +122,12 @@ const [peerNames, setPeerNames] = useState({});
     fetchMessages();
 
     const socket = io(
-      import.meta.env.VITE_BACKEND_URL || "http://localhost:5000", { withCredentials: true , transports: ["polling"],}
+      import.meta.env.VITE_BACKEND_URL || "http://localhost:5000", { withCredentials: true , 
+       // transports: ["polling"],
+      }
+
       
-      //todo: discover locking the emit call to user id rather then blind trust
+      //: discover locking the emit call to user id rather then blind trust
       //this damn segment is never ending.....why on earth did i want roomchats ?
     );
     socketRef.current = socket; // save ref
