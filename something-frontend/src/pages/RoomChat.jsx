@@ -12,6 +12,57 @@ import api from "../api/axios.js";
 import { io } from "socket.io-client";
 import CallRoom from "../components/CallRoom";
 
+// small helper component, drop it above RoomChat or in the same file
+function ChatImage({ src }) {
+  const [status, setStatus] = useState("loading"); // loading | loaded | error
+  const [attempt, setAttempt] = useState(0);
+  const timeoutRef = useRef(null);
+
+  useEffect(() => {
+    setStatus("loading");
+    timeoutRef.current = setTimeout(() => {
+      setStatus((s) => (s === "loading" ? "error" : s));
+    }, 8000); // 8s timeout, tweak to taste
+
+    return () => clearTimeout(timeoutRef.current);
+  }, [src, attempt]);
+
+  if (status === "error") {
+    return (
+      <button
+        onClick={() => setAttempt((a) => a + 1)}
+        className="roomchat-message-attachment-retry"
+      >
+        ⚠️ Couldn't load image — tap to retry
+      </button>
+    );
+  }
+
+  return (
+    <div className="roomchat-message-attachment-wrapper">
+      {status === "loading" && (
+        <div className="roomchat-message-attachment-skeleton" />
+      )}
+      <img
+        key={attempt} // forces a fresh request on retry
+        src={src}
+        alt="attachment"
+        className="roomchat-message-attachment"
+        style={{ display: status === "loading" ? "none" : "block" }}
+        loading="lazy"
+        onLoad={() => {
+          clearTimeout(timeoutRef.current);
+          setStatus("loaded");
+        }}
+        onError={() => {
+          clearTimeout(timeoutRef.current);
+          setStatus("error");
+        }}
+      />
+    </div>
+  );
+}
+
 export default function RoomChat() {
   const { roomId } = useParams();
   const navigate = useNavigate();
@@ -83,6 +134,8 @@ const messagesHasMoreRef = useRef(true);
 const [isWatching, setIsWatching] = useState(false);
 const [callTargets, setCallTargets] = useState(null);
 const [peerNames, setPeerNames] = useState({});
+
+
 
   ////////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////
@@ -792,11 +845,13 @@ useEffect(() => {
                     )}
                     {msg.attachment &&
                       (isImage(msg.attachment) ? (
-                        <img
-                          src={msg.attachment}
-                          alt="attachment"
-                          className="roomchat-message-attachment"
-                        />
+                        // <img
+                        //   src={msg.attachment}
+                        //   alt="attachment"
+                        //   className="roomchat-message-attachment"
+                        // />
+
+                         <ChatImage src={msg.attachment} />
                       ) : isVideo(msg.attachment) ? (
                         <video
                           controls

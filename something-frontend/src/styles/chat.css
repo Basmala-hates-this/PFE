@@ -1247,3 +1247,25 @@
   from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+
+.roomchat-message-attachment-skeleton {
+  width: 200px;
+  height: 150px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.06);
+  animation: pulse 1.4s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.8; }
+}
+.roomchat-message-attachment-retry {
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed rgba(255,255,255,0.2);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text-main);
+  cursor: pointer;
+  font-size: 13px;
+}
