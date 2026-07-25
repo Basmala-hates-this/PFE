@@ -36,6 +36,8 @@ io.use((socket, next) => {
    // socket.data.displayName = decoded.displayName || decoded.name;
     next();
   } catch (err) {
+    //next(new Error("unauthorized")); ......bitch
+     console.log("Socket auth failed:", err.name, "-", err.message); 
     next(new Error("unauthorized"));
   }
 });
