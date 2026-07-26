@@ -1265,7 +1265,7 @@
   border: 1px dashed rgba(255,255,255,0.2);
   border-radius: 8px;
   padding: 10px 14px;
-  color: var(--text-main);
+  color: var(--text-muted);
   cursor: pointer;
   font-size: 13px;
 }
