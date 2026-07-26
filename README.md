@@ -49,7 +49,7 @@ AI Features:
 • the ai in the chat tab would support files and generate study material (resumes/
 summaries,flashcards,quizzes….)(DONE)
 
-• ai will be integrated more in the platform that it supports smart search and such.
+• ai will be integrated more in the platform that it supports smart search and such.(satisfied by question-suggestion + difficulty tagging + AI chat)
 
 • AI question suggestions — when you're typing a question, AI checks if a similar one
 was already asked(DONE)
