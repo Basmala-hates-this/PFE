@@ -9,6 +9,8 @@ const cookie = require("cookie");
 const PORT = process.env.PORT || 5000;
 const server = http.createServer(app);
 
+const internalRouter = require('./routes/internalRouter');
+
 
 
 const io = new Server(server, {
@@ -302,7 +304,7 @@ function _handleCallLeave(socket, roomId) {
 }
 
 // ─── boot ─────────────────────────────────────────────────────────────────────
-app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
+app.use('/internal', internalRouter);
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });

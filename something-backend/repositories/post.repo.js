@@ -1,35 +1,12 @@
 const toCamel = require('../utils/toCamel');
 const pool = require('../db');
 
-// const createPost = async (postData) => {
-//   const result = await pool.query(
-//     `INSERT INTO posts 
-//       (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url, video_url, resource_link, resource_label, is_question)
-//      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-//      RETURNING *`,
-//     [
-//       postData.roomId,
-//       postData.authorId,
-//       postData.authorUsername,
-//       postData.authorRole,
-//       postData.title || null,
-//       postData.content,
-//       postData.image || null,
-//       postData.pdf || null,
-//       postData.video || null, 
-//       postData.resourceLink || null,
-//       postData.resourceLabel || null,
-//       postData.isQuestion ?? false,
-//     ]
-//   );
-//   return toCamel(result.rows[0]);
-// };
 
 const createPost = async (postData) => {
   const result = await pool.query(
     `INSERT INTO posts 
-      (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url, video_url, resource_link, resource_label, is_question, is_study_partner)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+      (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url, video_url, resource_link, resource_label, is_question, is_study_partner, tag, is_system_generated)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
      RETURNING *`,
     [
       postData.roomId,
@@ -45,6 +22,8 @@ const createPost = async (postData) => {
       postData.resourceLabel || null,
       postData.isQuestion ?? false,
       postData.isStudyPartner ?? false,
+      postData.tag || null,
+      postData.isSystemGenerated ?? false,
     ]
   );
   return toCamel(result.rows[0]);
@@ -212,7 +191,7 @@ const approveResource = async (postId, approved) => {
 };
 
 async function setQuestionFlag(postId, isQuestion) {
-  const result = await db.query(
+  const result = await pool.query(
     `UPDATE posts 
      SET is_question = $1 
      WHERE id = $2 

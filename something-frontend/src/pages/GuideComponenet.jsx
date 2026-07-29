@@ -181,19 +181,19 @@ export default function GuideComponent() {
           <h1>{t("guide2.sections.contact.title")}</h1>
           <p>
             <strong>{t("guide2.sections.contact.GlaukopisLabel")}</strong>
-            <a className="mail" href={`mailto:${t("guide2.sections.contact.studyBuddyEmail")}`}>
+            <a className="mail" href={`mailto: glaukopis14@gmail.com`}>
               glaukopis14@gmail.com
             </a>
           </p>
           <p>
             <strong>{t("guide2.sections.contact.superAdmin1Label")}</strong>
-            <a className="mail" href={`mailto:${t("guide2.sections.contact.superAdmin1Email")}`}>
+            <a className="mail" href={`mailto: laouaribasmala75@gmail.com`}>
               laouaribasmala75@gmail.com
             </a>
           </p>
           <p>
             <strong>{t("guide2.sections.contact.superAdmin2Label")}</strong>
-            <a className="mail" href={`mailto:${t("guide2.sections.contact.superAdmin2Email")}`}>
+            <a className="mail" href={`mailto: sarahbennoura87@gmail.com`}>
               sarahbennoura87@gmail.com
             </a>
           </p>

@@ -17,6 +17,8 @@ const pool = require("../db");
 const { PDFParse } = require("pdf-parse");
 
 
+const { buildRoomSummaryPrompt } = require('../services/aiPrompts');
+
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -45,6 +47,7 @@ function buildVisionMessages(messages, system, imageUrl) {
     },
   ];
 }
+
 
 
 async function extractPdfText(url) {
@@ -398,5 +401,8 @@ router.get("/study-materials/:id", authMiddleware, async (req, res) => {
   }
 });
 
+
+
 module.exports = router;
 module.exports.classifyDifficulty = classifyDifficulty;
+module.exports.runTask = runTask;

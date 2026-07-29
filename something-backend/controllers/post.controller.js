@@ -64,15 +64,7 @@ const createPost = async (req, res) => {
     ))
     .catch(err => console.error(`Embedding generation failed for post ${newPost.id}:`, err.message));
 //ze ai difficulty badge....m a m a  b o y mama's boy mama's boy......lost it again
-//     if (newPost.isQuestion) {
-//   classifyDifficulty(title, content)
-//     .then(difficulty => {
-//       if (difficulty) {
-//         return pool.query(`UPDATE posts SET difficulty = $1 WHERE id = $2`, [difficulty, newPost.id]);
-//       }
-//     })
-//     .catch(err => console.error(`Difficulty classification failed for post ${newPost.id}:`, err.message));
-// }
+
 if (newPost.isQuestion) {
   const io = req.app.get("io");
 
@@ -541,6 +533,8 @@ const updateDifficulty = async (req, res) => {
   res.json(toCamel(result.rows[0]));
 };
 
+
+
 module.exports = {
   createPost,
   getPostById,
@@ -564,4 +558,6 @@ module.exports = {
   toggleAnswered,
   checkSimilarPost,
   updateDifficulty,
+
+
 };

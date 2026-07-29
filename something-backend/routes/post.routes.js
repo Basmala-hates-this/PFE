@@ -46,37 +46,6 @@ router.get('/users/:userId/endorsements', endorsementController.getEndorsementsF
 
 
 //man i have more then what i thought....ohh well....
-// router.post("/check-similar", protect, async (req, res) => {
-//   const { content, roomId, roomType } = req.body;
-
-//   if (!["major", "subject"].includes(roomType)) return res.json({ match: null });
-//   if (!content || content.trim().length < 20) return res.json({ match: null });
-
-//   try {
-//     const embedding = await getEmbedding(content);
-//     const vectorLiteral = toVectorLiteral(embedding);
-
-//     const result = await pool.query(
-//       `SELECT id, title, 1 - (embedding <=> $1::vector) AS similarity
-//        FROM posts
-//        WHERE room_id = $2 AND embedding IS NOT NULL
-//        ORDER BY embedding <=> $1::vector
-//        LIMIT 1`,
-//       [vectorLiteral, roomId]
-//     );
-
-//     const top = result.rows[0];
-//     const SIMILARITY_THRESHOLD = 0.82; // starting point, will likely need tuning once you see real matches
-
-//     if (top && top.similarity >= SIMILARITY_THRESHOLD) {
-//       return res.json({ match: { id: top.id, title: top.title, similarity: top.similarity } });
-//     }
-//     return res.json({ match: null });
-//   } catch (err) {
-//     console.error("Similarity check failed:", err.message);
-//     return res.json({ match: null }); // fail silently — never block the user's typing over this
-//   }
-// });
 
 
 
