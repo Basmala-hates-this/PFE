@@ -8,10 +8,11 @@ const pool = require("../db");
 
 
 const roomRepo = require('../repositories/room.repo.js'); 
+const postRepo = require('../repositories/post.repo.js');
+const OFFICIAL_ACCOUNT_ID = process.env.OFFICIAL_ACCOUNT_ID;
 
-async function getAllActiveRooms() {
-  return await roomRepo.getAllRooms();
-}
+
+
 async function generateRoomSummary(room, weekStart, weekEnd) {
   const roomId = room.id;
   const roomName = room.name;
@@ -77,6 +78,8 @@ ORDER BY COALESCE(pvc.vote_count, 0) DESC
 LIMIT 3;
   `, [roomId, weekStart, weekEnd])).rows;
 
+
+
   const difficultyCounts = (await pool.query(`
     SELECT difficulty, COUNT(*) 
     FROM posts
@@ -89,7 +92,7 @@ LIMIT 3;
 
 const highlights = { topPosts, topContributors, unanswered, difficultyCounts };
 
-  //const roomName = await getRoomName(roomId);
+  
 
   const digestText = await runTask(
     'chat',
@@ -133,11 +136,8 @@ async function generateAllRoomSummaries(req, res) {
   const { weekStart, weekEnd } = getLastWeekRange();
 
   const results = await Promise.allSettled(
-    rooms.map(room => generateRoomSummary(room, weekStart, weekEnd))
+    rooms.map(room => generateRoomSummary(room, weekStart, weekEnd)) // pass whole room, not room.id
   );
-
-
- 
 
   res.json({
     generated: results.filter(r => r.status === 'fulfilled' && r.value).length,
@@ -146,8 +146,39 @@ async function generateAllRoomSummaries(req, res) {
 }
 
 
+async function getAllActiveRooms() {
+  const result = await pool.query(`
+    SELECT r.*
+    FROM rooms r
+    JOIN room_members rm ON rm.room_id = r.id
+    WHERE r.type != 'private'
+    GROUP BY r.id
+    HAVING COUNT(rm.user_id) > 0
+  `);
+  return result.rows;
+}
+
+
+function getLastWeekRange() {
+  const now = new Date();
+//we set the weeek start with monday ....i hate mondays....the digest will be on sundays,i dont like sundays either
+  const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const daysSinceMonday = (dayOfWeek + 6) % 7; // Sunday(0) -> 6, Monday(1) -> 0, etc.
+
+  const weekStart = new Date(now);
+  weekStart.setHours(0, 0, 0, 0);
+  weekStart.setDate(now.getDate() - daysSinceMonday);
+
+  // weekEnd is "right now" — the week isn't fully over yet when this runs,
+  // so we just capture everything up through the moment the job fires....i need to set the cron job for this
+  const weekEnd = new Date(now);
+
+  return { weekStart, weekEnd };
+}
 
 module.exports = {
      generateRoomSummary, 
-     generateAllRoomSummaries 
+     generateAllRoomSummaries ,
+     getAllActiveRooms,
+     getLastWeekRange,
     };
