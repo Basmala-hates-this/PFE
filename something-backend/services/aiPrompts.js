@@ -1,8 +1,8 @@
 function buildRoomSummaryPrompt(roomName, highlights) {
   const { topPosts, topContributors, unanswered, difficultyCounts } = highlights;
 
-  const topPostsText = topPosts.length
-    ? topPosts.map((p, i) => `${i + 1}. "${p.title}" (${p.vote_count} votes, ${p.comment_count} comments)`).join('\n')
+const topPostsText = topPosts.length
+    ? topPosts.map((p, i) => `${i + 1}. "${p.title}" (${p.useful_count} useful votes, ${p.comment_count} comments)`).join('\n')
     : 'No standout posts this week.';
 
   const contributorsText = topContributors.length
@@ -10,7 +10,7 @@ function buildRoomSummaryPrompt(roomName, highlights) {
     : 'No standout contributors this week.';
 
   const unansweredText = unanswered.length
-    ? unanswered.map((p, i) => `${i + 1}. "${p.title}" (${p.vote_count} votes, still unanswered)`).join('\n')
+? unanswered.map((p, i) => `${i + 1}. "${p.title}" (${p.useful_count} useful votes, still unanswered)`).join('\n')
     : 'Everything got answered this week — nice.';
 
   const difficultyText = difficultyCounts.length
