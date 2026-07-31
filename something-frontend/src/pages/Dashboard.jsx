@@ -2658,11 +2658,12 @@ onClick={() => {
 
       {selectedPost && (
         <PostModal
-          postId={selectedPost.id}
-          onClose={() => setSelectedPost(null)}
-          isGuest={isGuest}
-          onPostUpdate={handlePostUpdated}
-        />
+  postId={selectedPost.id}
+  onClose={() => setSelectedPost(null)}
+  isGuest={isGuest}
+  onPostUpdate={handlePostUpdated}
+  onOpenPost={(id) => setSelectedPost({ id })}
+/>
       )}
 
       {showBrowseRooms && (

@@ -427,8 +427,8 @@ function CommentNode({
 ////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////
 
-export default function PostModal({ postId, onClose, isGuest, onPostUpdate }) {
-  // const token = localStorage.getItem("token");
+export default function PostModal({ postId, onClose, isGuest, onPostUpdate, onOpenPost }) {
+    // const token = localStorage.getItem("token");
   // const guestToken = localStorage.getItem("guestToken");
   // const authToken = token || guestToken;
   const currentUser = JSON.parse(localStorage.getItem("currentUser"));
@@ -828,6 +828,65 @@ export default function PostModal({ postId, onClose, isGuest, onPostUpdate }) {
               </span>
             )}
           </p>
+          {/* the weekly digest/summaries */} 
+          {post.isSystemGenerated && post.highlights && (
+  <div style={{ marginTop: "16px", fontSize: "13px" }}>
+    {post.highlights.topPosts?.length > 0 && (
+      <div style={{ marginBottom: "12px" }}>
+        <strong style={{ opacity: 0.7 }}>Top posts:</strong>
+        <ul style={{ margin: "6px 0 0", paddingLeft: "18px" }}>
+          {post.highlights.topPosts.map((p) => (
+            <li key={p.id} style={{ marginBottom: "4px" }}>
+              <span
+                style={{ color: "#8ca4c6", cursor: "pointer" }}
+                onClick={() => onOpenPost(p.id)}
+              >
+                {p.title}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+
+    {post.highlights.topContributors?.length > 0 && (
+      <div style={{ marginBottom: "12px" }}>
+        <strong style={{ opacity: 0.7 }}>Top contributors:</strong>
+        <div style={{ marginTop: "6px", display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          {post.highlights.topContributors.map((c) => (
+            <span
+              key={c.user_id}
+              style={{ color: "#8ca4c6", cursor: "pointer" }}
+              onClick={() => (window.location.href = `/users/${c.user_id}`)}
+            >
+              @{c.username}
+            </span>
+          ))}
+        </div>
+      </div>
+    )}
+
+    {post.highlights.unanswered?.length > 0 && (
+      <div>
+        <strong style={{ opacity: 0.7 }}>Still unanswered:</strong>
+        <ul style={{ margin: "6px 0 0", paddingLeft: "18px" }}>
+          {post.highlights.unanswered.map((p) => (
+            <li key={p.id} style={{ marginBottom: "4px" }}>
+              <span
+                style={{ color: "#8ca4c6", cursor: "pointer" }}
+                onClick={() => onOpenPost(p.id)}
+              >
+                {p.title}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+)}
+
+
           {/* image attachment */}
           {post.imageUrl && (
             <div style={{ marginBottom: "8px" }}>
@@ -1172,7 +1231,7 @@ export default function PostModal({ postId, onClose, isGuest, onPostUpdate }) {
                       marginLeft: "auto",
                     }}
                   >
-                    ✕ {t("postModal.cancelReply")}
+                    {t("postModal.cancelReply")}
                   </button>
                 </div>
               )}

@@ -11,7 +11,9 @@ const roomRepo = require('../repositories/room.repo.js');
 const postRepo = require('../repositories/post.repo.js');
 const OFFICIAL_ACCOUNT_ID = process.env.OFFICIAL_ACCOUNT_ID;
 
-
+function formatDate(date) {
+  return date.toISOString().split('T')[0]; // "2026-07-27"
+}
 
 async function generateRoomSummary(room, weekStart, weekEnd) {
   const roomId = room.id;
@@ -22,7 +24,7 @@ async function generateRoomSummary(room, weekStart, weekEnd) {
     [roomId, weekStart]
   );
   if (existing.rows.length > 0) {
-    console.log(`Room ${roomId} already has a summary for week ${weekStart} — skipping`);
+    console.log(`Room ${roomId} already has a summary for week ${formatDate(weekStart)} — skipping`);
     return null;
   }
   // Pull raw data
@@ -45,7 +47,7 @@ LIMIT 4;
   `, [roomId, weekStart, weekEnd])).rows;
 
   const topContributors = (await pool.query(`
-    SELECT user_id, SUM(score) AS total_score,
+   SELECT u.username, combined.user_id, SUM(score) AS total_score,
   SUM(CASE WHEN type='post' THEN 1 ELSE 0 END) AS posts,
   SUM(CASE WHEN type='comment' THEN 1 ELSE 0 END) AS comments,
   SUM(CASE WHEN type='endorsement' THEN 1 ELSE 0 END) AS endorsements
@@ -67,7 +69,8 @@ FROM (
   FROM peer_endorsements
   WHERE room_id = $1 AND created_at BETWEEN $2 AND $3
 ) combined
-GROUP BY user_id
+JOIN users u ON u.id = combined.user_id
+GROUP BY combined.user_id, u.username
 ORDER BY total_score DESC
 LIMIT 3;
   `, [roomId, weekStart, weekEnd])).rows;
@@ -108,7 +111,7 @@ const digestText = await runTask(
   );
 
   const newPost = await postRepo.createPost({
-    title: `Weekly Digest — ${roomName}, Week of ${weekStart}`,
+    title: `Weekly Digest — ${roomName}, Week of ${formatDate(weekStart)}`,
     content: digestText,
     roomId,
     authorId: OFFICIAL_ACCOUNT_ID,
@@ -127,15 +130,13 @@ const digestText = await runTask(
     `, [roomId, weekStart, weekEnd, newPost.id, highlights]);
   } catch (err) {
     if (err.code === '23505') {
-      console.log(`Room ${roomId} already has a summary for week ${weekStart} — skipping`);
+      console.log(`Room ${roomId} already has a summary for week ${formatDate(weekStart)} — skipping`);
       return null;
     }
     throw err;
   }
 
-  return newPost;
-
-
+  
   // await pool.query(`
   //   INSERT INTO room_summaries (room_id, week_start, week_end, post_id, highlights)
   //   VALUES ($1, $2, $3, $4, $5)

@@ -86,11 +86,32 @@ if (newPost.isQuestion) {
 
 };
 
+// const getPostById = async (req, res) => {
+//   const { id } = req.params;
+//   const userId = req.user?.id || null; // handles guests
+//   const post = await postRepo.getPostById(id, userId);
+//   if (!post) return res.status(404).json({ message: 'Post not found' });
+//   res.json(post);
+// };
+
+//adding room digest ...sounds weird but hold withme,could be nice to have....too much work ey?
+
 const getPostById = async (req, res) => {
   const { id } = req.params;
   const userId = req.user?.id || null; // handles guests
   const post = await postRepo.getPostById(id, userId);
   if (!post) return res.status(404).json({ message: 'Post not found' });
+
+  if (post.isSystemGenerated) {
+    const summaryResult = await pool.query(
+      `SELECT highlights FROM room_summaries WHERE post_id = $1`,
+      [id]
+    );
+    if (summaryResult.rows[0]) {
+      post.highlights = summaryResult.rows[0].highlights;
+    }
+  }
+
   res.json(post);
 };
 
@@ -228,14 +249,6 @@ const addComment = async (req, res) => {
     return res.status(403).json({ message: 'You are suspended from commenting in this room.' });
   }
 
-  // const image = req.file && req.file.mimetype.startsWith('image/')
-  //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-
-  // const pdf = req.file && req.file.mimetype === 'application/pdf'
-  //   ? `http://localhost:5000/uploads/${req.file.filename}` : null;
-
-  //   const video = req.file && req.file.mimetype.startsWith('video/')
-  // ? `http://localhost:5000/uploads/${req.file.filename}` : null;
   const image = req.file && req.file.mimetype.startsWith('image/')
   ? `${process.env.BACKEND_URL}/uploads/${req.file.filename}` : null;
 const pdf = req.file && req.file.mimetype === 'application/pdf'
@@ -317,11 +330,6 @@ const updateComment = async (req, res) => {
   res.json(updated);
 };
 
-// const getCommentsByPost = async (req, res) => {
-//   const { postId } = req.params;
-//   const comments = await commentRepo.getCommentsByPost(postId);
-//   res.json(comments);
-// };
 
 const getCommentsByPost = async (req, res) => {
   const { postId } = req.params;
