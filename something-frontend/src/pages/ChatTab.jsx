@@ -4,6 +4,9 @@ import "../styles/chat.css"
 
 import StudyMaterialModal from "../components/StudyMaterialModal.jsx";
 
+import StudyPlanModal from "../components/StudyPlanModal.jsx";
+import StudyPlanCard from "../components/StudyPlanCard.jsx";
+
 // ─── SYSTEM PROMPT ─────────────────────────────────────────────────────────────
 const buildSystemPrompt = (user) => `
 You are Glaukopis Assistant, a helpful AI embedded inside the Glaukopis platform — an academic social network built for Algerian university students.
@@ -89,21 +92,6 @@ async function uploadToCloudinary(file) {
 }
 
 
-// ─── CALL OUR BACKEND PROXY ──────────────────────────────────────────────
-// async function callAI(messages, system, conversationId, attachment) {
-//   const token = localStorage.getItem("token");
-//   const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
-//     method: "POST",
-//     headers: {
-//       "Content-Type": "application/json",
-//       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-//     },
-//     body: JSON.stringify({ messages, system, conversationId, attachment }),
-//   });
-//   if (!response.ok) throw new Error("AI request failed");
-//   const data = await response.json();
-//   return data.content?.[0]?.text || "Sorry, I didn't get that. Try again?";
-// }
 async function callAI(messages, system, conversationId, attachment) {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
     method: "POST",
@@ -206,11 +194,13 @@ const generateStudyMaterial = async (msg, type) => {
   const loadConversation = async (id) => {
     try {
       const res = await api.get(`/ai/conversations/${id}`);
-      const loaded = res.data.map(m => ({
+    const loaded = res.data.map(m => ({
   role: m.role,
   content: m.content,
   attachment_url: m.attachment_url,
   attachment_type: m.attachment_type,
+  message_type: m.message_type,
+  reference_id: m.reference_id,
 }));
       setMessages(loaded.length > 0 ? loaded : [{
         role: "assistant",
@@ -219,6 +209,35 @@ const generateStudyMaterial = async (msg, type) => {
       setActiveConvoId(id);
     } catch (err) { console.error("Failed to load conversation:", err); }
   };
+
+  const handleCreateStudyPlan = async ({ subject, deadline, files }) => {
+  let convoId = activeConvoId;
+  if (!convoId) {
+    const res = await api.post("/ai/conversations", { title: subject.slice(0, 60) });
+    convoId = res.data.id;
+    setActiveConvoId(convoId);
+  }
+
+  let resources = [];
+  if (files.length > 0) {
+    const formData = new FormData();
+    files.forEach(f => formData.append("files", f));
+    const uploadRes = await api.post("/ai/study-plan/resources", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    resources = uploadRes.data.resources;
+  }
+
+  const res = await api.post("/ai/study-plan", { subject, deadline, resources, conversationId: convoId });
+
+  setMessages(prev => [...prev, {
+    role: "assistant",
+    content: `Generated a study plan for ${subject}.`,
+    message_type: "study_plan",
+    reference_id: res.data.plan.id,
+  }]);
+  fetchConversations();
+};
 
   const deleteConversation = async (e, id) => {
     e.stopPropagation();
@@ -363,12 +382,7 @@ const generateStudyMaterial = async (msg, type) => {
       formData.append("audio", blob, "recording.webm");
       try {
         setLoading(true);
-        // const token = localStorage.getItem("token");
-        // const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
-        //   method: "POST",
-        //   headers: token ? { Authorization: `Bearer ${token}` } : {},
-        //   body: formData,
-        // });
+      
         const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
   method: "POST",
   credentials: "include",
@@ -442,8 +456,12 @@ const generateStudyMaterial = async (msg, type) => {
           {messages.map((msg, i) => (
             <div key={i} className={`chat-bubble-wrap ${msg.role === "user" ? "chat-bubble-wrap-right" : "chat-bubble-wrap-left"}`}>
               {msg.role === "assistant" && <span className="chat-bot-avatar">🤖</span>}
-              <div className={`chat-bubble ${msg.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"}`}>
-                <p className="chat-bubble-text">{msg.content}</p>
+<div className={`chat-bubble ${msg.role === "user" ? "chat-bubble-user" : "chat-bubble-ai"}`}>
+                  {msg.message_type === "study_plan" && msg.reference_id ? (
+    <StudyPlanCard planId={msg.reference_id} />
+  ) : (
+    <p className="chat-bubble-text">{msg.content}</p>
+  )}
                 {msg.role === "assistant" && (
                   <button
                     onClick={() => speakText(msg.content, i)}
@@ -529,6 +547,14 @@ const generateStudyMaterial = async (msg, type) => {
           >
             {listening ? "⏹" : "🎤"}
           </button>
+          <button
+  onClick={() => setStudyPlanModalOpen(true)}
+  title="Create a study plan"
+  className="chat-icon-btn"
+  disabled={loading || uploading}
+>
+  📅
+</button>
           <textarea
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -547,6 +573,9 @@ const generateStudyMaterial = async (msg, type) => {
         </div>
       </div>
       <StudyMaterialModal material={activeMaterial} onClose={() => setActiveMaterial(null)} />
+        {studyPlanModalOpen && (
+  <StudyPlanModal onClose={() => setStudyPlanModalOpen(false)} onSubmit={handleCreateStudyPlan} />
+)}
     </div>
   );
 }

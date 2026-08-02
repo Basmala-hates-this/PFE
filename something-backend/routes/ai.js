@@ -10,9 +10,6 @@ const authMiddleware = require("../middleware/authMiddleware");
 const pool = require("../db");
 
 
-// const pdfParse = require("pdf-parse");
-// const pdfParseModule = require("pdf-parse");
-// const pdfParse = typeof pdfParseModule === "function" ? pdfParseModule : pdfParseModule.default;
 
 const { PDFParse } = require("pdf-parse");
 
@@ -305,7 +302,7 @@ router.get("/conversations/:id", authMiddleware, async (req, res) => {
     if (convo.rows.length === 0) return res.status(404).json({ error: "Not found" });
 
   const messages = await pool.query(
-  `SELECT role, content, created_at, attachment_url, attachment_type
+  `SELECT id, role, content, created_at, attachment_url, attachment_type, message_type, reference_id
    FROM ai_messages
    WHERE conversation_id = $1
    ORDER BY created_at ASC`,
@@ -406,3 +403,4 @@ router.get("/study-materials/:id", authMiddleware, async (req, res) => {
 module.exports = router;
 module.exports.classifyDifficulty = classifyDifficulty;
 module.exports.runTask = runTask;
+module.exports.extractPdfText = extractPdfText;

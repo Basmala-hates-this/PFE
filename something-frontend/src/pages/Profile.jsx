@@ -480,7 +480,7 @@ const handleStatClick = async (type) => {
     { type: "useless", label:( t('profile.stats.useless')), value: stats?.uselessReceived || 0 },
     { type: "specialized", label: t('profile.stats.specialized'), value: stats?.specializedReceived || 0 },
     { type: "endorsements", label: t('profile.stats.endorsements'), value: endorsements?.length || 0 },
-    { type: "rooms", label: t('profile.stats.rooms'), value: userRooms?.length || 0 },
+    // { type: "rooms", label: t('profile.stats.rooms'), value: userRooms?.length || 0 },
   ].map(({ type, label, value }) => (
     <div
       key={type}

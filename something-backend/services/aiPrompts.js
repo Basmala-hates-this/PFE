@@ -43,4 +43,18 @@ Write a warm, concise digest (250-350 words) in this structure:
 Do not use excessive emojis. Do not sound like a corporate newsletter. Write like a knowledgeable peer summarizing the week for the room. Do not fabricate any information not given above.`;
 }
 
-module.exports = { buildRoomSummaryPrompt };
+
+function buildStudyPlanPrompt({ subject, daysUntilDeadline, resourceContext }) {
+  return `Generate a day-by-day study plan for "${subject}" over ${daysUntilDeadline} days.
+${resourceContext ? `Base it on these provided resources:\n${resourceContext}` : 'No specific resources provided — use general best-practice topic coverage.'}
+
+Return ONLY a JSON array, no prose, no markdown fences, in this exact shape:
+[{"day_index": 1, "title": "short task title", "description": "1-2 sentence detail"}]
+
+Rules:
+- One entry per day_index from 1 to ${daysUntilDeadline}.
+- Earlier days: foundational/broad topics. Later days: review, practice, weak-point reinforcement.
+- Keep titles under 60 characters.`;
+}
+
+module.exports = { buildRoomSummaryPrompt, buildStudyPlanPrompt };
