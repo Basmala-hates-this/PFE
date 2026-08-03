@@ -7,8 +7,8 @@ const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const pool = require("../db");
-const {  toCamel } = require("../utils/toCamel");
-const { runTask } = require('./ai'); // same pattern as classifyDifficulty being imported elsewhere
+const { toCamel } = require("../utils/toCamel");
+const { runTask } = require('./ai'); 
 const { buildStudyPlanPrompt } = require('../services/aiPrompts');
 
 const { extractPdfText } = require('./ai');
