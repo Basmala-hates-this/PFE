@@ -70,13 +70,12 @@ router.post('/study-plan', protect , async (req, res) => {
     );
     const plan = planResult.rows[0];
 
-    const taskInserts = planJson.map((task, i) =>
-      client.query(
+    for (const [i, task] of planJson.entries()) {
+      await client.query(
         `INSERT INTO study_plan_tasks (plan_id, day_index, title, description, sort_order) VALUES ($1,$2,$3,$4,$5)`,
         [plan.id, task.day_index, task.title, task.description, i]
-      )
-    );
-    await Promise.all(taskInserts);
+      );
+    }
 
     // host message — content is a plain-text fallback for anywhere message_type isn't rendered specially yet
     const messageResult = await client.query(
@@ -98,7 +97,7 @@ router.post('/study-plan', protect , async (req, res) => {
     res.status(201).json({ plan, tasks: tasks.map(toCamel), messageId: messageResult.rows[0].id });
   } catch (err) {
     await client.query('ROLLBACK');
-    console.error('Study plan generation error:', err.message);
+    console.error('Study plan generation error:', err);
     res.status(503).json({ error: "Couldn't generate study plan, try again in a bit" });
   } finally {
     client.release();
