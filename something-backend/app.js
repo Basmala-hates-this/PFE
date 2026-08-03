@@ -19,6 +19,7 @@ const messageRoutes = require("./routes/message.routes");
 const adminRoutes = require("./routes/admin.routes");
 
 const aiRouter = require ("./routes/ai.js");
+const studyPlanRouter = require("./routes/studyPlan.js");
 app.set("trust proxy", 1);
 
 const publicLimiter = rateLimit({
@@ -27,6 +28,7 @@ const publicLimiter = rateLimit({
   message: { message: "Too many requests, slow down a little..." }
 });
 const notificationRoutes = require('./routes/notificationRoutes');
+
 
 app.use("/api/posts", publicLimiter);
 app.use("/api/rooms/public-rooms", publicLimiter);
@@ -60,6 +62,7 @@ app.use("/api/rooms", messageRoutes);
 
 
 app.use("/api/ai", aiRouter);
+app.use("/api/ai", studyPlanRouter);
 
 
 app.use('/api/notifications', notificationRoutes);

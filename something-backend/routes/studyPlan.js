@@ -7,9 +7,12 @@ const multer = require("multer");
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 const pool = require("../db");
-const {  toCamel } = require("../utils/helpers");
+const {  toCamel } = require("../utils/toCamel");
 const { runTask } = require('./ai'); // same pattern as classifyDifficulty being imported elsewhere
 const { buildStudyPlanPrompt } = require('../services/aiPrompts');
+
+const { extractPdfText } = require('./ai');
+const { uploadToCloudinary } = require('../config/cloudinary'); 
 
 
 async function generateStudyPlan({ subject, daysUntilDeadline, resourceContext }) {
@@ -23,7 +26,7 @@ async function generateStudyPlan({ subject, daysUntilDeadline, resourceContext }
 }
 
 
-router.post('/study-plan/resources', authMiddleware, upload.array('files', 5), async (req, res) => {
+router.post('/study-plan/resources', protect, upload.array('files', 5), async (req, res) => {
   if (!req.files?.length) return res.status(400).json({ error: 'No files provided' });
   try {
     const results = await Promise.all(req.files.map(async (file) => {
@@ -105,7 +108,7 @@ router.post('/study-plan', protect , async (req, res) => {
 
 router.patch('/study-plan/tasks/:taskId', protect, async (req, res) => {
     const { taskId } = req.params;
-  if (!isUUID(taskId)) return res.status(400).json({ error: 'Invalid task ID' });
+  // if (!isUUID(taskId)) return res.status(400).json({ error: 'Invalid task ID' });
   
   const { completed } = req.body;
 
