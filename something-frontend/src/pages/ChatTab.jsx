@@ -138,6 +138,7 @@ const [generatingType, setGeneratingType] = useState(null);
 const [activeMaterial, setActiveMaterial] = useState(null);
 const [savedMaterials, setSavedMaterials] = useState([]);
 const [sidebarTab, setSidebarTab] = useState("chats"); // "chats" | "materials"
+const [studyPlanModalOpen, setStudyPlanModalOpen] = useState(false); 
 
   useEffect(() => { fetchConversations(); }, []);
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
