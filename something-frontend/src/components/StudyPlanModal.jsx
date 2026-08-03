@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "./StudyPlan.css";
+import "../styles/studyPlan.css";
 
 export default function StudyPlanModal({ onClose, onSubmit }) {
   const [subject, setSubject] = useState("");
