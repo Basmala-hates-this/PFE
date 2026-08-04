@@ -32,6 +32,8 @@ import api from "../api/axios.js";
 
 import { io } from "socket.io-client";
 
+import { useCallback } from "react";
+
 //mosntrus amount of import...
 
 //sooooooooooo
@@ -89,7 +91,6 @@ export default function Dashboard() {
   const [postsCursor, setPostsCursor] = useState(null); // { createdAt, id } | null
 const [hasMorePosts, setHasMorePosts] = useState(true);
 const [loadingMore, setLoadingMore] = useState(false);
-const feedEndRef = useRef(null);
 
   const [editingComment, setEditingComment] = useState(null);
   const [editCommentContent, setEditCommentContent] = useState("");
@@ -344,25 +345,48 @@ if (!reset && postsCursor) {
 }, [sortBy === "questions"]);
 
 
+//trying to fix the pagination issue
+// replace feedEndRef + the two related useEffects with this:
+
+const observerRef = useRef(null);
+
+const feedEndRef = useCallback((node) => {
+  // tear down any observer watching the old node
+  if (observerRef.current) {
+    observerRef.current.disconnect();
+    observerRef.current = null;
+  }
+  if (!node) return; // node unmounted, nothing to observe
+
+  observerRef.current = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting) loadMoreRef.current();
+    },
+    { rootMargin: "300px" }
+  );
+  observerRef.current.observe(node);
+}, []);
+
+
 const loadMoreRef = useRef(() => {});
 
 useEffect(() => {
   loadMoreRef.current = () => fetchPosts(false);
 }); // no deps — runs every render, always fresh
 
-useEffect(() => {
-  const sentinel = feedEndRef.current;
-  if (!sentinel) return;
+// useEffect(() => {
+//   const sentinel = feedEndRef.current;
+//   if (!sentinel) return;
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      if (entries[0].isIntersecting) loadMoreRef.current();
-    },
-    { rootMargin: "300px" },
-  );
-  observer.observe(sentinel);
-  return () => observer.disconnect();
-}, []);
+//   const observer = new IntersectionObserver(
+//     (entries) => {
+//       if (entries[0].isIntersecting) loadMoreRef.current();
+//     },
+//     { rootMargin: "300px" },
+//   );
+//   observer.observe(sentinel);
+//   return () => observer.disconnect();
+// }, []);
 
   useEffect(() => {
   if (isGuest) return; // guests have no notifications
