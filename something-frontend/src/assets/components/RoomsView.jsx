@@ -130,9 +130,7 @@ export default function RoomsView({
       const roomsRes = await api.get("/rooms/my-rooms");
       setJoinFeedback(response.data.message);
       
-      // const roomsRes = await axios.get("http://localhost:5000/api/rooms/my-rooms", {
-      //   headers: { Authorization: `Bearer ${token}` }
-      // });
+      
       if (setUserRooms) setUserRooms(roomsRes.data);
       
       setTimeout(() => setShowJoinRoom(false), 2000);

@@ -9,6 +9,7 @@ const notifService = require('../services/notificationService');
 const { getEmbedding, toVectorLiteral } = require('../utils/embeddings');
 const { classifyDifficulty } = require("../routes/ai");
 
+
 //yay that cross specialty room id is finally here, now i can fuck around and find out for real
 const CROSS_SPECIALTY_ROOM_ID = process.env.CROSS_SPECIALTY_ROOM_ID;
 
@@ -172,42 +173,67 @@ const getPostsAll = async (req, res) => {
     });
     posts = result.posts;
     nextCursor = result.nextCursor;
-  }  else {
-    const params = [userId];
-    let cursorClause = "";
-    if (cursorCreatedAt && cursorId) {
-      params.push(cursorCreatedAt, cursorId);
-      cursorClause = `WHERE (p.created_at, p.id) < ($2, $3)`;
-    }
-    const questionClause = wantsQuestionsOnly
-      ? (cursorClause ? `AND p.is_question = true` : `WHERE p.is_question = true`)
-      : "";
-    params.push(Number(limit));
-    const limitParamIndex = params.length;
+  } else {
+  const userMajorIds = await userRepo.getUserMajorIds(userId);
+  const relevantMajorIds = userRole === 'professor'
+    ? userMajorIds
+    : (userMajorIds[0] ? [userMajorIds[0]] : []);
 
-    const result = await pool.query(
-      `SELECT p.*,
-        COALESCE(v.useful, 0) as vote_useful,
-        COALESCE(v.useless, 0) as vote_useless,
-        COUNT(DISTINCT c.id) as comment_count,
-        u.profile_pic_url as author_profile_pic,
-        (SELECT type FROM votes WHERE post_id = p.id AND user_id = $1) as user_vote
-       FROM posts p
-       LEFT JOIN post_vote_counts v ON v.post_id = p.id
-       LEFT JOIN comments c ON c.post_id = p.id
-       LEFT JOIN users u ON u.id = p.user_id
-       ${cursorClause}
-       ${questionClause}
-       GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
-       ORDER BY p.created_at DESC, p.id DESC
-       LIMIT $${limitParamIndex}`,
-      params
-    );
-    posts = toCamel(result.rows);
-    nextCursor = result.rows.length === Number(limit)
-      ? { createdAt: result.rows[result.rows.length - 1].created_at, id: result.rows[result.rows.length - 1].id }
-      : null;
+  const params = [userId];
+  let whereClauses = [];
+
+  if (cursorCreatedAt && cursorId) {
+    params.push(cursorCreatedAt, cursorId);
+    whereClauses.push(`(p.created_at, p.id) < ($2, $3)`);
   }
+  if (wantsQuestionsOnly) {
+    whereClauses.push(`p.is_question = true`);
+  }
+
+  // gate cross-specialty posts by relevance; everything else passes through untouched
+  params.push(CROSS_SPECIALTY_ROOM_ID);
+  const roomIdParamIndex = params.length;
+  if (relevantMajorIds.length > 0) {
+    params.push(relevantMajorIds);
+    const majorsParamIndex = params.length;
+    whereClauses.push(
+      `(p.room_id != $${roomIdParamIndex} OR p.from_major_id = ANY($${majorsParamIndex}) OR p.into_major_id = ANY($${majorsParamIndex}))`
+    );
+  } else {
+    // no majors on file — exclude cross-specialty posts entirely rather than showing none-filtered
+    whereClauses.push(`p.room_id != $${roomIdParamIndex}`);
+  }
+
+  const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+  params.push(Number(limit));
+  const limitParamIndex = params.length;
+
+  const result = await pool.query(
+    `SELECT p.*,
+      COALESCE(v.useful, 0) as vote_useful,
+      COALESCE(v.useless, 0) as vote_useless,
+      COUNT(DISTINCT c.id) as comment_count,
+      u.profile_pic_url as author_profile_pic,
+      fm.name as from_major_name,
+      im.name as into_major_name,
+      (SELECT type FROM votes WHERE post_id = p.id AND user_id = $1) as user_vote
+     FROM posts p
+     LEFT JOIN post_vote_counts v ON v.post_id = p.id
+     LEFT JOIN comments c ON c.post_id = p.id
+     LEFT JOIN users u ON u.id = p.user_id
+     LEFT JOIN majors fm ON fm.id = p.from_major_id
+     LEFT JOIN majors im ON im.id = p.into_major_id
+     ${whereClause}
+     GROUP BY p.id, v.useful, v.useless, u.profile_pic_url, fm.name, im.name
+     ORDER BY p.created_at DESC, p.id DESC
+     LIMIT $${limitParamIndex}`,
+    params
+  );
+  posts = toCamel(result.rows);
+  nextCursor = result.rows.length === Number(limit)
+    ? { createdAt: result.rows[result.rows.length - 1].created_at, id: result.rows[result.rows.length - 1].id }
+    : null;
+}
   res.json({ posts, nextCursor, hasMore: !!nextCursor });
 };
 

@@ -1028,7 +1028,89 @@ const handleNotifClick = (n) => {
   }
 };
 
+const customSelect2 = {
+    control: (provided, state) => ({
+      ...provided,
+      width: "100%",
+      padding: "10px",
+      marginBottom: "10px",
+      borderRadius: "8px",
+      background: "rgba(41, 64, 121, 0.34)",
+      color: "#ffffff",
+      border: state.isFocused
+        ? "1px solid rgba(255, 255, 255, 0.6)"
+        : "1px solid rgba(255, 255, 255, 0.2)",
+      boxShadow: "none",
+      minHeight: "48px",
+      cursor: "pointer",
+      transition: "all 0.2s ease",
 
+      ":hover": {
+        border: "1px solid rgba(255, 255, 255, 0.4)",
+      },
+    }),
+    menu: (provided) => ({
+      ...provided,
+      backgroundColor: "rgba(12, 25, 55, 0.96)",
+      borderRadius: "8px",
+      border: "1px solid rgba(255, 255, 255, 0.12)",
+      marginTop: "4px",
+      color: "#ffffff",
+      overflow: "hidden",
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected
+        ? "rgba(255, 255, 255, 0.12)"
+        : state.isFocused
+        ? "rgba(255, 255, 255, 0.08)"
+        : "transparent",
+      color: "#ffffff",
+      cursor: "pointer",
+      padding: "12px 14px",
+    }),
+    singleValue: (provided) => ({
+      ...provided,
+      color: "#ffffff",
+    }),
+    placeholder: (provided) => ({
+      ...provided,
+      color: "rgba(255, 255, 255, 0.7)",
+    }),
+    input: (provided) => ({
+      ...provided,
+      color: "#ffffff",
+    }),
+    valueContainer: (provided) => ({
+      ...provided,
+      padding: "0",
+    }),
+    indicatorSeparator: (provided) => ({
+      ...provided,
+      backgroundColor: "rgba(255, 255, 255, 0.15)",
+    }),
+    dropdownIndicator: (provided) => ({
+      ...provided,
+      color: "rgba(255, 255, 255, 0.8)",
+    }),
+    multiValue: (provided) => ({
+      ...provided,
+      backgroundColor: "rgba(255, 255, 255, 0.12)",
+      borderRadius: "8px",
+    }),
+    multiValueLabel: (provided) => ({
+      ...provided,
+      color: "#ffffff",
+    }),
+    multiValueRemove: (provided) => ({
+      ...provided,
+      color: "rgba(255, 255, 255, 0.8)",
+      ":hover": {
+        backgroundColor: "rgba(255, 255, 255, 0.16)",
+        color: "#ffffff",
+      },
+    }),
+  };
   const cSelect = {
     control: (provided, state) => ({
       ...provided,
@@ -2385,15 +2467,7 @@ onClick={() => {
         value={postIntoMajor}
         onChange={setPostIntoMajor}
         placeholder={t("dashboard.postModal.selectIntoMajor")}
-        styles={{
-         width: "100%",
-         padding: "10px",
-         marginBottom: "10px",
-         borderRadius: "8px",
-         background: "rgba(41, 64, 121, 0.34)",
-         color: "white",
-         border: "1px solid rgba(255, 255, 255, 0.2)"
-        }}
+        styles={customSelect2}
       />
     </div>
   </div>
