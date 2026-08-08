@@ -9,6 +9,10 @@ const notifService = require('../services/notificationService');
 const { getEmbedding, toVectorLiteral } = require('../utils/embeddings');
 const { classifyDifficulty } = require("../routes/ai");
 
+//yay that cross specialty room id is finally here, now i can fuck around and find out for real
+const CROSS_SPECIALTY_ROOM_ID = process.env.CROSS_SPECIALTY_ROOM_ID;
+
+
 // --- suspension check ---
 const isUserSuspendedInRoom = async (roomId, userId) => {
   const suspension = await roomRepo.getRoomSuspension(roomId, userId);
@@ -19,8 +23,9 @@ const isUserSuspendedInRoom = async (roomId, userId) => {
 // --- posts ---
 
 
+
 const createPost = async (req, res) => {
-  const { title, content, roomId, resourceLink, resourceLabel, isQuestion, isStudyPartner } = req.body;
+  const { title, content, roomId, resourceLink, resourceLabel, isQuestion, isStudyPartner, fromMajorId, intoMajorId } = req.body;
   const authorId = req.user.id;
   const authorUsername = req.user.username;
   const authorRole = req.user.role;
@@ -31,8 +36,36 @@ const createPost = async (req, res) => {
 
   const room = await roomRepo.getRoomById(roomId);
 
-  // only subject rooms can have study-partner posts — server-side gate, don't trust the client alone
   const isStudyPartnerFlag = room?.type === 'subject' && (isStudyPartner === true || isStudyPartner === 'true');
+
+  let resolvedFromMajorId = null;
+  let resolvedIntoMajorId = null;
+
+  if (room?.type === 'cross_specialty') {
+    if (!intoMajorId) {
+      return res.status(400).json({ message: 'You must tag a major to ask into.' });
+    }
+
+    if (authorRole === 'professor') {
+      if (!fromMajorId) {
+        return res.status(400).json({ message: 'You must tag the major you are posting from.' });
+      }
+      const profMajorIds = await userRepo.getUserMajorIds(authorId);
+      if (!profMajorIds.includes(fromMajorId)) {
+        return res.status(403).json({ message: 'You can only tag a major you belong to.' });
+      }
+      resolvedFromMajorId = fromMajorId;
+    } else {
+      const student = await userRepo.findById(authorId);
+      resolvedFromMajorId = student.majorId;
+    }
+
+    if (resolvedFromMajorId === intoMajorId) {
+      return res.status(400).json({ message: 'FROM and INTO majors must be different.' });
+    }
+
+    resolvedIntoMajorId = intoMajorId;
+  }
 
   const image = req.file && req.file.mimetype.startsWith('image/') ? req.file.path : undefined;
   const pdf = req.file && req.file.mimetype === 'application/pdf' ? req.file.path : undefined;
@@ -46,6 +79,8 @@ const createPost = async (req, res) => {
     resourceLabel: resourceLabel || null,
     isQuestion: isQuestion === true || isQuestion === 'true',
     isStudyPartner: isStudyPartnerFlag,
+    fromMajorId: resolvedFromMajorId,
+    intoMajorId: resolvedIntoMajorId,
   });
 
   try {
@@ -86,13 +121,7 @@ if (newPost.isQuestion) {
 
 };
 
-// const getPostById = async (req, res) => {
-//   const { id } = req.params;
-//   const userId = req.user?.id || null; // handles guests
-//   const post = await postRepo.getPostById(id, userId);
-//   if (!post) return res.status(404).json({ message: 'Post not found' });
-//   res.json(post);
-// };
+;
 
 //adding room digest ...sounds weird but hold withme,could be nice to have....too much work ey?
 
@@ -119,16 +148,28 @@ const getPostById = async (req, res) => {
 const getPostsAll = async (req, res) => {
   const { roomId, sort, limit = 20, cursorCreatedAt, cursorId, onlyQuestions } = req.query;
   const userId = req.user?.id || null;
+  const userRole = req.user?.role || null;
   const wantsQuestionsOnly = onlyQuestions === "true";
 
   let posts, nextCursor;
 
   if (roomId) {
+    let viewerMajorIds = null;
+    if (roomId === CROSS_SPECIALTY_ROOM_ID && userId) {
+      if (userRole === 'professor') {
+        viewerMajorIds = await userRepo.getUserMajorIds(userId);
+      } else {
+        const viewer = await userRepo.findById(userId);
+        viewerMajorIds = viewer?.majorId ? [viewer.majorId] : [];
+      }
+    }
+
     const result = await postRepo.getPostsByRoom(roomId, userId, {
       limit: Number(limit),
       cursorCreatedAt: cursorCreatedAt || null,
       cursorId: cursorId ? Number(cursorId) : null,
       onlyQuestions: wantsQuestionsOnly,
+      viewerMajorIds,
     });
     posts = result.posts;
     nextCursor = result.nextCursor;
@@ -168,7 +209,6 @@ const getPostsAll = async (req, res) => {
       ? { createdAt: result.rows[result.rows.length - 1].created_at, id: result.rows[result.rows.length - 1].id }
       : null;
   }
-
   res.json({ posts, nextCursor, hasMore: !!nextCursor });
 };
 

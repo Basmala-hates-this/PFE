@@ -159,6 +159,14 @@ const unsavePost = async (userId, postId) => {
   return { success: true };
 };
 
+const getUserMajorIds = async (userId) => {
+  const result = await pool.query(
+    `SELECT major_id FROM user_majors WHERE user_id = $1`,
+    [userId]
+  );
+  return result.rows.map(r => r.major_id);
+};
+
 module.exports = {
   createUser,
   findByEmail,
@@ -172,4 +180,5 @@ module.exports = {
   unfollowUser,
   savePost,
   unsavePost,
+  getUserMajorIds,
 };

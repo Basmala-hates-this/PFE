@@ -228,7 +228,12 @@
       "endorse": "Endorse",
     "endorsed": "Endorsed",
     "isStudyPartnerLabel": "Looking for study partners",
-    "studyPartner": "Study Partner"
+    "studyPartner": "Study Partner",
+    "fromMajorLabel": "Posting from",
+"selectFromMajor": "Select your major",
+"intoMajorLabel": "Asking into",
+"selectIntoMajor": "Select the major you're asking",
+"crossSpecialtyTagRequired": "Please tag both a from and into major before posting."
 
     },
     "browseRooms": {
@@ -287,7 +292,12 @@
     "guestCommentBanner":"hello guest",
      "isQuestionLabel": "This is a question",
     "isStudyPartnerLabel": "Looking for study partners",
-    "studyPartner": "Study Partner"
+    "studyPartner": "Study Partner",
+    "fromMajorLabel": "Posting from",
+"selectFromMajor": "Select your major",
+"intoMajorLabel": "Asking into",
+"selectIntoMajor": "Select the major you're asking",
+"crossSpecialtyTagRequired": "Please tag both a from and into major before posting."
 
   },
   "noComments": "No comments yet. Be the first!",

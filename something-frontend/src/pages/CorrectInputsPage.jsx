@@ -30,10 +30,7 @@ const [availableMajors, setAvailableMajors] = useState([]);
 useEffect(() => {
   const fetchData = async () => {
     try {
-      // const [uniRes, majorRes] = await Promise.all([
-      //   axios.get("http://localhost:5000/api/auth/universities"),
-      //   axios.get("http://localhost:5000/api/auth/majors")
-      // ]);
+      
       const [uniRes, majorRes] = await Promise.all([
   api.get("/auth/universities"),
   api.get("/auth/majors")
@@ -58,8 +55,7 @@ const uniOptions = availableUniversities.map((u) => ({
   label: u.name,
   uni: u,
 }));
-const majorOptions = availableMajors.map((m) => ({ value: m, label: m }));
-
+const majorOptions = availableMajors.map((m) => ({ value: m.name, label: m.name }));
 
   const handleSubmit = async () => {
     // console.log("handleSubmit fired");

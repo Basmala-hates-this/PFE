@@ -5,8 +5,8 @@ const pool = require('../db');
 const createPost = async (postData) => {
   const result = await pool.query(
     `INSERT INTO posts 
-      (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url, video_url, resource_link, resource_label, is_question, is_study_partner, tag, is_system_generated)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+      (room_id, user_id, author_username, author_role, title, content, image_url, pdf_url, video_url, resource_link, resource_label, is_question, is_study_partner, tag, is_system_generated, from_major_id, into_major_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
      RETURNING *`,
     [
       postData.roomId,
@@ -24,6 +24,8 @@ const createPost = async (postData) => {
       postData.isStudyPartner ?? false,
       postData.tag || null,
       postData.isSystemGenerated ?? false,
+      postData.fromMajorId || null,
+      postData.intoMajorId || null,
     ]
   );
   return toCamel(result.rows[0]);
@@ -49,7 +51,7 @@ const getPostById = async (id, userId = null) => {
   return toCamel(result.rows[0]) || null;
 };
 
-const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreatedAt = null, cursorId = null, onlyQuestions = false } = {}) => {
+const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreatedAt = null, cursorId = null, onlyQuestions = false, viewerMajorIds = null } = {}) => {
   const params = [roomId, userId];
   let cursorClause = "";
   if (cursorCreatedAt && cursorId) {
@@ -57,6 +59,13 @@ const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreated
     cursorClause = `AND (p.created_at, p.id) < ($3, $4)`;
   }
   const questionClause = onlyQuestions ? `AND p.is_question = true` : "";
+
+  let tagClause = "";
+  if (viewerMajorIds && viewerMajorIds.length > 0) {
+    params.push(viewerMajorIds);
+    tagClause = `AND (p.from_major_id = ANY($${params.length}) OR p.into_major_id = ANY($${params.length}))`;
+  }
+
   params.push(limit);
   const limitParamIndex = params.length;
 
@@ -74,6 +83,7 @@ const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreated
      WHERE p.room_id = $1
      ${cursorClause}
      ${questionClause}
+     ${tagClause}
      GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
      ORDER BY p.created_at DESC, p.id DESC
      LIMIT $${limitParamIndex}`,

@@ -136,6 +136,8 @@ const [loadingMore, setLoadingMore] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+
+
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
 
@@ -182,10 +184,45 @@ const [postIsStudyPartner, setPostIsStudyPartner] = useState(false);
 
 const dashSocketRef = useRef(null);
 
+
+  //shit for cross-major room
+  const CROSS_SPECIALTY_ROOM_ID = import.meta.env.VITE_CROSS_SPECIALTY_ROOM_ID;
+
+const [allMajors, setAllMajors] = useState([]); // [{id, name}]
+const [postFromMajor, setPostFromMajor] = useState(null); // {value, label}
+const [postIntoMajor, setPostIntoMajor] = useState(null); // {value, label}
+
+const selectedPostRoomIsCrossSpecialty =
+  selectedPostRoom?.value === CROSS_SPECIALTY_ROOM_ID;
+
+const majorOptions = allMajors.map((m) => ({ value: m.id, label: m.name }));
+
 // ....................................i hate me .....
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
   /////////////////////////////////////////////////////////////////////////////////////
+
+  //putting the cross major room shit here so it is closer to the consts
+  useEffect(() => {
+  if (isGuest) return; // cross-specialty room doesn't apply to guests
+  api.get("/auth/majors")
+    .then(res => setAllMajors(res.data))
+    .catch(err => console.error("Failed to fetch majors:", err));
+}, [isGuest]);
+
+// prefill FROM for students once majors are loaded + room becomes cross-specialty
+useEffect(() => {
+  if (!selectedPostRoomIsCrossSpecialty) {
+    setPostFromMajor(null);
+    setPostIntoMajor(null);
+    return;
+  }
+  if (user?.role !== "professor" && allMajors.length > 0) {
+    const studentMajorName = user?.majors?.[0];
+    const match = allMajors.find((m) => m.name === studentMajorName);
+    if (match) setPostFromMajor({ value: match.id, label: match.name });
+  }
+}, [selectedPostRoomIsCrossSpecialty, allMajors, user]);
 
   //useeffect just for difficulty tag.....bruh what is wrong with me?
   useEffect(() => {
@@ -374,20 +411,6 @@ useEffect(() => {
   loadMoreRef.current = () => fetchPosts(false);
 }); // no deps — runs every render, always fresh
 
-// useEffect(() => {
-//   const sentinel = feedEndRef.current;
-//   if (!sentinel) return;
-
-//   const observer = new IntersectionObserver(
-//     (entries) => {
-//       if (entries[0].isIntersecting) loadMoreRef.current();
-//     },
-//     { rootMargin: "300px" },
-//   );
-//   observer.observe(sentinel);
-//   return () => observer.disconnect();
-// }, []);
-
   useEffect(() => {
   if (isGuest) return; // guests have no notifications
 
@@ -462,7 +485,7 @@ useEffect(() => {
   //ze function to(can i call it function? or component? this entire page is a compenent though...anyhow finish the comment)create mock
   const handleMockPost = () => {
     setMockPosts((prev) => [
-      //objet dde post....why did i turn french? brothaa eughhhh
+      //objet de post....why did i turn french? brothaa eughhhh
       {
         id: prev.length + 1,
         author: user?.username || user?.fullname || "User",
@@ -475,88 +498,99 @@ useEffect(() => {
   //this one creates a semi blivable post and WE SAVE TO LOCALSTORAGE
   //the one before just creats a should have been good enough block...
   //THIS WILL EMITATE WHAT THE VISION MIGHT LOOK LIKE...
-  const handleSubmitPost = async () => {
-    if (!postContent.trim() || !selectedPostRoom) return;
-    setIsSubmitting(true);
-    try {
-     
+ const handleSubmitPost = async () => {
+  if (!postContent.trim() || !selectedPostRoom) return;
 
-      const formData = new FormData();
-      formData.append("content", postContent);
-      formData.append("title", postTitle || "Post");
-      formData.append("roomId", selectedPostRoom.value);
-      formData.append("isQuestion", postIsQuestion);
-formData.append("isStudyPartner", postIsStudyPartner);
-      if (postAttachment) formData.append("attachment", postAttachment);
-      if (postResourceLink.trim())
-        formData.append("resourceLink", postResourceLink);
-      if (postResourceLabel.trim())
-        formData.append("resourceLabel", postResourceLabel);
+  if (selectedPostRoomIsCrossSpecialty && (!postFromMajor || !postIntoMajor)) {
+    alert(t("dashboard.postModal.crossSpecialtyTagRequired"));
+    return;
+  }
 
-   
-      const response = await api.post("/posts", formData, {
-  headers: { "Content-Type": "multipart/form-data" }
-});
-
-      setPosts((prev) => [response.data, ...prev]);
-      setPostContent("");
-      setPostTitle("");
-      setSelectedPostRoom(null);
-      setPostAttachment(null);
-      setPostResourceLink("");
-      setPostResourceLabel("");
-      setIsModalOpen(false);
-      setPostIsQuestion(false);
-      setSimilarPost(null);
-      setPostIsQuestion(false);
-setPostIsStudyPartner(false);
-    } catch (err) {
-      console.error("Failed to create post:", err);
-    } finally {
-      setIsSubmitting(false);
+  setIsSubmitting(true);
+  try {
+    const formData = new FormData();
+    formData.append("content", postContent);
+    formData.append("title", postTitle || "Post");
+    formData.append("roomId", selectedPostRoom.value);
+    formData.append("isQuestion", postIsQuestion);
+    formData.append("isStudyPartner", postIsStudyPartner);
+    if (postAttachment) formData.append("attachment", postAttachment);
+    if (postResourceLink.trim()) formData.append("resourceLink", postResourceLink);
+    if (postResourceLabel.trim()) formData.append("resourceLabel", postResourceLabel);
+    if (selectedPostRoomIsCrossSpecialty) {
+      formData.append("fromMajorId", postFromMajor.value);
+      formData.append("intoMajorId", postIntoMajor.value);
     }
-  //  console.log(posts[0].createdAt);
-  };
+
+    const response = await api.post("/posts", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    setPosts((prev) => [response.data, ...prev]);
+    setPostContent("");
+    setPostTitle("");
+    setSelectedPostRoom(null);
+    setPostAttachment(null);
+    setPostResourceLink("");
+    setPostResourceLabel("");
+    setIsModalOpen(false);
+    setPostIsQuestion(false);
+    setSimilarPost(null);
+    setPostIsStudyPartner(false);
+    setPostFromMajor(null);
+    setPostIntoMajor(null);
+  } catch (err) {
+    console.error("Failed to create post:", err);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   //the ammount of bugs is bugging me.....
   //me stupid used the wrong api...
   //u know how i like to be extra so instead of simple select or react select i want a fancy select for room filtration?
   //....about that...
   const groupedRoomOptions = [
-    {
-      label: "Public",
-      options: userRooms
-        .filter((r) => r.type === "public")
-        .map((r) => ({ value: r.id, label: r.name })),
-    },
-    {
-      label: "University",
-      options: userRooms
-        .filter((r) => r.type === "university")
-        .map((r) => ({ value: r.id, label: r.name })),
-    },
-    {
-      label: "Majors",
-      options: userRooms
-        .filter((r) => r.type === "major")
-        .map((r) => ({ value: r.id, label: r.name })),
-    },
-    ...userRooms
-      .filter((r) => r.type === "subject")
-      .reduce((groups, room) => {
-        const label = "Subjects";
-        const existing = groups.find((g) => g.label === label);
-        if (existing) {
-          existing.options.push({ value: room.id, label: room.name });
-        } else {
-          groups.push({
-            label,
-            options: [{ value: room.id, label: room.name }],
-          });
-        }
-        return groups;
-      }, []),
-  ].filter((group) => group.options.length > 0); // remove empty groups
+  {
+    label: "Public",
+    options: userRooms
+      .filter((r) => r.type === "public")
+      .map((r) => ({ value: r.id, label: r.name })),
+  },
+  {
+    label: "University",
+    options: userRooms
+      .filter((r) => r.type === "university")
+      .map((r) => ({ value: r.id, label: r.name })),
+  },
+  {
+    label: "Majors",
+    options: userRooms
+      .filter((r) => r.type === "major")
+      .map((r) => ({ value: r.id, label: r.name })),
+  },
+  {
+    label: "Cross-Specialty",
+    options: userRooms
+      .filter((r) => r.type === "cross_specialty")
+      .map((r) => ({ value: r.id, label: r.name })),
+  },
+  ...userRooms
+    .filter((r) => r.type === "subject")
+    .reduce((groups, room) => {
+      const label = "Subjects";
+      const existing = groups.find((g) => g.label === label);
+      if (existing) {
+        existing.options.push({ value: room.id, label: room.name });
+      } else {
+        groups.push({
+          label,
+          options: [{ value: room.id, label: room.name }],
+        });
+      }
+      return groups;
+    }, []),
+].filter((group) => group.options.length > 0);  // remove empty groups
 
 
   const selectedPostRoomIsSubject =
@@ -570,7 +604,7 @@ setPostIsStudyPartner(false);
     const currentVote = posts.find((p) => p.id === postId)?.userVote;
     const alreadyVoted = currentVote === voteType;
 
-    // instant UI update
+    // instant UI update(the fake it until u make it)
     setPosts((prev) =>
       prev.map((post) => {
         if (post.id !== postId) return post;
@@ -748,22 +782,14 @@ const response = await api.get(`/posts/${postId}`);
     try {
    
 
-//       const requests = [
-//         
-//         api.get(`/posts/search?q=${query}`, {
-//   headers: isGuest && guestToken ? { Authorization: `Bearer ${guestToken}` } : {}
-// }),
-//       ];
+
 const requests = [
   api.get(`/posts/search?q=${query}`),
 ];
 
       if (!isGuest) {
         requests.push(
-          // axios.get(`http://localhost:5000/api/users/search?q=${query}`, 
-          //   {
-          //   headers: { Authorization: `Bearer ${token}` },
-          // }),
+       
           api.get(`/users/search?q=${query}`),
 
         );
@@ -899,9 +925,7 @@ const requests = [
   //announcment shit.....that damn word is long tf?
   const fetchAnnouncements = async () => {
     try {
-      // const res = await axios.get(
-      //   "http://localhost:5000/api/admin/announcements",
-      // );
+     
       const res = await api.get("/admin/announcements");
       setAnnouncements(res.data);
     } catch (err) {
@@ -2199,7 +2223,7 @@ onClick={() => {
 )}
 {!hasMorePosts && posts.length > 0 && (
   <p style={{ textAlign: "center", opacity: 0.4, fontSize: "12px", padding: "16px" }}>
-    You've reached the end
+    You've reached the end,try refreshing the feed or changing the sort option for more posts.✨
   </p>
 )}
               </div>
@@ -2306,7 +2330,49 @@ onClick={() => {
               placeholder={t("dashboard.postModal.selectRoom")}
               styles={customSelect}
             />
+
             <br />
+            {selectedPostRoomIsCrossSpecialty && (
+  <div style={{ marginTop: "10px", display: "flex", gap: "10px" }}>
+    <div style={{ flex: 1 }}>
+      <label style={{ display: "block", marginBottom: "6px", opacity: 0.7, fontSize: "13px" }}>
+        {t("dashboard.postModal.fromMajorLabel")}
+      </label>
+      {user?.role === "professor" ? (
+        <Select
+          options={majorOptions.filter((m) => user?.majors?.includes(m.label))}
+          value={postFromMajor}
+          onChange={setPostFromMajor}
+          placeholder={t("dashboard.postModal.selectFromMajor")}
+          styles={customSelect}
+        />
+      ) : (
+        <div style={{
+          padding: "8px",
+          borderRadius: "8px",
+          border: "1px solid rgba(255,255,255,0.2)",
+          opacity: 0.7,
+          fontSize: "14px",
+        }}>
+          {postFromMajor?.label || "—"}
+        </div>
+      )}
+    </div>
+
+    <div style={{ flex: 1 }}>
+      <label style={{ display: "block", marginBottom: "6px", opacity: 0.7, fontSize: "13px" }}>
+        {t("dashboard.postModal.intoMajorLabel")}
+      </label>
+      <Select
+        options={majorOptions.filter((m) => m.value !== postFromMajor?.value)}
+        value={postIntoMajor}
+        onChange={setPostIntoMajor}
+        placeholder={t("dashboard.postModal.selectIntoMajor")}
+        styles={customSelect}
+      />
+    </div>
+  </div>
+)}
             <textarea
               value={postContent}
               onChange={(e) => setPostContent(e.target.value)}
@@ -2386,14 +2452,7 @@ onClick={() => {
   {t("dashboard.postModal.isQuestionLabel")}
 </label>
 
-{/* <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "10px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
-  <input
-    type="checkbox"
-    checked={postIsQuestion}
-    onChange={(e) => setPostIsQuestion(e.target.checked)}
-  />
-  {t("dashboard.postModal.isQuestionLabel")}
-</label> */}
+
 
 {selectedPostRoomIsSubject && (
   <label style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "6px", fontSize: "13px", opacity: 0.8, cursor: "pointer" }}>
@@ -2500,12 +2559,15 @@ onClick={() => {
               <button onClick={() => { setIsModalOpen(false); setSimilarPost(null); }}>
                 {t("dashboard.postModal.cancel")}
               </button>
-              <button
-                onClick={handleSubmitPost}
-                disabled={
-                  !postContent.trim() || !selectedPostRoom || isSubmitting
-                }
-              >
+            <button
+  onClick={handleSubmitPost}
+  disabled={
+    !postContent.trim() ||
+    !selectedPostRoom ||
+    isSubmitting ||
+    (selectedPostRoomIsCrossSpecialty && (!postFromMajor || !postIntoMajor))
+  }
+>
                 {isSubmitting
                   ? t("dashboard.postModal.posting")
                   : t("dashboard.postModal.post")}

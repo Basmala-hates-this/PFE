@@ -347,9 +347,9 @@ const getApprovedUniversities = async (req, res) => {
 
 const getApprovedMajors = async (req, res) => {
   const result = await pool.query(
-    `SELECT name FROM majors WHERE status = 'approved' ORDER BY name ASC`
+    `SELECT id, name FROM majors WHERE status = 'approved' ORDER BY name ASC`
   );
-  res.json(result.rows.map(r => r.name));
+  res.json(result.rows); 
 };
 
 

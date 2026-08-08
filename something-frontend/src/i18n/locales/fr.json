@@ -232,7 +232,12 @@
      "endorse": "Recommander",
     "endorsed": "Recommandé",
     "isStudyPartnerLabel": "À la recherche de partenaires d'étude",
-    "studyPartner": "Partenaire d'étude"
+    "studyPartner": "Partenaire d'étude",
+    "fromMajorLabel": "Publier depuis",
+"selectFromMajor": "Sélectionnez votre spécialité",
+"intoMajorLabel": "Question adressée à",
+"selectIntoMajor": "Sélectionnez la spécialité concernée",
+"crossSpecialtyTagRequired": "Veuillez indiquer la spécialité d'origine et celle visée avant de publier."
 
     },
     "browseRooms": {
@@ -294,7 +299,12 @@
      "endorse": "Recommander",
     "endorsed": "Recommandé",
     "isStudyPartnerLabel": "À la recherche de partenaires d'étude",
-    "studyPartner": "Partenaire d'étude"
+    "studyPartner": "Partenaire d'étude",
+    "fromMajorLabel": "Publier depuis",
+"selectFromMajor": "Sélectionnez votre spécialité",
+"intoMajorLabel": "Question adressée à",
+"selectIntoMajor": "Sélectionnez la spécialité concernée",
+"crossSpecialtyTagRequired": "Veuillez indiquer la spécialité d'origine et celle visée avant de publier."
   },
   "noComments": "Aucun commentaire. Soyez le premier !",
   "hiddenComment": " Ce commentaire a été masqué.",

@@ -231,7 +231,12 @@
      "endorse": "توصية",
     "endorsed": "تمت التوصية",
     "isStudyPartnerLabel": "بحث عن شركاء دراسة",
-    "studyPartner": "شريك دراسة"
+    "studyPartner": "شريك دراسة",
+    "fromMajorLabel": "النشر من تخصص",
+"selectFromMajor": "اختر تخصصك",
+"intoMajorLabel": "السؤال موجّه إلى تخصص",
+"selectIntoMajor": "اختر التخصص المعني بالسؤال",
+"crossSpecialtyTagRequired": "الرجاء تحديد التخصص المصدر والتخصص المستهدف قبل النشر."
     },
     "browseRooms": {
       "title": "تصفح الغرف",
@@ -290,7 +295,12 @@
      "endorse": "توصية",
     "endorsed": "تمت التوصية",
     "isStudyPartnerLabel": "بحث عن شركاء دراسة",
-    "studyPartner": "شريك دراسة"
+    "studyPartner": "شريك دراسة",
+    "fromMajorLabel": "النشر من تخصص",
+"selectFromMajor": "اختر تخصصك",
+"intoMajorLabel": "السؤال موجّه إلى تخصص",
+"selectIntoMajor": "اختر التخصص المعني بالسؤال",
+"crossSpecialtyTagRequired": "الرجاء تحديد التخصص المصدر والتخصص المستهدف قبل النشر."
   },
   "noComments": "لا توجد تعليقات بعد. كن أول من يعلق!",
   "hiddenComment": "🙈 تم إخفاء هذا التعليق.",
