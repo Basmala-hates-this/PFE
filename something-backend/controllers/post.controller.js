@@ -56,8 +56,9 @@ const createPost = async (req, res) => {
       }
       resolvedFromMajorId = fromMajorId;
     } else {
-      const student = await userRepo.findById(authorId);
-      resolvedFromMajorId = student.majorId;
+     // students: no major_id column on users — major lives in user_majors like everyone else
+  const studentMajorIds = await userRepo.getUserMajorIds(authorId);
+  resolvedFromMajorId = studentMajorIds[0] || null;
     }
 
     if (resolvedFromMajorId === intoMajorId) {
@@ -155,13 +156,11 @@ const getPostsAll = async (req, res) => {
 
   if (roomId) {
     let viewerMajorIds = null;
-    if (roomId === CROSS_SPECIALTY_ROOM_ID && userId) {
-      if (userRole === 'professor') {
-        viewerMajorIds = await userRepo.getUserMajorIds(userId);
-      } else {
-        const viewer = await userRepo.findById(userId);
-        viewerMajorIds = viewer?.majorId ? [viewer.majorId] : [];
-      }
+    if (roomId === process.env.CROSS_SPECIALTY_ROOM_ID && userId) {
+      const userMajorIds = await userRepo.getUserMajorIds(userId);
+      viewerMajorIds = userRole === 'professor'
+        ? userMajorIds
+        : (userMajorIds[0] ? [userMajorIds[0]] : []);
     }
 
     const result = await postRepo.getPostsByRoom(roomId, userId, {
@@ -173,7 +172,7 @@ const getPostsAll = async (req, res) => {
     });
     posts = result.posts;
     nextCursor = result.nextCursor;
-  } else {
+  }  else {
     const params = [userId];
     let cursorClause = "";
     if (cursorCreatedAt && cursorId) {

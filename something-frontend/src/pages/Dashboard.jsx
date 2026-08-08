@@ -2368,7 +2368,13 @@ onClick={() => {
         value={postIntoMajor}
         onChange={setPostIntoMajor}
         placeholder={t("dashboard.postModal.selectIntoMajor")}
-        styles={customSelect}
+        styles={{
+          padding: "8px",
+          borderRadius: "8px",
+          border: "1px solid rgba(255,255,255,0.2)",
+          opacity: 0.7,
+          fontSize: "14px",
+        }}
       />
     </div>
   </div>
