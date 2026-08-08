@@ -205,6 +205,7 @@
       "unanswered": "Unanswered",
     "isStudyPartnerLabel": "Looking for study partners",
     "studyPartner": "Study Partner"
+    ,"asking":"Asking into"
     },
     "postModal": {
       "title": "Write a Post",
@@ -277,6 +278,7 @@
       "joinedRooms": "Joined Rooms",
       "privateRooms":"Your private rooms"
     }
+    
   
   },
   "postModal": {

@@ -203,7 +203,8 @@
         "answered": "تمت الإجابة",
       "unanswered": "بدون إجابة",
     "isStudyPartnerLabel": "بحث عن شركاء دراسة",
-    "studyPartner": "شريك دراسة"
+    "studyPartner": "شريك دراسة",
+    "asking":"السؤال موجّه إلى"
     },
     "postModal": {
       "title": "اكتب منشوراً",

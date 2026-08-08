@@ -1900,6 +1900,23 @@ onClick={() => {
     {post.difficulty}
   </span>
 )}
+{/* i need to find a better replacment for all the emojies ..... */}
+{post.fromMajorName && post.intoMajorName && (
+  <span style={{
+    display: "inline-block",
+    fontSize: "11px",
+    padding: "2px 10px",
+    borderRadius: "10px",
+    fontWeight: "bold",
+    marginBottom: "8px",
+    marginLeft: (post.isQuestion || post.isStudyPartner) ? "6px" : "0",
+    background: "rgba(140,164,198,0.18)",
+    color: "#8ca4c6",
+    border: "1px solid #8ca4c6b3",
+  }}>
+    🔀 {post.fromMajorName} {t('dashboard.post.asking')} {post.intoMajorName}
+  </span>
+)}
 {/* admins and superadmins can control difficulty of this....i need to work on "admin" part...permissions and all */}
 {post.isQuestion && (currentUser?.id === post.userId || isAdmin) && (
   <select
@@ -2369,11 +2386,13 @@ onClick={() => {
         onChange={setPostIntoMajor}
         placeholder={t("dashboard.postModal.selectIntoMajor")}
         styles={{
-          padding: "8px",
-          borderRadius: "8px",
-          border: "1px solid rgba(255,255,255,0.2)",
-          opacity: 0.7,
-          fontSize: "14px",
+         width: "100%",
+         padding: "10px",
+         marginBottom: "10px",
+         borderRadius: "8px",
+         background: "rgba(41, 64, 121, 0.34)",
+         color: "white",
+         border: "1px solid rgba(255, 255, 255, 0.2)"
         }}
       />
     </div>
@@ -2470,6 +2489,8 @@ onClick={() => {
     {t("dashboard.postModal.isStudyPartnerLabel")}
   </label>
 )}
+
+
 
 
 

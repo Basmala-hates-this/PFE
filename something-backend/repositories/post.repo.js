@@ -75,16 +75,20 @@ const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreated
       COALESCE(v.useless, 0) as vote_useless,
       COUNT(DISTINCT c.id) as comment_count,
       u.profile_pic_url as author_profile_pic,
+      fm.name as from_major_name,
+      im.name as into_major_name,
       (SELECT type FROM votes WHERE post_id = p.id AND user_id = $2) as user_vote
      FROM posts p
      LEFT JOIN post_vote_counts v ON v.post_id = p.id
      LEFT JOIN comments c ON c.post_id = p.id
      LEFT JOIN users u ON u.id = p.user_id
+     LEFT JOIN majors fm ON fm.id = p.from_major_id
+     LEFT JOIN majors im ON im.id = p.into_major_id
      WHERE p.room_id = $1
      ${cursorClause}
      ${questionClause}
      ${tagClause}
-     GROUP BY p.id, v.useful, v.useless, u.profile_pic_url
+     GROUP BY p.id, v.useful, v.useless, u.profile_pic_url, fm.name, im.name
      ORDER BY p.created_at DESC, p.id DESC
      LIMIT $${limitParamIndex}`,
     params

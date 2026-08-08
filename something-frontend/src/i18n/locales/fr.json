@@ -204,7 +204,8 @@
        "answered": "Répondu",
       "unanswered": "Sans réponse",
     "isStudyPartnerLabel": "À la recherche de partenaires d'étude",
-    "studyPartner": "Partenaire d'étude"
+    "studyPartner": "Partenaire d'étude",
+    "asking":" Question adressée à"
     },
     "postModal": {
       "title": "Écrire un post",
