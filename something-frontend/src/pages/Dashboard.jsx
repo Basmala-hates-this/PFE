@@ -190,12 +190,13 @@ const dashSocketRef = useRef(null);
 
 const [allMajors, setAllMajors] = useState([]); // [{id, name}]
 const [postFromMajor, setPostFromMajor] = useState(null); // {value, label}
-const [postIntoMajor, setPostIntoMajor] = useState(null); // {value, label}
 
 const selectedPostRoomIsCrossSpecialty =
   selectedPostRoom?.value === CROSS_SPECIALTY_ROOM_ID;
 
 const majorOptions = allMajors.map((m) => ({ value: m.id, label: m.name }));
+
+const [postIntoMajor, setPostIntoMajor] = useState(""); // major id string, was {value, label}
 
 // ....................................i hate me .....
   /////////////////////////////////////////////////////////////////////////////////////
@@ -214,7 +215,7 @@ const majorOptions = allMajors.map((m) => ({ value: m.id, label: m.name }));
 useEffect(() => {
   if (!selectedPostRoomIsCrossSpecialty) {
     setPostFromMajor(null);
-    setPostIntoMajor(null);
+    setPostIntoMajor("");
     return;
   }
   if (user?.role !== "professor" && allMajors.length > 0) {
@@ -519,7 +520,7 @@ useEffect(() => {
     if (postResourceLabel.trim()) formData.append("resourceLabel", postResourceLabel);
     if (selectedPostRoomIsCrossSpecialty) {
       formData.append("fromMajorId", postFromMajor.value);
-      formData.append("intoMajorId", postIntoMajor.value);
+  formData.append("intoMajorId", postIntoMajor);
     }
 
     const response = await api.post("/posts", formData, {
@@ -538,7 +539,7 @@ useEffect(() => {
     setSimilarPost(null);
     setPostIsStudyPartner(false);
     setPostFromMajor(null);
-    setPostIntoMajor(null);
+    setPostIntoMajor("");
   } catch (err) {
     console.error("Failed to create post:", err);
   } finally {
@@ -2458,7 +2459,7 @@ onClick={() => {
       )}
     </div>
 
-    <div style={{ flex: 1 }}>
+    {/* <div style={{ flex: 1 }}>
       <label style={{ display: "block", marginBottom: "6px", opacity: 0.7, fontSize: "13px" }}>
         {t("dashboard.postModal.intoMajorLabel")}
       </label>
@@ -2469,7 +2470,37 @@ onClick={() => {
         placeholder={t("dashboard.postModal.selectIntoMajor")}
         styles={customSelect2}
       />
-    </div>
+    </div> */}
+    <div style={{ flex: 1 }}>
+  <label style={{ display: "block", marginBottom: "6px", opacity: 0.7, fontSize: "13px" }}>
+    {t("dashboard.postModal.intoMajorLabel")}
+  </label>
+  <select
+    value={postIntoMajor}
+    onChange={(e) => setPostIntoMajor(e.target.value)}
+    style={{
+      width: "100%",
+      padding: "8px",
+      borderRadius: "8px",
+      background: "#1e2a3a",
+      color: "white",
+      border: "1px solid rgba(255,255,255,0.2)",
+      fontSize: "14px",
+      height: "38px",
+    }}
+  >
+    <option value="" style={{ background: "#1e2a3a" }}>
+      {t("dashboard.postModal.selectIntoMajor")}
+    </option>
+    {majorOptions
+      .filter((m) => m.value !== postFromMajor?.value)
+      .map((m) => (
+        <option key={m.value} value={m.value} style={{ background: "#1e2a3a" }}>
+          {m.label}
+        </option>
+      ))}
+  </select>
+</div>
   </div>
 )}
             <textarea
