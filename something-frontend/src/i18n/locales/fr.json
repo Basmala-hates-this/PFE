@@ -238,7 +238,9 @@
 "selectFromMajor": "Sélectionnez votre spécialité",
 "intoMajorLabel": "Question adressée à",
 "selectIntoMajor": "Sélectionnez la spécialité concernée",
-"crossSpecialtyTagRequired": "Veuillez indiquer la spécialité d'origine et celle visée avant de publier."
+"crossSpecialtyTagRequired": "Veuillez indiquer la spécialité d'origine et celle visée avant de publier.",
+"suggestedMajors":"spécialités suggérées",
+"allMajors":"Toutes spécialités"
 
     },
     "browseRooms": {

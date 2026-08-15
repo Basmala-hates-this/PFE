@@ -234,7 +234,9 @@
 "selectFromMajor": "Select your major",
 "intoMajorLabel": "Asking into",
 "selectIntoMajor": "Select the major you're asking",
-"crossSpecialtyTagRequired": "Please tag both a from and into major before posting."
+"crossSpecialtyTagRequired": "Please tag both a from and into major before posting.",
+"suggestedMajors":"suggested majors",
+"allMajors":"All Majors"
 
     },
     "browseRooms": {
@@ -299,7 +301,9 @@
 "selectFromMajor": "Select your major",
 "intoMajorLabel": "Asking into",
 "selectIntoMajor": "Select the major you're asking",
-"crossSpecialtyTagRequired": "Please tag both a from and into major before posting."
+"crossSpecialtyTagRequired": "Please tag both a from and into major before posting.",
+"suggestedMajors":"suggested majors",
+"allMajors":"All Majors"
 
   },
   "noComments": "No comments yet. Be the first!",

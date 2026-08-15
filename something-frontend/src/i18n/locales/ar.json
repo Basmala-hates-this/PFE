@@ -237,7 +237,9 @@
 "selectFromMajor": "اختر تخصصك",
 "intoMajorLabel": "السؤال موجّه إلى تخصص",
 "selectIntoMajor": "اختر التخصص المعني بالسؤال",
-"crossSpecialtyTagRequired": "الرجاء تحديد التخصص المصدر والتخصص المستهدف قبل النشر."
+"crossSpecialtyTagRequired": "الرجاء تحديد التخصص المصدر والتخصص المستهدف قبل النشر.",
+"suggestedMajors":"التخصصات المقترحة",
+"allMajors":"جميع التخصصات"
     },
     "browseRooms": {
       "title": "تصفح الغرف",
