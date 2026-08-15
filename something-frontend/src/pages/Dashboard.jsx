@@ -2524,7 +2524,16 @@ onClick={() => {
         </option>
       ))}
   </select> */}
-  <select value={postIntoMajor} onChange={(e) => setPostIntoMajor(e.target.value)} style={{...}}>
+  <select value={postIntoMajor} onChange={(e) => setPostIntoMajor(e.target.value)}  style={{
+      width: "100%",
+      padding: "8px",
+      borderRadius: "8px",
+      background: "#1e2a3a",
+      color: "white",
+      border: "1px solid rgba(255,255,255,0.2)",
+      fontSize: "14px",
+      height: "38px",
+    }}>
   <option value="">{t("dashboard.postModal.selectIntoMajor")}</option>
   {suggestedMajorIds.length > 0 && (
     <optgroup label={t("dashboard.postModal.suggestedMajors")}>
