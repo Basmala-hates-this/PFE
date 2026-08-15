@@ -196,12 +196,17 @@ const getPostsAll = async (req, res) => {
   if (relevantMajorIds.length > 0) {
     params.push(relevantMajorIds);
     const majorsParamIndex = params.length;
+    // whereClauses.push(
+    //   `(p.room_id != $${roomIdParamIndex} OR p.from_major_id = ANY($${majorsParamIndex}) OR p.into_major_id = ANY($${majorsParamIndex}))`
+    // );
     whereClauses.push(
-      `(p.room_id != $${roomIdParamIndex} OR p.from_major_id = ANY($${majorsParamIndex}) OR p.into_major_id = ANY($${majorsParamIndex}))`
-    );
+  `(p.room_id != $${roomIdParamIndex} OR p.from_major_id = ANY($${majorsParamIndex}) OR p.into_major_id = ANY($${majorsParamIndex}) OR p.is_system_generated = true)`
+);
   } else {
     // no majors on file — exclude cross-specialty posts entirely rather than showing none-filtered
-    whereClauses.push(`p.room_id != $${roomIdParamIndex}`);
+    // whereClauses.push(`p.room_id != $${roomIdParamIndex}`);
+      whereClauses.push(`(p.room_id != $${roomIdParamIndex} OR p.is_system_generated = true)`);
+
   }
 
   const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";

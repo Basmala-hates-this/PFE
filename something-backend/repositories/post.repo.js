@@ -61,10 +61,10 @@ const getPostsByRoom = async (roomId, userId = null, { limit = 20, cursorCreated
   const questionClause = onlyQuestions ? `AND p.is_question = true` : "";
 
   let tagClause = "";
-  if (viewerMajorIds && viewerMajorIds.length > 0) {
-    params.push(viewerMajorIds);
-    tagClause = `AND (p.from_major_id = ANY($${params.length}) OR p.into_major_id = ANY($${params.length}))`;
-  }
+ if (viewerMajorIds && viewerMajorIds.length > 0) {
+  params.push(viewerMajorIds);
+  tagClause = `AND (p.from_major_id = ANY($${params.length}) OR p.into_major_id = ANY($${params.length}) OR p.is_system_generated = true)`;
+}
 
   params.push(limit);
   const limitParamIndex = params.length;
