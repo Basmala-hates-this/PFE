@@ -7,7 +7,7 @@ const pool = require('../db');
 const toCamel = require('../utils/toCamel');
 const notifService = require('../services/notificationService');
 const { getEmbedding, toVectorLiteral } = require('../utils/embeddings');
-const { classifyDifficulty } = require("../routes/ai");
+const { classifyDifficulty, suggestIntoMajors } = require("../routes/ai");
 
 
 //yay that cross specialty room id is finally here, now i can fuck around and find out for real
@@ -611,7 +611,26 @@ const updateDifficulty = async (req, res) => {
   res.json(toCamel(result.rows[0]));
 };
 
+//you want to understand why i am adding shit?look into the future improve document....it will explain my stupid though process
 
+const suggestMajors = async (req, res) => {
+  const { title, content, fromMajorId } = req.body;
+
+  if (!content || content.trim().length < 20) return res.json({ suggestions: [] });
+
+  try {
+    const allMajorsResult = await pool.query(
+      `SELECT id, name FROM majors WHERE status = 'approved'`
+    );
+    const candidateMajors = allMajorsResult.rows.filter(m => m.id !== fromMajorId);
+
+    const suggestions = await suggestIntoMajors(title, content, candidateMajors);
+    res.json({ suggestions });
+  } catch (err) {
+    console.error("Major suggestion failed:", err.message);
+    res.json({ suggestions: [] }); // fail soft — same pattern as checkSimilarPost
+  }
+};
 
 module.exports = {
   createPost,
@@ -636,6 +655,7 @@ module.exports = {
   toggleAnswered,
   checkSimilarPost,
   updateDifficulty,
+  suggestMajors,
 
 
 };

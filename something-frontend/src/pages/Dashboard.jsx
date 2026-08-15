@@ -136,8 +136,6 @@ const [loadingMore, setLoadingMore] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-
-
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === "ar";
 
@@ -158,10 +156,7 @@ const [loadingMore, setLoadingMore] = useState(false);
     () => localStorage.getItem("theme") === "light",
   );
 
-
-
-
-  const [editPostAttachment, setEditPostAttachment] = useState(null);
+const [editPostAttachment, setEditPostAttachment] = useState(null);
 const [editPostResourceLink, setEditPostResourceLink] = useState("");
 const [editPostResourceLabel, setEditPostResourceLabel] = useState("");
 const [removeAttachment, setRemoveAttachment] = useState(false);
@@ -198,6 +193,10 @@ const majorOptions = allMajors.map((m) => ({ value: m.id, label: m.name }));
 
 const [postIntoMajor, setPostIntoMajor] = useState(""); // major id string, was {value, label}
 
+//man,the amount of const is disgusting...more consts....i need to refactor this component at some point
+const majorSuggestRef = useRef(null);
+const [suggestedMajorIds, setSuggestedMajorIds] = useState([]);
+
 // ....................................i hate me .....
   /////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -224,6 +223,31 @@ useEffect(() => {
     if (match) setPostFromMajor({ value: match.id, label: match.name });
   }
 }, [selectedPostRoomIsCrossSpecialty, allMajors, user]);
+
+//suggestions in cross major
+useEffect(() => {
+  if (majorSuggestRef.current) clearTimeout(majorSuggestRef.current);
+
+  if (!selectedPostRoomIsCrossSpecialty || !postContent || postContent.trim().length < 20) {
+    setSuggestedMajorIds([]);
+    return;
+  }
+
+  majorSuggestRef.current = setTimeout(async () => {
+    try {
+      const res = await api.post("/posts/suggest-majors", {
+        content: postContent,
+        title: postTitle,
+        fromMajorId: postFromMajor?.value,
+      });
+      setSuggestedMajorIds(res.data.suggestions);
+    } catch {
+      setSuggestedMajorIds([]);
+    }
+  }, 900);
+
+  return () => clearTimeout(majorSuggestRef.current);
+}, [postContent, selectedPostRoomIsCrossSpecialty, postFromMajor]);
 
   //useeffect just for difficulty tag.....bruh what is wrong with me?
   useEffect(() => {
@@ -2475,7 +2499,7 @@ onClick={() => {
   <label style={{ display: "block", marginBottom: "6px", opacity: 0.7, fontSize: "13px" }}>
     {t("dashboard.postModal.intoMajorLabel")}
   </label>
-  <select
+  {/* <select
     value={postIntoMajor}
     onChange={(e) => setPostIntoMajor(e.target.value)}
     style={{
@@ -2499,7 +2523,22 @@ onClick={() => {
           {m.label}
         </option>
       ))}
-  </select>
+  </select> */}
+  <select value={postIntoMajor} onChange={(e) => setPostIntoMajor(e.target.value)} style={{...}}>
+  <option value="">{t("dashboard.postModal.selectIntoMajor")}</option>
+  {suggestedMajorIds.length > 0 && (
+    <optgroup label={t("dashboard.postModal.suggestedMajors")}>
+      {majorOptions
+        .filter((m) => suggestedMajorIds.includes(m.value))
+        .map((m) => <option key={m.value} value={m.value}>✨ {m.label}</option>)}
+    </optgroup>
+  )}
+  <optgroup label={t("dashboard.postModal.allMajors")}>
+    {majorOptions
+      .filter((m) => m.value !== postFromMajor?.value && !suggestedMajorIds.includes(m.value))
+      .map((m) => <option key={m.value} value={m.value}>{m.label}</option>)}
+  </optgroup>
+</select>
 </div>
   </div>
 )}

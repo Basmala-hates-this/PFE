@@ -15,6 +15,7 @@ router.post('/', protect, guestBlock, upload.single('attachment'), postControlle
 router.get('/', optionalAuth, postController.getPostsAll);
 router.get('/search', postController.searchPosts);
 router.post('/check-similar', protect, postController.checkSimilarPost);
+router.post("/suggest-majors", protect, postController.suggestMajors);
 
 router.post('/:postId/save', protect, guestBlock, postController.savePost);
 router.delete('/:postId/save', protect, guestBlock, postController.unsavePost);

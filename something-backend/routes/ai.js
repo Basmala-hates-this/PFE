@@ -169,6 +169,39 @@ async function runTask(taskType, messages, system, imageUrl) {
   throw new Error(`All providers failed for task: ${taskType}`);
 }
 
+
+// ─── cross-specialty INTO major suggestion ──────────────────────────────────
+async function suggestIntoMajors(title, content, candidateMajors) {
+  // candidateMajors: [{id, name}, ...] — already excludes the poster's own FROM major
+  if (!candidateMajors || candidateMajors.length === 0) return [];
+
+  const majorsList = candidateMajors.map(m => `${m.id}: ${m.name}`).join("\n");
+
+  const prompt = `A student is posting the following question in a cross-specialty room, hoping to reach students from a different major who can help answer it.
+
+Title: ${title || ""}
+Content: ${content}
+
+Here is the list of available majors (id: name):
+${majorsList}
+
+Pick the 4 majors most likely to be relevant to this question, ordered from most to least relevant. Respond as JSON: {"majorIds": string[]} where each string is one of the ids listed above. Only include ids from the list. Return at most 4.`;
+
+  const raw = await runTask(
+    "json",
+    [{ role: "user", content: prompt }],
+    "You match academic questions to the most relevant fields of study. Output only valid JSON, no prose."
+  );
+
+  const parsed = JSON.parse(raw);
+  const validIds = new Set(candidateMajors.map(m => m.id));
+  const suggested = Array.isArray(parsed.majorIds)
+    ? parsed.majorIds.filter(id => validIds.has(id)).slice(0, 4)
+    : [];
+
+  return suggested;
+}
+
 // ─── POST /api/ai/chat — tries each provider in order ────────────────────────
 router.post("/chat", async (req, res) => {
   const { messages, system, conversationId, attachment } = req.body;
@@ -402,5 +435,6 @@ router.get("/study-materials/:id", authMiddleware, async (req, res) => {
 
 module.exports = router;
 module.exports.classifyDifficulty = classifyDifficulty;
+module.exports.suggestIntoMajors = suggestIntoMajors;
 module.exports.runTask = runTask;
 module.exports.extractPdfText = extractPdfText;
