@@ -29,7 +29,7 @@ if they asked where they are,you respond with the name of the page and a short d
 PERSONALITY: Short, clear, reassuring. Max 3-4 sentences. You are a helper popup, not an essay.
 Respond in the same language the user writes in (Arabic/French/English).
 `;
-
+ 
 async function callAI(messages) {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
     method: "POST",

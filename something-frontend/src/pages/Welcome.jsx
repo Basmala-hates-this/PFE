@@ -15,20 +15,6 @@ import { VoiceCommandProvider } from '../assets/components/VoiceCommandContext.j
 import { useVoiceCommandContext } from '../assets/components/VoiceCommandContext.jsx';
 
 
-
-  function RoomsPage() {
-  const navigate = useNavigate();
-  const { simulateTranscript } = useVoiceCommandContext();
-
-  useVoiceCommand({
-    id: 'open-chat',
-    phrases: ['open chat', 'go to chat'],
-    handler: () => navigate('/chat'),
-  });
-
-  return <button onClick={() => simulateTranscript('open chat')}>Test voice sim</button>;
-}
-
 export default function Welcome(){
   const navigate = useNavigate();
 
@@ -46,6 +32,10 @@ const { simulateTranscript } = useVoiceCommandContext();
     phrases: ['open chat', 'go to chat'],
     handler: () => navigate('/chat'),
   });
+
+
+  const { toggleListening, isListening, isTranscribing, isProcessing, micError } = useVoiceCommandContext();
+
 
 
 
@@ -174,6 +164,12 @@ const handleSelectChange = (event) => {
 
     {/* test the sim voice fuck */}
 <button onClick={() => simulateTranscript('open chat')}>Test voice sim</button>
+<button onClick={toggleListening}>
+  {isListening ? '⏹ stop' : '🎤 talk'}
+</button>
+{isTranscribing && <p>transcribing...</p>}
+{isProcessing && <p>thinking...</p>}
+{micError && <p>error: {micError}</p>}
 
     <FloatingHelper currentPage="welcome/home" /> 
 
