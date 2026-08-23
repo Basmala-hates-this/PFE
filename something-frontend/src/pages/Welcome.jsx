@@ -37,6 +37,14 @@ const [universityOptions, setUniversityOptions] = useState([]);
 const { t } = useTranslation();
 const currentLang = i18n.language;
 
+const { simulateTranscript } = useVoiceCommandContext();
+
+  useVoiceCommand({
+    id: 'open-chat',
+    phrases: ['open chat', 'go to chat'],
+    handler: () => navigate('/chat'),
+  });
+
 
 
 
@@ -162,6 +170,8 @@ const handleSelectChange = (event) => {
       </select>
     </div>
 
+    {/* test the sim voice fuck */}
+<button onClick={() => simulateTranscript('open chat')}>Test voice sim</button>
 
     <FloatingHelper currentPage="welcome/home" /> 
 
