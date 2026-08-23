@@ -49,16 +49,16 @@ AI Features:
 • the ai in the chat tab would support files and generate study material (resumes/
 summaries,flashcards,quizzes….)(DONE)
 
-• ai will be integrated more in the platform that it supports smart search and such.(satisfied by question-suggestion + difficulty tagging + AI chat)
+• ai will be integrated more in the platform that it supports smart search and such.(satisfied by question-suggestion + difficulty tagging + AI chat)(DONE)
 
 • AI question suggestions — when you're typing a question, AI checks if a similar one
 was already asked(DONE)
 
 • Smart study plan — AI generates a weekly study schedule based on your major and
-upcoming exams
+upcoming exams(DONE. ..i love this one)
 
 • AI-powered room summaries — weekly digest of the most useful content in your
-subject room
+subject room(DONE, just checked, prompt needs to be less hostile, but works)
 
 • Difficulty tagging — AI auto-tags posts as beginner/intermediate/advanced(DONE)
 
@@ -76,7 +76,7 @@ contaminating each individual space….
 AI angle to it:
 AI suggests which specialty to tag based on your question content. So the interdisciplinary
 space becomes one of the first places AI is deeply integrated.
-
+-->AY YO THIS ONE IS WORKING TOO, AND GREAT. ....we making good progress
 
 ##########################################################
-And I still need to fix my stupidity in build
+And I still need to fix my stupidity in build-->working on that+need to look at phone layout+better UI for the modals and such+ the diagrams and theory and such
