@@ -28,14 +28,14 @@ io.use((socket, next) => {
   try {
     const rawCookie = socket.handshake.headers.cookie;
     if (!rawCookie) return next(new Error("unauthorized"));
-    console.log("Handshake cookie header:", socket.handshake.headers.cookie);
+   // console.log("Handshake cookie header:", socket.handshake.headers.cookie);
 
     const parsed = cookie.parse(rawCookie);
     const token = parsed.token; // whatever name httpOnly cookie uses —
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET); 
     socket.data.userId = decoded.id;
-    socket.data.displayName = decoded.username; // also — payload has "username", not "displayName"
+    socket.data.displayName = decoded.username; // 
    // socket.data.displayName = decoded.displayName || decoded.name;
     next();
   } catch (err) {
@@ -51,11 +51,11 @@ const activeCalls = new Map();
 const socketMeta = new Map();
 
 io.on("connection", (socket) => {
-  console.log("Socket connected:", socket.id);
+  //console.log("Socket connected:", socket.id);
 
   socket.on("join_room", (roomId) => {
     socket.join(roomId);
-    console.log(`Socket ${socket.id} joined room ${roomId}`);
+    //console.log(`Socket ${socket.id} joined room ${roomId}`);
 
     if (activeCalls.has(roomId)) {
       const call = activeCalls.get(roomId);

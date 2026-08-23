@@ -10,7 +10,10 @@ import { useTranslation } from "react-i18next";
 import i18n from "../i18n/index.js";
 import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js";
-//todo : add "remember me box" and add faulty login limiter to alert the user that they have been locked out for 5 minutes after 3 failed attempts and send email to the email associated to the targeted login
+import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
+import { VoiceCommandProvider } from '../assets/components/VoiceCommandContext.jsx';
+
+////// add "remember me box" and add faulty login limiter to alert the user that they have been locked out for 5 minutes after 3 failed attempts and send email to the email associated to the targeted login
 //login is one of those few pages that are not logic heavy and lots of code....nice to have .....dashboard on the other hand is a nightmare of code and logic...i'll get to it later...i think....refactoring that ould be a nightmare
 export default function Login() {
   //i need to learn to keep the variable declaration AT THE DAMN TOP OF THIS DAMN FUNCTIONS BRO THE HELL!!!
@@ -117,6 +120,20 @@ export default function Login() {
     // Grabs the value ('en', 'fr', or 'ar') from the chosen option
     changeLanguage(event.target.value);
   };
+
+
+  function RoomsPage() {
+  const navigate = useNavigate();
+  const { simulateTranscript } = useVoiceCommandContext();
+
+  useVoiceCommand({
+    id: 'open-chat',
+    phrases: ['open chat', 'go to chat'],
+    handler: () => navigate('/chat'),
+  });
+
+  return <button onClick={() => simulateTranscript('open chat')}>Test voice sim</button>;
+}
 
   return (
     <div id="body2">

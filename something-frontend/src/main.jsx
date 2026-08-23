@@ -6,12 +6,17 @@ import './i18n/index.js'
 
 import App from './App.jsx'
 import { ThemeProvider } from "./Theme";
+import { VoiceCommandProvider } from './assets/components/VoiceCommandContext.jsx';
+
 
 createRoot(document.getElementById('root')).render(
   // <StrictMode>
    <ThemeProvider>
-     <App />
+     <VoiceCommandProvider  > 
+       <App />
+     </VoiceCommandProvider>
    </ThemeProvider>
+ 
    
   // </StrictMode>,
 )
