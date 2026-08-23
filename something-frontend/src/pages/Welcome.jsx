@@ -12,6 +12,8 @@ import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js"
 import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
 import { VoiceCommandProvider } from '../assets/components/VoiceCommandContext.jsx';
+import { useVoiceCommandContext } from '../assets/components/VoiceCommandContext.jsx';
+
 
 
   function RoomsPage() {
