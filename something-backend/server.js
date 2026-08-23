@@ -254,7 +254,7 @@ socket.on("call:cam_status", ({ roomId, isCamOff }) => {
   });
 
   socket.on("disconnect", () => {
-    console.log("Socket disconnected:", socket.id);
+  //  console.log("Socket disconnected:", socket.id);
     const meta = socketMeta.get(socket.id);
     if (meta?.roomId) _handleCallLeave(socket, meta.roomId);
     socketMeta.delete(socket.id);

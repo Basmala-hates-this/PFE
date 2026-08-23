@@ -10,7 +10,22 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js"
+import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
+import { VoiceCommandProvider } from '../assets/components/VoiceCommandContext.jsx';
 
+
+  function RoomsPage() {
+  const navigate = useNavigate();
+  const { simulateTranscript } = useVoiceCommandContext();
+
+  useVoiceCommand({
+    id: 'open-chat',
+    phrases: ['open chat', 'go to chat'],
+    handler: () => navigate('/chat'),
+  });
+
+  return <button onClick={() => simulateTranscript('open chat')}>Test voice sim</button>;
+}
 
 export default function Welcome(){
   const navigate = useNavigate();
@@ -21,6 +36,8 @@ const [universityOptions, setUniversityOptions] = useState([]);
 
 const { t } = useTranslation();
 const currentLang = i18n.language;
+
+
 
 
 
