@@ -163,7 +163,7 @@ const handleSelectChange = (event) => {
     </div>
 
     {/* test the sim voice fuck */}
-<button onClick={() => simulateTranscript('open chat')}>Test voice sim</button>
+{/* <button onClick={() => simulateTranscript('open chat')}>Test voice sim</button> */}
 <button onClick={toggleListening}>
   {isListening ? '⏹ stop' : '🎤 talk'}
 </button>

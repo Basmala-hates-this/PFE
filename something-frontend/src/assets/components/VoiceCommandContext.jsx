@@ -61,6 +61,38 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
     setDictationTargetId(null);
   }, []);
 
+  // --- turn-taking with TTS: mic and TTS output never run "active" at the same time ---
+  // Whatever plays TTS (confirmations, FloatingHelper's speakText, etc.) MUST call
+  // notifyTTSStart()/notifyTTSEnd() around playback so the mic doesn't transcribe itself.
+  const ttsSpeakingRef = useRef(false);
+
+  const notifyTTSStart = useCallback(() => {
+    ttsSpeakingRef.current = true;
+  }, []);
+
+  const notifyTTSEnd = useCallback(() => {
+    ttsSpeakingRef.current = false;
+  }, []);
+
+  // polls until TTS finishes, so the continuous loop can pause before starting a new segment
+  const waitUntilTTSFinished = useCallback(() => {
+    return new Promise((resolve) => {
+      if (!ttsSpeakingRef.current) return resolve();
+      const check = setInterval(() => {
+        if (!ttsSpeakingRef.current) {
+          clearInterval(check);
+          resolve();
+        }
+      }, 100);
+    });
+  }, []);
+
+  // convenience wrapper: speaks text AND handles the notify start/end pairing,
+  // so call sites (processTranscript, etc.) don't have to repeat the plumbing
+  const speakConfirmation = useCallback((text) => {
+    speak(text, { onStart: notifyTTSStart, onEnd: notifyTTSEnd });
+  }, [notifyTTSStart, notifyTTSEnd]);
+
   const [lastMatch, setLastMatch] = useState(null); // { commandId, matchedPhrase, source } | null
   const [isProcessing, setIsProcessing] = useState(false); // true while AI fallback is in flight
 
@@ -139,32 +171,6 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
   const [isTranscribing, setIsTranscribing] = useState(false); // true while audio is uploading/transcribing
   const [micError, setMicError] = useState(null);
   const continuousModeRef = useRef(false); // survives across async segment boundaries, unlike state
-
-  // --- turn-taking with TTS: mic and TTS output never run "active" at the same time ---
-  // Whatever plays TTS (confirmations, FloatingHelper's speakText, etc.) MUST call
-  // notifyTTSStart()/notifyTTSEnd() around playback so the mic doesn't transcribe itself.
-  const ttsSpeakingRef = useRef(false);
-
-  const notifyTTSStart = useCallback(() => {
-    ttsSpeakingRef.current = true;
-  }, []);
-
-  const notifyTTSEnd = useCallback(() => {
-    ttsSpeakingRef.current = false;
-  }, []);
-
-  // polls until TTS finishes, so the loop can pause before starting a new segment
-  const waitUntilTTSFinished = useCallback(() => {
-    return new Promise((resolve) => {
-      if (!ttsSpeakingRef.current) return resolve();
-      const check = setInterval(() => {
-        if (!ttsSpeakingRef.current) {
-          clearInterval(check);
-          resolve();
-        }
-      }, 100);
-    });
-  }, []);
 
   const stopVadLoop = useCallback(() => {
     if (vadFrameRef.current) {
