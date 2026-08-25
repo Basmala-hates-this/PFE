@@ -321,7 +321,8 @@ body, .sidebar, .main, .header, .fyp-container, .fyp-feed {
   background: #1e2a3a8f;
   border-radius: 16px;
   padding: 24px;
-  width: 500px;
+  width: 1000px;
+  height: 80vh;
   max-width: 90vw;
   border: 1px solid rgba(255,255,255,0.1);
   box-shadow: 0 20px 60px rgba(0,0,0,0.5);
