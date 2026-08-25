@@ -709,8 +709,9 @@ export default function PostModal({ postId, onClose, isGuest, onPostUpdate, onOp
         className="modal"
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "600px",
-          maxHeight: "80vh",
+          width: "1000px",
+          maxHeight: "90vh",
+          height:"100%",
           display: "flex",
           flexDirection: "column",
         }}
