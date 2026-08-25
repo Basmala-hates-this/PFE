@@ -702,15 +702,15 @@ export default function PostModal({ postId, onClose, isGuest, onPostUpdate, onOp
   ////////////////////////////////////////////////////////////////////
   ///////////////////////////////////////////////////////////////////////////////////////
   //////////////////////////////////////////////////////////////////
-
+// the damn thing is not updating to let me commit to github,but better size for post modal
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal"
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "1000px",
-          maxHeight: "90vh",
+          width: "1350px",
+          maxHeight: "9vh",
           height:"100%",
           display: "flex",
           flexDirection: "column",
