@@ -200,18 +200,31 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
       recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
 
       let resolved = false;
-      const finish = (result) => {
+      let stopReason = null;
+
+      // The ONLY place that builds the final Blob and resolves — must run
+      // after the browser has actually delivered data via ondataavailable,
+      // which is guaranteed to have fired by the time onstop fires.
+      recorder.onstop = () => {
         if (resolved) return;
         resolved = true;
-        stopVadLoop();
-        if (recorder.state !== 'inactive') recorder.stop();
-        resolve(result);
+        const blob = chunks.length ? new Blob(chunks, { type: 'audio/webm' }) : null;
+        console.log('[voice] segment finalized (', stopReason, '), blob size:', blob?.size ?? 0);
+        resolve(blob);
       };
 
-      recorder.onstop = () => {
-        if (!resolved) {
-          // stopped for a reason other than our own finish() call (e.g. mode turned off)
-          resolve(chunks.length ? new Blob(chunks, { type: 'audio/webm' }) : null);
+      // Triggers do NOT build a Blob themselves — chunks may still be empty
+      // at this exact moment (data arrives asynchronously). They just stop
+      // the recorder and record WHY, for logging; onstop above does the rest.
+      const finish = (reason) => {
+        if (resolved) return;
+        stopReason = reason;
+        stopVadLoop();
+        if (recorder.state !== 'inactive') {
+          recorder.stop(); // -> fires ondataavailable (with real data) -> fires onstop above
+        } else {
+          // already inactive somehow — resolve now with whatever chunks exist
+          recorder.onstop();
         }
       };
 
@@ -221,12 +234,11 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
       const startedAt = Date.now();
       let speechStartedAt = null;
       let lastLoudAt = null;
-      let loggedSpeechStart = false;
       const dataArray = new Uint8Array(analyser.fftSize);
 
       const tick = () => {
-        if (!continuousModeRef.current) { console.log('[voice] segment aborted: mode turned off'); return finish(null); }
-        if (ttsSpeakingRef.current) { console.log('[voice] segment aborted: TTS started speaking'); return finish(null); }
+        if (!continuousModeRef.current) { console.log('[voice] segment aborted: mode turned off'); return finish('mode-off'); }
+        if (ttsSpeakingRef.current) { console.log('[voice] segment aborted: TTS started speaking'); return finish('tts-speaking'); }
 
         analyser.getByteTimeDomainData(dataArray);
         // rough volume: average deviation from the 128 (silence) midpoint
@@ -248,21 +260,19 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
         if (!speechStartedAt && elapsed > IDLE_TIMEOUT_MS) {
           // never heard anything worth transcribing — bail without hitting the API
           console.log('[voice] segment idle-timed-out with no speech detected (check mic input / SILENCE_THRESHOLD)');
-          return finish(null);
+          return finish('idle-timeout');
         }
 
         if (speechStartedAt) {
           const spokeFor = lastLoudAt - speechStartedAt;
           const quietFor = now - lastLoudAt;
           if (spokeFor >= MIN_SPEECH_DURATION_MS && quietFor >= SILENCE_DURATION_MS) {
-            console.log('[voice] segment ended: silence after speech, blob size so far:', chunks.reduce((a, c) => a + c.size, 0));
-            return finish(new Blob(chunks, { type: 'audio/webm' })); // natural end of utterance
+            return finish('silence-after-speech'); // natural end of utterance
           }
         }
 
         if (elapsed > MAX_SEGMENT_DURATION_MS) {
-          console.log('[voice] segment ended: hit MAX_SEGMENT_DURATION_MS cap');
-          return finish(new Blob(chunks, { type: 'audio/webm' })); // safety cap
+          return finish('max-duration-cap'); // safety cap
         }
 
         vadFrameRef.current = requestAnimationFrame(tick);
