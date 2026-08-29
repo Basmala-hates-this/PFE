@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from "react";
+import { speak, stopSpeaking } from "../hooks/voiceTTS"; // adjust path to match where voiceTTS.js actually lives
+import { useVoiceCommandContext } from "./VoiceCommandContext";
 
 const REG_SYSTEM_PROMPT = `
 You are a friendly registration assistant for Glaukopis, an academic social network for Algerian university students.
@@ -29,7 +31,7 @@ if they asked where they are,you respond with the name of the page and a short d
 PERSONALITY: Short, clear, reassuring. Max 3-4 sentences. You are a helper popup, not an essay.
 Respond in the same language the user writes in (Arabic/French/English).
 `;
- 
+
 async function callAI(messages) {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
     method: "POST",
@@ -70,12 +72,24 @@ export default function FloatingHelper({ currentPage = "register" }) {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
-  const [listening, setListening] = useState(false);
+  const [listening, setListening] = useState(false); // push-to-talk dictation state (unchanged)
   const [speakingIndex, setSpeakingIndex] = useState(null); // which bubble is speaking
   const [pulse, setPulse] = useState(true);
   const bottomRef = useRef(null);
   const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+
+  // --- hands-free continuous listening (shared with voice nav) ---------
+  const {
+    toggleListening: toggleHandsFree,
+    isListening: isHandsFree,
+    isTranscribing: handsFreeTranscribing,
+    isProcessing: handsFreeProcessing,
+    micError: handsFreeMicError,
+    notifyTTSStart,
+    notifyTTSEnd,
+    registerUnmatchedHandler,
+  } = useVoiceCommandContext();
 
   useEffect(() => {
     const t = setTimeout(() => setPulse(false), 5000);
@@ -89,123 +103,91 @@ export default function FloatingHelper({ currentPage = "register" }) {
   // stop speech when widget closes
   useEffect(() => {
     if (!open) {
-      window.speechSynthesis?.cancel();
+      stopSpeaking();
+      notifyTTSEnd(); // release the mic gate too, in case we were mid-utterance
       setSpeakingIndex(null);
     }
-  }, [open]);
+  }, [open, notifyTTSEnd]);
 
-  // ── TTS ────────────────────────────────────────────────────────────
-const speakText = (text, index) => {
-  if (!window.speechSynthesis) return;
-
-  if (speakingIndex === index) {
-    window.speechSynthesis.cancel();
-    setSpeakingIndex(null);
-    return;
-  }
-
-  window.speechSynthesis.cancel();
-
-  // detect from the TEXT ITSELF, not conversation history
-  const detectFromText = (t) => {
-    if (/[\u0600-\u06FF]/.test(t)) return "ar";
-    if (/[àâçéèêëîïôùûüœæ]/i.test(t)) return "fr";
-    return "en";
-  };
-
-  const PREFERRED = {
-    "fr": "Microsoft Julie",
-    "en": "Microsoft Zira",
-    "ar": "Microsoft Julie",
-  };
-
-  const speak = (voices) => {
-    const utter = new SpeechSynthesisUtterance(text);
-    const langPrefix = detectFromText(text); // ← reads the actual message
-    const fullLang = langPrefix === "fr" ? "fr-FR" : langPrefix === "ar" ? "ar-DZ" : "en-US";
-
-    const preferred = voices.find(v => v.name === PREFERRED[langPrefix]);
-    const exact = voices.find(v => v.lang === fullLang);
-    const prefix = voices.find(v => v.lang.startsWith(langPrefix));
-
-    utter.voice = preferred || exact || prefix || null;
-    utter.lang = fullLang;
-    utter.rate = 0.95;
-
-    // console.log("VOICE:", utter.voice?.name, "| LANG:", fullLang, "| TEXT:", text.slice(0, 30));
-
-    utter.onstart = () => setSpeakingIndex(index);
-    utter.onend = () => setSpeakingIndex(null);
-    utter.onerror = () => setSpeakingIndex(null);
-    window.speechSynthesis.speak(utter);
-  };
-
-  const voices = window.speechSynthesis.getVoices();
-  if (voices.length > 0) {
-    speak(voices);
-  } else {
-    window.speechSynthesis.onvoiceschanged = () => {
-      speak(window.speechSynthesis.getVoices());
-    };
-  }
-};
-
-  // ── STT ────────────────────────────────────────────────────────────
- const toggleVoice = async () => {
-  // if already listening → stop and transcribe
-  if (listening) {
-    mediaRecorderRef.current?.stop();
-    return;
-  }
-
-  // request mic
-  let stream;
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-  } catch {
-    alert("Mic access denied. Please allow microphone.");
-    return;
-  }
-
-  const chunks = [];
-  const recorder = new MediaRecorder(stream);
-  mediaRecorderRef.current = recorder;
-
-  recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
-
-  recorder.onstop = async () => {
-    // stop all mic tracks
-    stream.getTracks().forEach(t => t.stop());
-    setListening(false);
-
-    const blob = new Blob(chunks, { type: "audio/webm" });
-    const formData = new FormData();
-    formData.append("audio", blob, "recording.webm");
-
-    try {
-      setLoading(true);
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (data.text) setInput(data.text);
-    } catch {
-      alert("Transcription failed. Try again.");
-    } finally {
-      setLoading(false);
+  // ── TTS (backend-based now, not window.speechSynthesis) ──────────────
+  // speakMessage still supports the per-bubble click-to-stop toggle from
+  // before, but plays via /ai/speak and gates the shared continuous mic
+  // (notifyTTSStart/notifyTTSEnd) so hands-free listening doesn't try to
+  // transcribe FloatingHelper's own voice.
+  const speakMessage = (text, index) => {
+    if (speakingIndex === index) {
+      stopSpeaking();
+      notifyTTSEnd();
+      setSpeakingIndex(null);
+      return;
     }
+
+    speak(text, {
+      onStart: () => {
+        notifyTTSStart();
+        setSpeakingIndex(index);
+      },
+      onEnd: () => {
+        notifyTTSEnd();
+        setSpeakingIndex(null);
+      },
+    });
   };
 
-  recorder.start();
-  setListening(true);
-};
+  // ── STT: push-to-talk dictation into the text input (unchanged) ──────
+  const toggleVoice = async () => {
+    if (listening) {
+      mediaRecorderRef.current?.stop();
+      return;
+    }
+
+    let stream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    } catch {
+      alert("Mic access denied. Please allow microphone.");
+      return;
+    }
+
+    const chunks = [];
+    const recorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = recorder;
+
+    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+
+    recorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      setListening(false);
+
+      const blob = new Blob(chunks, { type: "audio/webm" });
+      const formData = new FormData();
+      formData.append("audio", blob, "recording.webm");
+
+      try {
+        setLoading(true);
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await res.json();
+        if (data.text) setInput(data.text);
+      } catch {
+        alert("Transcription failed. Try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    recorder.start();
+    setListening(true);
+  };
 
   const sendMessage = async (text) => {
     const content = (text || input).trim();
     if (!content || loading) return;
     setInput("");
-    window.speechSynthesis?.cancel();
+    stopSpeaking();
+    notifyTTSEnd();
     setSpeakingIndex(null);
 
     const newMessages = [...messages, { role: "user", content }];
@@ -215,12 +197,38 @@ const speakText = (text, index) => {
     try {
       const reply = await callAI(newMessages.map((m) => ({ role: m.role, content: m.content })));
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
+      return reply;
     } catch {
       setMessages((prev) => [...prev, { role: "assistant", content: "Oops! Connection issue. Try again." }]);
+      return null;
     } finally {
       setLoading(false);
     }
   };
+
+  // Voice-triggered variant: same as sendMessage, but auto-speaks the reply
+  // aloud afterward — the user spoke instead of typed, so a silent text-only
+  // reply defeats the point of hands-free mode. Typed messages stay opt-in
+  // (click the speaker icon), matching existing behavior.
+  const sendVoiceMessage = async (text) => {
+    const reply = await sendMessage(text);
+    if (reply) {
+      // the new message's index is messages.length AFTER the user+assistant
+      // pair was appended — since sendMessage already updated state twice,
+      // just speak the reply text directly without needing the exact index
+      // for the toggle-to-stop UI (voice-triggered replies auto-play once).
+      speak(reply, { onStart: notifyTTSStart, onEnd: notifyTTSEnd });
+    }
+  };
+
+  // register as the unmatched-speech handler for as long as this
+  // FloatingHelper instance is mounted — scoped per-page, same idea as
+  // command registration
+  useEffect(() => {
+    const unregister = registerUnmatchedHandler(sendVoiceMessage);
+    return unregister;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registerUnmatchedHandler]);
 
   const quick = QUICK[currentPage] || QUICK.register;
 
@@ -240,7 +248,7 @@ const speakText = (text, index) => {
                 {/* TTS button — only on assistant messages */}
                 {m.role === "assistant" && (
                   <button
-                    onClick={() => speakText(m.content, i)}
+                    onClick={() => speakMessage(m.content, i)}
                     style={{
                       ...f.ttsBtn,
                       color: speakingIndex === i ? "#e74c3c" : "rgba(255,255,255,0.4)",
@@ -268,12 +276,33 @@ const speakText = (text, index) => {
             </div>
           )}
 
+          {/* hands-free status strip — only shows while active/relevant */}
+          {(isHandsFree || handsFreeTranscribing || handsFreeProcessing || handsFreeMicError) && (
+            <div style={f.handsFreeStatus}>
+              {handsFreeMicError
+                ? `Mic error: ${handsFreeMicError}`
+                : handsFreeProcessing
+                ? "Thinking..."
+                : handsFreeTranscribing
+                ? "Transcribing..."
+                : "Listening (hands-free)..."}
+            </div>
+          )}
+
           <div style={f.inputRow}>
             <button
               onClick={toggleVoice}
+              title="Push-to-talk: dictate into the text box"
               style={{ ...f.iconBtn, background: listening ? "#e74c3c" : "rgba(100,118,175,0.3)" }}
             >
               {listening ? "⏹" : "🎤"}
+            </button>
+            <button
+              onClick={toggleHandsFree}
+              title="Hands-free: continuous voice commands + questions"
+              style={{ ...f.iconBtn, background: isHandsFree ? "#2ecc71" : "rgba(100,118,175,0.15)" }}
+            >
+              {isHandsFree ? "🟢" : "🎧"}
             </button>
             <input
               type="text"
@@ -369,6 +398,10 @@ const f = {
     padding: "4px 10px", borderRadius: "12px",
     border: "1px solid rgba(100,118,175,0.4)", background: "transparent",
     color: "rgba(255,255,255,0.6)", fontSize: "11px", cursor: "pointer",
+  },
+  handsFreeStatus: {
+    padding: "6px 12px", fontSize: "11px", color: "rgba(255,255,255,0.6)",
+    borderTop: "1px solid rgba(255,255,255,0.05)", textAlign: "center",
   },
   inputRow: {
     display: "flex", gap: "6px", padding: "10px 12px",

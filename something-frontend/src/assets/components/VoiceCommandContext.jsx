@@ -63,6 +63,22 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
     setDictationTargetId(null);
   }, []);
 
+  // --- unmatched-speech handoff ---------------------------------------
+  // When speech matches no command, the default is a spoken "didn't catch
+  // that." Whichever page has FloatingHelper mounted can register itself
+  // here to intercept unmatched speech and treat it as a real question
+  // instead — scoped by mount/unmount just like the command registry.
+  const unmatchedHandlerRef = useRef(null);
+
+  const registerUnmatchedHandler = useCallback((handler) => {
+    unmatchedHandlerRef.current = handler;
+    return () => {
+      if (unmatchedHandlerRef.current === handler) {
+        unmatchedHandlerRef.current = null;
+      }
+    };
+  }, []);
+
   // --- turn-taking with TTS: mic and TTS output never run "active" at the same time ---
   // Whatever plays TTS (confirmations, FloatingHelper's speakText, etc.) MUST call
   // notifyTTSStart()/notifyTTSEnd() around playback so the mic doesn't transcribe itself.
@@ -148,6 +164,11 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
       }
 
       console.log('[voice] AI fallback also found nothing for:', text);
+      if (unmatchedHandlerRef.current) {
+        console.log('[voice] delegating unmatched speech to registered handler');
+        unmatchedHandlerRef.current(text);
+        return { matched: false, delegated: true };
+      }
       speakConfirmation("Sorry, I didn't catch that.");
       return { matched: false };
     } finally {
@@ -395,6 +416,7 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
     dictationTargetId,
     startDictation,
     stopDictation,
+    registerUnmatchedHandler,
     register,
     unregister,
     getRegisteredCommands,

@@ -21,6 +21,19 @@ function detectLangFromText(text) {
 let currentAudio = null; // so a new speak() call can interrupt a playing one
 
 /**
+ * Stops whatever is currently playing (if anything). Used by UIs that let
+ * the user toggle a specific message's playback off, e.g. clicking the same
+ * speaker icon again. Does NOT call onEnd itself — the caller already knows
+ * it stopped and should update its own state directly.
+ */
+export function stopSpeaking() {
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
+  }
+}
+
+/**
  * @param {string} text - what to say
  * @param {{ onStart?: () => void, onEnd?: () => void }} callbacks
  */
