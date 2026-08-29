@@ -288,6 +288,69 @@ router.post("/transcribe", upload.single("audio"), async (req, res) => {
 });
 
 
+
+// ─── TTS helpers (used by /speak) ──────────────────────────────────────────
+// Groq Orpheus for en/ar, proxied Google Translate TTS for fr (unofficial,
+// free, no key — fine for short confirmations; swap for a real provider
+// later if French TTS needs to scale beyond that).
+// NOTE: Groq's Arabic Orpheus model requires accepting Canopy Labs' model
+// terms once in the Groq console, or requests will fail.
+
+const MAX_TTS_CHARS = 200; // Groq Orpheus (esp. Arabic) has short input limits
+
+async function speakEnglish(text) {
+  const response = await groq.audio.speech.create({
+    model: "canopylabs/orpheus-v1-english",
+    voice: "autumn", // or: diana, hannah, austin, daniel, troy
+    input: text,
+    response_format: "wav",
+  });
+  return { buffer: Buffer.from(await response.arrayBuffer()), contentType: "audio/wav" };
+}
+
+async function speakArabic(text) {
+  const response = await groq.audio.speech.create({
+    model: "canopylabs/orpheus-arabic-saudi",
+    voice: "noura", // or: fahad, sultan, lulwa, aisha
+    input: text,
+    response_format: "wav",
+  });
+  return { buffer: Buffer.from(await response.arrayBuffer()), contentType: "audio/wav" };
+}
+
+async function speakFrench(text) {
+  const url = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=fr&client=tw-ob`;
+  const response = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0" } });
+  if (!response.ok) throw new Error(`Google TTS proxy ${response.status}`);
+  return { buffer: Buffer.from(await response.arrayBuffer()), contentType: "audio/mpeg" };
+}
+
+// ─── POST /api/ai/speak ─────────────────────────────────────────────────────
+router.post("/speak", async (req, res) => {
+  const { text, lang } = req.body;
+  if (!text?.trim()) return res.status(400).json({ error: "text is required" });
+
+  const truncated = text.slice(0, MAX_TTS_CHARS);
+
+  try {
+    let result;
+    if (lang === "ar") {
+      result = await speakArabic(truncated);
+    } else if (lang === "fr") {
+      result = await speakFrench(truncated);
+    } else {
+      result = await speakEnglish(truncated);
+    }
+
+    res.set("Content-Type", result.contentType);
+    return res.send(result.buffer);
+  } catch (err) {
+    console.error("TTS generation failed:", err.message);
+    return res.status(500).json({ error: "TTS generation failed" });
+  }
+});
+
+
 // ─── GET /api/ai/conversations ─────────────────────────────────────────────
 router.get("/conversations", authMiddleware, async (req, res) => {
   const userId = req.user.id;

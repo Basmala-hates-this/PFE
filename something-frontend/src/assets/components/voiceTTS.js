@@ -2,19 +2,15 @@
  * voiceTTS.js
  *
  * Speaks a short confirmation out loud (e.g. "Opening chat", "Didn't catch that").
- * Same voice-selection / language-detection approach as FloatingHelper.speakText,
- * but generic — no chat-bubble index, just text in -> speech out.
+ * Backed by /ai/speak on your backend (Groq Orpheus for en/ar, proxied Google
+ * Translate TTS for fr) instead of the browser's window.speechSynthesis —
+ * that API is unreliable across browsers (missing entirely in some, silently
+ * gutted by privacy features in others, as we found testing on Opera/Brave).
  *
  * IMPORTANT: always call this with onStart/onEnd wired to the context's
  * notifyTTSStart/notifyTTSEnd, or the continuous mic loop will try to
- * transcribe the TTS voice as a new command.
+ * transcribe the TTS audio as a new command.
  */
-
-const PREFERRED_VOICES = {
-  fr: 'Microsoft Julie',
-  en: 'Microsoft Zira',
-  ar: 'Microsoft Julie',
-};
 
 function detectLangFromText(text) {
   if (/[\u0600-\u06FF]/.test(text)) return 'ar';
@@ -22,11 +18,13 @@ function detectLangFromText(text) {
   return 'en';
 }
 
+let currentAudio = null; // so a new speak() call can interrupt a playing one
+
 /**
  * @param {string} text - what to say
  * @param {{ onStart?: () => void, onEnd?: () => void }} callbacks
  */
-export function speak(text, { onStart, onEnd } = {}) {
+export async function speak(text, { onStart, onEnd } = {}) {
   console.log('[voice:tts] speak() called with:', text);
 
   if (!text?.trim()) {
@@ -35,52 +33,44 @@ export function speak(text, { onStart, onEnd } = {}) {
     return;
   }
 
-  if (!window.speechSynthesis) {
-    console.warn('[voice:tts] window.speechSynthesis not available in this browser');
-    onEnd?.();
-    return;
+  // interrupt anything currently playing, same intent as speechSynthesis.cancel()
+  if (currentAudio) {
+    currentAudio.pause();
+    currentAudio = null;
   }
 
-  window.speechSynthesis.cancel(); // interrupt anything currently playing
+  const lang = detectLangFromText(text);
 
-  const doSpeak = (voices) => {
-    console.log('[voice:tts] speaking now, voices available:', voices.length);
-    const utter = new SpeechSynthesisUtterance(text);
-    const langPrefix = detectLangFromText(text);
-    const fullLang = langPrefix === 'fr' ? 'fr-FR' : langPrefix === 'ar' ? 'ar-DZ' : 'en-US';
+  try {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/speak`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, lang }),
+    });
+    if (!response.ok) throw new Error(`TTS request failed: ${response.status}`);
 
-    const preferred = voices.find((v) => v.name === PREFERRED_VOICES[langPrefix]);
-    const exact = voices.find((v) => v.lang === fullLang);
-    const prefix = voices.find((v) => v.lang.startsWith(langPrefix));
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const audio = new Audio(url);
+    currentAudio = audio;
 
-    utter.voice = preferred || exact || prefix || null;
-    utter.lang = fullLang;
-    utter.rate = 0.95;
-
-    utter.onstart = () => { console.log('[voice:tts] utterance started'); onStart?.(); };
-    utter.onend = () => { console.log('[voice:tts] utterance ended'); onEnd?.(); };
-    utter.onerror = (e) => { console.error('[voice:tts] utterance error:', e.error); onEnd?.(); };
-
-    window.speechSynthesis.speak(utter);
-  };
-
-  const voices = window.speechSynthesis.getVoices();
-  if (voices.length > 0) {
-    doSpeak(voices);
-  } else {
-    console.log('[voice:tts] no voices yet, waiting on onvoiceschanged (with 300ms fallback)');
-    let fired = false;
-    window.speechSynthesis.onvoiceschanged = () => {
-      if (fired) return;
-      fired = true;
-      doSpeak(window.speechSynthesis.getVoices());
+    audio.onplay = () => { console.log('[voice:tts] playback started'); onStart?.(); };
+    audio.onended = () => {
+      console.log('[voice:tts] playback ended');
+      URL.revokeObjectURL(url);
+      if (currentAudio === audio) currentAudio = null;
+      onEnd?.();
     };
-    // some browsers never fire onvoiceschanged reliably — don't hang forever
-    setTimeout(() => {
-      if (fired) return;
-      fired = true;
-      console.log('[voice:tts] onvoiceschanged never fired, proceeding with whatever voices exist now');
-      doSpeak(window.speechSynthesis.getVoices());
-    }, 300);
+    audio.onerror = (e) => {
+      console.error('[voice:tts] playback error:', e);
+      URL.revokeObjectURL(url);
+      if (currentAudio === audio) currentAudio = null;
+      onEnd?.(); // don't leave the TTS gate stuck "on" if playback fails
+    };
+
+    await audio.play();
+  } catch (err) {
+    console.error('[voice:tts] TTS fetch/playback failed:', err);
+    onEnd?.(); // release the gate even on total failure
   }
 }
