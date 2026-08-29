@@ -27,14 +27,24 @@ function detectLangFromText(text) {
  * @param {{ onStart?: () => void, onEnd?: () => void }} callbacks
  */
 export function speak(text, { onStart, onEnd } = {}) {
-  if (!text?.trim() || !window.speechSynthesis) {
-    onEnd?.(); // nothing to say / not supported — release the "TTS speaking" gate immediately
+  console.log('[voice:tts] speak() called with:', text);
+
+  if (!text?.trim()) {
+    console.log('[voice:tts] empty text, skipping');
+    onEnd?.();
+    return;
+  }
+
+  if (!window.speechSynthesis) {
+    console.warn('[voice:tts] window.speechSynthesis not available in this browser');
+    onEnd?.();
     return;
   }
 
   window.speechSynthesis.cancel(); // interrupt anything currently playing
 
   const doSpeak = (voices) => {
+    console.log('[voice:tts] speaking now, voices available:', voices.length);
     const utter = new SpeechSynthesisUtterance(text);
     const langPrefix = detectLangFromText(text);
     const fullLang = langPrefix === 'fr' ? 'fr-FR' : langPrefix === 'ar' ? 'ar-DZ' : 'en-US';
@@ -47,9 +57,9 @@ export function speak(text, { onStart, onEnd } = {}) {
     utter.lang = fullLang;
     utter.rate = 0.95;
 
-    utter.onstart = () => onStart?.();
-    utter.onend = () => onEnd?.();
-    utter.onerror = () => onEnd?.(); // don't leave the TTS gate stuck "on" if playback fails
+    utter.onstart = () => { console.log('[voice:tts] utterance started'); onStart?.(); };
+    utter.onend = () => { console.log('[voice:tts] utterance ended'); onEnd?.(); };
+    utter.onerror = (e) => { console.error('[voice:tts] utterance error:', e.error); onEnd?.(); };
 
     window.speechSynthesis.speak(utter);
   };
@@ -58,7 +68,19 @@ export function speak(text, { onStart, onEnd } = {}) {
   if (voices.length > 0) {
     doSpeak(voices);
   } else {
-    // voice list loads async on first call in some browsers
-    window.speechSynthesis.onvoiceschanged = () => doSpeak(window.speechSynthesis.getVoices());
+    console.log('[voice:tts] no voices yet, waiting on onvoiceschanged (with 300ms fallback)');
+    let fired = false;
+    window.speechSynthesis.onvoiceschanged = () => {
+      if (fired) return;
+      fired = true;
+      doSpeak(window.speechSynthesis.getVoices());
+    };
+    // some browsers never fire onvoiceschanged reliably — don't hang forever
+    setTimeout(() => {
+      if (fired) return;
+      fired = true;
+      console.log('[voice:tts] onvoiceschanged never fired, proceeding with whatever voices exist now');
+      doSpeak(window.speechSynthesis.getVoices());
+    }, 300);
   }
 }
