@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { matchCommand } from './matchCommand';
 import { parseIntentWithAI } from './voiceIntentAI';
+import { speak } from './Voicetts';
 
 /**
  * VoiceCommandContext
@@ -9,12 +10,13 @@ import { parseIntentWithAI } from './voiceIntentAI';
  *  - the live command registry (what's actionable RIGHT NOW, based on what's mounted)
  *  - continuous mic lifecycle: persistent stream + silence-detection (VAD) to
  *    auto-segment utterances, each one sent to /ai/transcribe -> processTranscript
- *  - intent resolution: keyword/substring match first, AI fallback (/ai/chat) on miss
+ *  - intent resolution: keyword/substring match first, AI fallback (/ai/chat) on miss,
+ *    with a spoken confirmation (or "didn't catch that") after each attempt
  *  - dictation mode (a registered command can grab raw speech for a form field)
  *
  * NOT in here yet (next steps):
- *  - TTS confirmation of executed commands
- *  - barge-in (cutting TTS playback when new speech starts)
+ *  - barge-in (interrupting TTS playback by talking over it — currently strict
+ *    turn-taking only: mic waits for TTS to finish, never overlaps it)
  *  - unsupported-browser / mic-denied UX beyond micError state
  */
 
@@ -120,6 +122,7 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
       console.log('[voice] matched (keyword):', keywordResult.command.id, '(phrase:', `"${keywordResult.matchedPhrase}")`);
       setLastMatch({ commandId: keywordResult.command.id, matchedPhrase: keywordResult.matchedPhrase, source: 'keyword' });
       keywordResult.command.handler?.();
+      speakConfirmation(keywordResult.command.label);
       return { matched: true, commandId: keywordResult.command.id, source: 'keyword' };
     }
 
@@ -139,16 +142,18 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
           console.log('[voice] matched (AI fallback):', matchedCommand.id);
           setLastMatch({ commandId: matchedCommand.id, matchedPhrase: null, source: 'ai' });
           matchedCommand.handler?.();
+          speakConfirmation(matchedCommand.label);
           return { matched: true, commandId: matchedCommand.id, source: 'ai' };
         }
       }
 
       console.log('[voice] AI fallback also found nothing for:', text);
+      speakConfirmation("Sorry, I didn't catch that.");
       return { matched: false };
     } finally {
       setIsProcessing(false);
     }
-  }, [dictationTargetId, getRegisteredCommands]);
+  }, [dictationTargetId, getRegisteredCommands, speakConfirmation]);
 
   // --- continuous listening: persistent stream + silence-based segmentation ---
   // Instead of push-to-talk, we keep the mic stream open and use volume
@@ -356,6 +361,7 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
     toggleListening,
     notifyTTSStart,
     notifyTTSEnd,
+    speakConfirmation,
     lastTranscript,
     lastMatch,
     isProcessing,
