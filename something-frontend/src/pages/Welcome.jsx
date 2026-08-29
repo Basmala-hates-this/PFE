@@ -27,11 +27,12 @@ const currentLang = i18n.language;
 
 const { simulateTranscript } = useVoiceCommandContext();
 
-  useVoiceCommand({
-    id: 'open-chat',
-    phrases: ['open chat', 'go to chat'],
-    handler: () => navigate('/chat'),
-  });
+ useVoiceCommand({
+  id: 'open-chat',
+  phrases: ['open chat', 'go to chat'],
+  handler: () => navigate('/chat'),
+  label: 'Opening chat',
+});
 
 
   const { toggleListening, isListening, isTranscribing, isProcessing, micError } = useVoiceCommandContext();

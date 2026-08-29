@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useRef, useState } from 'react';
 import { matchCommand } from './matchCommand';
 import { parseIntentWithAI } from './voiceIntentAI';
-import { speak } from './Voicetts';
+import { speak } from './voiceTTS';
 
 /**
  * VoiceCommandContext
@@ -216,15 +216,17 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
       };
 
       recorder.start();
+      console.log('[voice] segment recording started');
 
       const startedAt = Date.now();
       let speechStartedAt = null;
       let lastLoudAt = null;
+      let loggedSpeechStart = false;
       const dataArray = new Uint8Array(analyser.fftSize);
 
       const tick = () => {
-        if (!continuousModeRef.current) return finish(null); // mode was turned off mid-segment
-        if (ttsSpeakingRef.current) return finish(null); // TTS started talking — abandon this segment, don't transcribe our own voice
+        if (!continuousModeRef.current) { console.log('[voice] segment aborted: mode turned off'); return finish(null); }
+        if (ttsSpeakingRef.current) { console.log('[voice] segment aborted: TTS started speaking'); return finish(null); }
 
         analyser.getByteTimeDomainData(dataArray);
         // rough volume: average deviation from the 128 (silence) midpoint
@@ -236,12 +238,16 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
         const elapsed = now - startedAt;
 
         if (volume > SILENCE_THRESHOLD) {
-          if (!speechStartedAt) speechStartedAt = now;
+          if (!speechStartedAt) {
+            speechStartedAt = now;
+            console.log('[voice] speech detected, volume:', volume.toFixed(1));
+          }
           lastLoudAt = now;
         }
 
         if (!speechStartedAt && elapsed > IDLE_TIMEOUT_MS) {
           // never heard anything worth transcribing — bail without hitting the API
+          console.log('[voice] segment idle-timed-out with no speech detected (check mic input / SILENCE_THRESHOLD)');
           return finish(null);
         }
 
@@ -249,11 +255,13 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
           const spokeFor = lastLoudAt - speechStartedAt;
           const quietFor = now - lastLoudAt;
           if (spokeFor >= MIN_SPEECH_DURATION_MS && quietFor >= SILENCE_DURATION_MS) {
+            console.log('[voice] segment ended: silence after speech, blob size so far:', chunks.reduce((a, c) => a + c.size, 0));
             return finish(new Blob(chunks, { type: 'audio/webm' })); // natural end of utterance
           }
         }
 
         if (elapsed > MAX_SEGMENT_DURATION_MS) {
+          console.log('[voice] segment ended: hit MAX_SEGMENT_DURATION_MS cap');
           return finish(new Blob(chunks, { type: 'audio/webm' })); // safety cap
         }
 
@@ -274,8 +282,9 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
       const blob = await recordOneSegment();
       if (!continuousModeRef.current) break; // mode turned off while we were recording
 
-      if (!blob || blob.size === 0) continue; // idle timeout / nothing captured — listen again
+      if (!blob || blob.size === 0) { console.log('[voice] no usable audio captured, listening again'); continue; }
 
+      console.log('[voice] sending segment to /ai/transcribe, blob size:', blob.size);
       setIsTranscribing(true);
       try {
         const formData = new FormData();
@@ -284,11 +293,14 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
           method: 'POST',
           body: formData,
         });
-        if (!res.ok) throw new Error('transcribe request failed');
+        if (!res.ok) throw new Error(`transcribe request failed: ${res.status}`);
         const data = await res.json();
+        console.log('[voice] transcribed text:', data.text);
 
         if (data.text?.trim()) {
           await processTranscript(data.text); // handles its own keyword/AI-fallback + isProcessing state
+        } else {
+          console.log('[voice] transcription came back empty');
         }
       } catch (err) {
         console.error('[voice] continuous loop transcribe/process failed:', err);
@@ -315,6 +327,10 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
 
     streamRef.current = stream;
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume(); // some browsers create contexts suspended — silent analyser otherwise
+    }
+    console.log('[voice] AudioContext state:', audioContext.state);
     const source = audioContext.createMediaStreamSource(stream);
     const analyser = audioContext.createAnalyser();
     analyser.fftSize = 512;
@@ -328,6 +344,7 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
   }, [continuousLoop]);
 
   const stopListening = useCallback(() => {
+    console.log('[voice] stopListening called');
     continuousModeRef.current = false;
     stopVadLoop();
     if (mediaRecorderRef.current?.state !== 'inactive') mediaRecorderRef.current?.stop();
