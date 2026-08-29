@@ -439,6 +439,7 @@ style={{backgroundColor:"green", width:"250px",marginRight:"10px",height:"40px" 
     // const response = await axios.post("http://localhost:5000/api/auth/guest",
     //    {
     //   selectedUniversities
+    //doing this to get to redeploy
     // });
     const response = await api.post("/auth/guest", { selectedUniversities });
     localStorage.setItem("guestToken", response.data.guestToken);

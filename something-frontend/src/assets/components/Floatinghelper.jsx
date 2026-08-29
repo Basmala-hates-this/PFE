@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { speak, stopSpeaking } from "../hooks/voiceTTS"; // adjust path to match where voiceTTS.js actually lives
+import { speak, stopSpeaking } from "./voiceTTS"; // adjust path to match where voiceTTS.js actually lives
 import { useVoiceCommandContext } from "./VoiceCommandContext";
 
 const REG_SYSTEM_PROMPT = `
