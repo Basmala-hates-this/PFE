@@ -268,8 +268,30 @@ const currentLang = i18n.language;
     id: 'open-chat',
     phrases: ['open chat', 'go to chat'],
     handler: () => navigate('/chat'),
-    label: 'Opening chat',
+    label: 'Opening chat', 
+// thisone might need to go after finishing the testing
   });
+
+  useVoiceCommand({
+  id: 'continue-as-guest',
+  phrases: ['continue as guest', 'guest', 'browse as guest', 'explore as guest'],
+  handler: () => setShowGuestModal(true),
+  label: 'Continuing as guest',
+});
+
+useVoiceCommand({
+  id: 'create-account',
+  phrases: ['create account', 'create an account', 'sign up', 'register'],
+  handler: () => navigate('/info'),
+  label: 'Taking you to create an account',
+});
+
+useVoiceCommand({
+  id: 'login',
+  phrases: ['login', 'log in', 'go to login'],
+  handler: () => navigate('/login'),
+  label: 'Taking you to login',
+});
 
 
 useEffect(() => {
