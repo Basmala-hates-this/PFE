@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { speak, stopSpeaking } from "./voiceTTS"; // adjust path to match where voiceTTS.js actually lives
 import { useVoiceCommandContext } from "./VoiceCommandContext";
+import { useLocation } from "react-router-dom";
 
 const REG_SYSTEM_PROMPT = `
 You are a friendly registration assistant for Glaukopis, an academic social network for Algerian university students.
@@ -32,12 +33,24 @@ PERSONALITY: Short, clear, reassuring. Max 3-4 sentences. You are a helper popup
 Respond in the same language the user writes in (Arabic/French/English).
 `;
 
-async function callAI(messages) {
+
+function getPageFromPath(pathname) {
+  if (pathname.startsWith("/login")) return "login";
+  if (pathname.startsWith("/info")) return "info";
+  if (pathname.startsWith("/register")) return "register";
+  return "welcome"; // fallback for "/" and anything unmapped
+}
+
+async function callAI(messages, currentPage) {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ messages, system: REG_SYSTEM_PROMPT }),
+    body: JSON.stringify({
+      messages,
+      system: `${REG_SYSTEM_PROMPT}\n\nThe user is CURRENTLY on this page: ${currentPage}. Trust this over anything earlier in the conversation.`,
+    }),
   });
+
   if (!response.ok) throw new Error("AI request failed");
   const data = await response.json();
   return data.content?.[0]?.text || "Not sure — try again?";
@@ -65,11 +78,9 @@ const GREETINGS = {
   info: "Hellooo~~, This sets up your academic profile. Ask me about any field!",
 };
 
-export default function FloatingHelper({ currentPage = "register" }) {
+export default function FloatingHelper() {
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    { role: "assistant", content: GREETINGS[currentPage] || GREETINGS.register },
-  ]);
+ 
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false); // push-to-talk dictation state (unchanged)
@@ -79,6 +90,11 @@ export default function FloatingHelper({ currentPage = "register" }) {
   const recognitionRef = useRef(null);
   const mediaRecorderRef = useRef(null);
 
+  const location = useLocation();
+const currentPage = getPageFromPath(location.pathname);
+ const [messages, setMessages] = useState([
+    { role: "assistant", content: GREETINGS[currentPage] || GREETINGS.register },
+  ]);
   // --- hands-free continuous listening (shared with voice nav) ---------
   const {
     toggleListening: toggleHandsFree,
