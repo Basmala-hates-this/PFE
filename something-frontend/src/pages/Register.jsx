@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js";
+import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
+import { VoiceCommandProvider } from '../assets/components/VoiceCommandContext.jsx';
 
 //////THE DAMN USERNAME CANNOT BELONG TO ANOTHER USER...IF IT EXISTS ALREADY IT CANNOT BE CHOSEN....fuck...
 
@@ -59,7 +61,12 @@ useEffect(() => {
   }
 }, [profile, navigate]);
 
-
+useVoiceCommand({
+  id: 'welcome',
+  phrases: ['welcome', 'go to welcome','go to home page','back to home page','back to home'],
+  handler: () => navigate('/'),
+  label: 'Taking you to home page',
+});
 
 //upon me realizing the user name bug...apperantlly it was in my plans but i forgot...of course i did....we will atempt to fix it now....help
 const [error, setError] = useState("");

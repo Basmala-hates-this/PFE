@@ -17,7 +17,7 @@ import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
 
 import api from "../api/axios.js";
-
+import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
 
 
 
@@ -40,7 +40,20 @@ const [role, setRole] = useState("");
 const [isSubmitting, setIsSubmitting] = useState(false);
 
 
+//i'll add  the voice command for navigation here....just to have something useful
+useVoiceCommand({
+  id: 'login',
+  phrases: ['login', 'log in', 'go to login','already have an account','i have an account','my account exists'],
+  handler: () => navigate('/login'),
+  label: 'Taking you to login',
+});
 
+useVoiceCommand({
+  id: 'welcome',
+  phrases: ['welcome', 'go to welcome','go to home page','back to home page','back to home'],
+  handler: () => navigate('/'),
+  label: 'Taking you to home page',
+});
 
 //prof proof
 let isProf;

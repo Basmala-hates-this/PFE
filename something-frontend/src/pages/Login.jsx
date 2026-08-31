@@ -15,6 +15,7 @@ import { VoiceCommandProvider } from '../assets/components/VoiceCommandContext.j
 
 
 
+
 ////// add "remember me box" and add faulty login limiter to alert the user that they have been locked out for 5 minutes after 3 failed attempts and send email to the email associated to the targeted login
 //login is one of those few pages that are not logic heavy and lots of code....nice to have .....dashboard on the other hand is a nightmare of code and logic...i'll get to it later...i think....refactoring that ould be a nightmare
 export default function Login() {
@@ -34,6 +35,7 @@ export default function Login() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+
   //huumm...the browser is playing with me and adding data i didint input ....i want it crispy clean soooo.....didnt work....
   //ahhh the local stogare days and the cookies fights.....when life was simple and without AI
   useEffect(() => {
@@ -41,6 +43,20 @@ export default function Login() {
     setPassword("");
   }, []);
   ////////////////
+
+  useVoiceCommand({
+    id: 'reset',
+    phrases: ['reset', 'forgot password', 'reset password', 'forgot my password', 'i forgot my password'],
+    handler: () => navigate('/reset'),
+    label: 'Taking you to reset password page',
+  });
+
+  useVoiceCommand({
+    id: 'welcome',
+    phrases: ['welcome', 'go to welcome','go to home page','back to home page','back to home'],
+    handler: () => navigate('/'),
+    label: 'Taking you to home page',
+  });
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);

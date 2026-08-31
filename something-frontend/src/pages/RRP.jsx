@@ -7,11 +7,28 @@ import axios from "axios";
 import { useTranslation } from 'react-i18next';
 import api from "../api/axios.js";
 
+import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
+
+
 
 export default function RRP() {
     const navigate = useNavigate();
 const [email, setEmail] = useState("");
 
+//i'll add  the voice command for navigation here....just to have something useful
+useVoiceCommand({
+  id: 'login',
+  phrases: ['login', 'log in', 'go to login','already have an account','i have an account','my account exists'],
+  handler: () => navigate('/login'),
+  label: 'Taking you to login',
+});
+
+useVoiceCommand({
+  id: 'welcome',
+  phrases: ['welcome', 'go to welcome','go to home page','back to home page','back to home'],
+  handler: () => navigate('/'),
+  label: 'Taking you to home page',
+});
 
     
     const [error, setError] = useState("");
