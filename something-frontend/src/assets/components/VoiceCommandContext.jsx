@@ -229,8 +229,16 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
       recorder.onstop = () => {
         if (resolved) return;
         resolved = true;
-        const blob = chunks.length ? new Blob(chunks, { type: 'audio/webm' }) : null;
-        console.log('[voice] segment finalized (', stopReason, '), blob size:', blob?.size ?? 0);
+        // Only ever hand back audio for transcription if OUR OWN detection
+        // actually heard speech AND the segment ended naturally. Idle-timeouts
+        // (silence the whole time) and aborts (mode-off / tts-speaking) still
+        // have non-empty blobs — MediaRecorder captures ambient noise regardless
+        // — but sending those to Whisper reliably produces hallucinated text
+        // ("Open shot did you freeze?", random language switches, etc.) on
+        // near-silent audio. Discard them here, before they ever reach the API.
+        const shouldTranscribe = stopReason === 'silence-after-speech' || stopReason === 'max-duration-cap';
+        const blob = shouldTranscribe && chunks.length ? new Blob(chunks, { type: 'audio/webm' }) : null;
+        console.log('[voice] segment finalized (', stopReason, '), transcribing:', shouldTranscribe, ', blob size:', blob?.size ?? 0);
         resolve(blob);
       };
 
