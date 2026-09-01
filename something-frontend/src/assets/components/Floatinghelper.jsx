@@ -211,7 +211,10 @@ const currentPage = getPageFromPath(location.pathname);
     setLoading(true);
 
     try {
-      const reply = await callAI(newMessages.map((m) => ({ role: m.role, content: m.content })));
+      const reply = await callAI(
+  newMessages.map((m) => ({ role: m.role, content: m.content })),
+  currentPage
+);
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       return reply;
     } catch {

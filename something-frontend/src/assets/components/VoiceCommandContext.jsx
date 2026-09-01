@@ -55,13 +55,26 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
 
   // --- dictation mode -------------------------------------------------
 
-  const startDictation = useCallback((id) => {
-    setDictationTargetId(id);
-  }, []);
+  // const startDictation = useCallback((id) => {
+  //   setDictationTargetId(id);
+  // }, []);
 
-  const stopDictation = useCallback(() => {
-    setDictationTargetId(null);
-  }, []);
+  // const stopDictation = useCallback(() => {
+  //   setDictationTargetId(null);
+  // }, []);
+
+  const dictationResolverRef = useRef(null);
+
+const startDictation = useCallback((id, onResult) => {
+  setDictationTargetId(id);
+  dictationResolverRef.current = onResult ?? null;
+}, []);
+
+const stopDictation = useCallback(() => {
+  setDictationTargetId(null);
+  dictationResolverRef.current = null;
+}, []);
+
 
   // --- unmatched-speech handoff ---------------------------------------
   // When speech matches no command, the default is a spoken "didn't catch
@@ -122,13 +135,20 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
   const processTranscript = useCallback(async (text) => {
     setLastTranscript(text);
 
+    // if (dictationTargetId) {
+    //   // dictation mode intercepts BEFORE matching — raw speech, not a command
+    //   console.log('[voice] dictation ->', dictationTargetId, ':', text);
+    //   setLastMatch(null);
+    //   // actual field-filling wiring happens wherever dictationTargetId is consumed
+    //   return { matched: false, dictation: true };
+    // }
+
     if (dictationTargetId) {
-      // dictation mode intercepts BEFORE matching — raw speech, not a command
-      console.log('[voice] dictation ->', dictationTargetId, ':', text);
-      setLastMatch(null);
-      // actual field-filling wiring happens wherever dictationTargetId is consumed
-      return { matched: false, dictation: true };
-    }
+  console.log('[voice] dictation ->', dictationTargetId, ':', text);
+  setLastMatch(null);
+  dictationResolverRef.current?.(text);
+  return { matched: false, dictation: true };
+}
 
     const commands = getRegisteredCommands();
 
@@ -336,11 +356,27 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
         const data = await res.json();
         console.log('[voice] transcribed text:', data.text);
 
+        // if (data.text?.trim()) {
+        //   await processTranscript(data.text); // handles its own keyword/AI-fallback + isProcessing state
+        // } else {
+        //   console.log('[voice] transcription came back empty');
+        // }
         if (data.text?.trim()) {
-          await processTranscript(data.text); // handles its own keyword/AI-fallback + isProcessing state
-        } else {
-          console.log('[voice] transcription came back empty');
-        }
+  if (isWakeModeRef.current) {
+    if (matchesWakePhrase(data.text)) {
+      console.log('[voice] wake word matched — switching to active listening');
+      isWakeModeRef.current = false;
+      setIsWakeListening(false);
+      setIsListening(true);
+      speakConfirmation("I'm listening.");
+    }
+    // no match -> discard silently, wake loop just keeps listening
+  } else {
+    await processTranscript(data.text); // handles its own keyword/AI-fallback + isProcessing state
+  }
+} else {
+  console.log('[voice] transcription came back empty');
+}
       } catch (err) {
         console.error('[voice] continuous loop transcribe/process failed:', err);
         setMicError('transcribe-failed');
@@ -351,40 +387,89 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
     }
   }, [recordOneSegment, processTranscript, waitUntilTTSFinished]);
 
-  const startListening = useCallback(async () => {
-    if (continuousModeRef.current) return; // already running
-    setMicError(null);
+  // const startListening = useCallback(async () => {
+  //   if (continuousModeRef.current) return; // already running
+  //   setMicError(null);
 
-    let stream;
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    } catch (err) {
-      console.error('[voice] mic permission denied or unavailable:', err);
-      setMicError('mic-denied');
-      return;
-    }
+  //   let stream;
+  //   try {
+  //     stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  //   } catch (err) {
+  //     console.error('[voice] mic permission denied or unavailable:', err);
+  //     setMicError('mic-denied');
+  //     return;
+  //   }
 
-    streamRef.current = stream;
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    if (audioContext.state === 'suspended') {
-      await audioContext.resume(); // some browsers create contexts suspended — silent analyser otherwise
-    }
-    console.log('[voice] AudioContext state:', audioContext.state);
-    const source = audioContext.createMediaStreamSource(stream);
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = 512;
-    source.connect(analyser);
-    audioContextRef.current = audioContext;
-    analyserRef.current = analyser;
+  //   streamRef.current = stream;
+  //   const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  //   if (audioContext.state === 'suspended') {
+  //     await audioContext.resume(); // some browsers create contexts suspended — silent analyser otherwise
+  //   }
+  //   console.log('[voice] AudioContext state:', audioContext.state);
+  //   const source = audioContext.createMediaStreamSource(stream);
+  //   const analyser = audioContext.createAnalyser();
+  //   analyser.fftSize = 512;
+  //   source.connect(analyser);
+  //   audioContextRef.current = audioContext;
+  //   analyserRef.current = analyser;
 
-    continuousModeRef.current = true;
-    setIsListening(true);
-    continuousLoop();
-  }, [continuousLoop]);
+  //   continuousModeRef.current = true;
+  //   setIsListening(true);
+  //   continuousLoop();
+  // }, [continuousLoop]);
+
+  const isWakeModeRef = useRef(false); // true = loop is only listening for the wake phrase
+const [isWakeListening, setIsWakeListening] = useState(false);
+
+const WAKE_PHRASES = ['hey glaukopis', 'ok glaukopis', 'يا غلوكوبيس', 'او كي غلوكوبيس'];
+// add whatever wording actually fits — normalize handles case/diacritics so keep entries simple
+
+const normalize = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+const matchesWakePhrase = (text) => {
+  const n = normalize(text);
+  return WAKE_PHRASES.some((p) => n.includes(normalize(p)));
+};
+
+const startMicSession = useCallback(async (mode) => { // mode: 'wake' | 'active'
+  if (continuousModeRef.current) return; // already running (either mode)
+  setMicError(null);
+
+  let stream;
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+  } catch (err) {
+    console.error('[voice] mic permission denied or unavailable:', err);
+    setMicError('mic-denied');
+    return;
+  }
+
+  streamRef.current = stream;
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioContext.state === 'suspended') {
+    await audioContext.resume();
+  }
+  const source = audioContext.createMediaStreamSource(stream);
+  const analyser = audioContext.createAnalyser();
+  analyser.fftSize = 512;
+  source.connect(analyser);
+  audioContextRef.current = audioContext;
+  analyserRef.current = analyser;
+
+  continuousModeRef.current = true;
+  isWakeModeRef.current = mode === 'wake';
+  setIsWakeListening(mode === 'wake');
+  setIsListening(mode === 'active');
+  continuousLoop();
+}, [continuousLoop]);
+
+const startListening = useCallback(() => startMicSession('active'), [startMicSession]);
+const startWakeListening = useCallback(() => startMicSession('wake'), [startMicSession]);
 
   const stopListening = useCallback(() => {
     console.log('[voice] stopListening called');
     continuousModeRef.current = false;
+    isWakeModeRef.current = false;   
+    setIsWakeListening(false); 
     stopVadLoop();
     if (mediaRecorderRef.current?.state !== 'inactive') mediaRecorderRef.current?.stop();
     streamRef.current?.getTracks().forEach((t) => t.stop());

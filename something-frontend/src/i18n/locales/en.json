@@ -8,7 +8,8 @@
     "modal_title": "Select up to 5 universities to browse",
     "modal_placeholder": "Select universities...",
     "modal_cancel": "Cancel",
-    "modal_browse": "Browse as Guest"
+    "modal_browse": "Browse as Guest",
+    "voice":"Enable voice assistant"
   },
   "language": {
     "select": "Language",

@@ -11,7 +11,7 @@ import i18n from '../i18n/index.js';
 import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js"
 import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
-
+import { useVoiceCommandContext } from '../assets/components/VoiceCommandContext.jsx';
 
 export default function Welcome(){
   const navigate = useNavigate();
@@ -23,13 +23,8 @@ const [universityOptions, setUniversityOptions] = useState([]);
 const { t } = useTranslation();
 const currentLang = i18n.language;
 
-//   useVoiceCommand({
-//     id: 'open-chat',
-//     phrases: ['open chat', 'go to chat'],
-//     handler: () => navigate('/chat'),
-//     label: 'Opening chat', 
-// // thisone might need to go after finishing the testing
-//   });
+
+const { startWakeListening, isListening, isWakeListening } = useVoiceCommandContext();
 
   useVoiceCommand({
   id: 'continue-as-guest',
@@ -54,7 +49,7 @@ useVoiceCommand({
 
 
 useEffect(() => {
-  // axios.get("http://localhost:5000/api/auth/universities")
+
   api.get("/auth/universities")
     .then(res => {
       setUniversityOptions(res.data.map(u => ({ value: u.code, label: u.name })));
@@ -173,6 +168,21 @@ const handleSelectChange = (event) => {
       </select>
     </div>
 
+    {!isListening && !isWakeListening && (
+  <button
+    id="enableVoiceBtn"
+    onClick={startWakeListening}
+    style={{
+      position: "absolute", top: "16px", left: "16px",
+      background: "#6476af", color: "white", border: "none",
+      borderRadius: "20px", padding: "8px 16px", fontSize: "13px",
+      cursor: "pointer", display: "flex", alignItems: "center", gap: "6px",
+    }}
+  >
+    🎙️ {t('welcome.voice')}
+  </button>
+)}
+
     <FloatingHelper currentPage="welcome/home" /> 
 
 
@@ -217,11 +227,7 @@ style={{backgroundColor:"green", width:"250px",marginRight:"10px",height:"40px" 
 
         onClick={async () => {
   try {
-    // const response = await axios.post("http://localhost:5000/api/auth/guest",
-    //    {
-    //   selectedUniversities
-    //doing this to get to redeploy
-    // });
+
     const response = await api.post("/auth/guest", { selectedUniversities });
     localStorage.setItem("guestToken", response.data.guestToken);
     localStorage.setItem("guestUniversities", JSON.stringify(selectedUniversities));

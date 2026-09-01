@@ -8,7 +8,8 @@
     "modal_title": "Sélectionnez jusqu'à 5 universités à parcourir",
     "modal_placeholder": "Sélectionnez des universités...",
     "modal_cancel": "Annuler",
-    "modal_browse": "Parcourir en tant qu'invité"
+    "modal_browse": "Parcourir en tant qu'invité",
+     "voice":"Activer l'assistant vocal"
   },
   "language": {
     "select": "Langue",

@@ -8,7 +8,8 @@
     "modal_title": "اختر حتى 5 جامعات للتصفح",
     "modal_placeholder": "اختر الجامعات...",
     "modal_cancel": "إلغاء",
-    "modal_browse": "تصفح كضيف"
+    "modal_browse": "تصفح كضيف",
+     "voice":"تفعيل المساعد الصوتي"
   },
   "language": {
     "select": "اللغة",
