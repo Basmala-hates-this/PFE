@@ -56,8 +56,10 @@
 
 #forgotlinks{
     width: 100%;
-    height: 100vh;
+   
     color: white;
+    display: flex;
+    margin-left: 55px;
 }
 
 #reset-email{

@@ -16,6 +16,7 @@ THE FORMS:
  and will only see a limited version of the platform(read only). They won't have access to chat rooms or personalized features, but can browse  general info.
  5. request rest password: fields: registed email,they get a link via that email if valid and will lead to the reset password page with new password and confirm password fields.
 6. fin : a celebratory page after successful registration, with a set of navigation buttons(go to dashboard,back to home-welcome page-,back to login) buttons and a "celebrate again "button that launches th confetti animation on the page.
+7. requst-reset-password(RRP): fields: just one field for the email used in the registration process,if that email was valid ,a reset link would be sent to it.
 HOW TO HELP:
 - "what do I put here?" → explain the field clearly
 - university/major confusion → select from list, or type a custom one if not listed
