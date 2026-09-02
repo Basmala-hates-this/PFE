@@ -1,8 +1,5 @@
 import "../styles/register-login.css";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
-//  import {validateUsername} from "../assets/components/Validations.js";
-import { useEffect } from "react";
 import { isValidEmail } from "../assets/components/Validations.js";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
@@ -12,6 +9,7 @@ import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js";
 import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
 import { VoiceCommandProvider } from '../assets/components/VoiceCommandContext.jsx';
+import { useState, useRef, useEffect } from "react";
 
 
 
@@ -35,6 +33,8 @@ export default function Login() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const usernameRef = useRef(null);
+
 
   //huumm...the browser is playing with me and adding data i didint input ....i want it crispy clean soooo.....didnt work....
   //ahhh the local stogare days and the cookies fights.....when life was simple and without AI
@@ -47,7 +47,7 @@ export default function Login() {
   useVoiceCommand({
     id: 'reset',
     phrases: ['reset', 'forgot password', 'reset password', 'forgot my password', 'i forgot my password'],
-    handler: () => navigate('/reset'),
+    handler: () => navigate('/rpp'),
     label: 'Taking you to reset password page',
   });
 
@@ -57,6 +57,18 @@ export default function Login() {
     handler: () => navigate('/'),
     label: 'Taking you to home page',
   });
+
+
+
+useVoiceCommand({
+  id: 'focus-username',
+  phrases: ['fill username', 'enter username', 'type my username', 'go to username', 'focus username'],
+  handler: () => usernameRef.current?.focus(),
+  label: 'Focused the username field — go ahead and type',
+});
+
+
+
 
   const handleUsernameChange = (e) => {
     setUsername(e.target.value);
@@ -74,25 +86,9 @@ export default function Login() {
     //again...localstorage to the testing rescue...we get theusers existing...i for somereason found users and user....but it just reads users....to  be fixed later
     //const users = JSON.parse(localStorage.getItem("users")) || [];
 
-    //our little tini tiny checker
-    // let user = null;
-    // we look for the username OR email ...if they exist.then check the password related to that accoount
-    // if (isValidEmail(username)) {
-    //   // email login
-    //   user = users.find((u) => u.email === username);
-    // } else {
-    //   // username login
-    //   user = users.find((u) => u.username === username);
-    // }
-    // if user not found or password incorrect
-
-    // if (!user || user.password !== password) {
-    //   setError("Credentials are incorrect.");
-    //   return;
-    // }
+  
 
     try {
-      // const response = await axios.post("http://localhost:5000/api/auth/login", {
       const response = await api.post("/auth/login", {
         identifier: username,
         password,
@@ -182,6 +178,7 @@ export default function Login() {
               placeholder={t("login.username_placeholder")}
               value={username}
               onChange={handleUsernameChange}
+               ref={usernameRef}
             />
             {/* <p
   id="feedback"

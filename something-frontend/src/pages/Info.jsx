@@ -19,6 +19,9 @@ import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js";
 import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
 
+import { useGuidedFormFill } from '../assets/hooks/useGuidedFormFill.js';
+import * as chrono from 'chrono-node';
+import fuzzysort from 'fuzzysort';
 
 
 
@@ -41,6 +44,7 @@ const [isSubmitting, setIsSubmitting] = useState(false);
 
 
 //i'll add  the voice command for navigation here....just to have something useful
+//ps:add the other 2 languages dude.....when i feel like it though
 useVoiceCommand({
   id: 'login',
   phrases: ['login', 'log in', 'go to login','already have an account','i have an account','my account exists'],
@@ -107,13 +111,7 @@ const selectedMajorOptions = [
 
 //   //hummm...i deleted the data when i added a new non existing major...fuck...fixing
 //   // Get stored majors, if any
-//   const stored = JSON.parse(localStorage.getItem("majors")) || [];
 
-//   // Merge without duplicates
-//   const mergedMajors = [...new Set([...defaultMajors, ...stored])];
-//   setAvailableMajors(mergedMajors);
-//    localStorage.setItem("majors", JSON.stringify(mergedMajors));
-// }, []);
 
 //hum...lets try the major select thingy to the uni select thingy
 const [isOtherUniversity, setIsOtherUniversity] = useState(false);
@@ -124,12 +122,7 @@ const universityOptions = availableUniversities.map(u => ({
   label: u.name
 }));
 
-// const selectedUniversityOption = university.code
-//   ? {
-//       value: university.code,
-//       label: university.name
-//     }
-//   : null;
+
 
 const selectedUniversityOption = isOtherUniversity
   ? { value: "OTHER", label: "Other" }  // show "Other" as selected
@@ -139,31 +132,10 @@ const selectedUniversityOption = isOtherUniversity
 
 
 
-//   const storedUniversities = JSON.parse(localStorage.getItem("universities")) || [];
-
-//   const mergedUniversities = [...defaultUniversities];
-
-//   // add stored custom universities if they don't already exist//the code is....NUUUUUULLLLL
-//   //am i stupid this should not be null...this will cause little to tooo much problems....fuck..i need to find it
-//   storedUniversities.forEach(u => {
-//     if (!mergedUniversities.some(d => d.name === u.name)) {
-//       mergedUniversities.push(u);
-//     }
-//   });
-
-//   setAvailableUniversities(mergedUniversities);
-
-//   // persist merged list
-//   localStorage.setItem("universities", JSON.stringify(mergedUniversities));
-// }, []);
-
 useEffect(() => {
   const fetchData = async () => {
     try {
-      // const [uniRes, majorRes] = await Promise.all([
-      //   axios.get("http://localhost:5000/api/auth/universities"),
-      //   axios.get("http://localhost:5000/api/auth/majors")
-      // ]);
+    
       const [uniRes, majorRes] = await Promise.all([
   api.get("/auth/universities"),
   api.get("/auth/majors")
@@ -192,9 +164,7 @@ const [error, setError] = useState("");
 const handleEmailBlur = async () => {
   if (!email) return;
   try {
-    // const response = await axios.get(
-    //   `http://localhost:5000/api/auth/check-email?email=${email}`
-    // );
+   
     const response = await api.get(`/auth/check-email?email=${email}`);
     if (response.data.exists) {
       setError(t("validation.email_already_exists"));
@@ -225,15 +195,7 @@ if (customMajor.trim()) {
     finalMajors.push(customMajor.trim());
 }
 
-// if (customMajor.trim()) {
-//   const storedMajors = JSON.parse(localStorage.getItem("majors")) || [];
 
-//   if (!storedMajors.includes(customMajor.trim())) {
-//     const updatedMajors = [...storedMajors, customMajor.trim()];
-//     localStorage.setItem("majors", JSON.stringify(updatedMajors));
-//     setAvailableMajors(updatedMajors);
-//   }
-// }
 //soooo....dev tool manupilation precaution ...am i paranoid at this point?
 if (role === "student" && finalMajors.length !== 1) {
   alert(t("validation.student_one_major"));
@@ -257,14 +219,6 @@ if (isOtherUniversity && university.name.trim()) {
     name: uniName,
   };
 
-  // const storedUniversities =
-  //   JSON.parse(localStorage.getItem("universities")) || [];
-
-  // if (!storedUniversities.some(u => u.code === uniCode)) {
-  //   const updatedUniversities = [...storedUniversities, finalUniversity];
-  //   localStorage.setItem("universities", JSON.stringify(updatedUniversities));
-  //   setAvailableUniversities(prev => [...prev, finalUniversity]);
-  // }
 }
 //u know...for times like when i decide to make the variable names make sense.....i'm gratful for vs code to suggest the names i need instead of typing the enrite shit...fuck
 
@@ -291,7 +245,7 @@ if (isOtherUniversity && university.name.trim()) {
   }
 // decided on otp verification now....
 try {
-    // await axios.post("http://localhost:5000/api/auth/send-otp", { email });
+
     await api.post("/auth/send-otp", { email });
     setProfile(profile);
     navigate("/register");
@@ -300,9 +254,7 @@ try {
     alert("Failed to send verification email. Please check your email and try again.");
     setIsSubmitting(false);
   }
-  // finally{
-  //   setIsSubmitting(false);
-  // }
+ 
 
 
   // Save to localStorage.....i need to abandon the local storage at some point....that is SAD....
@@ -409,13 +361,115 @@ const handleSelectChange = (event) => {
     // Grabs the value ('en', 'fr', or 'ar') from the chosen option
     changeLanguage(event.target.value);
   };
+
+// the voice filling form
+// you cant say i dont hate my self,this is painful to build
+  const normalizeBirthDate = (raw) => {
+  const parsed = chrono.parseDate(raw);
+  return parsed ? parsed.toISOString().slice(0, 10) : raw; // leave raw as-is on failure — validate() below catches it
+};
+const isValidISODate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value);
+
+const normalizeRole = (raw) => {
+  const n = raw.toLowerCase();
+  if (n.includes('prof')) return 'professor';
+  if (n.includes('stud') || n.includes('étud') || n.includes('etu') || n.includes('طالب')) return 'student';
+  return raw; // unrecognized — fails validate, triggers retry
+};
+const isValidRole = (value) => value === 'student' || value === 'professor';
+
+
+// threshold is fuzzysort's score (negative, closer to 0 = better match).
+// -10000 is generous — tuned loose because voice transcripts are messy
+// (missed words, wrong article, accent mishears). Tighten if it starts
+// accepting matches that are actually wrong once you test with real speech.
+const FUZZY_THRESHOLD = -10000;
+
+const fuzzyFind = (raw, list, getLabel) => {
+  const result = fuzzysort.go(raw.trim(), list, {
+    key: getLabel,
+    threshold: FUZZY_THRESHOLD,
+    limit: 1,
+  });
+  return result.length ? result[0].obj : null;
+};
+
+
+const fillFields = (answers) => {
+  const fields = [
+    { id: 'fullName', label: 'full name', setter: setFullName },
+    {
+      id: 'birthDate', label: 'date of birth', setter: setBirthDate,
+      normalize: normalizeBirthDate, validate: isValidISODate,
+    },
+    {
+      id: 'email', label: 'email', setter: setEmail,
+      confirm: true, // per your earlier answer — read back + require spoken yes
+    },
+    { id: 'role', label: 'role — student or professor', setter: setRole, normalize: normalizeRole, validate: isValidRole },
+  ];
+
+  // university: only ask once we know whether "other" flow needs setting up.
+  // Doesn't actually depend on role/major, listed here so it's asked before majors.
+  fields.push({
+    id: 'university', label: 'university', setter: (raw) => {
+      const match = fuzzyFind(raw, availableUniversities, (u) => u.name);
+      if (match) {
+        setUniversity(match);
+        setIsOtherUniversity(false);
+      } else {
+        setUniversity({ code: null, name: raw });
+        setIsOtherUniversity(true);
+      }
+    },
+  });
+
+  // majors: depends on answers.role, which is why fields is a FUNCTION —
+  // this branch literally can't be decided until the role field lands.
+  if (answers.role === 'professor') {
+    fields.push({
+      id: 'majors', label: 'major (you can list more than one)', multi: true,
+      setter: (values) => {
+        const matched = values.map((v) => fuzzyFind(v, availableMajors, (m) => m) || v);
+        setMajors(matched.filter((m) => availableMajors.includes(m)));
+        const unmatched = matched.filter((m) => !availableMajors.includes(m));
+        if (unmatched.length) { setIsOtherMajor(true); setCustomMajor(unmatched[0]); }
+      },
+    });
+  } else if (answers.role === 'student') {
+    fields.push({
+      id: 'major', label: 'major', setter: (raw) => {
+        const match = fuzzyFind(raw, availableMajors, (m) => m);
+        if (match) { setMajors([match]); setIsOtherMajor(false); }
+        else { setIsOtherMajor(true); setCustomMajor(raw); }
+      },
+    });
+  }
+  // profProof (file upload) intentionally excluded — not voice-fillable
+
+  return fields;
+};
+
+const { runWalkthrough } = useGuidedFormFill(fillFields);
+
+useVoiceCommand({
+  id: 'fill-form',
+  phrases: ['fill out the form', 'help me fill this', 'guide me through the form', 'fill this form by voice'],
+  handler: runWalkthrough,
+  label: 'Starting the guided form fill',
+});
+
+  ////////////////////////////////////////////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////
+
     return (
         <div id="body1">
           <div className="language-switcher">
       <label htmlFor="lang-select" className="sr-only">Choose Language: </label>
       <select 
         id="lang-select"
-        value={currentLang} // Keeps the dropdown synced with your active language
+        value={currentLang} // Keeps the dropdown synced with the active language
         onChange={handleSelectChange}
         className="lang-dropdown"
       >
@@ -511,7 +565,7 @@ const handleSelectChange = (event) => {
                 <label htmlFor="major" id="major">{t("info.major_label")}</label>
                 <br/>
                 {/* ONE RING TO RULE THEM ALL .....select i mean one select to rule them all*/}
-                {/* so spending along time on perfecting the one select thing just to decide to do something similar to choice.js is beyond self hate at this point
+                {/* so spending a long time on perfecting the one select thing just to decide to do something similar to choice.js is beyond self hate at this point
                 anyhow...if i liked how react-select works..then the unis will get it tooooo...the autocomplete is back...i'll rutn it off for a while
                  */}
              
@@ -568,7 +622,7 @@ const handleSelectChange = (event) => {
             </fieldset>
         
            <br/><br/>
-            <input type="submit" value={isSubmitting ? t("info.submitting") : t("info.submit")}  disabled={isSubmitting} id="btn1"/>  {/* onClick={() => navigate("/register")} */}
+            <input type="submit" value={isSubmitting ? t("info.submitting") : t("info.submit")}  disabled={isSubmitting} id="btn1"/>  
            <br/><br/>
             <a href="#" id="InfoLink" onClick={() => navigate("/")} style={{marginRight:"30px"}}>
               {t("info.link_back_home")}

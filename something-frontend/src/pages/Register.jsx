@@ -11,6 +11,8 @@ import FloatingHelper from "../assets/components/Floatinghelper";
 import api from "../api/axios.js";
 import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
 import { VoiceCommandProvider } from '../assets/components/VoiceCommandContext.jsx';
+import { useRef } from "react";
+import { useGuidedFormFill } from '../assets/hooks/useGuidedFormFill.js';
 
 //////THE DAMN USERNAME CANNOT BELONG TO ANOTHER USER...IF IT EXISTS ALREADY IT CANNOT BE CHOSEN....fuck...
 
@@ -49,12 +51,12 @@ const [canResend, setCanResend] = useState(false);
 
 
 const [isSubmitting, setIsSubmitting] = useState(false);
-//const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+
 
 const { t, i18n } = useTranslation();
 const isRTL = i18n.language === "ar";
 
-//if someine ever was abale to skip info form....this will atke them back to it
+//if someine ever was able to skip info form....this will atke them back to it
 useEffect(() => {
   if (!profile) {
     navigate("/info");
@@ -75,9 +77,7 @@ const handleUsernameBlur = async () => {
   if (!username) return;
     setIsCheckingUsername(true);
   try {
-    // const response = await axios.get(
-    //   `http://localhost:5000/api/auth/check-username?username=${username}`
-    // );
+ 
     const response = await api.get(`/auth/check-username?username=${username}`);
     if (response.data.exists) {
       setError(t("validation.username_already_taken"));
@@ -99,10 +99,7 @@ const handleSubmit =async (e) => {
   if (!canSubmit) return;
     setIsSubmitting(true);
  try {
-    // await axios.post("http://localhost:5000/api/auth/verify-otp", {
-    //   email: profile.email,
-    //   otp
-    // });
+ 
     await api.post("/auth/verify-otp", { email: profile.email, otp });
 setOtpFeedback(t("validation.otp_verified"));
     setOtpColor("green");
@@ -176,34 +173,13 @@ useEffect(() => {
 }, [resendTimer]);
 
 
-// const handleVerifyOtp = async () => {
-//   if (!otp) return;
-//   // setIsVerifyingOtp(true);
-//   try {
-//     await axios.post("http://localhost:5000/api/auth/verify-otp", {
-//       email: profile.email,
-//       otp
-//     });
-//     setOtpVerified(true);
-//     setOtpFeedback("Email verified successfully!");
-//     setOtpColor("green");
-//   } catch (err) {
-//     setOtpVerified(false);
-//     setOtpFeedback(err.response?.data?.message || "Invalid OTP");
-//     setOtpColor("#fc0c0ce9");
-//   } finally {
-//     setIsVerifyingOtp(false);
-//   }
-// };
 
 
 // resend is nice to have ...right?
 const handleResendOtp = async () => {
   if (!canResend) return;
   try {
-    // await axios.post("http://localhost:5000/api/auth/send-otp", {
-    //   email: profile.email
-    // });
+   
     await api.post("/auth/send-otp", { email: profile.email });
     setCanResend(false);
     setResendTimer(60);
@@ -229,6 +205,46 @@ useEffect(() => {
   setCanSubmit(usernameValid && passwordsMatch && strongEnough && !error && !isCheckingUsername );
 }, [username, password, confirmPassword, error, isCheckingUsername]);
 
+
+const usernameRef = useRef(null);
+
+useVoiceCommand({
+  id: 'focus-username',
+  phrases: ['fill username', 'enter username', 'type my username', 'go to username', 'focus username'],
+  handler: () => usernameRef.current?.focus(),
+  label: 'Focused the username field — go ahead and type',
+});
+
+const isValidOtp = (value) => /^\d{6}$/.test(value);
+const normalizeOtp = (raw) => raw.replace(/\D/g, ''); // strip anything STT adds that isn't a digit (spaces, "dash", stray words)
+
+const otpFields = [
+  {
+    id: 'otp', label: 'six digit code', setter: (value) => {
+      setOtp(value);
+      setOtpVerified(false);
+      setOtpFeedback("");
+    },
+    normalize: normalizeOtp, validate: isValidOtp,
+  },
+];
+
+const { runWalkthrough: fillOtp } = useGuidedFormFill(otpFields);
+
+useVoiceCommand({
+  id: 'fill-otp',
+  phrases: ['fill the code', 'enter the otp', "what's the code", 'fill otp', 'enter verification code'],
+  handler: fillOtp,
+  label: 'Starting the code entry',
+});
+
+useVoiceCommand({
+  id: 'resend-otp',
+  phrases: ['resend the code', 'resend otp', 'send me a new code', "i didn't get the code"],
+  handler: handleResendOtp,
+  label: 'Resending the code',
+});
+
 ////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
@@ -252,7 +268,7 @@ useEffect(() => {
                 <br />
                 <input type="text" required minLength="5" id="username" className="username" name="username"  
                 value={username} placeholder={t("register.username_placeholder")} onChange={handleUsernameChange}
-                onBlur={handleUsernameBlur}/>
+                onBlur={handleUsernameBlur}  ref={usernameRef}  />
                <p
   id="feedback"
   style={{
@@ -308,14 +324,7 @@ useEffect(() => {
       }}
       style={{ width: "30%", letterSpacing: "5px", fontSize: "18px" ,marginLeft:"25px",borderRadius:"8px", padding:"8px 16px",maxHeight:"30px",height:"100%",marginRight:"3%"}}
     /> <br /><br />
-    {/* <button
-      type="button"
-      onClick={handleVerifyOtp}
-      disabled={isVerifyingOtp || otp.length !== 6 || otpVerified}
-      style={{ borderRadius: "8px", padding: "8px 16px", cursor: "pointer" }}
-    >
-      {isVerifyingOtp ? "Checking..." : otpVerified ? " Verified" : "Verify"}
-    </button> */}
+  
   </div>
 
   {otpFeedback && (

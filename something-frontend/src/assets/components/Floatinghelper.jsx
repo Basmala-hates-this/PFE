@@ -96,9 +96,10 @@ const currentPage = getPageFromPath(location.pathname);
     { role: "assistant", content: GREETINGS[currentPage] || GREETINGS.register },
   ]);
   // --- hands-free continuous listening (shared with voice nav) ---------
-  const {
+const {
     toggleListening: toggleHandsFree,
     isListening: isHandsFree,
+    isWakeListening,
     isTranscribing: handsFreeTranscribing,
     isProcessing: handsFreeProcessing,
     micError: handsFreeMicError,
@@ -296,7 +297,7 @@ const currentPage = getPageFromPath(location.pathname);
           )}
 
           {/* hands-free status strip — only shows while active/relevant */}
-          {(isHandsFree || handsFreeTranscribing || handsFreeProcessing || handsFreeMicError) && (
+                  {(isHandsFree || isWakeListening || handsFreeTranscribing || handsFreeProcessing || handsFreeMicError) && (
             <div style={f.handsFreeStatus}>
               {handsFreeMicError
                 ? `Mic error: ${handsFreeMicError}`
@@ -304,6 +305,8 @@ const currentPage = getPageFromPath(location.pathname);
                 ? "Thinking..."
                 : handsFreeTranscribing
                 ? "Transcribing..."
+                : isWakeListening
+                ? "Listening for wake word..."
                 : "Listening (hands-free)..."}
             </div>
           )}
@@ -342,19 +345,31 @@ const currentPage = getPageFromPath(location.pathname);
         </div>
       )}
 
-      <button
+           <button
         onClick={() => { setOpen((o) => !o); setPulse(false); }}
         style={{ ...f.fab, animation: pulse && !open ? "sbPulse 1.5s infinite" : "none" }}
-        title="Need help?"
+        title={isWakeListening ? "Voice assistant listening for wake word" : isHandsFree ? "Voice assistant active" : "Need help?"}
       >
         {open ? "✕" : "🤖"}
+        {!open && (isWakeListening || isHandsFree) && (
+          <span
+            style={{
+              ...f.micDot,
+              background: isHandsFree ? "#2ecc71" : "#f5a623", // green = actively hearing commands, amber = idle wake-word listening
+            }}
+          />
+        )}
       </button>
 
-      <style>{`
+         <style>{`
         @keyframes sbPulse {
           0%   { box-shadow: 0 0 0 0 rgba(100,118,175,0.7); }
           70%  { box-shadow: 0 0 0 12px rgba(100,118,175,0); }
           100% { box-shadow: 0 0 0 0 rgba(100,118,175,0); }
+        }
+        @keyframes sbDotPulse {
+          0%, 100% { opacity: 1; }
+          50%      { opacity: 0.4; }
         }
       `}</style>
     </div>
@@ -367,13 +382,20 @@ const f = {
     zIndex: 9999, display: "flex", flexDirection: "column",
     alignItems: "flex-end", gap: "12px", fontFamily: "inherit",
   },
-  fab: {
+    fab: {
+    position: "relative",
     width: "52px", height: "52px", borderRadius: "50%", border: "none",
     background: "linear-gradient(135deg, #6476af, #4a5a8a)",
     color: "white", fontSize: "22px", cursor: "pointer",
     boxShadow: "0 4px 20px rgba(100,118,175,0.5)",
     display: "flex", alignItems: "center", justifyContent: "center",
     transition: "transform 0.2s",
+  },
+  micDot: {
+    position: "absolute", top: "2px", right: "2px",
+    width: "12px", height: "12px", borderRadius: "50%",
+    border: "2px solid #1a2236",
+    animation: "sbDotPulse 1.8s infinite",
   },
   window: {
     width: "320px", maxHeight: "430px",

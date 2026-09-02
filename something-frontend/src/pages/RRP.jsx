@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import api from "../api/axios.js";
 
 import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
+import FloatingHelper from "../assets/components/Floatinghelper";
+import { useGuidedFormFill } from '../assets/hooks/useGuidedFormFill.js';
 
 
 
@@ -30,6 +32,18 @@ useVoiceCommand({
   label: 'Taking you to home page',
 });
 
+const emailFields = [
+  { id: 'email', label: 'email', setter: setEmail, confirm: true },
+];
+const { runWalkthrough: fillEmail } = useGuidedFormFill(emailFields);
+
+useVoiceCommand({
+  id: 'fill-email',
+  phrases: ['fill my email', 'enter my email', "what's my email", 'fill in email'],
+  handler: fillEmail,
+  label: 'Starting email entry',
+});
+
     
     const [error, setError] = useState("");
 
@@ -45,8 +59,7 @@ useVoiceCommand({
   }
 
   try {
-    // console.log(email)
-    // await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+  
     await api.post("/auth/forgot-password", { email });
     // always show success message — don't reveal if email exists.......damn
 alert(t("rrp.success"));
@@ -57,7 +70,9 @@ setError(t("rrp.error"));  }
 };
 
   return (
-    <div className="RRP" id="body4">  
+    <div className="RRP" id="body4"> 
+        <FloatingHelper currentPage="rrp" />
+ 
         <form onSubmit={handleSubmit} method="post" id="reset-form">
         <fieldset id="field5">
             <h2> {t("rrp.title")} </h2>
