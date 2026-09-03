@@ -16,11 +16,14 @@ import {
 import { useTranslation } from 'react-i18next';
 import api from "../api/axios.js";
 
+import FloatingHelper from "../assets/components/Floatinghelper";
+import { useVoiceCommand } from '../assets/hooks/useVoiceCommand.js';
+
 //just noting that my brain thinks this page should have and be able to read the profile for somereason....maybe the username display for dashboard later?
 //meh, i'll see later..if not, no big deal.....i hope...
 //also....abut the validations of existing profile...i cant see how anyone would reach here without filling the previos 2 forms
 //but better safe than sorry i guess?...dmn it..i should have gone with something simpler like a university planner or something...
-//again....sorry sarah...
+
 export default function Fin() {
     const navigate = useNavigate();
     const { profile, credentials } = useRegistration();
@@ -44,7 +47,7 @@ export default function Fin() {
   //user efect will check the previosly mentiond...if one is false..rederect to he page needed...if not....well....CONTENT!!
  useEffect(() => {
   handleConfetti();
-  //no skipping to fin somehow..... YOUUUUUUUUUUUU SHALL NOOOOOOOOOOT PAASSSSSSSSS...said dembeldore quitly....this should cuase ragbait to whoever read it:)
+  //no skipping to fin somehow..... YOUUUUUUUUUUUU SHALL NOOOOOOOOOOT PAASSSSSSSSS...said dambeldore quitly....this should cause ragbait to whoever read it:)
   if (!profile || !credentials) {
     navigate("/info");
     return;
@@ -92,11 +95,7 @@ export default function Fin() {
       formData.append("proofFile", newUser.profProof);
     }
 
-    // const response = await axios.post(
-    //   "http://localhost:5000/api/auth/register",
-    //   formData,
-    //   { headers: { "Content-Type": "multipart/form-data" } }
-    // );
+ 
     const response = await api.post(
   "/auth/register",
   formData,
@@ -104,10 +103,8 @@ export default function Fin() {
 );
 
     const data = response.data;
-   // localStorage.setItem("token", data.token);
     localStorage.setItem("currentUser", JSON.stringify(data.user));
     setLoading(false);
-  //  handleConfetti();
 
   } catch (err) {
     console.error("Error sending profile:", err);
@@ -125,27 +122,57 @@ export default function Fin() {
 //for some reason...when i navigate to dashboard...it saves to users in localstorage-->this later works normally in login
 //when i navigate to another link..it goes to user...and at login it does not pass
 //i'll change everything to users and see if it works....
+//ooh the old sad days of local storage testing.....oh how far have we gone....
 const handleDashboard = () => {
- 
+  if (loading) return;
     navigate("/dashboard");
 
 };
 
 const handleLogin = () => {
- 
+  if (loading) return;
     navigate("/login");
 
 };
 
 const handleWelcome = () => {
- 
+  if (loading) return;
     navigate("/");
 
 };
 
 
+useVoiceCommand({
+  id: 'go-dashboard',
+  phrases: ['go to dashboard', 'dashboard', 'take me to my dashboard'],
+  handler: handleDashboard,
+  label: 'Taking you to your dashboard',
+});
+
+useVoiceCommand({
+  id: 'welcome',
+  phrases: ['welcome', 'go to welcome', 'go to home page', 'back to home page', 'back to home'],
+  handler: handleWelcome,
+  label: 'Taking you to home page',
+});
+
+useVoiceCommand({
+  id: 'login',
+  phrases: ['login', 'log in', 'go to login'],
+  handler: handleLogin,
+  label: 'Taking you to login',
+});
+
+useVoiceCommand({
+  id: 'celebrate',
+  phrases: ['celebrate', 'celebrate again', 'confetti', 'more confetti'],
+  handler: handleConfetti,
+  label: 'Celebrating',
+});
+
   return (
     <div className="fin-page" id="body3">
+     <FloatingHelper currentPage="fin" />
      <h1 id="finH1">{t("fin.success_title")}✔️</h1>
     <br/><br/>
     <h3 id="finH3">{t("fin.thank_you")}</h3>
