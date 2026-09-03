@@ -491,10 +491,12 @@ const startWakeListening = useCallback(() => startMicSession('wake'), [startMicS
   // dev-only alias for manual testing without speaking
   const simulateTranscript = processTranscript;
 
-  const value = {
+const value = {
     locale,
     isListening,
     setIsListening,
+    isWakeListening,
+    startWakeListening,
     isTranscribing,
     micError,
     startListening,
@@ -514,8 +516,10 @@ const startWakeListening = useCallback(() => startMicSession('wake'), [startMicS
     unregister,
     getRegisteredCommands,
     processTranscript,
-    simulateTranscript, // dev-only alias for processTranscript, useful for testing without speaking
+    simulateTranscript,
   };
+  
+  console.log(micError)
 
   return (
     <VoiceCommandContext.Provider value={value}>
