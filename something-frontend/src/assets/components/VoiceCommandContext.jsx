@@ -425,9 +425,33 @@ const WAKE_PHRASES = ['hey glaukopis', 'ok glaukopis', 'يا غلوكوبيس', 
 // add whatever wording actually fits — normalize handles case/diacritics so keep entries simple
 
 const normalize = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+
+
+// Levenshtein edit distance 
+function levenshtein(a, b) {
+  const m = a.length, n = b.length;
+  const dp = Array.from({ length: m + 1 }, () => new Array(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      dp[i][j] = a[i - 1] === b[j - 1]
+        ? dp[i - 1][j - 1]
+        : 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+    }
+  }
+  return dp[m][n];
+}
+
+const WAKE_WORD_EN = 'glaukopis';
+const WAKE_WORD_AR = 'غلوكوبيس'; 
+
 const matchesWakePhrase = (text) => {
-  const n = normalize(text);
-  return WAKE_PHRASES.some((p) => n.includes(normalize(p)));
+  const words = normalize(text).split(/\s+/).filter(Boolean);
+  return words.some((w) => {
+    if (/[\u0600-\u06FF]/.test(w)) return levenshtein(w, WAKE_WORD_AR) <= 2;
+    return levenshtein(w, WAKE_WORD_EN) <= 3; // tolerates "glacopus", "glockopis", "glaucopus", etc.
+  });
 };
 
 const startMicSession = useCallback(async (mode) => { // mode: 'wake' | 'active'
