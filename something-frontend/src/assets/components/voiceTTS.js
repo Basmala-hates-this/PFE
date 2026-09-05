@@ -47,10 +47,11 @@ export async function speak(text, { onStart, onEnd } = {}) {
   }
 
   // interrupt anything currently playing, same intent as speechSynthesis.cancel()
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio = null;
-  }
+ if (currentAudio) {
+  currentAudio.onended?.();   // release the previous call's TTS gate before cutting it off
+  currentAudio.pause();
+  currentAudio = null;
+}
 
   const lang = detectLangFromText(text);
 

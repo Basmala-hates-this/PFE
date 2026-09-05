@@ -125,8 +125,16 @@ const stopDictation = useCallback(() => {
   // convenience wrapper: speaks text AND handles the notify start/end pairing,
   // so call sites (processTranscript, etc.) don't have to repeat the plumbing
   const speakConfirmation = useCallback((text) => {
-    speak(text, { onStart: notifyTTSStart, onEnd: notifyTTSEnd });
-  }, [notifyTTSStart, notifyTTSEnd]);
+  notifyTTSStart(); // flip synchronously, don't wait for speak()'s async onStart
+  return new Promise((resolve) => {
+    speak(text, {
+      onEnd: () => {
+        notifyTTSEnd();
+        resolve();
+      },
+    });
+  });
+}, [notifyTTSStart, notifyTTSEnd]);
 
   const [lastMatch, setLastMatch] = useState(null); // { commandId, matchedPhrase, source } | null
   const [isProcessing, setIsProcessing] = useState(false); // true while AI fallback is in flight
@@ -147,7 +155,7 @@ const stopDictation = useCallback(() => {
     //   return { matched: false, dictation: true };
     // }
 
-   if (dictationTargetIdRef.current) {
+if (dictationTargetIdRef.current) {
   console.log('[voice] dictation ->', dictationTargetIdRef.current, ':', text);
   setLastMatch(null);
   dictationResolverRef.current?.(text);
@@ -162,7 +170,7 @@ const stopDictation = useCallback(() => {
       console.log('[voice] matched (keyword):', keywordResult.command.id, '(phrase:', `"${keywordResult.matchedPhrase}")`);
       setLastMatch({ commandId: keywordResult.command.id, matchedPhrase: keywordResult.matchedPhrase, source: 'keyword' });
       keywordResult.command.handler?.();
-      speakConfirmation(keywordResult.command.label);
+      await speakConfirmation(keywordResult.command.label);
       return { matched: true, commandId: keywordResult.command.id, source: 'keyword' };
     }
 
@@ -182,23 +190,23 @@ const stopDictation = useCallback(() => {
           console.log('[voice] matched (AI fallback):', matchedCommand.id);
           setLastMatch({ commandId: matchedCommand.id, matchedPhrase: null, source: 'ai' });
           matchedCommand.handler?.();
-          speakConfirmation(matchedCommand.label);
+         await  speakConfirmation(matchedCommand.label);
           return { matched: true, commandId: matchedCommand.id, source: 'ai' };
         }
       }
 
       console.log('[voice] AI fallback also found nothing for:', text);
       if (unmatchedHandlerRef.current) {
-        console.log('[voice] delegating unmatched speech to registered handler');
-        unmatchedHandlerRef.current(text);
-        return { matched: false, delegated: true };
-      }
-      speakConfirmation("Sorry, I didn't catch that.");
+  console.log('[voice] delegating unmatched speech to registered handler');
+  await unmatchedHandlerRef.current(text); // block the loop through the whole ai/chat round trip + spoken reply
+  return { matched: false, delegated: true };
+}
+     await  speakConfirmation("Sorry, I didn't catch that.");
       return { matched: false };
     } finally {
       setIsProcessing(false);
     }
-  }, [dictationTargetId, getRegisteredCommands, speakConfirmation]);
+  }, [ getRegisteredCommands, speakConfirmation]);
 
   // --- continuous listening: persistent stream + silence-based segmentation ---
   // Instead of push-to-talk, we keep the mic stream open and use volume
@@ -375,7 +383,8 @@ const stopDictation = useCallback(() => {
       isWakeModeRef.current = false;
       setIsWakeListening(false);
       setIsListening(true);
-      speakConfirmation("I'm listening.");
+      
+     await  speakConfirmation("I'm listening.");
     }
     // no match -> discard silently, wake loop just keeps listening
   } else {

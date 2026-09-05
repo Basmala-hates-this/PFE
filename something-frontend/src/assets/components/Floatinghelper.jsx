@@ -231,16 +231,28 @@ const {
   // aloud afterward — the user spoke instead of typed, so a silent text-only
   // reply defeats the point of hands-free mode. Typed messages stay opt-in
   // (click the speaker icon), matching existing behavior.
-  const sendVoiceMessage = async (text) => {
-    const reply = await sendMessage(text);
-    if (reply) {
+  
+
       // the new message's index is messages.length AFTER the user+assistant
       // pair was appended — since sendMessage already updated state twice,
       // just speak the reply text directly without needing the exact index
       // for the toggle-to-stop UI (voice-triggered replies auto-play once).
-      speak(reply, { onStart: notifyTTSStart, onEnd: notifyTTSEnd });
-    }
-  };
+    //   speak(reply, { onStart: notifyTTSStart, onEnd: notifyTTSEnd });
+
+  const sendVoiceMessage = async (text) => {
+  const reply = await sendMessage(text);
+  if (reply) {
+    notifyTTSStart(); // flip synchronously, don't wait for speak()'s async onStart
+    await new Promise((resolve) => {
+      speak(reply, {
+        onEnd: () => {
+          notifyTTSEnd();
+          resolve();
+        },
+      });
+    });
+  }
+};
 
   // register as the unmatched-speech handler for as long as this
   // FloatingHelper instance is mounted — scoped per-page, same idea as
