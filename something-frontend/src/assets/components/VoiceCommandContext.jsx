@@ -30,6 +30,8 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
   const [lastTranscript, setLastTranscript] = useState('');
   const [dictationTargetId, setDictationTargetId] = useState(null); // id of field currently receiving raw speech
 
+  const ttsActiveCountRef = useRef(0);
+
   // --- registry API -------------------------------------------------
 
   const register = useCallback((command) => {
@@ -66,11 +68,13 @@ export function VoiceCommandProvider({ children, locale = 'en' }) {
   const dictationResolverRef = useRef(null);
 
 const startDictation = useCallback((id, onResult) => {
+  dictationTargetIdRef.current = id; 
   setDictationTargetId(id);
   dictationResolverRef.current = onResult ?? null;
 }, []);
 
 const stopDictation = useCallback(() => {
+  dictationTargetIdRef.current = null;
   setDictationTargetId(null);
   dictationResolverRef.current = null;
 }, []);
@@ -98,11 +102,11 @@ const stopDictation = useCallback(() => {
   const ttsSpeakingRef = useRef(false);
 
   const notifyTTSStart = useCallback(() => {
-    ttsSpeakingRef.current = true;
+     ttsActiveCountRef.current += 1;
   }, []);
 
   const notifyTTSEnd = useCallback(() => {
-    ttsSpeakingRef.current = false;
+    ttsActiveCountRef.current = Math.max(0, ttsActiveCountRef.current - 1);
   }, []);
 
   // polls until TTS finishes, so the continuous loop can pause before starting a new segment
@@ -143,8 +147,8 @@ const stopDictation = useCallback(() => {
     //   return { matched: false, dictation: true };
     // }
 
-    if (dictationTargetId) {
-  console.log('[voice] dictation ->', dictationTargetId, ':', text);
+   if (dictationTargetIdRef.current) {
+  console.log('[voice] dictation ->', dictationTargetIdRef.current, ':', text);
   setLastMatch(null);
   dictationResolverRef.current?.(text);
   return { matched: false, dictation: true };
@@ -217,6 +221,9 @@ const stopDictation = useCallback(() => {
   const [isTranscribing, setIsTranscribing] = useState(false); // true while audio is uploading/transcribing
   const [micError, setMicError] = useState(null);
   const continuousModeRef = useRef(false); // survives across async segment boundaries, unlike state
+
+  const dictationTargetIdRef = useRef(null);
+
 
   const stopVadLoop = useCallback(() => {
     if (vadFrameRef.current) {
