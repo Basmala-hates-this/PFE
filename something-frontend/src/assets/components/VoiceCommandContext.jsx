@@ -110,17 +110,19 @@ const stopDictation = useCallback(() => {
   }, []);
 
   // polls until TTS finishes, so the continuous loop can pause before starting a new segment
-  const waitUntilTTSFinished = useCallback(() => {
-    return new Promise((resolve) => {
-      if (!ttsSpeakingRef.current) return resolve();
-      const check = setInterval(() => {
-        if (!ttsSpeakingRef.current) {
-          clearInterval(check);
-          resolve();
-        }
-      }, 100);
-    });
-  }, []);
+ const waitUntilTTSFinished = useCallback(() => {
+  return new Promise((resolve) => {
+    if (ttsActiveCountRef.current <= 0) return resolve();
+    const check = setInterval(() => {
+      if (ttsActiveCountRef.current <= 0) {
+        clearInterval(check);
+        resolve();
+      }
+      // recordOneSegment's tick
+// if (ttsActiveCountRef.current > 0) { console.log('[voice] segment aborted: TTS started speaking'); return finish('tts-speaking'); }
+    }, 100);
+  });
+}, []);
 
   // convenience wrapper: speaks text AND handles the notify start/end pairing,
   // so call sites (processTranscript, etc.) don't have to repeat the plumbing
@@ -147,14 +149,7 @@ const stopDictation = useCallback(() => {
   const processTranscript = useCallback(async (text) => {
     setLastTranscript(text);
 
-    // if (dictationTargetId) {
-    //   // dictation mode intercepts BEFORE matching — raw speech, not a command
-    //   console.log('[voice] dictation ->', dictationTargetId, ':', text);
-    //   setLastMatch(null);
-    //   // actual field-filling wiring happens wherever dictationTargetId is consumed
-    //   return { matched: false, dictation: true };
-    // }
-
+  
 if (dictationTargetIdRef.current) {
   console.log('[voice] dictation ->', dictationTargetIdRef.current, ':', text);
   setLastMatch(null);
@@ -437,7 +432,7 @@ if (dictationTargetIdRef.current) {
   const isWakeModeRef = useRef(false); // true = loop is only listening for the wake phrase
 const [isWakeListening, setIsWakeListening] = useState(false);
 
-const WAKE_PHRASES = ['hey glaukopis', 'ok glaukopis', 'يا غلوكوبيس', 'او كي غلوكوبيس'];
+// const WAKE_PHRASES = ['hey glaukopis', 'ok glaukopis', 'يا غلوكوبيس', 'او كي غلوكوبيس'];
 // add whatever wording actually fits — normalize handles case/diacritics so keep entries simple
 
 const normalize = (s) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
@@ -459,16 +454,42 @@ function levenshtein(a, b) {
   return dp[m][n];
 }
 
-const WAKE_WORD_EN = 'glaukopis';
-const WAKE_WORD_AR = 'غلوكوبيس'; 
+const WAKE_TRIGGERS = {
+  en: [
+    { words: ['glau'], maxDistance: 1 },
+    { words: ['hoot'], maxDistance: 1 },
+    { words: ['hey', 'owl'], maxDistance: 1 }, // "owl" alone is too common to trust bare...fuck duolingo......
+    { words: ['glaukopis'], maxDistance: 2 },
+  ],
+  fr: [
+    { words: ['glau'], maxDistance: 1 },              // reads/sounds fine as-is in French
+    { words: ['hou'], maxDistance: 1 },                // "hou hou" — the standard FR owl-hoot sound
+    { words: ['salut', 'hibou'], maxDistance: 1 },     // "hey owl" — two-word, same false-positive guard as EN
+    { words: ['glaukopis'], maxDistance: 2 },
+  ],
+  ar: [
+    { words: ['غلو'], maxDistance: 1 },                // phonetic "glau"
+    { words: ['هوت'], maxDistance: 1 },                // phonetic "hoot"
+    { words: ['يا', 'بومة'], maxDistance: 1 },          // "hey owl"
+    { words: ['غلوكوبيس'], maxDistance: 2 },            // keep  original full-brand-name trigger too
+  ],
+};
 
+// matchesWakePhrase closes over `locale` from the component's props — no
+// need to sniff script from the text anymore, we already know the language
 const matchesWakePhrase = (text) => {
   const words = normalize(text).split(/\s+/).filter(Boolean);
-  return words.some((w) => {
-    if (/[\u0600-\u06FF]/.test(w)) return levenshtein(w, WAKE_WORD_AR) <= 2;
-    return levenshtein(w, WAKE_WORD_EN) <= 3; // tolerates "glacopus", "glockopis", "glaucopus", etc.
+  const triggers = WAKE_TRIGGERS[locale] || WAKE_TRIGGERS.en;
+
+  return triggers.some(({ words: triggerWords, maxDistance }) => {
+    for (let i = 0; i <= words.length - triggerWords.length; i++) {
+      const isMatch = triggerWords.every((tw, j) => levenshtein(words[i + j], tw) <= maxDistance);
+      if (isMatch) return true;
+    }
+    return false;
   });
 };
+
 
 const startMicSession = useCallback(async (mode) => { // mode: 'wake' | 'active'
   if (continuousModeRef.current) return; // already running (either mode)
