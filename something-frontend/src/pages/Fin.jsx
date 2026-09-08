@@ -172,7 +172,7 @@ useVoiceCommand({
 
   return (
     <div className="fin-page" id="body3">
-     <FloatingHelper currentPage="fin" />
+     {/* <FloatingHelper currentPage="fin" /> */}
      <h1 id="finH1">{t("fin.success_title")}✔️</h1>
     <br/><br/>
     <h3 id="finH3">{t("fin.thank_you")}</h3>

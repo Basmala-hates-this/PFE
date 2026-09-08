@@ -480,7 +480,7 @@ useVoiceCommand({
     </div>
 
 
-    <FloatingHelper currentPage="info" /> 
+    {/* <FloatingHelper currentPage="info" />  */}
 
 
              <form  onSubmit={handleSubmit} id="indexForm">{/*<!--action="register.html"   i think this is useless since i added the js redirection--> */}

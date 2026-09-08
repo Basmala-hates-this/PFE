@@ -183,7 +183,7 @@ const handleSelectChange = (event) => {
   </button>
 )}
 
-    <FloatingHelper currentPage="welcome/home" /> 
+    {/* <FloatingHelper currentPage="welcome/home" />  */}
 
 
     

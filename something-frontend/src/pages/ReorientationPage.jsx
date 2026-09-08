@@ -90,7 +90,7 @@ const isRTL = i18n.language === 'ar';
       </select>
     </div>
 
-        <FloatingHelper currentPage="reorientation" /> 
+        {/* <FloatingHelper currentPage="reorientation" />  */}
     
       <div style={{
         background: "#252b45", borderRadius: "12px", padding: "32px",

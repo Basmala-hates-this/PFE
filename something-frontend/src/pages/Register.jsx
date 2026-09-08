@@ -254,7 +254,7 @@ useVoiceCommand({
     <div id="body2">
 
 
-      <FloatingHelper currentPage="register" /> 
+      {/* <FloatingHelper currentPage="register" />  */}
 
       
       <form  id="registerForm" onSubmit={handleSubmit} >

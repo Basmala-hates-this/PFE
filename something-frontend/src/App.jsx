@@ -28,8 +28,61 @@ import Guide from "./pages/Guide.jsx";
 import { useEffect } from "react";
 import Guide2 from "./pages/GuideComponenet.jsx";
 import api from "./api/axios.js";
+import FloatingHelper from "./assets/components/Floatinghelper.jsx";
+import { useLocation } from "react-router-dom";
 
 
+
+function isProtectedPath(pathname) {
+  return (
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/edit") ||
+    pathname.startsWith("/rooms") ||
+    pathname.startsWith("/search") ||
+    pathname.startsWith("/users") ||
+    pathname.startsWith("/connections") ||
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/superadmin")
+  );
+}
+
+
+function AppContent() {
+  const location = useLocation();
+  return (
+    <>
+      <Routes>
+       
+        <Route path="/" element={<Welcome />} />
+        <Route path="/info" element={<Info />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/fin" element={<Fin />} />
+        <Route path="/rrp" element={<RRP />} />
+        <Route path="/reset" element={<Reset />} />
+        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
+        <Route path="/rooms/:roomId" element={<ProtectedRoute><RoomChat /></ProtectedRoute>} />
+        <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
+        <Route path="/users/:userId" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
+        <Route path="/connections/:userId" element={<ProtectedRoute><ConnectionsPage /></ProtectedRoute>} />
+
+        <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
+        <Route path="/superadmin" element={<ProtectedRoute><SuperAdminPanel /></ProtectedRoute>} />
+
+        <Route path="/reorientation" element={<ReorientationPage />} />
+        <Route path="/correct-inputs" element={<CorrectInputsPage />} />
+        <Route path="/guide" element={<Guide />} />
+        <Route path="/guide2" element={<Guide2 />} />
+
+      
+      </Routes>
+      {!isProtectedPath(location.pathname) && <FloatingHelper />}
+    </>
+  );
+}
 
 function App() {
 
@@ -65,35 +118,11 @@ function App() {
 }, []);
 
   return (
-    <Router>
-            <RegistrationProvider>
-
-      <Routes>
-        <Route path="/" element={<Welcome />} />
-        <Route path="/info" element={<Info />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/fin" element={<Fin />} />
-        <Route path="/rrp" element={<RRP />} />
-        <Route path="/reset" element={<Reset />} />
-        <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-        <Route path="/edit" element={<ProtectedRoute><EditProfile /></ProtectedRoute>} />
-        <Route path="/rooms/:roomId" element={<ProtectedRoute><RoomChat /></ProtectedRoute>} />
-        <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
-        <Route path="/users/:userId" element={<ProtectedRoute><PublicProfile /></ProtectedRoute>} />
-        <Route path="/connections/:userId" element={<ProtectedRoute><ConnectionsPage /></ProtectedRoute>} />
-
-        <Route path="/admin" element={<ProtectedRoute><AdminPanel /></ProtectedRoute>} />
-        <Route path="/superadmin" element={<ProtectedRoute><SuperAdminPanel /></ProtectedRoute>} />
-
-        <Route path="/reorientation" element={<ReorientationPage />} />
-        <Route path="/correct-inputs" element={<CorrectInputsPage />} />
-        <Route path="/guide" element={<Guide />} />
-        <Route path="/guide2" element={<Guide2 />} />
-
-      </Routes>
-            </RegistrationProvider>
+    
+  <Router>
+      <RegistrationProvider>
+        <AppContent />
+      </RegistrationProvider>
     </Router>
    
     

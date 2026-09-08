@@ -109,7 +109,7 @@ const majorOptions = availableMajors.map((m) => ({ value: m.name, label: m.name 
         padding: "20px",
       }}
     >
-          <FloatingHelper currentPage="correction " /> 
+          {/* <FloatingHelper currentPage="correction " />  */}
       
       <div
         style={{

@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import { matchCommand } from './matchCommand';
 import { parseIntentWithAI } from './voiceIntentAI';
 import { speak } from './voiceTTS';
+import { useEffect } from 'react';
 
 /**
  * VoiceCommandContext
@@ -99,7 +100,6 @@ const stopDictation = useCallback(() => {
   // --- turn-taking with TTS: mic and TTS output never run "active" at the same time ---
   // Whatever plays TTS (confirmations, FloatingHelper's speakText, etc.) MUST call
   // notifyTTSStart()/notifyTTSEnd() around playback so the mic doesn't transcribe itself.
-  const ttsSpeakingRef = useRef(false);
 
   const notifyTTSStart = useCallback(() => {
      ttsActiveCountRef.current += 1;
@@ -118,9 +118,10 @@ const stopDictation = useCallback(() => {
         clearInterval(check);
         resolve();
       }
-      // recordOneSegment's tick
-// if (ttsActiveCountRef.current > 0) { console.log('[voice] segment aborted: TTS started speaking'); return finish('tts-speaking'); }
-    }, 100);
+    // in recordOneSegment's tick()
+if (ttsActiveCountRef.current > 0) { console.log('[voice] segment aborted: TTS started speaking'); return finish('tts-speaking'); 
+
+}   }, 100);
   });
 }, []);
 
@@ -341,6 +342,11 @@ if (dictationTargetIdRef.current) {
     });
   }, [stopVadLoop]);
 
+  const localeRef = useRef(locale);
+useEffect(() => {
+  localeRef.current = locale;
+}, [locale]);
+
   // The continuous loop: record a segment -> transcribe+process it -> repeat,
   // for as long as continuousModeRef.current stays true.
   const continuousLoop = useCallback(async () => {
@@ -484,8 +490,8 @@ const WAKE_WORD_DISPLAY = {
 // matchesWakePhrase closes over `locale` from the component's props — no
 // need to sniff script from the text anymore, we already know the language
 const matchesWakePhrase = (text) => {
-  const words = normalize(text).split(/\s+/).filter(Boolean);
-  const triggers = WAKE_TRIGGERS[locale] || WAKE_TRIGGERS.en;
+   const words = normalize(text).split(/\s+/).filter(Boolean);
+  const triggers = WAKE_TRIGGERS[localeRef.current] || WAKE_TRIGGERS.en;
 
   return triggers.some(({ words: triggerWords, maxDistance }) => {
     for (let i = 0; i <= words.length - triggerWords.length; i++) {

@@ -165,7 +165,7 @@ const handleSelectChange = (event) => {
       </select>
     </div>
 
-        <FloatingHelper currentPage="reset" /> 
+        {/* <FloatingHelper currentPage="reset" />  */}
     
               <form  onSubmit={handleSubmit}>
         <fieldset id="field6">

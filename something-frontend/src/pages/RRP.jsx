@@ -71,7 +71,7 @@ setError(t("rrp.error"));  }
 
   return (
     <div className="RRP" id="body4"> 
-        <FloatingHelper currentPage="rrp" />
+        {/* <FloatingHelper currentPage="rrp" /> */}
  
         <form onSubmit={handleSubmit} method="post" id="reset-form">
         <fieldset id="field5">

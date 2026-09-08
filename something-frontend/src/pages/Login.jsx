@@ -155,7 +155,7 @@ useVoiceCommand({
         </select>
       </div>
 
-      <FloatingHelper currentPage="login" />
+      {/* <FloatingHelper currentPage="login" /> */}
 
       <form onSubmit={handleSubmit} id="loginForm" autoComplete="off">
         {" "}

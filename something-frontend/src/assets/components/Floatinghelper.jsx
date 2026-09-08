@@ -167,7 +167,7 @@ export default function FloatingHelper() {
     if (!isWakeListening) return; // only rotate while actually relevant
     const interval = setInterval(() => {
       setWakeHintIndex((i) => (i + 1) % wakeWordHints.length);
-    }, 3000);
+    }, 4500);
     return () => clearInterval(interval);
   }, [isWakeListening, wakeWordHints.length]);
 
@@ -177,7 +177,7 @@ export default function FloatingHelper() {
   }, []);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });//smoooooth operatooooooooar....smoooooooooooooooooooooooth operetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaah
   }, [messages]);
 
   // stop speech when widget closes
