@@ -17,6 +17,9 @@ THE FORMS:
  5. request rest password: fields: registed email,they get a link via that email if valid and will lead to the reset password page with new password and confirm password fields.
 6. fin : a celebratory page after successful registration, with a set of navigation buttons(go to dashboard,back to home-welcome page-,back to login) buttons and a "celebrate again "button that launches th confetti animation on the page.
 7. requst-reset-password(RRP): fields: just one field for the email used in the registration process,if that email was valid ,a reset link would be sent to it.
+8. reset-password(reset): fields: new password and confirm password,if the user is logged in they can access this page from the edit link via the profile tab to change thier password,if they are not logged in they can access it via the reset link sent to thier email after requesting a reset.
+9. reorientation page: fields: university and major,if the user made mistake while registering their custom university or major or an admin refused their major/university request they would be greeted by this page on their next login to chose a new approved major or university according to what went wrong in their registration.
+10.correctInput (correction) page: fields:  major,if a user registered as a professor and thier proof of status was refused by an admin,they would be required to downgrade ro one major and get the student role ,if they suspected a mistake they can contact the superadmin via email found at the buttom of the manual.
 HOW TO HELP:
 - "what do I put here?" → explain the field clearly
 - university/major confusion → select from list, or type a custom one if not listed
@@ -34,11 +37,16 @@ PERSONALITY: Short, clear, reassuring. Max 3-4 sentences. You are a helper popup
 Respond in the same language the user writes in (Arabic/French/English).
 `;
 
-
 function getPageFromPath(pathname) {
   if (pathname.startsWith("/login")) return "login";
   if (pathname.startsWith("/info")) return "info";
   if (pathname.startsWith("/register")) return "register";
+  if (pathname.startsWith("/rrp")) return "request-reset-password";
+  if (pathname.startsWith("/reset")) return "reset";
+  if (pathname.startsWith("/reorientation")) return "reorientation";
+  if (pathname.startsWith("/correct-inputs")) return "correction";
+  if (pathname.startsWith("/fin")) return "fin";
+
   return "welcome"; // fallback for "/" and anything unmapped
 }
 
@@ -67,21 +75,62 @@ function detectLang(messages) {
   return "en-US";
 }
 
-const QUICK = {
-  register: ["What goes in username?", "Password rules?", "Why do I need an email?"],
-  login: ["I forgot my password", "Wrong password error?", "Which email do I use?"],
-  info: ["What is 'university' field?", "I don't see my major", "Can I skip this page?"],
-};
-
 const GREETINGS = {
   register: " I can help you fill out this form. Ask if you get stuck!",
   login: " Need help logging in? Ask me anything.",
   info: "Hellooo~~, This sets up your academic profile. Ask me about any field!",
+  "request-reset-password":
+    "Enter the email you registered with, and I'll help if anything looks off.",
+  reset:
+    "Set your new password below. Ask me about the rules if you need them!",
+  reorientation:
+    "Let's get you set up with an approved university or major. Ask if you're not sure what to pick.",
+  correction:
+    "Let's sort out your role. Ask me if you're not sure what happened or what to do next.",
+  fin: "🎉 You're all set! Ask me what any of these buttons do.",
 };
 
+const QUICK = {
+  register: [
+    "What goes in username?",
+    "Password rules?",
+    "Why do I need an email?",
+  ],
+  login: [
+    "I forgot my password",
+    "Wrong password error?",
+    "Which email do I use?",
+  ],
+  info: [
+    "What is 'university' field?",
+    "I don't see my major",
+    "Can I skip this page?",
+  ],
+  "request-reset-password": [
+    "Which email do I use?",
+    "I didn't get the email",
+    "How long is the link valid?",
+  ],
+  reset: [
+    "Password rules?",
+    "Why do I need to confirm it?",
+    "What if I forgot my old password?",
+  ],
+  reorientation: [
+    "Why am I here?",
+    "I don't see my university",
+    "Can I change this again later?",
+  ],
+  correction: [
+    "Why was I downgraded?",
+    "Can I appeal this?",
+    "Which major do I pick?",
+  ],
+  fin: ["Where's my dashboard?", "How do I get back to login?"],
+};
 export default function FloatingHelper() {
   const [open, setOpen] = useState(false);
- 
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [listening, setListening] = useState(false); // push-to-talk dictation state (unchanged)
@@ -92,22 +141,35 @@ export default function FloatingHelper() {
   const mediaRecorderRef = useRef(null);
 
   const location = useLocation();
-const currentPage = getPageFromPath(location.pathname);
- const [messages, setMessages] = useState([
-    { role: "assistant", content: GREETINGS[currentPage] || GREETINGS.register },
+  const currentPage = getPageFromPath(location.pathname);
+  const [messages, setMessages] = useState([
+    {
+      role: "assistant",
+      content: GREETINGS[currentPage] || GREETINGS.register,
+    },
   ]);
   // --- hands-free continuous listening (shared with voice nav) ---------
-const {
+  const {
     toggleListening: toggleHandsFree,
     isListening: isHandsFree,
     isWakeListening,
     isTranscribing: handsFreeTranscribing,
+    wakeWordHints,
     isProcessing: handsFreeProcessing,
     micError: handsFreeMicError,
     notifyTTSStart,
     notifyTTSEnd,
     registerUnmatchedHandler,
   } = useVoiceCommandContext();
+
+  const [wakeHintIndex, setWakeHintIndex] = useState(0);
+  useEffect(() => {
+    if (!isWakeListening) return; // only rotate while actually relevant
+    const interval = setInterval(() => {
+      setWakeHintIndex((i) => (i + 1) % wakeWordHints.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [isWakeListening, wakeWordHints.length]);
 
   useEffect(() => {
     const t = setTimeout(() => setPulse(false), 5000);
@@ -171,10 +233,12 @@ const {
     const recorder = new MediaRecorder(stream);
     mediaRecorderRef.current = recorder;
 
-    recorder.ondataavailable = (e) => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
+    };
 
     recorder.onstop = async () => {
-      stream.getTracks().forEach(t => t.stop());
+      stream.getTracks().forEach((t) => t.stop());
       setListening(false);
 
       const blob = new Blob(chunks, { type: "audio/webm" });
@@ -183,10 +247,13 @@ const {
 
       try {
         setLoading(true);
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/ai/transcribe`, {
-          method: "POST",
-          body: formData,
-        });
+        const res = await fetch(
+          `${import.meta.env.VITE_API_URL}/ai/transcribe`,
+          {
+            method: "POST",
+            body: formData,
+          },
+        );
         const data = await res.json();
         if (data.text) setInput(data.text);
       } catch {
@@ -214,13 +281,16 @@ const {
 
     try {
       const reply = await callAI(
-  newMessages.map((m) => ({ role: m.role, content: m.content })),
-  currentPage
-);
+        newMessages.map((m) => ({ role: m.role, content: m.content })),
+        currentPage,
+      );
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       return reply;
     } catch {
-      setMessages((prev) => [...prev, { role: "assistant", content: "Oops! Connection issue. Try again." }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: "Oops! Connection issue. Try again." },
+      ]);
       return null;
     } finally {
       setLoading(false);
@@ -231,28 +301,27 @@ const {
   // aloud afterward — the user spoke instead of typed, so a silent text-only
   // reply defeats the point of hands-free mode. Typed messages stay opt-in
   // (click the speaker icon), matching existing behavior.
-  
 
-      // the new message's index is messages.length AFTER the user+assistant
-      // pair was appended — since sendMessage already updated state twice,
-      // just speak the reply text directly without needing the exact index
-      // for the toggle-to-stop UI (voice-triggered replies auto-play once).
-    //   speak(reply, { onStart: notifyTTSStart, onEnd: notifyTTSEnd });
+  // the new message's index is messages.length AFTER the user+assistant
+  // pair was appended — since sendMessage already updated state twice,
+  // just speak the reply text directly without needing the exact index
+  // for the toggle-to-stop UI (voice-triggered replies auto-play once).
+  //   speak(reply, { onStart: notifyTTSStart, onEnd: notifyTTSEnd });
 
   const sendVoiceMessage = async (text) => {
-  const reply = await sendMessage(text);
-  if (reply) {
-    notifyTTSStart(); // flip synchronously, don't wait for speak()'s async onStart
-    await new Promise((resolve) => {
-      speak(reply, {
-        onEnd: () => {
-          notifyTTSEnd();
-          resolve();
-        },
+    const reply = await sendMessage(text);
+    if (reply) {
+      notifyTTSStart(); // flip synchronously, don't wait for speak()'s async onStart
+      await new Promise((resolve) => {
+        speak(reply, {
+          onEnd: () => {
+            notifyTTSEnd();
+            resolve();
+          },
+        });
       });
-    });
-  }
-};
+    }
+  };
 
   // register as the unmatched-speech handler for as long as this
   // FloatingHelper instance is mounted — scoped per-page, same idea as
@@ -271,12 +340,20 @@ const {
         <div style={f.window}>
           <div style={f.header}>
             <span>🤖 Registration Helper</span>
-            <button onClick={() => setOpen(false)} style={f.closeBtn}>✕</button>
+            <button onClick={() => setOpen(false)} style={f.closeBtn}>
+              ✕
+            </button>
           </div>
 
           <div style={f.messages}>
             {messages.map((m, i) => (
-              <div key={i} style={{ ...f.bubble, ...(m.role === "user" ? f.userBubble : f.aiBubble) }}>
+              <div
+                key={i}
+                style={{
+                  ...f.bubble,
+                  ...(m.role === "user" ? f.userBubble : f.aiBubble),
+                }}
+              >
                 <p style={f.bubbleText}>{m.content}</p>
                 {/* TTS button — only on assistant messages */}
                 {m.role === "assistant" && (
@@ -284,7 +361,10 @@ const {
                     onClick={() => speakMessage(m.content, i)}
                     style={{
                       ...f.ttsBtn,
-                      color: speakingIndex === i ? "#e74c3c" : "rgba(255,255,255,0.4)",
+                      color:
+                        speakingIndex === i
+                          ? "#e74c3c"
+                          : "rgba(255,255,255,0.4)",
                     }}
                     title={speakingIndex === i ? "Stop" : "Read aloud"}
                   >
@@ -304,23 +384,33 @@ const {
           {messages.length <= 2 && (
             <div style={f.quickRow}>
               {quick.map((q) => (
-                <button key={q} style={f.quickBtn} onClick={() => sendMessage(q)}>{q}</button>
+                <button
+                  key={q}
+                  style={f.quickBtn}
+                  onClick={() => sendMessage(q)}
+                >
+                  {q}
+                </button>
               ))}
             </div>
           )}
 
           {/* hands-free status strip — only shows while active/relevant */}
-                  {(isHandsFree || isWakeListening || handsFreeTranscribing || handsFreeProcessing || handsFreeMicError) && (
+          {(isHandsFree ||
+            isWakeListening ||
+            handsFreeTranscribing ||
+            handsFreeProcessing ||
+            handsFreeMicError) && (
             <div style={f.handsFreeStatus}>
               {handsFreeMicError
                 ? `Mic error: ${handsFreeMicError}`
                 : handsFreeProcessing
-                ? "Thinking..."
-                : handsFreeTranscribing
-                ? "Transcribing..."
-                : isWakeListening
-                ? "Listening for wake word..."
-                : "Listening (hands-free)..."}
+                  ? "Thinking..."
+                  : handsFreeTranscribing
+                    ? "Transcribing..."
+                    : isWakeListening
+                      ? "Listening for wake word..."
+                      : "Listening (hands-free)..."}
             </div>
           )}
 
@@ -328,14 +418,20 @@ const {
             <button
               onClick={toggleVoice}
               title="Push-to-talk: dictate into the text box"
-              style={{ ...f.iconBtn, background: listening ? "#e74c3c" : "rgba(100,118,175,0.3)" }}
+              style={{
+                ...f.iconBtn,
+                background: listening ? "#e74c3c" : "rgba(100,118,175,0.3)",
+              }}
             >
               {listening ? "⏹" : "🎤"}
             </button>
             <button
               onClick={toggleHandsFree}
               title="Hands-free: continuous voice commands + questions"
-              style={{ ...f.iconBtn, background: isHandsFree ? "#2ecc71" : "rgba(100,118,175,0.15)" }}
+              style={{
+                ...f.iconBtn,
+                background: isHandsFree ? "#2ecc71" : "rgba(100,118,175,0.15)",
+              }}
             >
               {isHandsFree ? "🟢" : "🎧"}
             </button>
@@ -350,7 +446,11 @@ const {
             <button
               onClick={() => sendMessage()}
               disabled={!input.trim() || loading}
-              style={{ ...f.iconBtn, background: input.trim() ? "#6476af" : "rgba(255,255,255,0.1)", opacity: !input.trim() ? 0.5 : 1 }}
+              style={{
+                ...f.iconBtn,
+                background: input.trim() ? "#6476af" : "rgba(255,255,255,0.1)",
+                opacity: !input.trim() ? 0.5 : 1,
+              }}
             >
               ➤
             </button>
@@ -358,10 +458,27 @@ const {
         </div>
       )}
 
-           <button
-        onClick={() => { setOpen((o) => !o); setPulse(false); }}
-        style={{ ...f.fab, animation: pulse && !open ? "sbPulse 1.5s infinite" : "none" }}
-        title={isWakeListening ? "Voice assistant listening for wake word" : isHandsFree ? "Voice assistant active" : "Need help?"}
+      {!open && isWakeListening && (
+        <div key={wakeHintIndex} style={f.wakeToast}>
+          Say "{wakeWordHints[wakeHintIndex]}"
+        </div>
+      )}
+      <button
+        onClick={() => {
+          setOpen((o) => !o);
+          setPulse(false);
+        }}
+        style={{
+          ...f.fab,
+          animation: pulse && !open ? "sbPulse 1.5s infinite" : "none",
+        }}
+        title={
+          isWakeListening
+            ? "Voice assistant listening for wake word"
+            : isHandsFree
+              ? "Voice assistant active"
+              : "Need help?"
+        }
       >
         {open ? "✕" : "🤖"}
         {!open && (isWakeListening || isHandsFree) && (
@@ -374,7 +491,7 @@ const {
         )}
       </button>
 
-         <style>{`
+      <style>{`
         @keyframes sbPulse {
           0%   { box-shadow: 0 0 0 0 rgba(100,118,175,0.7); }
           70%  { box-shadow: 0 0 0 12px rgba(100,118,175,0); }
@@ -384,6 +501,13 @@ const {
           0%, 100% { opacity: 1; }
           50%      { opacity: 0.4; }
         }
+
+        @keyframes sbToastFade {
+  0%   { opacity: 0; transform: translateY(4px); }
+  15%  { opacity: 1; transform: translateY(0); }
+  85%  { opacity: 1; }
+  100% { opacity: 0; }
+}
       `}</style>
     </div>
   );
@@ -391,86 +515,170 @@ const {
 
 const f = {
   wrapper: {
-    position: "fixed", bottom: "24px", right: "24px",
-    zIndex: 9999, display: "flex", flexDirection: "column",
-    alignItems: "flex-end", gap: "12px", fontFamily: "inherit",
+    position: "fixed",
+    bottom: "24px",
+    right: "24px",
+    zIndex: 9999,
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    gap: "12px",
+    fontFamily: "inherit",
   },
-    fab: {
+  fab: {
     position: "relative",
-    width: "52px", height: "52px", borderRadius: "50%", border: "none",
+    width: "52px",
+    height: "52px",
+    borderRadius: "50%",
+    border: "none",
     background: "linear-gradient(135deg, #6476af, #4a5a8a)",
-    color: "white", fontSize: "22px", cursor: "pointer",
+    color: "white",
+    fontSize: "22px",
+    cursor: "pointer",
     boxShadow: "0 4px 20px rgba(100,118,175,0.5)",
-    display: "flex", alignItems: "center", justifyContent: "center",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
     transition: "transform 0.2s",
   },
   micDot: {
-    position: "absolute", top: "2px", right: "2px",
-    width: "12px", height: "12px", borderRadius: "50%",
+    position: "absolute",
+    top: "2px",
+    right: "2px",
+    width: "12px",
+    height: "12px",
+    borderRadius: "50%",
     border: "2px solid #1a2236",
     animation: "sbDotPulse 1.8s infinite",
   },
   window: {
-    width: "320px", maxHeight: "430px",
-    background: "#1a2236", borderRadius: "16px",
+    width: "320px",
+    maxHeight: "430px",
+    background: "#1a2236",
+    borderRadius: "16px",
     boxShadow: "0 8px 40px rgba(0,0,0,0.5)",
     border: "1px solid rgba(255,255,255,0.1)",
-    display: "flex", flexDirection: "column", overflow: "hidden",
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
   },
   header: {
     padding: "12px 16px",
     background: "rgba(100,118,175,0.2)",
     borderBottom: "1px solid rgba(255,255,255,0.08)",
-    display: "flex", justifyContent: "space-between", alignItems: "center",
-    fontSize: "13px", fontWeight: "600", color: "white",
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "white",
   },
   closeBtn: {
-    background: "none", border: "none",
-    color: "rgba(255,255,255,0.6)", cursor: "pointer", fontSize: "16px",
+    background: "none",
+    border: "none",
+    color: "rgba(255,255,255,0.6)",
+    cursor: "pointer",
+    fontSize: "16px",
   },
   messages: {
-    flex: 1, overflowY: "auto", padding: "12px",
-    display: "flex", flexDirection: "column", gap: "8px",
+    flex: 1,
+    overflowY: "auto",
+    padding: "12px",
+    display: "flex",
+    flexDirection: "column",
+    gap: "8px",
   },
   bubble: { maxWidth: "85%", padding: "8px 12px", borderRadius: "12px" },
-  userBubble: { alignSelf: "flex-end", background: "#6476af", borderBottomRightRadius: "3px" },
-  aiBubble: {
-    alignSelf: "flex-start", background: "rgba(255,255,255,0.07)",
-    border: "1px solid rgba(255,255,255,0.08)", borderBottomLeftRadius: "3px",
+  userBubble: {
+    alignSelf: "flex-end",
+    background: "#6476af",
+    borderBottomRightRadius: "3px",
   },
-  bubbleText: { margin: 0, fontSize: "13px", lineHeight: "1.5", color: "white", whiteSpace: "pre-wrap" },
+  aiBubble: {
+    alignSelf: "flex-start",
+    background: "rgba(255,255,255,0.07)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderBottomLeftRadius: "3px",
+  },
+  bubbleText: {
+    margin: 0,
+    fontSize: "13px",
+    lineHeight: "1.5",
+    color: "white",
+    whiteSpace: "pre-wrap",
+  },
   ttsBtn: {
-    background: "none", border: "none", cursor: "pointer",
-    fontSize: "12px", padding: "2px 0 0 0", display: "block",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "12px",
+    padding: "2px 0 0 0",
+    display: "block",
     transition: "color 0.2s",
   },
   quickRow: {
-    display: "flex", flexWrap: "wrap", gap: "6px", padding: "8px 12px",
+    display: "flex",
+    flexWrap: "wrap",
+    gap: "6px",
+    padding: "8px 12px",
     borderTop: "1px solid rgba(255,255,255,0.05)",
   },
   quickBtn: {
-    padding: "4px 10px", borderRadius: "12px",
-    border: "1px solid rgba(100,118,175,0.4)", background: "transparent",
-    color: "rgba(255,255,255,0.6)", fontSize: "11px", cursor: "pointer",
+    padding: "4px 10px",
+    borderRadius: "12px",
+    border: "1px solid rgba(100,118,175,0.4)",
+    background: "transparent",
+    color: "rgba(255,255,255,0.6)",
+    fontSize: "11px",
+    cursor: "pointer",
   },
   handsFreeStatus: {
-    padding: "6px 12px", fontSize: "11px", color: "rgba(255,255,255,0.6)",
-    borderTop: "1px solid rgba(255,255,255,0.05)", textAlign: "center",
+    padding: "6px 12px",
+    fontSize: "11px",
+    color: "rgba(255,255,255,0.6)",
+    borderTop: "1px solid rgba(255,255,255,0.05)",
+    textAlign: "center",
   },
   inputRow: {
-    display: "flex", gap: "6px", padding: "10px 12px",
-    borderTop: "1px solid rgba(255,255,255,0.08)", alignItems: "center",
+    display: "flex",
+    gap: "6px",
+    padding: "10px 12px",
+    borderTop: "1px solid rgba(255,255,255,0.08)",
+    alignItems: "center",
   },
   input: {
-    flex: 1, padding: "8px 12px", borderRadius: "10px",
+    flex: 1,
+    padding: "8px 12px",
+    borderRadius: "10px",
     border: "1px solid rgba(255,255,255,0.12)",
-    background: "rgba(255,255,255,0.05)", color: "white",
-    fontSize: "13px", outline: "none", fontFamily: "inherit",
+    background: "rgba(255,255,255,0.05)",
+    color: "white",
+    fontSize: "13px",
+    outline: "none",
+    fontFamily: "inherit",
   },
   iconBtn: {
-    width: "36px", height: "36px", borderRadius: "10px", border: "none",
-    cursor: "pointer", fontSize: "14px", display: "flex",
-    alignItems: "center", justifyContent: "center", flexShrink: 0,
-    transition: "all 0.2s", color: "white",
+    width: "36px",
+    height: "36px",
+    borderRadius: "10px",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "14px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    transition: "all 0.2s",
+    color: "white",
   },
-}
+  wakeToast: {
+    padding: "6px 12px",
+    borderRadius: "10px",
+    background: "rgba(26,34,54,0.92)",
+    border: "1px solid rgba(255,255,255,0.12)",
+    color: "white",
+    fontSize: "12px",
+    whiteSpace: "nowrap",
+    animation: "sbToastFade 3s ease-in-out",
+  },
+};

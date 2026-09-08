@@ -4,6 +4,7 @@ import axios from "axios";
  import { useTranslation } from 'react-i18next';
  import i18n from '../i18n/index.js';
  import api from "../api/axios.js";
+ import FloatingHelper from "../assets/components/Floatinghelper.jsx";
 export default function ReorientationPage() {
   const navigate = useNavigate();
  
@@ -88,6 +89,9 @@ const isRTL = i18n.language === 'ar';
         <option value="ar">العربية</option>
       </select>
     </div>
+
+        <FloatingHelper currentPage="reorientation" /> 
+    
       <div style={{
         background: "#252b45", borderRadius: "12px", padding: "32px",
         width: "100%", maxWidth: "480px"

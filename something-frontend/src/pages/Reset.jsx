@@ -15,6 +15,8 @@ import { useNavigate, useSearchParams } from "react-router-dom"; import { useSta
 import { useTranslation } from 'react-i18next';
 import i18n from '../i18n/index.js';
 import api from "../api/axios.js";
+import { useContext } from "react";
+import Floatinghelper from "../assets/components/Floatinghelper.jsx";
 
 export default function Reset() {
       const navigate = useNavigate();
@@ -162,9 +164,12 @@ const handleSelectChange = (event) => {
         <option value="ar">العربية</option>
       </select>
     </div>
+
+        <FloatingHelper currentPage="reset" /> 
+    
               <form  onSubmit={handleSubmit}>
         <fieldset id="field6">
-            <h2 id="rpTitle">{t("reset.title")} 🔒</h2>
+            <h2 id="rpTitle">{t("reset.title")} </h2>
             
                 <label htmlFor="password" className="rpLabel" >{t("reset.new_password_label")}</label>
                 <br/>

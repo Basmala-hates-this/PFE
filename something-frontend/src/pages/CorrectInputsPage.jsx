@@ -5,6 +5,7 @@ import Select from "react-select";
 import { customSelect } from "../assets/components/selectStyles";
  import { useTranslation } from 'react-i18next';
 import api from "../api/axios.js";
+import FloatingHelper from "../assets/components/Floatinghelper.jsx";
 
 
 export default function CorrectInputsPage() {
@@ -96,6 +97,7 @@ const majorOptions = availableMajors.map((m) => ({ value: m.name, label: m.name 
   };
 
   return (
+    
     <div
       style={{
         minHeight: "100vh",
@@ -107,6 +109,8 @@ const majorOptions = availableMajors.map((m) => ({ value: m.name, label: m.name 
         padding: "20px",
       }}
     >
+          <FloatingHelper currentPage="correction " /> 
+      
       <div
         style={{
           background: "#252b45",
@@ -224,6 +228,7 @@ const majorOptions = availableMajors.map((m) => ({ value: m.name, label: m.name 
         </button>
       </div>
     </div>
+    
   );
 }
  

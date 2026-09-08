@@ -475,6 +475,12 @@ const WAKE_TRIGGERS = {
   ],
 };
 
+const WAKE_WORD_DISPLAY = {
+  en: ['Glau', 'Hoot', 'Hey Owl'],
+  fr: ['Glau', 'Hou', 'Salut Hibou'],
+  ar: ['غلو', 'هوت', 'يا بومة'],
+};
+
 // matchesWakePhrase closes over `locale` from the component's props — no
 // need to sniff script from the text anymore, we already know the language
 const matchesWakePhrase = (text) => {
@@ -554,6 +560,7 @@ const startWakeListening = useCallback(() => startMicSession('wake'), [startMicS
 
 const value = {
     locale,
+    wakeWordHints: WAKE_WORD_DISPLAY[locale] || WAKE_WORD_DISPLAY.en,
     isListening,
     setIsListening,
     isWakeListening,
