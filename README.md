@@ -1,6 +1,8 @@
 
 if the doc about the original idea isnt here...i'll add it
 
+FYI this is a self built learning base project, it is not perfect but very functional to all the levels I could think of
+######################################################################################################################
 
 
 
