@@ -4,13 +4,10 @@ if the doc about the original idea isnt here...i'll add it
 FYI this is a self built learning base project, it is not perfect but very functional to all the levels I could think of
 ######################################################################################################################
 
-
-
-
-
-
-
-
+The core idea and the base of the progress(the primary prototype description) are both available in the idk pdf in this project 
+This project went through plenty of phases and changes, all lead to the best growth in both productivity and my skills
+But the jurney is not over yet, this has more potentials to grow even more
+Just not for the moment since I need to focus on other aspects
 
 #############################
 
