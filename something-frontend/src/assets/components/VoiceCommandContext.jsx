@@ -197,7 +197,7 @@ if (dictationTargetIdRef.current) {
   await unmatchedHandlerRef.current(text); // block the loop through the whole ai/chat round trip + spoken reply
   return { matched: false, delegated: true };
 }
-     await  speakConfirmation("Sorry, I didn't catch that.");
+     await speakConfirmation(CONFIRM_STRINGS[localeRef.current]?.noMatch ?? CONFIRM_STRINGS.en.noMatch);
       return { matched: false };
     } finally {
       setIsProcessing(false);
@@ -385,7 +385,7 @@ useEffect(() => {
       setIsWakeListening(false);
       setIsListening(true);
       
-     await  speakConfirmation("I'm listening.");
+     await speakConfirmation(CONFIRM_STRINGS[localeRef.current]?.listening ?? CONFIRM_STRINGS.en.listening);
     }
     // no match -> discard silently, wake loop just keeps listening
   } else {
@@ -485,6 +485,12 @@ const WAKE_WORD_DISPLAY = {
   en: ['Glau', 'Hoot', 'Hey Owl'],
   fr: ['Glau', 'Hou', 'Salut Hibou'],
   ar: ['غلو', 'هوت', 'يا بومة'],
+};
+
+const CONFIRM_STRINGS = {
+  en: { listening: "I'm listening.", noMatch: "Sorry, I didn't catch that." },
+  fr: { listening: "Je vous écoute.", noMatch: "Désolé, je n'ai pas compris." },
+  ar: { listening: "أنا أستمع.", noMatch: "عذرًا، لم أفهم ذلك." },
 };
 
 // matchesWakePhrase closes over `locale` from the component's props — no
