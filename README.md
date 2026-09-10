@@ -59,7 +59,7 @@ a question.
 
 ---
 
-## 🚧 Remaining Work
+##  Remaining Work
 
 The project is functional, but several areas still need polishing:
 
@@ -81,7 +81,7 @@ fundamental functionality**.
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 The original project idea and primary prototype description are
 available in the project documentation.
@@ -91,7 +91,7 @@ available in the project documentation.
 
 ---
 
-## 🛠️ Development Philosophy
+##  Philosophy
 
 Glaukopis is a self-built learning project.
 
@@ -123,7 +123,7 @@ take precedence.**
 
 ---
 
-## 📊 Feature Status
+## Feature Status
 
 | Feature | Status |
 |---|---|
@@ -146,7 +146,7 @@ take precedence.**
 
 ---
 
-## 📝 Notes
+## Notes
 
 This repository represents a project that has been developed primarily
 as a solo learning experience.
