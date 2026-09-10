@@ -110,7 +110,7 @@ const stopDictation = useCallback(() => {
   }, []);
 
   // polls until TTS finishes, so the continuous loop can pause before starting a new segment
- const waitUntilTTSFinished = useCallback(() => {
+const waitUntilTTSFinished = useCallback(() => {
   return new Promise((resolve) => {
     if (ttsActiveCountRef.current <= 0) return resolve();
     const check = setInterval(() => {
@@ -118,10 +118,7 @@ const stopDictation = useCallback(() => {
         clearInterval(check);
         resolve();
       }
-    // in recordOneSegment's tick()
-if (ttsActiveCountRef.current > 0) { console.log('[voice] segment aborted: TTS started speaking'); return finish('tts-speaking'); 
-
-}   }, 100);
+    }, 100);
   });
 }, []);
 
@@ -298,8 +295,7 @@ if (dictationTargetIdRef.current) {
 
       const tick = () => {
         if (!continuousModeRef.current) { console.log('[voice] segment aborted: mode turned off'); return finish('mode-off'); }
-        if (ttsSpeakingRef.current) { console.log('[voice] segment aborted: TTS started speaking'); return finish('tts-speaking'); }
-
+        if (ttsActiveCountRef.current > 0) { console.log('[voice] segment aborted: TTS started speaking'); return finish('tts-speaking'); }
         analyser.getByteTimeDomainData(dataArray);
         // rough volume: average deviation from the 128 (silence) midpoint
         let sum = 0;
