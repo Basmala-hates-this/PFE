@@ -1,92 +1,157 @@
-The leftover f this project as I see it
-*polish the voice system(the feedback, wakewords, form filling and dashboard integration)
-*add emails to when calls startes
-*polish the modals (comments/posts/and other display modals) 
-*polish the call UI
-*add prof status override other then relaying on the database
-*all the theory side of this project is still waiting
-###############################################
-But from what I can call it, this project is well functional and great looking. 
-When I come back with a clearer mind, this left overs would cross easy
+# 🦉 Glaukopis
 
-###########################################################
-if the doc about the original idea isnt here...i'll add it
+> A self-built university collaboration platform focused on knowledge
+> sharing, peer learning, and AI-assisted academic tools.
 
-FYI this is a self built learning base project, it is not perfect but very functional to all the levels I could think of
-######################################################################################################################
+---
 
-The core idea and the base of the progress(the primary prototype description) are both available in the idk pdf in this project 
-This project went through plenty of phases and changes, all lead to the best growth in both productivity and my skills
-But the jurney is not over yet, this has more potentials to grow even more
-Just not for the moment since I need to focus on other aspects
+## About the Project
 
-#############################
+Glaukopis is a self-built learning project that evolved considerably
+throughout its development.
 
-##########################################
+The original concept, architecture, and project documentation went
+through multiple iterations as new ideas and technical challenges
+appeared. Each phase contributed to improving both the platform and
+my own development skills.
 
-for the override.....i have a table to explain what can be overridden
-<img width="935" height="461" alt="image" src="https://github.com/user-attachments/assets/b4dcaa6d-d086-489f-93f1-b3589acd4447" />
-######################################
-python ahh comments.....either way just clearing this read me because i actually read what it had
+This is not intended to be presented as a perfect production system.
+It is, however, a highly functional project built progressively from
+scratch, with features extending well beyond the original prototype.
 
-############################################################
-Back to being solo.....maybe for the best?time would tell. ...i was always solo. ...
-I need to get back to the ovrride and add the prof status override at some point. ...
-Right now, it happens that I don't have much to do in the improve list, but what is left is quite heavy and time consuming. ...
-##################################################################################
-<strong>Future improvs</strong>
+---
 
+## Current State
 
-More Collaborative Features:
+The platform is currently **highly functional**, with most of the
+planned core and advanced features implemented.
 
+### Community Features
 
-Answered/Unanswered filtering — community can see what questions still need
-help, encourages people to contribute(this,I think op should have control over)(DONE)
+- Answered / unanswered question filtering
+- Peer endorsements
+- Study-partner posts
+- Real-time room chat
+- Cross-specialty collaboration rooms
 
-• Peer endorsements — users can endorse each other's expertise in a subject (like
-LinkedIn skills but academic)(DONE)
+### AI Features
 
-• "Looking for study partner" posts — a specific post type for finding someone to
-study with(DONE)
+- AI question suggestions
+- AI-generated study material
+- Smart search assistance
+- AI-generated study plans
+- AI-powered room summaries
+- AI difficulty tagging
+- AI-assisted voice navigation
 
-• Room chat improvs --- migrate from polling to WebSockets to support actual real(DONE---mostly functional)
-time chats and future video and audio calls.
+### Cross-Specialty Collaboration
 
+One of the later additions to the project is the interdisciplinary
+room system.
 
-AI Features:
-• full voice navigation and action for hands free experience
+Questions can be associated with both the specialty they originate
+from and the specialty they are directed toward, allowing relevant
+content to appear in the appropriate academic spaces without flooding
+general feeds.
 
-• the ai in the chat tab would support files and generate study material (resumes/
-summaries,flashcards,quizzes….)(DONE)
+AI can also assist with determining which specialty is relevant to
+a question.
 
-• ai will be integrated more in the platform that it supports smart search and such.(satisfied by question-suggestion + difficulty tagging + AI chat)(DONE)
+---
 
-• AI question suggestions — when you're typing a question, AI checks if a similar one
-was already asked(DONE)
+## 🚧 Remaining Work
 
-• Smart study plan — AI generates a weekly study schedule based on your major and
-upcoming exams(DONE. ..i love this one)
+The project is functional, but several areas still need polishing:
 
-• AI-powered room summaries — weekly digest of the most useful content in your
-subject room(DONE, just checked, prompt needs to be less hostile, but works)
+- [ ] Polish the voice system
+  - Feedback
+  - Wake-word handling
+  - Form filling
+  - Dashboard integration
+- [ ] Email notifications when calls start
+- [ ] Polish comment/post display modals
+- [ ] Polish call UI
+- [ ] Add professor-status override system
+- [ ] Improve mobile layout
+- [ ] Fix remaining build issues
+- [ ] Complete diagrams and theoretical documentation
 
-• Difficulty tagging — AI auto-tags posts as beginner/intermediate/advanced(DONE)
+These are mostly **polishing and documentation tasks rather than
+fundamental functionality**.
 
+---
 
-Cross-speciality room(this could be the SHIT)
-A room for inter communication between different majors….auto joined for everyone
-A special room type — not owned by any one specialty — called something like an
-"Interdisciplinary Space" or just "Cross-Specialty" zone.
-The key difference from normal rooms is the post tagging system — when you post there,
-you tag it with both the domain you're coming FROM and the domain you're asking INTO.
-so,when you tag your major and the major you want to ask into,that post appears in both
-feeds only instead of everywhere for everyone like public space do…..
-this way, the og architecture stands and we get a clean cross-major collaboration without
-contaminating each individual space….
-AI angle to it:
-AI suggests which specialty to tag based on your question content. So the interdisciplinary
-space becomes one of the first places AI is deeply integrated.
--->AY YO THIS ONE IS WORKING TOO, AND GREAT. ....we making good progress
+## 📚 Documentation
 
-##########################################################
-And I still need to fix my stupidity in build-->working on that+need to look at phone layout+better UI for the modals and such+ the diagrams and theory and such
+The original project idea and primary prototype description are
+available in the project documentation.
+
+> Documentation will be expanded as the project reaches its next
+> development phase.
+
+---
+
+## 🛠️ Development Philosophy
+
+Glaukopis is a self-built learning project.
+
+It has gone through numerous phases, redesigns, additions, and
+architectural changes. Some features were built specifically to
+experiment with technologies or ideas rather than because they were
+strictly necessary for the original concept.
+
+That is part of the project.
+
+The goal was never simply to produce a finished application, but to
+use the application as a way to explore, build, break, improve, and
+learn.
+
+---
+
+## 🗺️ Project Journey
+
+The project began as a relatively simple university collaboration
+concept and gradually expanded into a much larger system.
+
+Ideas were added, removed, redesigned, and sometimes completely
+reimplemented as development progressed.
+
+The current version represents the result of those iterations.
+
+**The journey is not over — it is simply paused while other priorities
+take precedence.**
+
+---
+
+## 📊 Feature Status
+
+| Feature | Status |
+|---|---|
+| Question filtering | ✅ Complete |
+| Peer endorsements | ✅ Complete |
+| Study partner posts | ✅ Complete |
+| Real-time room chat | ✅ Mostly complete |
+| AI study material | ✅ Complete |
+| AI smart assistance | ✅ Complete |
+| AI question suggestions | ✅ Complete |
+| AI study plans | ✅ Complete |
+| AI room summaries | ✅ Complete |
+| AI difficulty tagging | ✅ Complete |
+| Cross-specialty rooms | ✅ Complete |
+| Voice system | 🚧 Needs polishing |
+| Call interface | 🚧 Needs polishing |
+| Professor status override | 🚧 Planned |
+| Mobile UI | 🚧 Needs improvement |
+| Theory / diagrams | 🚧 In progress |
+
+---
+
+## 📝 Notes
+
+This repository represents a project that has been developed primarily
+as a solo learning experience.
+
+There is still considerable potential for expansion, but development
+is currently paused so that attention can be given to other work.
+
+The project will be revisited when the time is right.
