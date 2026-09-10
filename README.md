@@ -1,4 +1,15 @@
+The leftover f this project as I see it
+*polish the voice system(the feedback, wakewords, form filling and dashboard integration)
+*add emails to when calls startes
+*polish the modals (comments/posts/and other display modals) 
+*polish the call UI
+*add prof status override other then relaying on the database
+*all the theory side of this project is still waiting
+###############################################
+But from what I can call it, this project is well functional and great looking. 
+When I come back with a clearer mind, this left overs would cross easy
 
+###########################################################
 if the doc about the original idea isnt here...i'll add it
 
 FYI this is a self built learning base project, it is not perfect but very functional to all the levels I could think of
