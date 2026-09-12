@@ -25,13 +25,13 @@ scratch, with features extending well beyond the original prototype.
   
 ---
 ### Stack
--react.js in vite environment 
--node.js + express.js
--react i18n language support [ English, French, Arabic] 
--cloudinary
--brevo email service
--groq+ mistral+ openrouter for ai support
--cron job for scheduling  
+- react.js in vite environment 
+- node.js + express.js
+- react i18n language support [ English, French, Arabic] 
+- cloudinary
+- brevo email service
+- groq+ mistral+ openrouter for ai support
+- cron job for scheduling  
 ---
 
 ## Current State
@@ -41,8 +41,8 @@ planned core and advanced features implemented.
 
 ### Community Features
 
--Post/ comments structured collaboration
--Room oriented content and architecture [ public, university, major, subject, private chats] 
+- Post/ comments structured collaboration
+- Room oriented content and architecture [ public, university, major, subject, private chats] 
 - Answered / unanswered question filtering
 - Peer endorsements
 - Study-partner posts
